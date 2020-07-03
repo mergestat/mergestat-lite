@@ -1,0 +1,11 @@
+{
+    "go.buildFlags": [
+        "-tags='sqlite_vtable'"
+    ],
+    "go.vetFlags": [
+        "-tags='sqlite_vtable'"
+    ],
+    "go.toolsEnvVars": {
+        "GOFLAGS": "-tags='sqlite_vtable'"
+    }
+}
