@@ -97,7 +97,7 @@ type treeCommitIterator struct {
 	treeFileIter *object.FileIter
 }
 
-func NewTreeCommitIterator(commitIter object.CommitIter) (*treeCommitIterator, error) {
+func newTreeCommitIterator(commitIter object.CommitIter) (*treeCommitIterator, error) {
 	commit, err := commitIter.Next()
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 		return nil, err
 	}
 
-	treeCommitIter, err := NewTreeCommitIterator(iter)
+	treeCommitIter, err := newTreeCommitIterator(iter)
 	if err != nil {
 		return nil, err
 	}

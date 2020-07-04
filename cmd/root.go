@@ -13,7 +13,6 @@ import (
 	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
 	"github.com/go-git/go-git/v5"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -25,8 +24,8 @@ var (
 )
 
 func init() {
-	RootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote git repository may also be specified, it will be cloned to a temporary directory on disk before query execution. Default git credentials are used for non-public remote repos.")
-	RootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
+	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote git repository may also be specified, it will be cloned to a temporary directory on disk before query execution. Default git credentials are used for non-public remote repos.")
+	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 }
 
 func handleError(err error) {
@@ -36,7 +35,7 @@ func handleError(err error) {
 	}
 }
 
-var RootCmd = &cobra.Command{
+var rootCmd = &cobra.Command{
 	Use: `gitqlite "SELECT * FROM commits"`,
 	Long: `
 		gitqlite is a CLI for querying git repositories with SQL, using SQLite virtual tables.
@@ -109,8 +108,9 @@ var RootCmd = &cobra.Command{
 	},
 }
 
+// Execute runs the root command
 func Execute() {
-	if err := RootCmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		handleError(err)
 	}
 }
