@@ -97,9 +97,6 @@ func TestCommitCounts(t *testing.T) {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
 	}
 	numRows := getRowsCount(rows)
-	if err != nil {
-		t.Fatal(err)
-	}
 	expected = commitCount
 	if numRows != expected {
 		t.Fatalf("expected %d rows got: %d", expected, numRows)
