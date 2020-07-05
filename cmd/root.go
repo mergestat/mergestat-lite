@@ -70,25 +70,23 @@ var rootCmd = &cobra.Command{
 		}
 
 		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
-		remote, err := vcsurl.Parse(repo)
-		if err == nil {
-			r, err := remote.Remote(vcsurl.HTTPS)
-			handleError(err)
-
-			dir, err := ioutil.TempDir("", "repo")
-			handleError(err)
-
-			_, err = git.PlainClone(dir, false, &git.CloneOptions{
-				URL: r,
-			})
-			handleError(err)
-
-			defer func() {
-				err := os.RemoveAll(dir)
+		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
+			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
+				dir, err := ioutil.TempDir("", "repo")
 				handleError(err)
-			}()
 
-			repo = dir
+				_, err = git.PlainClone(dir, false, &git.CloneOptions{
+					URL: r,
+				})
+				handleError(err)
+
+				defer func() {
+					err := os.RemoveAll(dir)
+					handleError(err)
+				}()
+
+				repo = dir
+			}
 		}
 
 		repo, err = filepath.Abs(repo)
