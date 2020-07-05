@@ -71,7 +71,7 @@ var rootCmd = &cobra.Command{
 
 		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
 		remote, err := vcsurl.Parse(repo)
-		if err == nil {
+		if err == nil && remote.Kind == vcsurl.Git {
 			r, err := remote.Remote(vcsurl.HTTPS)
 			handleError(err)
 
