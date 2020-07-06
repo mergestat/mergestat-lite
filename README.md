@@ -26,6 +26,32 @@ Will produce a binary in your current directory.
 
 TODO: more installation instructions
 
+### Using Docker
+
+Build an image locally using docker
+
+```
+docker build -t gitqlite:latest .
+```
+
+#### Running commands
+
+`gitqlite` operates on a git repository. This repository needs to be attached as a volume. This example uses the (bash) built-in command `pwd` for the current working directory
+
+> [**pwd**] Print the absolute pathname of the current working directory.
+
+```
+docker run -v `pwd`:/repo:ro gitqlite "SELECT * FROM commits"
+```
+
+#### Running commands from STDIN
+
+For piping commands via STDIN, the docker command needs to be told to run non-interactively, as well as attaching the repository at `/repo`.
+
+```
+cat query.sql | docker run -i -v `pwd`:/repo:ro gitqlite
+```
+
 ## Usage
 
 ```
