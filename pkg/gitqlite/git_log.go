@@ -60,7 +60,8 @@ func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 	v.repo = repo
 	headRef, err := v.repo.Head()
 	if err != nil {
-		return nil, err
+		// the git repository is empty
+		return &commitCursor{0, v.repo, nil, nil, true}, nil
 	}
 
 	iter, err := v.repo.Log(&git.LogOptions{
@@ -186,6 +187,10 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 }
 
 func (vc *commitCursor) Next() error {
+	if vc.commitIter == nil {
+		return nil
+	}
+
 	vc.index++
 
 	commit, err := vc.commitIter.Next()
@@ -211,6 +216,10 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
+	if vc.commitIter == nil {
+		return nil
+	}
+
 	vc.commitIter.Close()
 	return nil
 }

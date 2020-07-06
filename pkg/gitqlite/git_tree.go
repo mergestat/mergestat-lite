@@ -171,7 +171,8 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 
 	headRef, err := v.repo.Head()
 	if err != nil {
-		return nil, err
+		// the git repository is empty
+		return &commitCursor{0, v.repo, nil, nil, true}, nil
 	}
 	iter, err := v.repo.Log(&git.LogOptions{
 		From:  headRef.Hash(),
@@ -195,6 +196,10 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 }
 
 func (vc *treeCursor) Next() error {
+	if vc.iterator == nil {
+		return nil
+	}
+
 	vc.index++
 	//Iterates to next file
 	file, err := vc.iterator.Next()
@@ -223,6 +228,10 @@ func (vc *treeCursor) Rowid() (int64, error) {
 }
 
 func (vc *treeCursor) Close() error {
+	if vc.iterator == nil {
+		return nil
+	}
+
 	vc.iterator.Close()
 	return nil
 }
