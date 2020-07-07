@@ -1,8 +1,13 @@
 package gitqlite
 
 import (
+	"bufio"
+	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -54,6 +59,8 @@ func (m *gitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 func (m *gitLogModule) DestroyModule() {}
 
 func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
+	//TODO add a way to use git if installed on sys instead of go git
+
 	repo, err := git.PlainOpen(v.repoPath)
 	if err != nil {
 		return nil, err
@@ -63,7 +70,7 @@ func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 	headRef, err := v.repo.Head()
 	if err != nil {
 		if err == plumbing.ErrReferenceNotFound {
-			return &commitCursor{0, v.repo, nil, nil, true}, nil
+			return &commitCursor{0, v.repoPath, v.repo, nil, nil, true}, nil
 		}
 		return nil, err
 	}
@@ -81,7 +88,7 @@ func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 		return nil, err
 	}
 
-	return &commitCursor{0, v.repo, commit, iter, false}, nil
+	return &commitCursor{0, v.repoPath, v.repo, commit, iter, false}, nil
 }
 
 func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -98,6 +105,7 @@ func (v *gitLogTable) Destroy() error { return nil }
 
 type commitCursor struct {
 	index      int
+	repoDir    string
 	repo       *git.Repository
 	current    *object.Commit
 	commitIter object.CommitIter
@@ -162,7 +170,7 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 	case 12:
 		if int(commit.NumParents()) > 0 {
-			additions, _, err := statCalc(commit)
+			additions, _, err := statCalc(commit, vc.repoDir)
 			if err != nil {
 				return err
 			}
@@ -172,7 +180,7 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		}
 	case 13:
 		if int(commit.NumParents()) > 0 {
-			_, deletions, err := statCalc(commit)
+			_, deletions, err := statCalc(commit, vc.repoDir)
 			if err != nil {
 				return err
 			}
@@ -223,29 +231,83 @@ func (vc *commitCursor) Close() error {
 }
 
 //statCalc calculates the number of additions/deletions and returns in format additions, deletions
-func statCalc(c *object.Commit) (int, int, error) {
-	p, err := c.Parent(0)
+func statCalc(c *object.Commit, repoPath string) (int, int, error) {
+	// if sys has git tool use it instead of go git for efficiency(git ~5x faster than go-git)
+	gitPath, err := exec.LookPath("git")
 	if err != nil {
-		return 0, 0, err
-	}
-	parentTree, err := p.Tree()
-	if err != nil {
-		return 0, 0, err
-	}
-	tree, err := c.Tree()
-	if err != nil {
-		return 0, 0, err
-	}
+		p, err := c.Parent(0)
+		if err != nil {
+			return 0, 0, err
+		}
+		parentTree, err := p.Tree()
+		if err != nil {
+			return 0, 0, err
+		}
+		tree, err := c.Tree()
+		if err != nil {
+			return 0, 0, err
+		}
 
-	patch, err := parentTree.Patch(tree)
-	if err != nil {
-		return 0, 0, err
+		patch, err := parentTree.Patch(tree)
+		if err != nil {
+			return 0, 0, err
+		}
+		additions, deletions := 0, 0
+		stats := patch.Stats()
+		for i := range stats {
+			additions += stats[i].Addition
+			deletions += stats[i].Deletion
+		}
+		return additions, deletions, nil
+	} else {
+		args := []string{"diff"}
+		cParent, err := c.Parent(0)
+		if err != nil {
+			return 0, 0, nil
+		}
+		args = append(args, "--numstat", c.Hash.String(), cParent.Hash.String())
+		cmd := exec.CommandContext(context.Background(), gitPath, args...)
+		cmd.Dir = repoPath
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			return 0, 0, err
+		}
+
+		stderr, err := cmd.StderrPipe()
+		if err != nil {
+			return 0, 0, err
+		}
+		additions, deletions := 0, 0
+		if err := cmd.Start(); err != nil {
+			return 0, 0, err
+		}
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			line := scanner.Text()
+			s := strings.Split(line, "\t")
+			if s[0] != "0" {
+				del, err := strconv.Atoi(s[0])
+				if err != nil {
+					return 0, 0, err
+				}
+				deletions += del
+			}
+			if s[1] != "0" {
+				add, err := strconv.Atoi(s[1])
+				if err != nil {
+					return 0, 0, err
+				}
+				additions += add
+			}
+		}
+		errs, err := ioutil.ReadAll(stderr)
+		if err != nil {
+			return 0, 0, err
+		}
+		if err := cmd.Wait(); err != nil {
+			fmt.Println(string(errs))
+			return 0, 0, err
+		}
+		return additions, deletions, nil
 	}
-	additions, deletions := 0, 0
-	stats := patch.Stats()
-	for i := range stats {
-		additions += stats[i].Addition
-		deletions += stats[i].Deletion
-	}
-	return additions, deletions, nil
 }
