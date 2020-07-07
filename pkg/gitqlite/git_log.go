@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mattn/go-sqlite3"
 )
@@ -58,8 +59,12 @@ func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 		return nil, err
 	}
 	v.repo = repo
+
 	headRef, err := v.repo.Head()
 	if err != nil {
+		if err == plumbing.ErrReferenceNotFound {
+			return &commitCursor{0, v.repo, nil, nil, true}, nil
+		}
 		return nil, err
 	}
 
@@ -211,7 +216,9 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
-	vc.commitIter.Close()
+	if vc.commitIter != nil {
+		vc.commitIter.Close()
+	}
 	return nil
 }
 

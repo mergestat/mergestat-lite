@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mattn/go-sqlite3"
 )
@@ -171,6 +172,9 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 
 	headRef, err := v.repo.Head()
 	if err != nil {
+		if err == plumbing.ErrReferenceNotFound {
+			return &treeCursor{0, v.repo, nil, nil, true}, nil
+		}
 		return nil, err
 	}
 	iter, err := v.repo.Log(&git.LogOptions{
@@ -223,6 +227,8 @@ func (vc *treeCursor) Rowid() (int64, error) {
 }
 
 func (vc *treeCursor) Close() error {
-	vc.iterator.Close()
+	if vc.iterator != nil {
+		vc.iterator.Close()
+	}
 	return nil
 }
