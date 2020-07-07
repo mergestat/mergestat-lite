@@ -77,7 +77,6 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(fileContents)
 	}
 	return nil
-	//return errors.New("something messed up in column")
 }
 func (v *gitTreeTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	// TODO this should actually be implemented!
