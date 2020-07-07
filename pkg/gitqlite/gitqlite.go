@@ -38,6 +38,10 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("git_tag", &gitTagModule{})
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
@@ -88,6 +92,10 @@ func (g *GitQLite) ensureTables() error {
 		return err
 	}
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS refs USING git_ref(%q);", g.RepoPath))
+	if err != nil {
+		return err
+	}
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE tags USING git_tag(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}
