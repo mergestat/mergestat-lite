@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -22,12 +22,13 @@ func (m *gitTagModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 		CREATE TABLE %q (
 			id TEXT,
 			name TEXT,
+			lightweight BOOL,
+			target TEXT,
 			tagger_name TEXT,
 			tagger_email TEXT,
 			message TEXT,
 			pgp TEXT,
-			target_type TEXT,
-			target TEXT
+			target_type TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -51,17 +52,20 @@ func (v *gitTagTable) Open() (sqlite3.VTabCursor, error) {
 		return nil, err
 	}
 	v.repo = repo
-	tagIterator, err := v.repo.TagObjects()
+	tagIterator, err := v.repo.Tags()
 	if err != nil {
 		return nil, err
 	}
 	tag, err := tagIterator.Next()
 	if err != nil {
-		if err == plumbing.ErrReferenceNotFound || err == io.EOF {
-			return &tagCursor{0, v.repo, nil, nil, true}, nil
-		}
 		return nil, err
 	}
+	// if err != nil {
+	// 	if err == plumbing.ErrReferenceNotFound || err == io.EOF {
+	// 		return &tagCursor{0, v.repo, nil, nil, true}, nil
+	// 	}
+	// 	return nil, err
+	// }
 
 	return &tagCursor{0, v.repo, tag, tagIterator, false}, nil
 
@@ -82,41 +86,65 @@ func (v *gitTagTable) Destroy() error { return nil }
 type tagCursor struct {
 	index   int
 	repo    *git.Repository
-	current *object.Tag
-	tagIter *object.TagIter
+	current *plumbing.Reference
+	tagIter storer.ReferenceIter
 	eof     bool
 }
 
 func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-
-	tag := vc.current
-
+	lightweight := false
+	tag, err := vc.repo.TagObject(vc.current.Hash())
+	if err != nil {
+		lightweight = true
+	}
 	switch col {
 	case 0:
 		//tag id
-		c.ResultText(tag.Hash.String())
+		c.ResultText(vc.current.Hash().String())
 	case 1:
 		//tag name
-		c.ResultText(tag.Name)
+		c.ResultText(vc.current.Name().String())
 	case 2:
-		//tag tagger name
-		c.ResultText(tag.Tagger.Name)
+		//is tag lightweight
+		c.ResultBool(lightweight)
 	case 3:
-		//tagger email
-		c.ResultText(tag.Tagger.Email)
+		//tag tagger name
+		c.ResultText(vc.current.Target().Short())
 	case 4:
-		//message
-		c.ResultText(tag.Message)
+		//tagger email
+		if err == nil {
+			c.ResultText(tag.Tagger.Email)
+		} else {
+			c.ResultNull()
+		}
 	case 5:
-		//PGP
-		c.ResultText(tag.PGPSignature)
+		//message
+		if err == nil {
+			c.ResultText(tag.Message)
+		} else {
+			c.ResultNull()
+		}
 	case 6:
-		//target_type
-		c.ResultText(tag.TargetType.String())
+		//PGP
+		if err == nil {
+			c.ResultText(tag.PGPSignature)
+		} else {
+			c.ResultNull()
+		}
 	case 7:
+		//target_type
+		if err == nil {
+			c.ResultText(tag.TargetType.String())
+		} else {
+			c.ResultNull()
+		}
+	case 8:
 		//target
-		c.ResultText(tag.Target.String())
-
+		if err == nil {
+			c.ResultText(tag.Target.String())
+		} else {
+			c.ResultNull()
+		}
 	}
 	return nil
 
