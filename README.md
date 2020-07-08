@@ -178,13 +178,13 @@ Returns commit counts by author, broken out by day of the week:
 ```sql
 SELECT
     count(*) AS commits,
-    count(case when strftime('%w',author_when)='0' then 1 end) as sunday,
-    count(case when strftime('%w',author_when)='1' then 1 end) as monday,
-    count(case when strftime('%w',author_when)='2' then 1 end) as tuesday,
-    count(case when strftime('%w',author_when)='3' then 1 end) as wednesday,
-    count(case when strftime('%w',author_when)='4' then 1 end) as thursday,
-    count(case when strftime('%w',author_when)='5' then 1 end) as friday,
-    count(case when strftime('%w',author_when)='6' then 1 end) as saturday,
+    count(CASE WHEN strftime('%w',author_when)='0' THEN 1 END) AS sunday,
+    count(CASE WHEN strftime('%w',author_when)='1' THEN 1 END) AS monday,
+    count(CASE WHEN strftime('%w',author_when)='2' THEN 1 END) AS tuesday,
+    count(CASE WHEN strftime('%w',author_when)='3' THEN 1 END) AS wednesday,
+    count(CASE WHEN strftime('%w',author_when)='4' THEN 1 END) AS thursday,
+    count(CASE WHEN strftime('%w',author_when)='5' THEN 1 END) AS friday,
+    count(CASE WHEN strftime('%w',author_when)='6' THEN 1 END) AS saturday,
     author_email
 FROM commits GROUP BY author_email ORDER BY commits
 ```
