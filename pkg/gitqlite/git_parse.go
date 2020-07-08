@@ -114,7 +114,6 @@ func parseLog(reader io.Reader) (Result, error) {
 	if currentCommit != nil {
 		res = append(res, currentCommit)
 	}
-	fmt.Println(res)
 	return res, nil
 }
 func ExecuteParse(repoPath string) (Result, error) {
@@ -123,7 +122,7 @@ func ExecuteParse(repoPath string) (Result, error) {
 		return nil, err
 	}
 	args := []string{"log"}
-	args = append(args, "--format=commit %H %ntree %T%nparent %P%nAuthor: %an %ae%nAuthorDate: %aI%nCommit: %cn %ce%nCommitDate: %cI%nMessage: %s", "--numstat")
+	args = append(args, "--format=commit %H%ntree %T%nparent %P%nAuthor: %an %ae%nAuthorDate: %aI%nCommit: %cn %ce%nCommitDate: %cI%nMessage: %s", "--numstat")
 	cmd := exec.CommandContext(context.Background(), gitPath, args...)
 	cmd.Dir = repoPath
 
