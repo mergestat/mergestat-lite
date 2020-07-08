@@ -2,7 +2,6 @@ package gitlog
 
 import (
 	"bufio"
-	"context"
 	"io"
 	"os/exec"
 	"strconv"
@@ -125,7 +124,7 @@ func Execute(repoPath string) (Result, error) {
 	args := []string{"log"}
 	args = append(args, "--format=commit %H%ntree %T%nparent %P%nAuthor: %an %ae%nAuthorDate: %aI%nCommit: %cn %ce%nCommitDate: %cI%nMessage: %s", "--numstat")
 
-	cmd := exec.CommandContext(context.Background(), gitPath, args...)
+	cmd := exec.Command(gitPath, args...)
 	cmd.Dir = repoPath
 
 	stdout, err := cmd.StdoutPipe()
