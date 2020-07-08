@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/augmentable-dev/gitqlite/pkg/gitlog"
 	"github.com/go-git/go-git/v5"
 	"github.com/mattn/go-sqlite3"
 )
@@ -51,7 +52,7 @@ func (m *gitLogCLIModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3
 func (m *gitLogCLIModule) DestroyModule() {}
 
 func (v *gitLogCLITable) Open() (sqlite3.VTabCursor, error) {
-	res, err := ExecuteParse(v.repoPath)
+	res, err := gitlog.Execute(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +73,8 @@ func (v *gitLogCLITable) Destroy() error { return nil }
 
 type commitCLICursor struct {
 	index   int
-	results Result
-	current *Commit
+	results gitlog.Result
+	current *gitlog.Commit
 	eof     bool
 }
 
@@ -109,13 +110,13 @@ func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(vc.current.CommitterWhen.Format(time.RFC3339Nano))
 	case 9:
 		//parent_id
-		c.ResultText(vc.current.Parent)
+		c.ResultText(vc.current.ParentID)
 	case 10:
 		//parent_count
-		c.ResultInt(len(strings.Split(vc.current.Parent, " ")))
+		c.ResultInt(len(strings.Split(vc.current.ParentID, " ")))
 	case 11:
 		//tree_id
-		c.ResultText(vc.current.Tree)
+		c.ResultText(vc.current.TreeID)
 
 	case 12:
 		c.ResultInt(vc.current.Additions)
