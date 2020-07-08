@@ -3,6 +3,7 @@ package gitqlite
 import (
 	"database/sql"
 	"fmt"
+	"os/exec"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/mattn/go-sqlite3"
@@ -18,6 +19,11 @@ func init() {
 	sql.Register("gitqlite", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
 			err := conn.CreateModule("git_log", &gitLogModule{})
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("git_log_cli", &gitLogCLIModule{})
 			if err != nil {
 				return err
 			}
@@ -63,9 +69,17 @@ func New(repoPath string) (*GitQLite, error) {
 
 // creates the virtual tables inside of the *sql.DB
 func (g *GitQLite) ensureTables() error {
-	_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE commits USING git_log(%q);", g.RepoPath))
+	_, err := exec.LookPath("git")
 	if err != nil {
-		return err
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE commits USING git_log(%q);", g.RepoPath))
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE commits USING git_log_cli(%q);", g.RepoPath))
+		if err != nil {
+			return err
+		}
 	}
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE files USING git_tree(%q);", g.RepoPath))
 	if err != nil {
