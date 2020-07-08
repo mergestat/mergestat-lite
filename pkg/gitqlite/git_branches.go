@@ -23,7 +23,9 @@ func (m *gitBranchModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.
 			name TEXT,
 			remote TEXT,
 			merge TEXT,
-			rebase TEXT
+			rebase TEXT,
+			hash TEXT,
+			ref_name TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -111,6 +113,13 @@ func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 3:
 		//branchger rebase
 		c.ResultText(branch.Rebase)
+
+	case 4:
+		//Branch hash
+		c.ResultText(branchRef.Hash().String())
+	case 5:
+		//BranchRef Name
+		c.ResultText(branchRef.Name().String())
 	}
 	return nil
 
