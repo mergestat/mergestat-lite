@@ -132,11 +132,7 @@ func displayDB(rows *sql.Rows) error {
 			return err
 		}
 	default:
-		columns, err := rows.Columns()
-		if err != nil {
-			return err
-		}
-		if shouldUseTable(len(columns)) {
+		if shouldUseTable(rows) {
 			err := tableDisplay(rows)
 			if err != nil {
 				return err
@@ -274,7 +270,12 @@ func readStdin() (string, error) {
 	return returnString, nil
 }
 
-// Switch between table and csv dependent on num columns(suggested num for table 5<=)
-func shouldUseTable(nCols int) bool {
-	return nCols <= 5
+// Switch between table and csv dependent on num columns
+func shouldUseTable(rows *sql.Rows) bool {
+	columns, err := rows.Columns()
+	if err != nil {
+		fmt.Println(err)
+		return true //default to using a table
+	}
+	return len(columns) <= 5
 }
