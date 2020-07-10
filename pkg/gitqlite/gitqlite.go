@@ -73,21 +73,21 @@ func New(repoPath string) (*GitQLite, error) {
 func (g *GitQLite) ensureTables() error {
 	_, err := exec.LookPath("git")
 	if err != nil {
-		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE commits USING git_log(%q);", g.RepoPath))
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log(%q);", g.RepoPath))
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE commits USING git_log_cli(%q);", g.RepoPath))
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli(%q);", g.RepoPath))
 		if err != nil {
 			return err
 		}
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE files USING git_tree(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE refs USING git_ref(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS refs USING git_ref(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}
