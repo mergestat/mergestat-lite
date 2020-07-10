@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"os/exec"
 
@@ -45,9 +46,10 @@ func init() {
 
 // New creates an instance of GitQLite
 func New(repoPath string) (*GitQLite, error) {
+	repoPathB64 := base64.StdEncoding.EncodeToString([]byte(repoPath))
 	// see https://github.com/mattn/go-sqlite3/issues/204
 	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
-	db, err := sql.Open("gitqlite", "file::memory:?cache=shared")
+	db, err := sql.Open("gitqlite", fmt.Sprintf("file:%s?mode=memory&cache=shared", repoPathB64))
 	if err != nil {
 		return nil, err
 	}
@@ -71,21 +73,21 @@ func New(repoPath string) (*GitQLite, error) {
 func (g *GitQLite) ensureTables() error {
 	_, err := exec.LookPath("git")
 	if err != nil {
-		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE commits USING git_log(%q);", g.RepoPath))
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log(%q);", g.RepoPath))
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE commits USING git_log_cli(%q);", g.RepoPath))
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli(%q);", g.RepoPath))
 		if err != nil {
 			return err
 		}
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE files USING git_tree(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE refs USING git_ref(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS refs USING git_ref(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}
