@@ -22,8 +22,8 @@ func (m *gitBranchModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.
 		CREATE TABLE %q (
 			name TEXT,
 			remote TEXT,
-			merge TEXT,
-			rebase TEXT,
+			target TEXT,
+			type TEXT,
 			hash TEXT,
 			ref_name TEXT
 		)`, args[0]))
@@ -49,29 +49,43 @@ func (v *gitBranchTable) Open() (sqlite3.VTabCursor, error) {
 		return nil, err
 	}
 	v.repo = repo
-	branchIterator, err := v.repo.Branches()
+	localBranchIterator, err := repo.Branches()
 	if err != nil {
 		return nil, err
 	}
-	branchRef, err := branchIterator.Next()
+	remoteBranchIterator, err := remoteBranches(repo.Storer)
+	if err != nil {
+		return nil, err
+	}
+
+	branchRef, err := localBranchIterator.Next()
 	if err != nil {
 		if err == io.EOF {
-			return &branchCursor{0, v.repo, nil, nil, true}, nil
+			return &branchCursor{0, v.repo, nil, nil, nil, true}, nil
 		}
 		return nil, err
 	}
-	_, err = v.repo.Branch((branchRef.Name().Short()))
-	if err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return &branchCursor{0, v.repo, nil, nil, true}, nil
-		}
-		return nil, err
-	}
+	// _, err = v.repo.Branch((branchRef.Name().Short()))
+	// if err != nil {
+	// 	if err == plumbing.ErrReferenceNotFound {
+	// 		return &branchCursor{0, v.repo, nil, nil, true}, nil
+	// 	}
+	// 	return nil, err
+	// }
 
-	return &branchCursor{0, v.repo, branchRef, branchIterator, false}, nil
+	return &branchCursor{0, v.repo, branchRef, localBranchIterator, remoteBranchIterator, false}, nil
 
 }
+func remoteBranches(s storer.ReferenceStorer) (storer.ReferenceIter, error) {
+	refs, err := s.IterReferences()
+	if err != nil {
+		return nil, err
+	}
 
+	return storer.NewReferenceFilteredIter(func(ref *plumbing.Reference) bool {
+		return ref.Name().IsRemote()
+	}, refs), nil
+}
 func (v *gitBranchTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	// TODO this should actually be implemented!
 	dummy := make([]bool, len(cst))
@@ -85,11 +99,12 @@ func (v *gitBranchTable) Disconnect() error {
 func (v *gitBranchTable) Destroy() error { return nil }
 
 type branchCursor struct {
-	index      int
-	repo       *git.Repository
-	current    *plumbing.Reference
-	branchIter storer.ReferenceIter
-	eof        bool
+	index            int
+	repo             *git.Repository
+	current          *plumbing.Reference
+	localBranchIter  storer.ReferenceIter
+	remoteBranchIter storer.ReferenceIter
+	eof              bool
 }
 
 func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
@@ -97,32 +112,51 @@ func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	branchRef := vc.current
 	branch, err := vc.repo.Branch(branchRef.Name().Short())
 	if err != nil {
+		switch col {
+		case 0:
+			//branch name
+			c.ResultText(branchRef.Name().Short())
+		case 1:
+			//branch remote
+			c.ResultText(branchRef.Name().String())
+		case 2:
+			//branch merge
+			c.ResultText(branchRef.Target().String())
+		case 3:
+			//branchger rebase
+			c.ResultText(branchRef.Type().String())
+		case 4:
+			//Branch hash
+			c.ResultText(branchRef.Hash().String())
+		case 5:
+			//BranchRef Name
+			c.ResultText(branchRef.Name().String())
+		}
+		return nil
+	} else {
+
+		switch col {
+		case 0:
+			//branch name
+			c.ResultText(branch.Name)
+		case 1:
+			//branch remote
+			c.ResultText(branch.Remote)
+		case 2:
+			//branch merge
+			c.ResultText(branchRef.Target().String())
+		case 3:
+			//branchger rebase
+			c.ResultText(branchRef.Type().String())
+		case 4:
+			//Branch hash
+			c.ResultText(branchRef.Hash().String())
+		case 5:
+			//BranchRef Name
+			c.ResultText(branchRef.Name().String())
+		}
 		return nil
 	}
-
-	switch col {
-	case 0:
-		//branch name
-		c.ResultText(branch.Name)
-	case 1:
-		//branch remote
-		c.ResultText(branch.Remote)
-	case 2:
-		//branch merge
-		c.ResultText(branch.Merge.String())
-	case 3:
-		//branchger rebase
-		c.ResultText(branch.Rebase)
-
-	case 4:
-		//Branch hash
-		c.ResultText(branchRef.Hash().String())
-	case 5:
-		//BranchRef Name
-		c.ResultText(branchRef.Name().String())
-	}
-	return nil
-
 }
 
 func (vc *branchCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
@@ -133,14 +167,24 @@ func (vc *branchCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 func (vc *branchCursor) Next() error {
 	vc.index++
 
-	branchRef, err := vc.branchIter.Next()
+	branchRef, err := vc.localBranchIter.Next()
 	if err != nil {
 		if err == io.EOF {
-			vc.current = nil
-			vc.eof = true
+			branchRef, err = vc.remoteBranchIter.Next()
+			if err != nil {
+				if err == io.EOF {
+					vc.current = nil
+					vc.eof = true
+					return nil
+				}
+				return err
+			}
+			vc.current = branchRef
 			return nil
+
+		} else {
+			return err
 		}
-		return err
 	}
 	vc.current = branchRef
 	return nil
@@ -155,8 +199,11 @@ func (vc *branchCursor) Rowid() (int64, error) {
 }
 
 func (vc *branchCursor) Close() error {
-	if vc.branchIter != nil {
-		vc.branchIter.Close()
+	if vc.localBranchIter != nil {
+		vc.localBranchIter.Close()
+	}
+	if vc.remoteBranchIter != nil {
+		vc.remoteBranchIter.Close()
 	}
 	return nil
 }
