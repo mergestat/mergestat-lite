@@ -121,8 +121,11 @@ func TestCommitCounts(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if commit.ID().String() != c[0] || commit.Author.Name != c[1] {
+		if commit.ID().String() != c[0] {
 			t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
+		}
+		if commit.Author.Name != c[1] {
+			t.Fatalf("expected %s at row %d got %s", commit.Author.Name, i, c[1])
 		}
 
 	}
@@ -221,8 +224,14 @@ func TestRefCounts(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if ref.Name().String() != c[0] || ref.Type().String() != c[1] || ref.Hash().String() != c[2] {
-			t.Fatalf("expected %s at row %d got %s", ref.Hash().String(), i, c[0])
+		if ref.Name().String() != c[0] {
+			t.Fatalf("expected %s at row %d got %s", ref.Name().String(), i, c[0])
+		}
+		if ref.Type().String() != c[1] {
+			t.Fatalf("expected %s at row %d got %s", ref.Type().String(), i, c[1])
+		}
+		if ref.Hash().String() != c[2] {
+			t.Fatalf("expected %s at row %d got %s", ref.Hash().String(), i, c[2])
 		}
 
 	}
@@ -251,8 +260,11 @@ func TestTags(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if tag.Hash().String() != c[0] || tag.Name().String() != c[1] {
+		if tag.Hash().String() != c[0] {
 			t.Fatalf("expected %s at row %d got %s", tag.Hash().String(), i, c[0])
+		}
+		if tag.Name().String() != c[1] {
+			t.Fatalf("expected %s at row %d got %s", tag.Name(), i, c[1])
 		}
 
 	}
@@ -291,7 +303,10 @@ func TestBranches(t *testing.T) {
 			}
 		}
 		if branch.Name().Short() != c[0] || branch.Hash().String() != c[4] {
-			t.Fatalf("expected %s at row %d got %s \n expected %s got %s", branch.Name().String(), i, c[0], branch.Hash().String(), c[4])
+			t.Fatalf("expected %s at row %d got %s", branch.Name().String(), i, c[0])
+		}
+		if branch.Hash().String() != c[4] {
+			t.Fatalf("expected %s at row %d got %s", branch.Hash().String(), i, c[4])
 		}
 
 	}
