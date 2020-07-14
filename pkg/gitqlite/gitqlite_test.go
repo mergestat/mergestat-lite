@@ -103,6 +103,30 @@ func TestCommitCounts(t *testing.T) {
 	if numRows != expected {
 		t.Fatalf("expected %d rows got: %d", expected, numRows)
 	}
+
+	rows, err = instance.DB.Query("SELECT id, author_name FROM commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(rows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		commit, err := commitChecker.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if commit.ID().String() != c[0] || commit.Author.Name != c[1] {
+			t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
+		}
+
+	}
+
 }
 
 func TestFileCounts(t *testing.T) {
@@ -180,6 +204,28 @@ func TestRefCounts(t *testing.T) {
 	if numRows != refCount {
 		t.Fatalf("expected %d rows got : %d", refCount, numRows)
 	}
+	refRows, err = instance.DB.Query("SELECT * FROM refs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(refRows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		ref, err := refChecker.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if ref.Name().String() != c[0] || ref.Type().String() != c[1] || ref.Hash().String() != c[2] {
+			t.Fatalf("expected %s at row %d got %s", ref.Hash().String(), i, c[0])
+		}
+
+	}
 }
 
 func TestTags(t *testing.T) {
@@ -188,7 +234,7 @@ func TestTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tagRows, err := instance.DB.Query("SELECT * from tags")
+	tagRows, err := instance.DB.Query("SELECT * FROM tags")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -220,7 +266,7 @@ func TestBranches(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	branchRows, err := instance.DB.Query("SELECT * from branches")
+	branchRows, err := instance.DB.Query("SELECT * FROM branches")
 	if err != nil {
 		t.Fatal(err)
 	}
