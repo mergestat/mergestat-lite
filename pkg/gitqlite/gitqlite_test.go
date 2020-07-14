@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"database/sql"
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -180,13 +181,10 @@ func TestRefCounts(t *testing.T) {
 		t.Fatalf("expected %d rows got : %d", refCount, numRows)
 	}
 }
-func testTags(t *testing.T) {
+
+func TestTags(t *testing.T) {
 
 	tagIterator, err := fixtureRepo.Tags()
-	if err != nil {
-		t.Fatal(err)
-	}
-	tag, err := tagIterator.Next()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,12 +192,63 @@ func testTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for tagRows.Next() {
+	rowNum, contents, err := getContents(tagRows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		tag, err := tagIterator.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if tag.Hash().String() != c[0] || tag.Name().String() != c[1] {
+			t.Fatalf("expected %s at row %d got %s", tag.Hash().String(), i, c[0])
+		}
 
 	}
 }
-func testBranches(t *testing.T) {
+func TestBranches(t *testing.T) {
+	localBranchIterator, err := fixtureRepo.Branches()
+	if err != nil {
+		t.Fatal(err)
+	}
+	remoteBranchIterator, err := remoteBranches(fixtureRepo.Storer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	branchRows, err := instance.DB.Query("SELECT name, hash from branches")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(branchRows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		branch, err := localBranchIterator.Next()
+		if err != nil {
+			if err == io.EOF {
+				branch, err = remoteBranchIterator.Next()
+				if err != nil {
+					if err == io.EOF {
+						break
+					} else {
+						t.Fatal(err)
+					}
+				}
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if branch.Name().Short() != c[0] || branch.Hash().String() != c[1] {
+			t.Fatalf("expected %s at row %d got %s \n expected %s got %s", branch.Name().String(), i, c[0], branch.Hash().String(), c[1])
+		}
 
+	}
 }
 func getRowsCount(rows *sql.Rows) int {
 	count := 0
@@ -208,4 +257,40 @@ func getRowsCount(rows *sql.Rows) int {
 	}
 
 	return count
+}
+func getContents(rows *sql.Rows) (int, [][]string, error) {
+	var (
+		count int = 0
+	)
+	columns, err := rows.Columns()
+	if err != nil {
+		return count, nil, err
+	}
+
+	pointers := make([]interface{}, len(columns))
+	container := make([]sql.NullString, len(columns))
+	var ret [][]string
+
+	for i := range pointers {
+		pointers[i] = &container[i]
+	}
+
+	for rows.Next() {
+		err = rows.Scan(pointers...)
+		if err != nil {
+			return count, nil, err
+		}
+
+		r := make([]string, len(columns))
+		for i, c := range container {
+			if c.Valid {
+				r[i] = c.String
+			} else {
+				r[i] = "NULL"
+			}
+		}
+		ret = append(ret, r)
+	}
+	return count, ret, err
+
 }
