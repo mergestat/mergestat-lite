@@ -99,19 +99,11 @@ func (g *GitQLite) ensureTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE tags USING git_tag(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS tags USING git_tag(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE branches USING git_branch(%q);", g.RepoPath))
-	if err != nil {
-		return err
-	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE tags USING git_tag(%q);", g.RepoPath))
-	if err != nil {
-		return err
-	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE branches USING git_branch(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}

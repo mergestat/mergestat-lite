@@ -180,7 +180,27 @@ func TestRefCounts(t *testing.T) {
 		t.Fatalf("expected %d rows got : %d", refCount, numRows)
 	}
 }
+func testTags(t *testing.T) {
 
+	tagIterator, err := fixtureRepo.Tags()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tag, err := tagIterator.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tagRows, err := instance.DB.Query("SELECT id, name from tags")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for tagRows.Next() {
+
+	}
+}
+func testBranches(t *testing.T) {
+
+}
 func getRowsCount(rows *sql.Rows) int {
 	count := 0
 	for rows.Next() {
