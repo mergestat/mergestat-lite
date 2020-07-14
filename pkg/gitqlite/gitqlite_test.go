@@ -188,7 +188,7 @@ func TestTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tagRows, err := instance.DB.Query("SELECT id, name from tags")
+	tagRows, err := instance.DB.Query("SELECT * from tags")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -220,7 +220,7 @@ func TestBranches(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	branchRows, err := instance.DB.Query("SELECT name, hash from branches")
+	branchRows, err := instance.DB.Query("SELECT * from branches")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,8 +244,8 @@ func TestBranches(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if branch.Name().Short() != c[0] || branch.Hash().String() != c[1] {
-			t.Fatalf("expected %s at row %d got %s \n expected %s got %s", branch.Name().String(), i, c[0], branch.Hash().String(), c[1])
+		if branch.Name().Short() != c[0] || branch.Hash().String() != c[4] {
+			t.Fatalf("expected %s at row %d got %s \n expected %s got %s", branch.Name().String(), i, c[0], branch.Hash().String(), c[4])
 		}
 
 	}
