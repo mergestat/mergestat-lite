@@ -2,13 +2,13 @@ package gitqlite
 
 import (
 	"fmt"
-	"io"
-	"strings"
 	"time"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	git "github.com/libgit2/git2go/v30"
+
+	// "github.com/go-git/go-git/v5"
+	// "github.com/go-git/go-git/v5/plumbing"
+	// "github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -54,34 +54,34 @@ func (m *gitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 func (m *gitLogModule) DestroyModule() {}
 
 func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.PlainOpen(v.repoPath)
+	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
 	v.repo = repo
 
-	headRef, err := v.repo.Head()
-	if err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return &commitCursor{0, v.repo, nil, nil, true}, nil
-		}
-		return nil, err
-	}
+	v.repo = repo
 
-	iter, err := v.repo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
+	revWalk, err := repo.Walk()
 	if err != nil {
 		return nil, err
 	}
 
-	commit, err := iter.Next()
+	revWalk.Sorting(git.SortTime)
+	err = revWalk.PushHead()
 	if err != nil {
 		return nil, err
 	}
 
-	return &commitCursor{0, v.repo, commit, iter, false}, nil
+	var oid git.Oid
+	revWalk.Next(&oid)
+
+	commit, err := repo.LookupCommit(&oid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &commitCursor{0, v.repo, commit, revWalk, false}, nil
 }
 
 func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -97,29 +97,29 @@ func (v *gitLogTable) Disconnect() error {
 func (v *gitLogTable) Destroy() error { return nil }
 
 type commitCursor struct {
-	index      int
-	repo       *git.Repository
-	current    *object.Commit
-	commitIter object.CommitIter
-	eof        bool
+	index   int
+	repo    *git.Repository
+	current *git.Commit
+	revWalk *git.RevWalk
+	eof     bool
 }
 
 func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 	commit := vc.current
-	author := commit.Author
-	committer := commit.Committer
+	author := commit.Author()
+	committer := commit.Committer()
 
 	switch col {
 	case 0:
 		//commit id
-		c.ResultText(commit.ID().String())
+		c.ResultText(commit.Id().String())
 	case 1:
 		//commit message
-		c.ResultText(commit.Message)
+		c.ResultText(commit.Message())
 	case 2:
 		//commit summary
-		c.ResultText(strings.Split(commit.Message, "\n")[0])
+		c.ResultText(commit.Summary())
 	case 3:
 		//commit author name
 		c.ResultText(author.Name)
@@ -140,29 +140,26 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(committer.When.Format(time.RFC3339Nano))
 	case 9:
 		//parent_id
-		if int(commit.NumParents()) > 0 {
-			p, err := commit.Parent(0)
-			if err != nil {
-				return err
-			}
-			c.ResultText(p.ID().String())
+		if int(commit.ParentCount()) > 0 {
+			p := commit.Parent(0)
+			c.ResultText(p.Id().String())
 		} else {
 			c.ResultNull()
 		}
 	case 10:
 		//parent_count
-		c.ResultInt(int(commit.NumParents()))
+		c.ResultInt(int(commit.ParentCount()))
 	case 11:
 		//tree_id
 		tree, err := vc.current.Tree()
 		if err != nil {
 			return err
 		}
-		c.ResultText(tree.ID().String())
+		c.ResultText(tree.Id().String())
 
 	case 12:
-		if int(commit.NumParents()) > 0 {
-			additions, _, err := statCalc(commit)
+		if int(commit.ParentCount()) > 0 {
+			additions, _, err := statCalc(vc.repo, commit)
 			if err != nil {
 				return err
 			}
@@ -171,8 +168,8 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 			c.ResultInt(0)
 		}
 	case 13:
-		if int(commit.NumParents()) > 0 {
-			_, deletions, err := statCalc(commit)
+		if int(commit.ParentCount()) > 0 {
+			_, deletions, err := statCalc(vc.repo, commit)
 			if err != nil {
 				return err
 			}
@@ -192,17 +189,20 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 
 func (vc *commitCursor) Next() error {
 	vc.index++
-
-	commit, err := vc.commitIter.Next()
+	var oid git.Oid
+	err := vc.revWalk.Next(&oid)
+	if git.IsErrorCode(err, git.ErrIterOver) {
+		vc.current = nil
+		vc.eof = true
+		return nil
+	}
 	if err != nil {
-		if err == io.EOF {
-			vc.current = nil
-			vc.eof = true
-			return nil
-		}
 		return err
 	}
-
+	commit, err := vc.repo.LookupCommit(&oid)
+	if err != nil {
+		return err
+	}
 	vc.current = commit
 	return nil
 }
@@ -216,18 +216,13 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
-	if vc.commitIter != nil {
-		vc.commitIter.Close()
-	}
+	vc.revWalk.Free()
 	return nil
 }
 
 //statCalc calculates the number of additions/deletions and returns in format additions, deletions
-func statCalc(c *object.Commit) (int, int, error) {
-	p, err := c.Parent(0)
-	if err != nil {
-		return 0, 0, err
-	}
+func statCalc(r *git.Repository, c *git.Commit) (int, int, error) {
+	p := c.Parent(0)
 	parentTree, err := p.Tree()
 	if err != nil {
 		return 0, 0, err
@@ -236,16 +231,13 @@ func statCalc(c *object.Commit) (int, int, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-
-	patch, err := parentTree.Patch(tree)
+	diff, err := r.DiffTreeToTree(parentTree, tree, &git.DiffOptions{})
 	if err != nil {
 		return 0, 0, err
 	}
-	additions, deletions := 0, 0
-	stats := patch.Stats()
-	for i := range stats {
-		additions += stats[i].Addition
-		deletions += stats[i].Deletion
+	stats, err := diff.Stats()
+	if err != nil {
+		return 0, 0, err
 	}
-	return additions, deletions, nil
+	return stats.Insertions(), stats.Deletions(), nil
 }

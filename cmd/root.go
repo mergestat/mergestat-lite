@@ -12,7 +12,7 @@ import (
 
 	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
-	"github.com/go-git/go-git/v5"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -77,9 +77,7 @@ var rootCmd = &cobra.Command{
 				dir, err := ioutil.TempDir("", "repo")
 				handleError(err)
 
-				_, err = git.PlainClone(dir, false, &git.CloneOptions{
-					URL: r,
-				})
+				_, err = git.Clone(r, dir, &git.CloneOptions{})
 				handleError(err)
 
 				defer func() {

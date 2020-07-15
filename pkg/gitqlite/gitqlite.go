@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/go-git/go-git/v5"
+	//"github.com/go-git/go-git/v5"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -16,7 +17,7 @@ type GitQLite struct {
 	RepoPath string
 }
 type Options struct {
-	UseCli  bool 
+	UseCli  bool
 	Testing bool
 }
 
@@ -65,8 +66,7 @@ func New(repoPath string, options *Options) (*GitQLite, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	_, err = git.PlainOpen(repoPath)
+	_, err = git.OpenRepository(repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +94,9 @@ func (g *GitQLite) ensureTables(options *Options) error {
 		if err != nil {
 			return err
 		}
-		if options.Testing {
-			_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS go_git_commits USING git_log(%q);", g.RepoPath))
-			if err != nil {
-				return err
-			}
+		_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS libgit2_commits USING git_log(%q);", g.RepoPath))
+		if err != nil {
+			return err
 		}
 	}
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree(%q);", g.RepoPath))
