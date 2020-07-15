@@ -60,7 +60,7 @@ var rootCmd = &cobra.Command{
 		cwd, err := os.Getwd()
 		handleError(err)
 
-		// if a repo path is not supplied either as a flag or the second argument, use the current directory
+		// if a repo path is not supplied as a flag, use the current directory
 		if repo == "" {
 			if len(args) > 1 {
 				repo = args[1]
@@ -94,7 +94,7 @@ var rootCmd = &cobra.Command{
 			handleError(err)
 		}
 
-		g, err := gitqlite.New(repo)
+		g, err := gitqlite.New(repo, false)
 		handleError(err)
 
 		rows, err := g.DB.Query(query)

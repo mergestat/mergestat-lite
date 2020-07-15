@@ -41,7 +41,7 @@ func initFixtureRepo() (func() error, error) {
 		return nil, err
 	}
 
-	instance, err = New(dir)
+	instance, err = New(dir, true)
 	if err != nil {
 		return nil, err
 	}
