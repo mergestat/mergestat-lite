@@ -15,6 +15,10 @@ type GitQLite struct {
 	DB       *sql.DB
 	RepoPath string
 }
+type Options struct {
+	UseCli  bool 
+	Testing bool
+}
 
 func init() {
 	sql.Register("gitqlite", &sqlite3.SQLiteDriver{
@@ -53,7 +57,7 @@ func init() {
 }
 
 // New creates an instance of GitQLite
-func New(repoPath string, testing bool) (*GitQLite, error) {
+func New(repoPath string, options *Options) (*GitQLite, error) {
 	repoPathB64 := base64.StdEncoding.EncodeToString([]byte(repoPath))
 	// see https://github.com/mattn/go-sqlite3/issues/204
 	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
@@ -69,7 +73,7 @@ func New(repoPath string, testing bool) (*GitQLite, error) {
 
 	g := &GitQLite{DB: db, RepoPath: repoPath}
 
-	err = g.ensureTables(testing)
+	err = g.ensureTables(options)
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +82,9 @@ func New(repoPath string, testing bool) (*GitQLite, error) {
 }
 
 // creates the virtual tables inside of the *sql.DB
-func (g *GitQLite) ensureTables(testing bool) error {
+func (g *GitQLite) ensureTables(options *Options) error {
 	_, err := exec.LookPath("git")
-	if err != nil {
+	if err != nil || !options.UseCli {
 		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log(%q);", g.RepoPath))
 		if err != nil {
 			return err
@@ -90,11 +94,11 @@ func (g *GitQLite) ensureTables(testing bool) error {
 		if err != nil {
 			return err
 		}
-	}
-	if testing {
-		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS go_git_commits USING git_log(%q);", g.RepoPath))
-		if err != nil {
-			return err
+		if options.Testing {
+			_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS go_git_commits USING git_log(%q);", g.RepoPath))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree(%q);", g.RepoPath))

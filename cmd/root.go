@@ -21,11 +21,13 @@ import (
 var (
 	repo   string
 	format string
+	cli    bool
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote git repository may also be specified, it will be cloned to a temporary directory on disk before query execution. Default git credentials are used for non-public remote repos.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
+	rootCmd.PersistentFlags().BoolVar(&cli, "cli", true, "if git CLI installed specify false to use go git parsing libraries")
 }
 
 func handleError(err error) {
@@ -94,7 +96,9 @@ var rootCmd = &cobra.Command{
 			handleError(err)
 		}
 
-		g, err := gitqlite.New(repo, false)
+		g, err := gitqlite.New(repo, &gitqlite.Options{
+			UseCli: cli,
+		})
 		handleError(err)
 
 		rows, err := g.DB.Query(query)
