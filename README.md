@@ -2,6 +2,7 @@
 [![BuildStatus](https://github.com/augmentable-dev/gitqlite/workflows/tests/badge.svg)](https://github.com/augmentable-dev/gitqlite/actions?workflow=tests)
 [![Go Report Card](https://goreportcard.com/badge/github.com/augmentable-dev/gitqlite)](https://goreportcard.com/report/github.com/augmentable-dev/gitqlite)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/augmentable-dev/gitqlite)](https://www.tickgit.com/browse?repo=github.com/augmentable-dev/gitqlite)
+[![codecov](https://codecov.io/gh/augmentable-dev/gitqlite/branch/master/graph/badge.svg)](https://codecov.io/gh/augmentable-dev/gitqlite)
 
 
 # gitqlite
