@@ -35,7 +35,7 @@ Build an image locally using docker
 docker build -t gitqlite:latest .
 ```
 
-Or use an image from [docker hub](https://hub.docker.com/repository/docker/augmentable/gitqlite)
+Or use an official image from [docker hub](https://hub.docker.com/repository/docker/augmentable/gitqlite)
 
 ```
 docker pull augmentable/gitqlite:latest
