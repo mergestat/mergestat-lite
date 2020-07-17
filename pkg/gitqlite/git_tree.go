@@ -160,14 +160,15 @@ type LLTreeCursor struct {
 }
 
 type treeCursor struct {
-	index    int
-	repo     *git.Repository
-	iterator *git.RevWalk
-	oid      *git.Oid
-	commit   *git.Commit
-	tree     *git.Tree
-	current  *git.TreeEntry
-	eof      bool
+	index      int
+	repo       *git.Repository
+	iterator   *git.RevWalk
+	oid        *git.Oid
+	commit     *git.Commit
+	tree       *git.Tree
+	EntryCount uint64
+	current    *git.TreeEntry
+	eof        bool
 }
 
 func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
@@ -178,7 +179,6 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 	v.repo = repo
 
 	v.repo = repo
-
 	revWalk, err := repo.Walk()
 	if err != nil {
 		return nil, err
@@ -205,13 +205,13 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 	}
 	current := tree.EntryByIndex(0)
 
-	return &LLTreeCursor{nil, &treeCursor{0, v.repo, revWalk, &oid, commit, tree, current, false}, false}, nil
+	return &LLTreeCursor{nil, &treeCursor{0, v.repo, revWalk, &oid, commit, tree, tree.EntryCount(), current, false}, false}, nil
 }
 
 func (vc *LLTreeCursor) Next() error {
 	vc.self.index++
 	//Iterates to next tree entry if the index is less than the entry count
-	if vc.self.index < int(vc.self.tree.EntryCount()) {
+	if uint64(vc.self.index) < vc.self.EntryCount {
 		// go to next entry in the tree
 		file := vc.self.tree.EntryByIndex(uint64(vc.self.index))
 		//if next entry is a tree then go into that tree
@@ -221,11 +221,12 @@ func (vc *LLTreeCursor) Next() error {
 				return nil
 			}
 			//set parent to self
-			vc.parent = vc
+			vc.parent = &LLTreeCursor{vc.parent, vc.self, vc.eof}
 			//set self to new tree
 			vc.self.tree = tree
 			vc.self.index = 0
 			vc.self.current = vc.self.tree.EntryByIndex(0)
+			vc.self.EntryCount = tree.EntryCount()
 			return nil
 
 		}
@@ -234,9 +235,10 @@ func (vc *LLTreeCursor) Next() error {
 		return nil
 	} else {
 		if vc.parent != nil {
-			vc.self = vc.parent.self
-			vc.parent = vc.parent.parent
-			return nil
+			vc.self.tree.Free()
+			vc.self = &treeCursor{vc.parent.self.index, vc.parent.self.repo, vc.parent.self.iterator, vc.parent.self.oid, vc.parent.self.commit, vc.parent.self.tree, vc.parent.self.EntryCount, vc.parent.self.current, vc.parent.eof}
+			vc.parent = &LLTreeCursor{vc.parent.parent, vc.self, vc.eof}
+			return vc.Next()
 		}
 		var oid git.Oid
 		err := vc.self.iterator.Next(&oid)
