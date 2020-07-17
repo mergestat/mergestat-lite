@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/go-git/go-git/v5"
@@ -16,7 +15,7 @@ import (
 var (
 	fixtureRepoCloneURL = "https://github.com/augmentable-dev/tickgit"
 	fixtureRepo         *git.Repository
-	instance            *GitQLite
+	fixtureRepoDir      string
 )
 
 func TestMain(m *testing.M) {
@@ -41,13 +40,8 @@ func initFixtureRepo() (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
-	instance, err = New(dir, &Options{
-		UseCli:  true,
-		Testing: true,
-	})
-	if err != nil {
-		return nil, err
-	}
+
+	fixtureRepoDir = dir
 
 	return func() error {
 		err := os.RemoveAll(dir)
@@ -59,12 +53,22 @@ func initFixtureRepo() (func() error, error) {
 }
 
 func TestModuleInitialization(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if instance.DB == nil {
 		t.Fatal("expected non-nil DB, got nil")
 	}
 }
 
 func TestCommitCounts(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	headRef, err := fixtureRepo.Head()
 	if err != nil {
 		t.Fatal(err)
@@ -134,82 +138,89 @@ func TestCommitCounts(t *testing.T) {
 	}
 
 }
-func TestGoGitCommit(t *testing.T) {
-	// only use this if sys doesn't have git CLI as name of vtable will be commits
-	_, err := exec.LookPath("git")
-	if err == nil {
-		headRef, err := fixtureRepo.Head()
-		if err != nil {
-			t.Fatal(err)
-		}
-		commitChecker, err := fixtureRepo.Log(&git.LogOptions{
-			From:  headRef.Hash(),
-			Order: git.LogOrderCommitterTime,
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
 
-		commitCount := 0
-		err = commitChecker.ForEach(func(c *object.Commit) error {
-			commitCount++
-			return nil
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+func TestGoGitCommits(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		//checks commits
-		rows, err := instance.DB.Query("SELECT * FROM go_git_commits")
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer rows.Close()
-		columns, err := rows.Columns()
-		if err != nil {
-			t.Fatal(err)
-		}
-		expected := 14
-		if len(columns) != expected {
-			t.Fatalf("expected %d columns, got: %d", expected, len(columns))
-		}
-		numRows := getRowsCount(rows)
+	headRef, err := fixtureRepo.Head()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commitChecker, err := fixtureRepo.Log(&git.LogOptions{
+		From:  headRef.Hash(),
+		Order: git.LogOrderCommitterTime,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		expected = commitCount
-		if numRows != expected {
-			t.Fatalf("expected %d rows got: %d", expected, numRows)
-		}
+	commitCount := 0
+	err = commitChecker.ForEach(func(c *object.Commit) error {
+		commitCount++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		rows, err = instance.DB.Query("SELECT id, author_name FROM go_git_commits")
+	//checks commits
+	rows, err := instance.DB.Query("SELECT * FROM commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	columns, err := rows.Columns()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := 14
+	if len(columns) != expected {
+		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
+	}
+	numRows := getRowsCount(rows)
+
+	expected = commitCount
+	if numRows != expected {
+		t.Fatalf("expected %d rows got: %d", expected, numRows)
+	}
+
+	rows, err = instance.DB.Query("SELECT id, author_name FROM commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(rows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		commit, err := commitChecker.Next()
 		if err != nil {
-			t.Fatal(err)
-		}
-		rowNum, contents, err := getContents(rows)
-		if err != nil {
-			t.Fatalf("err %d at row Number %d", err, rowNum)
-		}
-		for i, c := range contents {
-			commit, err := commitChecker.Next()
-			if err != nil {
-				if err == io.EOF {
-					break
-				} else {
-					t.Fatal(err)
-				}
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
 			}
-			if commit.ID().String() != c[0] {
-				t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
-			}
-			if commit.Author.Name != c[1] {
-				t.Fatalf("expected %s at row %d got %s", commit.Author.Name, i, c[1])
-			}
-
 		}
+		if commit.ID().String() != c[0] {
+			t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
+		}
+		if commit.Author.Name != c[1] {
+			t.Fatalf("expected %s at row %d got %s", commit.Author.Name, i, c[1])
+		}
+
 	}
 
 }
 
 func TestFileCounts(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	headRef, err := fixtureRepo.Head()
 	if err != nil {
 		t.Fatal(err)
@@ -253,6 +264,10 @@ func TestFileCounts(t *testing.T) {
 }
 
 func TestRefCounts(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	refChecker, err := fixtureRepo.References()
 	if err != nil {
 		t.Fatal(err)
@@ -315,6 +330,10 @@ func TestRefCounts(t *testing.T) {
 }
 
 func TestTags(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	tagIterator, err := fixtureRepo.Tags()
 	if err != nil {
@@ -347,6 +366,11 @@ func TestTags(t *testing.T) {
 	}
 }
 func TestBranches(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	localBranchIterator, err := fixtureRepo.Branches()
 	if err != nil {
 		t.Fatal(err)
