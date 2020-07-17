@@ -1,8 +1,8 @@
 package gitqlite
 
 import (
+	"crypto/md5"
 	"database/sql"
-	"encoding/base64"
 	"fmt"
 	"os/exec"
 
@@ -57,10 +57,9 @@ func init() {
 
 // New creates an instance of GitQLite
 func New(repoPath string, options *Options) (*GitQLite, error) {
-	repoPathB64 := base64.StdEncoding.EncodeToString([]byte(repoPath))
 	// see https://github.com/mattn/go-sqlite3/issues/204
 	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
-	db, err := sql.Open("gitqlite", fmt.Sprintf("file:%s?mode=memory", repoPathB64))
+	db, err := sql.Open("gitqlite", fmt.Sprintf("file:%x?mode=memory", md5.Sum([]byte(repoPath))))
 	if err != nil {
 		return nil, err
 	}
