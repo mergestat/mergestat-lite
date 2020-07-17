@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"database/sql"
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -14,7 +15,7 @@ import (
 var (
 	fixtureRepoCloneURL = "https://github.com/augmentable-dev/tickgit"
 	fixtureRepo         *git.Repository
-	instance            *GitQLite
+	fixtureRepoDir      string
 )
 
 func TestMain(m *testing.M) {
@@ -40,10 +41,7 @@ func initFixtureRepo() (func() error, error) {
 		return nil, err
 	}
 
-	instance, err = New(dir)
-	if err != nil {
-		return nil, err
-	}
+	fixtureRepoDir = dir
 
 	return func() error {
 		err := os.RemoveAll(dir)
@@ -55,12 +53,22 @@ func initFixtureRepo() (func() error, error) {
 }
 
 func TestModuleInitialization(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if instance.DB == nil {
 		t.Fatal("expected non-nil DB, got nil")
 	}
 }
 
 func TestCommitCounts(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	headRef, err := fixtureRepo.Head()
 	if err != nil {
 		t.Fatal(err)
@@ -102,9 +110,117 @@ func TestCommitCounts(t *testing.T) {
 	if numRows != expected {
 		t.Fatalf("expected %d rows got: %d", expected, numRows)
 	}
+
+	rows, err = instance.DB.Query("SELECT id, author_name FROM commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(rows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		commit, err := commitChecker.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if commit.ID().String() != c[0] {
+			t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
+		}
+		if commit.Author.Name != c[1] {
+			t.Fatalf("expected %s at row %d got %s", commit.Author.Name, i, c[1])
+		}
+
+	}
+
+}
+
+func TestGoGitCommits(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	headRef, err := fixtureRepo.Head()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commitChecker, err := fixtureRepo.Log(&git.LogOptions{
+		From:  headRef.Hash(),
+		Order: git.LogOrderCommitterTime,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	commitCount := 0
+	err = commitChecker.ForEach(func(c *object.Commit) error {
+		commitCount++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//checks commits
+	rows, err := instance.DB.Query("SELECT * FROM commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	columns, err := rows.Columns()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := 14
+	if len(columns) != expected {
+		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
+	}
+	numRows := getRowsCount(rows)
+
+	expected = commitCount
+	if numRows != expected {
+		t.Fatalf("expected %d rows got: %d", expected, numRows)
+	}
+
+	rows, err = instance.DB.Query("SELECT id, author_name FROM commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(rows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		commit, err := commitChecker.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if commit.ID().String() != c[0] {
+			t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
+		}
+		if commit.Author.Name != c[1] {
+			t.Fatalf("expected %s at row %d got %s", commit.Author.Name, i, c[1])
+		}
+
+	}
+
 }
 
 func TestFileCounts(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	headRef, err := fixtureRepo.Head()
 	if err != nil {
 		t.Fatal(err)
@@ -148,6 +264,10 @@ func TestFileCounts(t *testing.T) {
 }
 
 func TestRefCounts(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	refChecker, err := fixtureRepo.References()
 	if err != nil {
 		t.Fatal(err)
@@ -179,8 +299,119 @@ func TestRefCounts(t *testing.T) {
 	if numRows != refCount {
 		t.Fatalf("expected %d rows got : %d", refCount, numRows)
 	}
+	refRows, err = instance.DB.Query("SELECT * FROM refs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(refRows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		ref, err := refChecker.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if ref.Name().String() != c[0] {
+			t.Fatalf("expected %s at row %d got %s", ref.Name().String(), i, c[0])
+		}
+		if ref.Type().String() != c[1] {
+			t.Fatalf("expected %s at row %d got %s", ref.Type().String(), i, c[1])
+		}
+		if ref.Hash().String() != c[2] {
+			t.Fatalf("expected %s at row %d got %s", ref.Hash().String(), i, c[2])
+		}
+
+	}
 }
 
+func TestTags(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tagIterator, err := fixtureRepo.Tags()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tagRows, err := instance.DB.Query("SELECT * FROM tags")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(tagRows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		tag, err := tagIterator.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if tag.Hash().String() != c[0] {
+			t.Fatalf("expected %s at row %d got %s", tag.Hash().String(), i, c[0])
+		}
+		if tag.Name().String() != c[1] {
+			t.Fatalf("expected %s at row %d got %s", tag.Name(), i, c[1])
+		}
+
+	}
+}
+func TestBranches(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	localBranchIterator, err := fixtureRepo.Branches()
+	if err != nil {
+		t.Fatal(err)
+	}
+	remoteBranchIterator, err := remoteBranches(fixtureRepo.Storer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	branchRows, err := instance.DB.Query("SELECT * FROM branches")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rowNum, contents, err := getContents(branchRows)
+	if err != nil {
+		t.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+	for i, c := range contents {
+		branch, err := localBranchIterator.Next()
+		if err != nil {
+			if err == io.EOF {
+				branch, err = remoteBranchIterator.Next()
+				if err != nil {
+					if err == io.EOF {
+						break
+					} else {
+						t.Fatal(err)
+					}
+				}
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if branch.Name().Short() != c[0] || branch.Hash().String() != c[4] {
+			t.Fatalf("expected %s at row %d got %s", branch.Name().String(), i, c[0])
+		}
+		if branch.Hash().String() != c[4] {
+			t.Fatalf("expected %s at row %d got %s", branch.Hash().String(), i, c[4])
+		}
+
+	}
+}
 func getRowsCount(rows *sql.Rows) int {
 	count := 0
 	for rows.Next() {
@@ -188,4 +419,40 @@ func getRowsCount(rows *sql.Rows) int {
 	}
 
 	return count
+}
+func getContents(rows *sql.Rows) (int, [][]string, error) {
+	var (
+		count int = 0
+	)
+	columns, err := rows.Columns()
+	if err != nil {
+		return count, nil, err
+	}
+
+	pointers := make([]interface{}, len(columns))
+	container := make([]sql.NullString, len(columns))
+	var ret [][]string
+
+	for i := range pointers {
+		pointers[i] = &container[i]
+	}
+
+	for rows.Next() {
+		err = rows.Scan(pointers...)
+		if err != nil {
+			return count, nil, err
+		}
+
+		r := make([]string, len(columns))
+		for i, c := range container {
+			if c.Valid {
+				r[i] = c.String
+			} else {
+				r[i] = "NULL"
+			}
+		}
+		ret = append(ret, r)
+	}
+	return count, ret, err
+
 }

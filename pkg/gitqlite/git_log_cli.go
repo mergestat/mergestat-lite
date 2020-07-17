@@ -110,7 +110,7 @@ func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(vc.current.CommitterWhen.Format(time.RFC3339Nano))
 	case 9:
 		//parent_id
-		c.ResultText(vc.current.ParentID)
+		c.ResultText(strings.Split(vc.current.ParentID, " ")[0])
 	case 10:
 		//parent_count
 		c.ResultInt(len(strings.Split(vc.current.ParentID, " ")))

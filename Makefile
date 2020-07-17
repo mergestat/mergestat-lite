@@ -9,3 +9,7 @@ lint:
 
 test:
 	go test -v -tags=sqlite_vtable ./...
+
+test-cover:
+	go test -v -tags=sqlite_vtable ./... -cover -covermode=count -coverprofile=coverage.out
+	go tool cover -html=coverage.out
