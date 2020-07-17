@@ -19,15 +19,15 @@ import (
 
 //define flags in here
 var (
-	repo   string
-	format string
-	cli    bool
+	repo       string
+	format     string
+	skipGitCLI bool
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote git repository may also be specified, it will be cloned to a temporary directory on disk before query execution. Default git credentials are used for non-public remote repos.")
+	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
-	rootCmd.PersistentFlags().BoolVar(&cli, "cli", true, "if git CLI installed specify false to use go git parsing libraries")
+	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
 }
 
 func handleError(err error) {
@@ -40,8 +40,8 @@ func handleError(err error) {
 var rootCmd = &cobra.Command{
 	Use: `gitqlite "SELECT * FROM commits"`,
 	Long: `
-		gitqlite is a CLI for querying git repositories with SQL, using SQLite virtual tables.
-		Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/gitqlite`,
+  gitqlite is a CLI for querying git repositories with SQL, using SQLite virtual tables.
+  Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/gitqlite`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
 		info, err := os.Stdin.Stat()
@@ -97,7 +97,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		g, err := gitqlite.New(repo, &gitqlite.Options{
-			UseCli: cli,
+			SkipGitCLI: skipGitCLI,
 		})
 		handleError(err)
 
