@@ -35,6 +35,12 @@ Build an image locally using docker
 docker build -t gitqlite:latest .
 ```
 
+Or use an official image from [docker hub](https://hub.docker.com/repository/docker/augmentable/gitqlite)
+
+```
+docker pull augmentable/gitqlite:latest
+```
+
 #### Running commands
 
 `gitqlite` operates on a git repository. This repository needs to be attached as a volume. This example uses the (bash) built-in command `pwd` for the current working directory
