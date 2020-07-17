@@ -74,7 +74,10 @@ func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 	}
 
 	var oid git.Oid
-	revWalk.Next(&oid)
+	err = revWalk.Next(&oid)
+	if err != nil {
+		return nil, err
+	}
 
 	commit, err := repo.LookupCommit(&oid)
 	if err != nil {

@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/plumbing/object"
+	git "github.com/libgit2/git2go/v30"
+
+	// "github.com/go-git/go-git/v5"
+	// "github.com/go-git/go-git/v5/plumbing"
+	// "github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -40,41 +43,37 @@ func (m *gitTreeModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 
 func (m *gitTreeModule) DestroyModule() {}
 
-func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	commit := vc.iterator.commit
-	treeHeadEntry := commit.TreeHash.String() // should be structure Name String Id *Oid Type ObjectType Filemode Filemode
-	currentFile := vc.current
-	fileMode, err := currentFile.Mode.ToOSFileMode()
-	if err != nil {
-		return err
-	}
-	fileContents, err := currentFile.Contents()
-	if err != nil {
-		return err
-	}
-	name := currentFile.Name
+func (vc *LLTreeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 	switch col {
 	case 0:
 		//commit id
-		c.ResultText(commit.ID().String())
+		c.ResultText(vc.self.commit.Id().String())
 	case 1:
 		//tree id
-		c.ResultText(treeHeadEntry)
+		c.ResultText(vc.self.tree.Id().String())
 	case 2:
 		//tree name
-		c.ResultText(name)
+		c.ResultText(vc.self.current.Name)
 	case 3:
 		//filemode
-		c.ResultText(fileMode.String())
+		c.ResultText(string(int(vc.self.current.Filemode)))
 	case 4:
 		//filetype
-		c.ResultText(currentFile.Type().String())
+		c.ResultText(vc.self.current.Type.String())
 	case 5:
 		//File
 		// change this to text with the blob section of go-git
-
-		c.ResultText(fileContents)
+		if vc.self.current.Type.String() == "Blob" {
+			blob, err := vc.self.repo.LookupBlob(vc.self.current.Id)
+			if err != nil {
+				return err
+			}
+			contents := blob.Contents()
+			c.ResultText(string(contents))
+		} else {
+			c.ResultText("NULL")
+		}
 	}
 	return nil
 }
@@ -154,80 +153,133 @@ func (iter *treeCommitIterator) Close() {
 	iter.commitIter.Close()
 }
 
+type LLTreeCursor struct {
+	parent *LLTreeCursor
+	self   *treeCursor
+	eof    bool
+}
+
 type treeCursor struct {
 	index    int
 	repo     *git.Repository
-	iterator *treeCommitIterator
-	current  *object.File
+	iterator *git.RevWalk
+	oid      *git.Oid
+	commit   *git.Commit
+	tree     *git.Tree
+	current  *git.TreeEntry
 	eof      bool
 }
 
 func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.PlainOpen(v.repoPath)
+	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
 	v.repo = repo
 
-	headRef, err := v.repo.Head()
-	if err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return &treeCursor{0, v.repo, nil, nil, true}, nil
-		}
-		return nil, err
-	}
-	iter, err := v.repo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
+	v.repo = repo
+
+	revWalk, err := repo.Walk()
 	if err != nil {
 		return nil, err
 	}
 
-	treeCommitIter, err := newTreeCommitIterator(iter)
+	revWalk.Sorting(git.SortTime)
+	err = revWalk.PushHead()
 	if err != nil {
 		return nil, err
 	}
 
-	current, err := treeCommitIter.Next()
+	var oid git.Oid
+	err = revWalk.Next(&oid)
 	if err != nil {
 		return nil, err
 	}
+	commit, err := repo.LookupCommit(&oid)
+	if err != nil {
+		return nil, err
+	}
+	tree, err := commit.Tree()
+	if err != nil {
+		return nil, err
+	}
+	current := tree.EntryByIndex(0)
 
-	return &treeCursor{0, v.repo, treeCommitIter, current, false}, nil
+	return &LLTreeCursor{nil, &treeCursor{0, v.repo, revWalk, &oid, commit, tree, current, false}, false}, nil
 }
 
-func (vc *treeCursor) Next() error {
-	vc.index++
-	//Iterates to next file
-	file, err := vc.iterator.Next()
-	if err != nil {
-		if err == io.EOF {
-			vc.current = nil
+func (vc *LLTreeCursor) Next() error {
+	vc.self.index++
+	//Iterates to next tree entry if the index is less than the entry count
+	if vc.self.index < int(vc.self.tree.EntryCount()) {
+		// go to next entry in the tree
+		file := vc.self.tree.EntryByIndex(uint64(vc.self.index))
+		//if next entry is a tree then go into that tree
+		if file.Type.String() == "Tree" {
+			tree, err := vc.self.repo.LookupTree(file.Id)
+			if err != nil {
+				return nil
+			}
+			//set parent to self
+			vc.parent = vc
+			//set self to new tree
+			vc.self.tree = tree
+			vc.self.index = 0
+			vc.self.current = vc.self.tree.EntryByIndex(0)
+			return nil
+
+		}
+		// if not EOF and not err go to next file in tree
+		vc.self.current = file
+		return nil
+	} else {
+		if vc.parent != nil {
+			vc.self = vc.parent.self
+			vc.parent = vc.parent.parent
+			return nil
+		}
+		var oid git.Oid
+		err := vc.self.iterator.Next(&oid)
+		if git.IsErrorCode(err, git.ErrIterOver) {
+			vc.self.current = nil
+			vc.parent = nil
 			vc.eof = true
 			return nil
 		}
-		return err
+		if err != nil {
+			return err
+		}
+		commit, err := vc.self.repo.LookupCommit(&oid)
+		if err != nil {
+			return err
+		}
+		tree, err := commit.Tree()
+		if err != nil {
+			return err
+		}
+		vc.self.oid = &oid
+		vc.self.commit = commit
+		vc.self.tree = tree
+		vc.self.current = tree.EntryByIndex(0)
+		vc.self.index = 0
+		return nil
+
 	}
-	// if not EOF and not err go to next file in tree
-	vc.current = file
+}
+func (vc *LLTreeCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+	vc.self.index = 0
 	return nil
 }
-func (vc *treeCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	vc.index = 0
-	return nil
-}
-func (vc *treeCursor) EOF() bool {
+func (vc *LLTreeCursor) EOF() bool {
 	return vc.eof
 }
 
-func (vc *treeCursor) Rowid() (int64, error) {
-	return int64(vc.index), nil
+func (vc *LLTreeCursor) Rowid() (int64, error) {
+	return int64(vc.self.index), nil
 }
 
-func (vc *treeCursor) Close() error {
-	if vc.iterator != nil {
-		vc.iterator.Close()
-	}
+func (vc *LLTreeCursor) Close() error {
+	vc.parent = nil
+	vc.self.iterator.Free()
 	return nil
 }
