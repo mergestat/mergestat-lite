@@ -60,28 +60,7 @@ func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 	}
 	v.repo = repo
 
-	headRef, err := v.repo.Head()
-	if err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return &commitCursor{0, v.repo, nil, nil, true}, nil
-		}
-		return nil, err
-	}
-
-	iter, err := v.repo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	commit, err := iter.Next()
-	if err != nil {
-		return nil, err
-	}
-
-	return &commitCursor{0, v.repo, commit, iter, false}, nil
+	return &commitCursor{repo: v.repo}, nil
 }
 
 func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -97,15 +76,12 @@ func (v *gitLogTable) Disconnect() error {
 func (v *gitLogTable) Destroy() error { return nil }
 
 type commitCursor struct {
-	index      int
 	repo       *git.Repository
 	current    *object.Commit
 	commitIter object.CommitIter
-	eof        bool
 }
 
 func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-
 	commit := vc.current
 	author := commit.Author
 	committer := commit.Committer
@@ -186,18 +162,38 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	vc.index = 0
+	headRef, err := vc.repo.Head()
+	if err != nil {
+		if err == plumbing.ErrReferenceNotFound {
+			return nil
+		}
+		return err
+	}
+
+	iter, err := vc.repo.Log(&git.LogOptions{
+		From:  headRef.Hash(),
+		Order: git.LogOrderCommitterTime,
+	})
+	if err != nil {
+		return err
+	}
+	vc.commitIter = iter
+
+	commit, err := iter.Next()
+	if err != nil {
+		return err
+	}
+
+	vc.current = commit
+
 	return nil
 }
 
 func (vc *commitCursor) Next() error {
-	vc.index++
-
 	commit, err := vc.commitIter.Next()
 	if err != nil {
 		if err == io.EOF {
 			vc.current = nil
-			vc.eof = true
 			return nil
 		}
 		return err
@@ -208,17 +204,18 @@ func (vc *commitCursor) Next() error {
 }
 
 func (vc *commitCursor) EOF() bool {
-	return vc.eof
+	return vc.current == nil
 }
 
 func (vc *commitCursor) Rowid() (int64, error) {
-	return int64(vc.index), nil
+	return int64(0), nil
 }
 
 func (vc *commitCursor) Close() error {
 	if vc.commitIter != nil {
 		vc.commitIter.Close()
 	}
+	vc.current = nil
 	return nil
 }
 

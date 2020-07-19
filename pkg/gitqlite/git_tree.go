@@ -78,6 +78,7 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	}
 	return nil
 }
+
 func (v *gitTreeTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	// TODO this should actually be implemented!
 	dummy := make([]bool, len(cst))
@@ -119,11 +120,9 @@ func (iter *treeCommitIterator) Next() (*object.File, error) {
 		// if it is the last file in the tree go to the next commit
 
 		if err == io.EOF {
-
 			commit, err := iter.commitIter.Next()
 
 			if err != nil {
-
 				//if it is the last file in the last tree of the commits return EOF
 				if err == io.EOF {
 					return nil, io.EOF
@@ -155,11 +154,9 @@ func (iter *treeCommitIterator) Close() {
 }
 
 type treeCursor struct {
-	index    int
 	repo     *git.Repository
 	iterator *treeCommitIterator
 	current  *object.File
-	eof      bool
 }
 
 func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
@@ -169,42 +166,15 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 	}
 	v.repo = repo
 
-	headRef, err := v.repo.Head()
-	if err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return &treeCursor{0, v.repo, nil, nil, true}, nil
-		}
-		return nil, err
-	}
-	iter, err := v.repo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	treeCommitIter, err := newTreeCommitIterator(iter)
-	if err != nil {
-		return nil, err
-	}
-
-	current, err := treeCommitIter.Next()
-	if err != nil {
-		return nil, err
-	}
-
-	return &treeCursor{0, v.repo, treeCommitIter, current, false}, nil
+	return &treeCursor{repo: v.repo}, nil
 }
 
 func (vc *treeCursor) Next() error {
-	vc.index++
 	//Iterates to next file
 	file, err := vc.iterator.Next()
 	if err != nil {
 		if err == io.EOF {
 			vc.current = nil
-			vc.eof = true
 			return nil
 		}
 		return err
@@ -214,15 +184,42 @@ func (vc *treeCursor) Next() error {
 	return nil
 }
 func (vc *treeCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	vc.index = 0
+	headRef, err := vc.repo.Head()
+	if err != nil {
+		if err == plumbing.ErrReferenceNotFound {
+			return nil
+		}
+		return err
+	}
+	iter, err := vc.repo.Log(&git.LogOptions{
+		From:  headRef.Hash(),
+		Order: git.LogOrderCommitterTime,
+	})
+	if err != nil {
+		return err
+	}
+
+	treeCommitIter, err := newTreeCommitIterator(iter)
+	if err != nil {
+		return err
+	}
+
+	vc.iterator = treeCommitIter
+
+	current, err := treeCommitIter.Next()
+	if err != nil {
+		return err
+	}
+
+	vc.current = current
 	return nil
 }
 func (vc *treeCursor) EOF() bool {
-	return vc.eof
+	return vc.current == nil
 }
 
 func (vc *treeCursor) Rowid() (int64, error) {
-	return int64(vc.index), nil
+	return int64(0), nil
 }
 
 func (vc *treeCursor) Close() error {

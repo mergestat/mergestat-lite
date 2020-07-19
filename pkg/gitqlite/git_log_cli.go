@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/gitqlite/pkg/gitlog"
-	"github.com/go-git/go-git/v5"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -14,7 +13,6 @@ type gitLogCLIModule struct{}
 
 type gitLogCLITable struct {
 	repoPath string
-	repo     *git.Repository
 }
 
 func (m *gitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
@@ -52,11 +50,7 @@ func (m *gitLogCLIModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3
 func (m *gitLogCLIModule) DestroyModule() {}
 
 func (v *gitLogCLITable) Open() (sqlite3.VTabCursor, error) {
-	res, err := gitlog.Execute(v.repoPath)
-	if err != nil {
-		return nil, err
-	}
-	return &commitCLICursor{0, res, res[0], false}, nil
+	return &commitCLICursor{index: 0, repoPath: v.repoPath}, nil
 }
 
 func (v *gitLogCLITable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -66,87 +60,81 @@ func (v *gitLogCLITable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.In
 }
 
 func (v *gitLogCLITable) Disconnect() error {
-	v.repo = nil
 	return nil
 }
 func (v *gitLogCLITable) Destroy() error { return nil }
 
 type commitCLICursor struct {
-	index   int
-	results gitlog.Result
-	current *gitlog.Commit
-	eof     bool
-}
-
-func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
-
-	switch col {
-	case 0:
-		//commit id
-		c.ResultText(vc.current.SHA)
-	case 1:
-		//commit message
-		c.ResultText(vc.current.Message)
-	case 2:
-		//commit summary
-		c.ResultText(strings.Split(vc.current.Message, "\n")[0])
-	case 3:
-		//commit author name
-		c.ResultText(vc.current.AuthorName)
-	case 4:
-		//commit author email
-		c.ResultText(vc.current.AuthorEmail)
-	case 5:
-		//author when
-		c.ResultText(vc.current.AuthorWhen.Format(time.RFC3339Nano))
-	case 6:
-		//committer name
-		c.ResultText(vc.current.CommitterName)
-	case 7:
-		//committer email
-		c.ResultText(vc.current.CommitterEmail)
-	case 8:
-		//committer when
-		c.ResultText(vc.current.CommitterWhen.Format(time.RFC3339Nano))
-	case 9:
-		//parent_id
-		c.ResultText(strings.Split(vc.current.ParentID, " ")[0])
-	case 10:
-		//parent_count
-		c.ResultInt(len(strings.Split(vc.current.ParentID, " ")))
-	case 11:
-		//tree_id
-		c.ResultText(vc.current.TreeID)
-
-	case 12:
-		c.ResultInt(vc.current.Additions)
-	case 13:
-		c.ResultInt(vc.current.Deletions)
-
-	}
-	return nil
+	index    int
+	repoPath string
+	results  gitlog.Result
 }
 
 func (vc *commitCLICursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+	res, err := gitlog.Execute(vc.repoPath)
+	if err != nil {
+		return err
+	}
 	vc.index = 0
+	vc.results = res
 	return nil
 }
 
 func (vc *commitCLICursor) Next() error {
 	vc.index++
-	if vc.index < len(vc.results) {
-		vc.current = vc.results[vc.index]
-		return nil
-
-	} else {
-		vc.current = nil
-		vc.eof = true
-		return nil
-	}
+	return nil
 }
 
 func (vc *commitCLICursor) EOF() bool {
-	return vc.eof
+	return vc.index >= len(vc.results)
+}
+
+func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
+	current := vc.results[vc.index]
+	switch col {
+	case 0:
+		//commit id
+		c.ResultText(current.SHA)
+	case 1:
+		//commit message
+		c.ResultText(current.Message)
+	case 2:
+		//commit summary
+		c.ResultText(strings.Split(current.Message, "\n")[0])
+	case 3:
+		//commit author name
+		c.ResultText(current.AuthorName)
+	case 4:
+		//commit author email
+		c.ResultText(current.AuthorEmail)
+	case 5:
+		//author when
+		c.ResultText(current.AuthorWhen.Format(time.RFC3339Nano))
+	case 6:
+		//committer name
+		c.ResultText(current.CommitterName)
+	case 7:
+		//committer email
+		c.ResultText(current.CommitterEmail)
+	case 8:
+		//committer when
+		c.ResultText(current.CommitterWhen.Format(time.RFC3339Nano))
+	case 9:
+		//parent_id
+		c.ResultText(strings.Split(current.ParentID, " ")[0])
+	case 10:
+		//parent_count
+		c.ResultInt(len(strings.Split(current.ParentID, " ")))
+	case 11:
+		//tree_id
+		c.ResultText(current.TreeID)
+	case 12:
+		c.ResultInt(current.Additions)
+	case 13:
+		c.ResultInt(current.Deletions)
+
+	}
+	return nil
 }
 
 func (vc *commitCLICursor) Rowid() (int64, error) {
@@ -154,5 +142,7 @@ func (vc *commitCLICursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCLICursor) Close() error {
+	vc.index = 0
+	vc.results = nil
 	return nil
 }
