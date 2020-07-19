@@ -49,33 +49,11 @@ func (v *gitBranchTable) Open() (sqlite3.VTabCursor, error) {
 		return nil, err
 	}
 	v.repo = repo
-	localBranchIterator, err := repo.Branches()
-	if err != nil {
-		return nil, err
-	}
-	remoteBranchIterator, err := remoteBranches(repo.Storer)
-	if err != nil {
-		return nil, err
-	}
 
-	branchRef, err := localBranchIterator.Next()
-	if err != nil {
-		if err == io.EOF {
-			return &branchCursor{0, v.repo, nil, nil, nil, true}, nil
-		}
-		return nil, err
-	}
-	// _, err = v.repo.Branch((branchRef.Name().Short()))
-	// if err != nil {
-	// 	if err == plumbing.ErrReferenceNotFound {
-	// 		return &branchCursor{0, v.repo, nil, nil, true}, nil
-	// 	}
-	// 	return nil, err
-	// }
-
-	return &branchCursor{0, v.repo, branchRef, localBranchIterator, remoteBranchIterator, false}, nil
+	return &branchCursor{repo: v.repo}, nil
 
 }
+
 func remoteBranches(s storer.ReferenceStorer) (storer.ReferenceIter, error) {
 	refs, err := s.IterReferences()
 	if err != nil {
@@ -86,6 +64,7 @@ func remoteBranches(s storer.ReferenceStorer) (storer.ReferenceIter, error) {
 		return ref.Name().IsRemote()
 	}, refs), nil
 }
+
 func (v *gitBranchTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	// TODO this should actually be implemented!
 	dummy := make([]bool, len(cst))
@@ -96,19 +75,17 @@ func (v *gitBranchTable) Disconnect() error {
 	v.repo = nil
 	return nil
 }
+
 func (v *gitBranchTable) Destroy() error { return nil }
 
 type branchCursor struct {
-	index            int
 	repo             *git.Repository
 	current          *plumbing.Reference
 	localBranchIter  storer.ReferenceIter
 	remoteBranchIter storer.ReferenceIter
-	eof              bool
 }
 
 func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-
 	branchRef := vc.current
 	branch, err := vc.repo.Branch(branchRef.Name().Short())
 	if err != nil {
@@ -160,13 +137,34 @@ func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *branchCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	vc.index = 0
+	localBranchIterator, err := vc.repo.Branches()
+	if err != nil {
+		return err
+	}
+
+	vc.localBranchIter = localBranchIterator
+
+	remoteBranchIterator, err := remoteBranches(vc.repo.Storer)
+	if err != nil {
+		return err
+	}
+
+	vc.remoteBranchIter = remoteBranchIterator
+
+	branchRef, err := localBranchIterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			return nil
+		}
+		return err
+	}
+
+	vc.current = branchRef
+
 	return nil
 }
 
 func (vc *branchCursor) Next() error {
-	vc.index++
-
 	branchRef, err := vc.localBranchIter.Next()
 	if err != nil {
 		if err == io.EOF {
@@ -174,7 +172,6 @@ func (vc *branchCursor) Next() error {
 			if err != nil {
 				if err == io.EOF {
 					vc.current = nil
-					vc.eof = true
 					return nil
 				}
 				return err
@@ -191,11 +188,11 @@ func (vc *branchCursor) Next() error {
 }
 
 func (vc *branchCursor) EOF() bool {
-	return vc.eof
+	return vc.current == nil
 }
 
 func (vc *branchCursor) Rowid() (int64, error) {
-	return int64(vc.index), nil
+	return int64(0), nil
 }
 
 func (vc *branchCursor) Close() error {

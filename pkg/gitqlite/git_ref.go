@@ -69,11 +69,9 @@ func (v *gitRefTable) Disconnect() error {
 func (v *gitRefTable) Destroy() error { return nil }
 
 type refCursor struct {
-	index    int
 	repo     *git.Repository
 	iterator storer.ReferenceIter
 	current  *plumbing.Reference
-	eof      bool
 }
 
 func (v *gitRefTable) Open() (sqlite3.VTabCursor, error) {
@@ -83,26 +81,32 @@ func (v *gitRefTable) Open() (sqlite3.VTabCursor, error) {
 	}
 	v.repo = repo
 
-	refIter, err := repo.References()
+	return &refCursor{repo: v.repo}, nil
+}
+
+func (vc *refCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+	refIter, err := vc.repo.References()
 	if err != nil {
-		return nil, err
-	}
-	current, err := refIter.Next()
-	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &refCursor{0, v.repo, refIter, current, false}, nil
+	vc.iterator = refIter
+
+	current, err := refIter.Next()
+	if err != nil {
+		return err
+	}
+
+	vc.current = current
+	return nil
 }
 
 func (vc *refCursor) Next() error {
-	vc.index++
 	//Iterates to next ref
 	file, err := vc.iterator.Next()
 	if err != nil {
 		if err == io.EOF {
 			vc.current = nil
-			vc.eof = true
 			return nil
 		}
 		return err
@@ -111,16 +115,13 @@ func (vc *refCursor) Next() error {
 	vc.current = file
 	return nil
 }
-func (vc *refCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	vc.index = 0
-	return nil
-}
+
 func (vc *refCursor) EOF() bool {
-	return vc.eof
+	return vc.current == nil
 }
 
 func (vc *refCursor) Rowid() (int64, error) {
-	return int64(vc.index), nil
+	return int64(0), nil
 }
 
 func (vc *refCursor) Close() error {

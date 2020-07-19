@@ -52,22 +52,8 @@ func (v *gitTagTable) Open() (sqlite3.VTabCursor, error) {
 		return nil, err
 	}
 	v.repo = repo
-	tagIterator, err := v.repo.Tags()
-	if err != nil {
-		return nil, err
-	}
-	tag, err := tagIterator.Next()
-	if err != nil {
-		return nil, err
-	}
-	// if err != nil {
-	// 	if err == plumbing.ErrReferenceNotFound || err == io.EOF {
-	// 		return &tagCursor{0, v.repo, nil, nil, true}, nil
-	// 	}
-	// 	return nil, err
-	// }
 
-	return &tagCursor{0, v.repo, tag, tagIterator, false}, nil
+	return &tagCursor{repo: v.repo}, nil
 
 }
 
@@ -84,11 +70,9 @@ func (v *gitTagTable) Disconnect() error {
 func (v *gitTagTable) Destroy() error { return nil }
 
 type tagCursor struct {
-	index   int
 	repo    *git.Repository
 	current *plumbing.Reference
 	tagIter storer.ReferenceIter
-	eof     bool
 }
 
 func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
@@ -151,18 +135,28 @@ func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *tagCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	vc.index = 0
+	tagIterator, err := vc.repo.Tags()
+	if err != nil {
+		return err
+	}
+
+	vc.tagIter = tagIterator
+
+	tag, err := tagIterator.Next()
+	if err != nil {
+		return err
+	}
+
+	vc.current = tag
+
 	return nil
 }
 
 func (vc *tagCursor) Next() error {
-	vc.index++
-
 	tag, err := vc.tagIter.Next()
 	if err != nil {
 		if err == io.EOF {
 			vc.current = nil
-			vc.eof = true
 			return nil
 		}
 		return err
@@ -173,11 +167,11 @@ func (vc *tagCursor) Next() error {
 }
 
 func (vc *tagCursor) EOF() bool {
-	return vc.eof
+	return vc.current == nil
 }
 
 func (vc *tagCursor) Rowid() (int64, error) {
-	return int64(vc.index), nil
+	return int64(0), nil
 }
 
 func (vc *tagCursor) Close() error {
