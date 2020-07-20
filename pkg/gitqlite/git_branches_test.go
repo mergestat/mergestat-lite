@@ -52,3 +52,17 @@ func TestBranches(t *testing.T) {
 
 	}
 }
+func BenchmarkBranchCount(b *testing.B) {
+	instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
+	if err != nil {
+		b.Fatal(err)
+	}
+	rows, err := instance.DB.Query("SELECT * FROM branches")
+	if err != nil {
+		b.Fatal(err)
+	}
+	rowNum, _, err := GetContents(rows)
+	if err != nil {
+		b.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+}

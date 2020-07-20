@@ -72,3 +72,17 @@ func TestRefCounts(t *testing.T) {
 
 	}
 }
+func BenchmarkRefCounts(b *testing.B) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		b.Fatal(err)
+	}
+	rows, err := instance.DB.Query("SELECT * FROM refs")
+	if err != nil {
+		b.Fatal(err)
+	}
+	rowNum, _, err := GetContents(rows)
+	if err != nil {
+		b.Fatalf("err %d at row Number %d", err, rowNum)
+	}
+}
