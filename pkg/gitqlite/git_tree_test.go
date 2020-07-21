@@ -78,10 +78,10 @@ func TestFileCounts(t *testing.T) {
 		t.Fatalf("%s in GetContents at row %d", err, index)
 	}
 
-	if file.Name != contents[0][2] {
+	if file.Name != contents[0][3] {
 		t.Fatalf("Expected fileName to be %s got %s", file.Name, contents[0][2])
 	}
-	if file.Hash.String() != contents[0][6] {
+	if file.Hash.String() != contents[0][2] {
 		t.Fatalf("Expected Hash %s got Hash %s", file.Hash.String(), contents[0][0])
 	}
 
