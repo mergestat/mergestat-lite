@@ -25,7 +25,8 @@ func (m *gitTreeModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 				name TEXT,
 				mode TEXT,
 				type TEXT,
-				contents TEXT
+				contents TEXT,
+				file_id TEXT
 			)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -75,6 +76,8 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		// change this to text with the blob section of go-git
 
 		c.ResultText(fileContents)
+	case 6:
+		c.ResultText(currentFile.ID().String())
 	}
 	return nil
 }
