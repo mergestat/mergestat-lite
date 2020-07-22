@@ -22,10 +22,12 @@ func (m *gitTreeModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 			CREATE TABLE %q(
 				commit_id TEXT,
 				tree_id TEXT,
+				file_id TEXT,
 				name TEXT,
 				mode TEXT,
 				type TEXT,
 				contents TEXT
+				
 			)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -62,19 +64,22 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//tree id
 		c.ResultText(treeHeadEntry)
 	case 2:
+		c.ResultText(currentFile.ID().String())
+	case 3:
 		//tree name
 		c.ResultText(name)
-	case 3:
+	case 4:
 		//filemode
 		c.ResultText(fileMode.String())
-	case 4:
+	case 5:
 		//filetype
 		c.ResultText(currentFile.Type().String())
-	case 5:
+	case 6:
 		//File
 		// change this to text with the blob section of go-git
 
 		c.ResultText(fileContents)
+
 	}
 	return nil
 }

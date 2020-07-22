@@ -119,10 +119,12 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 |-----------|------|
 | commit_id | TEXT |
 | tree_id   | TEXT |
+| file_id   | TEXT |
 | name      | TEXT |
 | mode      | TEXT |
 | type      | TEXT |
 | contents  | TEXT |
+
 
 #### `refs`
 
