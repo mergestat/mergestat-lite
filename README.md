@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/augmentable-dev/gitqlite/branch/master/graph/badge.svg)](https://codecov.io/gh/augmentable-dev/gitqlite)
 
 
-# gitqlite
+# gitqlite 🔍
 
 `gitqlite` is a tool for running SQL queries on git repositories.
 It's meant for ad-hoc querying of git repositories on disk through a common interface (SQL), as an alternative to patching together various shell commands.
