@@ -14,13 +14,13 @@ It's meant for ad-hoc querying of git repositories on disk through a common inte
 ## Installation
 
 ```
-go install -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
+go get -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
 ```
 
 Will use the go tool chain to install a binary to `$GOBIN`.
 
 ```
-GOBIN=$(pwd) go install -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
+GOBIN=$(pwd) go get -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
 ```
 
 Will produce a binary in your current directory.
