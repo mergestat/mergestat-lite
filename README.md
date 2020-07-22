@@ -8,10 +8,19 @@
 # gitqlite
 
 `gitqlite` is a tool for running SQL queries on git repositories.
-It implements SQLite [virtual tables](https://www.sqlite.org/vtab.html) and uses [go-git](https://github.com/go-git/go-git).
-It's meant for ad-hoc querying of git repositories on disk through a common interface (SQL), as an alternative to patching together various shell commands.
+It enables queries such as:
+```sql
+-- how many commits have been authored by user@email.com?
+SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
+```
+More in-depth examples and documentation can be found below.
+This project is meant for ad-hoc querying of git repositories on disk through a common interface (SQL), as an alternative to patching together various shell commands.
+It implements SQLite [virtual tables](https://www.sqlite.org/vtab.html) and uses [go-git](https://github.com/go-git/go-git) (in some cases shelling out to the `git` command if it's installed, for better performance).
+
 
 ## Installation
+
+**More Installation Instructions Coming Soon**
 
 ```
 go get -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
@@ -25,7 +34,6 @@ GOBIN=$(pwd) go get -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
 
 Will produce a binary in your current directory.
 
-TODO: more installation instructions
 
 ### Using Docker
 
