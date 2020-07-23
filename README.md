@@ -18,7 +18,7 @@ More in-depth examples and documentation can be found below.
 
 ## Installation
 
-**More Installation Instructions Coming Soon**
+***More Installation Instructions Coming Soon***
 
 ```
 go get -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
