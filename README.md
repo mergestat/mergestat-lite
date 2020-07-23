@@ -92,6 +92,16 @@ By default, output will be an ASCII table.
 Use `--format json` or `--format csv` for alternatives.
 See `-h` for all the options.
 
+```
+gitqlite --ui=true
+```
+
+Will use gitqlite's Command line GUI(powered by gocui)
+Use tab to cycle through the different views and ctrl+c to close
+Cycling from the Repo to the Output view will run gitqlite
+If repo is not specified default is cwd
+
+
 ### Tables
 
 #### `commits`
