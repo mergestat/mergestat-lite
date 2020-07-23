@@ -22,12 +22,15 @@ var (
 	repo       string
 	format     string
 	skipGitCLI bool
+	ui         bool
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
+	rootCmd.PersistentFlags().BoolVar(&ui, "ui", false, "whether to use the CLUI defaults to false")
+
 }
 
 func handleError(err error) {
@@ -44,77 +47,83 @@ var rootCmd = &cobra.Command{
   Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/gitqlite`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
-		info, err := os.Stdin.Stat()
-		handleError(err)
-
-		var query string
-		if len(args) > 0 {
-			query = args[0]
-		} else if info.Mode()&os.ModeCharDevice == 0 {
-			query, err = readStdin()
-			handleError(err)
+		if ui {
+			RunGUI()
 		} else {
-			err = cmd.Help()
+			info, err := os.Stdin.Stat()
 			handleError(err)
-			os.Exit(0)
-		}
 
-		cwd, err := os.Getwd()
-		handleError(err)
-
-		// if a repo path is not supplied as a flag, use the current directory
-		if repo == "" {
-			if len(args) > 1 {
-				repo = args[1]
+			var query string
+			if len(args) > 0 {
+				query = args[0]
+			} else if info.Mode()&os.ModeCharDevice == 0 {
+				query, err = readStdin()
+				handleError(err)
 			} else {
-				repo = cwd
+				err = cmd.Help()
+				handleError(err)
+				os.Exit(0)
 			}
-		}
 
-		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
-		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
-			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
-				dir, err := ioutil.TempDir("", "repo")
-				handleError(err)
+			cwd, err := os.Getwd()
+			handleError(err)
 
-				_, err = git.PlainClone(dir, false, &git.CloneOptions{
-					URL: r,
-				})
-				handleError(err)
+			// if a repo path is not supplied as a flag, use the current directory
+			if repo == "" {
+				if len(args) > 1 {
+					repo = args[1]
+				} else {
+					repo = cwd
+				}
+			}
 
-				defer func() {
-					err := os.RemoveAll(dir)
+			// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
+			if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
+				if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
+					dir, err := ioutil.TempDir("", "repo")
 					handleError(err)
-				}()
 
-				repo = dir
+					_, err = git.PlainClone(dir, false, &git.CloneOptions{
+						URL: r,
+					})
+					handleError(err)
+
+					defer func() {
+						err := os.RemoveAll(dir)
+						handleError(err)
+					}()
+
+					repo = dir
+				}
 			}
-		}
 
-		repo, err = filepath.Abs(repo)
-		if err != nil {
+			repo, err = filepath.Abs(repo)
+			if err != nil {
+				handleError(err)
+			}
+
+			g, err := gitqlite.New(repo, &gitqlite.Options{
+				SkipGitCLI: skipGitCLI,
+			})
+			handleError(err)
+
+			rows, err := g.DB.Query(query)
+			handleError(err)
+
+			defer rows.Close()
+			err = displayDB(rows)
 			handleError(err)
 		}
-
-		g, err := gitqlite.New(repo, &gitqlite.Options{
-			SkipGitCLI: skipGitCLI,
-		})
-		handleError(err)
-
-		rows, err := g.DB.Query(query)
-		handleError(err)
-
-		defer rows.Close()
-		err = displayDB(rows)
-		handleError(err)
 	},
 }
 
 // Execute runs the root command
 func Execute() {
+
 	if err := rootCmd.Execute(); err != nil {
 		handleError(err)
 	}
+
 }
 
 func displayDB(rows *sql.Rows) error {
