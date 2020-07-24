@@ -22,14 +22,14 @@ var (
 	repo       string
 	format     string
 	skipGitCLI bool
-	ui         bool
+	gui        bool
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
-	rootCmd.PersistentFlags().BoolVar(&ui, "ui", false, "whether to use the CLUI defaults to false")
+	rootCmd.PersistentFlags().BoolVar(&gui, "gui", false, "whether to use the CLUI defaults to false")
 
 }
 
@@ -47,7 +47,7 @@ var rootCmd = &cobra.Command{
   Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/gitqlite`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if ui {
+		if gui {
 			RunGUI()
 		} else {
 			info, err := os.Stdin.Stat()

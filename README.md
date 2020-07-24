@@ -92,8 +92,10 @@ By default, output will be an ASCII table.
 Use `--format json` or `--format csv` for alternatives.
 See `-h` for all the options.
 
+
+#### Using the GUI
 ```
-gitqlite --ui=true
+gitqlite --gui
 ```
 
 Will use gitqlite's Command line GUI(powered by gocui)
