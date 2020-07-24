@@ -166,7 +166,8 @@ func getRepo(remote string) (string, error) {
 			Force: true,
 		})
 		if err != nil {
-
+			//do nothing
+			fmt.Print()
 		}
 	}
 
