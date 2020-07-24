@@ -70,7 +70,6 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	g.Cursor = true
-	//v.Clear()
 	v.Rewind()
 	active = nextIndex
 	return nil
@@ -200,7 +199,7 @@ func display(g *gocui.Gui, path string) error {
 	if err != nil {
 		return err
 	}
-	if len(columns) < 7 {
+	if len(columns) < 9 {
 		err := table(rows, out)
 		if err != nil {
 			return err
