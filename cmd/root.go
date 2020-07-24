@@ -47,8 +47,19 @@ var rootCmd = &cobra.Command{
   Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/gitqlite`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
+		cwd, err := os.Getwd()
+		handleError(err)
+
+		// if a repo path is not supplied as a flag, use the current directory
+		if repo == "" {
+			if len(args) > 1 {
+				repo = args[1]
+			} else {
+				repo = cwd
+			}
+		}
 		if gui {
-			RunGUI()
+			RunGUI(repo)
 		} else {
 			info, err := os.Stdin.Stat()
 			handleError(err)
@@ -63,18 +74,6 @@ var rootCmd = &cobra.Command{
 				err = cmd.Help()
 				handleError(err)
 				os.Exit(0)
-			}
-
-			cwd, err := os.Getwd()
-			handleError(err)
-
-			// if a repo path is not supplied as a flag, use the current directory
-			if repo == "" {
-				if len(args) > 1 {
-					repo = args[1]
-				} else {
-					repo = cwd
-				}
 			}
 
 			// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path

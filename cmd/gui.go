@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	viewArr  = []string{"Query", "Repo", "Output"}
+	viewArr  = []string{"Query", "Output"}
 	active   = 0
 	query    = ""
 	repoPath = ""
@@ -36,9 +36,6 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 	if v.Name() == "Query" && v.Buffer() != "" {
 
 		query = v.Buffer()
-	}
-	if v.Name() == "Repo" && v.Buffer() != "" {
-		repoPath = v.Buffer()
 		path, err := getRepo(repoPath)
 		if err != nil {
 			return err
@@ -47,24 +44,35 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 		if err != nil {
 			return err
 		}
-
-	} else if v.Name() == "Repo" {
-		var (
-			err  error
-			path string
-		)
-
-		path, err = getRepo(repoPath)
-		if err != nil {
-			return err
-		}
-
-		err = display(g, path)
-		if err != nil {
-			return err
-		}
-
 	}
+	// if v.Name() == "Repo" && v.Buffer() != "" {
+	// 	repoPath = v.Buffer()
+	// 	path, err := getRepo(repoPath)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = display(g, path)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// } else if v.Name() == "Repo" {
+	// 	var (
+	// 		err  error
+	// 		path string
+	// 	)
+
+	// 	path, err = getRepo(repoPath)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	err = display(g, path)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// }
 	if _, err := setCurrentViewOnTop(g, name); err != nil {
 		return err
 	}
@@ -77,7 +85,7 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("Query", 0, 0, maxX/2-2, 2); err != nil {
+	if v, err := g.SetView("Query", 0, 0, maxX-1, 2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -90,15 +98,15 @@ func layout(g *gocui.Gui) error {
 		}
 	}
 
-	if v, err := g.SetView("Repo", maxX/2-1, 0, maxX-1, 2); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		v.Title = "Repo"
-		v.Autoscroll = true
-		v.Wrap = true
-		v.Editable = true
-	}
+	// if v, err := g.SetView("Repo", maxX/2-1, 0, maxX-1, 2); err != nil {
+	// 	if err != gocui.ErrUnknownView {
+	// 		return err
+	// 	}
+	// 	v.Title = "Repo"
+	// 	v.Autoscroll = true
+	// 	v.Wrap = true
+	// 	v.Editable = true
+	// }
 	if v, err := g.SetView("Output", 0, 3, maxX, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -113,13 +121,13 @@ func layout(g *gocui.Gui) error {
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
-func RunGUI() {
+func RunGUI(repo string) {
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer g.Close()
-
+	repoPath = repo
 	g.Highlight = true
 	g.Cursor = true
 	g.SelFgColor = gocui.ColorGreen
