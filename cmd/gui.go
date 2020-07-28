@@ -56,34 +56,6 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 	}
-	// if v.Name() == "Repo" && v.Buffer() != "" {
-	// 	repoPath = v.Buffer()
-	// 	path, err := getRepo(repoPath)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	err = display(g, path)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// } else if v.Name() == "Repo" {
-	// 	var (
-	// 		err  error
-	// 		path string
-	// 	)
-
-	// 	path, err = getRepo(repoPath)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	err = display(g, path)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// }
 	if _, err := setCurrentViewOnTop(g, name); err != nil {
 		return err
 	}
@@ -108,16 +80,6 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 	}
-
-	// if v, err := g.SetView("Repo", maxX/2-1, 0, maxX-1, 2); err != nil {
-	// 	if err != gocui.ErrUnknownView {
-	// 		return err
-	// 	}
-	// 	v.Title = "Repo"
-	// 	v.Autoscroll = true
-	// 	v.Wrap = true
-	// 	v.Editable = true
-	// }
 	if v, err := g.SetView("Output", 0, 3, maxX, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
