@@ -35,19 +35,20 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 		if err != nil {
 			return err
 		}
+		out.Clear()
 		query = v.Buffer()
 		path, err := getRepo(repoPath)
 		if err != nil {
 			return err
 		}
-		g, err := gitqlite.New(path, &gitqlite.Options{
+		git, err := gitqlite.New(path, &gitqlite.Options{
 			SkipGitCLI: skipGitCLI,
 		})
 		if err != nil {
 			return err
 		}
 
-		rows, err := g.DB.Query(query)
+		rows, err := git.DB.Query(query)
 		if err != nil {
 			return err
 		}
@@ -55,7 +56,19 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 		if err != nil {
 			return err
 		}
+		out, err = g.View("Info")
+		if err != nil {
+			return err
+		}
+		out.Clear()
+		path, err = filepath.Abs(repoPath)
+		if err != nil {
+			return err
+		}
+		fmt.Fprint(out, "Repo: "+path)
+
 	}
+
 	if _, err := setCurrentViewOnTop(g, name); err != nil {
 		return err
 	}
@@ -68,7 +81,7 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("Query", 0, 0, maxX-1, 2); err != nil {
+	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*3/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -80,12 +93,20 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 	}
-	if v, err := g.SetView("Output", 0, 3, maxX, maxY-1); err != nil {
+	if v, err := g.SetView("Info", maxX/2+1, 0, maxX-1, maxY*3/10); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "Info"
+		v.Autoscroll = true
+		v.Wrap = true
+	}
+	if v, err := g.SetView("Output", 0, maxY*3/10+1, maxX, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Title = "Output"
-		v.Wrap = true
+		v.Wrap = false
 		v.Editable = true
 	}
 	return nil
