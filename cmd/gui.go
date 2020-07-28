@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"database/sql"
-	"encoding/csv"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,7 +9,6 @@ import (
 
 	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
 	"github.com/go-git/go-git/v5"
-	"github.com/olekukonko/tablewriter"
 
 	"github.com/jroimartin/gocui"
 )
@@ -34,13 +31,27 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (active + 1) % len(viewArr)
 	name := viewArr[nextIndex]
 	if v.Name() == "Query" && v.Buffer() != "" {
-
+		out, err := g.View("Output")
+		if err != nil {
+			return err
+		}
 		query = v.Buffer()
 		path, err := getRepo(repoPath)
 		if err != nil {
 			return err
 		}
-		err = display(g, path)
+		g, err := gitqlite.New(path, &gitqlite.Options{
+			SkipGitCLI: skipGitCLI,
+		})
+		if err != nil {
+			return err
+		}
+
+		rows, err := g.DB.Query(query)
+		if err != nil {
+			return err
+		}
+		err = displayDB(rows, out)
 		if err != nil {
 			return err
 		}
@@ -179,120 +190,4 @@ func getRepo(remote string) (string, error) {
 	}
 
 	return path, nil
-}
-func display(g *gocui.Gui, path string) error {
-	out, err := g.View("Output")
-	if err != nil {
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
-	instance, err := gitqlite.New(path, &gitqlite.Options{})
-	if err != nil {
-		return err
-	}
-	defer instance.DB.Close()
-	rows, err := instance.DB.Query(query)
-	if err != nil {
-		return err
-	}
-	file, err := filepath.Abs(repoPath)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(out, "Repo: "+file+"\nQuery: "+query)
-	columns, err := rows.Columns()
-	if err != nil {
-		return err
-	}
-	if len(columns) < 9 {
-		err := table(rows, out)
-		if err != nil {
-			return err
-		}
-
-	} else {
-		err := displayCsv(rows, out)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-func table(rows *sql.Rows, v *gocui.View) error {
-	columns, err := rows.Columns()
-	if err != nil {
-		return err
-	}
-	pointers := make([]interface{}, len(columns))
-	container := make([]sql.NullString, len(columns))
-
-	for i := range pointers {
-		pointers[i] = &container[i]
-	}
-	table := tablewriter.NewWriter(v)
-	for rows.Next() {
-
-		err := rows.Scan(pointers...)
-		if err != nil {
-			return err
-		}
-
-		r := make([]string, len(columns))
-		for i, c := range container {
-			if c.Valid {
-				r[i] = c.String
-			} else {
-				r[i] = "NULL"
-			}
-		}
-
-		table.Append(r)
-		if err != nil {
-			return err
-		}
-	}
-	table.Render()
-	return nil
-}
-func displayCsv(rows *sql.Rows, v *gocui.View) error {
-
-	columns, err := rows.Columns()
-	if err != nil {
-		return err
-	}
-	w := csv.NewWriter(v)
-
-	err = w.Write(columns)
-	if err != nil {
-		return err
-	}
-	pointers := make([]interface{}, len(columns))
-	container := make([]sql.NullString, len(columns))
-
-	for i := range pointers {
-		pointers[i] = &container[i]
-	}
-	for rows.Next() {
-		err := rows.Scan(pointers...)
-		if err != nil {
-			return err
-		}
-
-		r := make([]string, len(columns))
-		for i, c := range container {
-			if c.Valid {
-				r[i] = c.String
-			}
-		}
-
-		err = w.Write(r)
-		if err != nil {
-			return err
-		}
-	}
-	w.Flush()
-	return nil
 }

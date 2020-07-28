@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -100,7 +101,9 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				handleError(err)
 			}
-
+			// err, rows := getRows(query, repo)
+			// handleError(err)
+			// defer rows.Close()
 			g, err := gitqlite.New(repo, &gitqlite.Options{
 				SkipGitCLI: skipGitCLI,
 			})
@@ -109,8 +112,7 @@ var rootCmd = &cobra.Command{
 			rows, err := g.DB.Query(query)
 			handleError(err)
 
-			defer rows.Close()
-			err = displayDB(rows)
+			err = displayDB(rows, os.Stdout)
 			handleError(err)
 		}
 	},
@@ -125,27 +127,34 @@ func Execute() {
 
 }
 
-func displayDB(rows *sql.Rows) error {
+// func getRows(query string, repo string) (error, *sql.Rows) {
+
+// 	defer rows.Close()
+
+// 	return nil, rows
+// }
+
+func displayDB(rows *sql.Rows, w io.Writer) error {
 
 	switch format {
 	case "csv":
-		err := csvDisplay(rows, ',')
+		err := csvDisplay(rows, ',', w)
 		if err != nil {
 			return err
 		}
 	case "tsv":
-		err := csvDisplay(rows, '\t')
+		err := csvDisplay(rows, '\t', w)
 		if err != nil {
 			return err
 		}
 	case "json":
-		err := jsonDisplay(rows)
+		err := jsonDisplay(rows, w)
 		if err != nil {
 			return err
 		}
 	//TODO: switch between table and csv dependent on num columns(suggested num for table 5<=
 	default:
-		err := tableDisplay(rows)
+		err := tableDisplay(rows, w)
 		if err != nil {
 			return err
 		}
@@ -154,13 +163,13 @@ func displayDB(rows *sql.Rows) error {
 	return nil
 }
 
-func csvDisplay(rows *sql.Rows, commaChar rune) error {
+func csvDisplay(rows *sql.Rows, commaChar rune, write io.Writer) error {
 
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
 	}
-	w := csv.NewWriter(os.Stdout)
+	w := csv.NewWriter(write)
 	w.Comma = commaChar
 
 	err = w.Write(columns)
@@ -195,7 +204,7 @@ func csvDisplay(rows *sql.Rows, commaChar rune) error {
 	return nil
 }
 
-func jsonDisplay(rows *sql.Rows) error {
+func jsonDisplay(rows *sql.Rows, write io.Writer) error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
@@ -206,7 +215,7 @@ func jsonDisplay(rows *sql.Rows) error {
 		values[i] = new(interface{})
 	}
 
-	enc := json.NewEncoder(os.Stdout)
+	enc := json.NewEncoder(write)
 
 	for rows.Next() {
 		err = rows.Scan(values...)
@@ -229,7 +238,7 @@ func jsonDisplay(rows *sql.Rows) error {
 
 	return nil
 }
-func tableDisplay(rows *sql.Rows) error {
+func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
@@ -240,7 +249,7 @@ func tableDisplay(rows *sql.Rows) error {
 	for i := range pointers {
 		pointers[i] = &container[i]
 	}
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(write)
 	table.SetHeader(columns)
 	for rows.Next() {
 
