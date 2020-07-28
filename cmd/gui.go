@@ -26,7 +26,15 @@ func setCurrentViewOnTop(g *gocui.Gui, name string) (*gocui.View, error) {
 	}
 	return g.SetViewOnTop(name)
 }
-
+func clearQuery(g *gocui.Gui, v *gocui.View) error {
+	q, err := g.View("Query")
+	if err != nil {
+		return err
+	}
+	q.Clear()
+	q.Rewind()
+	return nil
+}
 func nextView(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (active + 1) % len(viewArr)
 	name := viewArr[nextIndex]
@@ -132,6 +140,9 @@ func RunGUI(repo string) {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.KeyTab, gocui.ModNone, nextView); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, clearQuery); err != nil {
 		log.Panicln(err)
 	}
 
