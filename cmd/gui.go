@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
 	"github.com/go-git/go-git/v5"
@@ -14,7 +15,7 @@ import (
 )
 
 var (
-	viewArr  = []string{"Query", "Output"}
+	viewArr  = []string{"Query", "Info", "Output"}
 	active   = 0
 	query    = ""
 	repoPath = ""
@@ -55,7 +56,7 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 		if err != nil {
 			return err
 		}
-
+		start := time.Now()
 		rows, err := git.DB.Query(query)
 		if err != nil {
 			return err
@@ -64,17 +65,8 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 		if err != nil {
 			return err
 		}
-		out, err = g.View("Info")
-		if err != nil {
-			return err
-		}
-		out.Clear()
-		path, err = filepath.Abs(repoPath)
-		if err != nil {
-			return err
-		}
-		fmt.Fprint(out, "Repo: "+path)
-
+		total := time.Since(start)
+		displayInformation(g, git, total)
 	}
 
 	if _, err := setCurrentViewOnTop(g, name); err != nil {
@@ -107,6 +99,7 @@ func layout(g *gocui.Gui) error {
 		}
 		v.Title = "Info"
 		v.Autoscroll = true
+		v.Editable = true
 		v.Wrap = true
 	}
 	if v, err := g.SetView("Output", 0, maxY*3/10+1, maxX, maxY-1); err != nil {
@@ -184,4 +177,38 @@ func getRepo(remote string) (string, error) {
 	}
 
 	return path, nil
+}
+func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Duration) error {
+	out, err := g.View("Info")
+	if err != nil {
+		return err
+	}
+	out.Clear()
+	path, err := filepath.Abs(repoPath)
+	if err != nil {
+		return err
+	}
+	fmt.Fprint(out, "Repo: "+path+"\n")
+	rows, err := git.DB.Query("Select id from commits")
+	if err != nil {
+		return err
+	}
+	index := 0
+	for rows.Next() {
+		index++
+	}
+	fmt.Fprintf(out, "Number of commits %d\n", index)
+
+	rows, err = git.DB.Query("Select distinct author_name from commits")
+	if err != nil {
+		return err
+	}
+	index = 0
+	for rows.Next() {
+		index++
+	}
+	fmt.Fprintf(out, "Number of authors %d\n", index)
+	fmt.Fprintln(out, "Time taken to execute query"+length.String())
+	return nil
+
 }
