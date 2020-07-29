@@ -66,7 +66,10 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 		total := time.Since(start)
-		displayInformation(g, git, total)
+		err = displayInformation(g, git, total)
+		if err != nil {
+			return err
+		}
 	}
 
 	if _, err := setCurrentViewOnTop(g, name); err != nil {
@@ -87,7 +90,6 @@ func layout(g *gocui.Gui) error {
 		}
 		v.Title = "Query"
 		v.Editable = true
-		v.Autoscroll = true
 		v.Wrap = true
 		if _, err = setCurrentViewOnTop(g, "Query"); err != nil {
 			return err
@@ -98,7 +100,6 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
-		v.Autoscroll = true
 		v.Editable = true
 		v.Wrap = true
 	}
@@ -208,6 +209,7 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 		index++
 	}
 	fmt.Fprintf(out, "Number of authors %d\n", index)
+
 	fmt.Fprintln(out, "Time taken to execute query"+length.String())
 	return nil
 
