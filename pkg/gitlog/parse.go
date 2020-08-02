@@ -25,67 +25,76 @@ type Commit struct {
 }
 type Result []*Commit
 
-func parseLog(reader io.Reader) (Result, error) {
-	scanner := bufio.NewScanner(reader)
-	res := make(Result, 0)
+type CommitIter struct {
+	scanner *bufio.Scanner
+	current *Commit
+}
 
-	// line prefixes for the `fuller` formatted output
-	const (
-		commit     = "commit "
-		tree       = "tree "
-		parent     = "parent "
-		author     = "Author: "
-		authorDate = "AuthorDate: "
-		message    = "Message: "
-		committer  = "Commit: "
-		commitDate = "CommitDate: "
-	)
+func newCommitIter(reader io.Reader) *CommitIter {
+	return &CommitIter{
+		scanner: bufio.NewScanner(reader),
+		current: nil,
+	}
+}
 
-	var currentCommit *Commit
-	for scanner.Scan() {
-		line := scanner.Text()
+// line prefixes for the `fuller` formatted output
+const (
+	commit     = "commit "
+	tree       = "tree "
+	parent     = "parent "
+	author     = "Author: "
+	authorDate = "AuthorDate: "
+	message    = "Message: "
+	committer  = "Commit: "
+	commitDate = "CommitDate: "
+)
+
+func (iter *CommitIter) Next() (*Commit, error) {
+	for iter.scanner.Scan() {
+		line := iter.scanner.Text()
 		switch {
 		case strings.HasPrefix(line, commit):
-			if currentCommit != nil { // if we're seeing a new commit but already have a current commit, we've finished a commit
-				res = append(res, currentCommit)
-			}
-			currentCommit = &Commit{
+			current := iter.current // save the previous current
+			iter.current = &Commit{ // set the iterator's current to the new commit we see
 				SHA: strings.TrimPrefix(line, commit),
 			}
+			if current != nil { // if we're seeing a new commit but already have a current commit, we've finished a commit and should return it
+				return current, nil
+			}
 		case strings.HasPrefix(line, tree):
-			currentCommit.TreeID = strings.TrimPrefix(line, tree)
+			iter.current.TreeID = strings.TrimPrefix(line, tree)
 		case strings.HasPrefix(line, parent):
-			currentCommit.ParentID = strings.TrimPrefix(line, parent)
+			iter.current.ParentID = strings.TrimPrefix(line, parent)
 		case strings.HasPrefix(line, author):
 			s := strings.TrimPrefix(line, author)
 			spl := strings.Split(s, " ")
 			email := strings.Trim(spl[len(spl)-1], "<>")
 			name := strings.Join(spl[:len(spl)-1], " ")
-			currentCommit.AuthorEmail = strings.Trim(email, "<>")
-			currentCommit.AuthorName = strings.TrimSpace(name)
+			iter.current.AuthorEmail = strings.Trim(email, "<>")
+			iter.current.AuthorName = strings.TrimSpace(name)
 		case strings.HasPrefix(line, authorDate):
 			authorDateString := strings.TrimPrefix(line, authorDate)
 			aD, err := time.Parse(time.RFC3339, authorDateString)
 			if err != nil {
 				return nil, err
 			}
-			currentCommit.AuthorWhen = aD
+			iter.current.AuthorWhen = aD
 		case strings.HasPrefix(line, committer):
 			s := strings.TrimPrefix(line, committer)
 			spl := strings.Split(s, " ")
 			email := strings.Trim(spl[len(spl)-1], "<>")
 			name := strings.Join(spl[:len(spl)-1], " ")
-			currentCommit.CommitterEmail = strings.Trim(email, "<>")
-			currentCommit.CommitterName = strings.TrimSpace(name)
+			iter.current.CommitterEmail = strings.Trim(email, "<>")
+			iter.current.CommitterName = strings.TrimSpace(name)
 		case strings.HasPrefix(line, commitDate):
 			commitDateString := strings.TrimPrefix(line, commitDate)
 			cD, err := time.Parse(time.RFC3339, commitDateString)
 			if err != nil {
 				return nil, err
 			}
-			currentCommit.CommitterWhen = cD
+			iter.current.CommitterWhen = cD
 		case strings.HasPrefix(line, message):
-			currentCommit.Message = strings.TrimPrefix(line, message)
+			iter.current.Message = strings.TrimPrefix(line, message)
 		case strings.TrimSpace(line) == "": // ignore empty lines
 		default:
 			s := strings.Split(line, "\t")
@@ -104,18 +113,21 @@ func parseLog(reader io.Reader) (Result, error) {
 					return nil, err
 				}
 			}
-			currentCommit.Additions = additions
-			currentCommit.Deletions = deletions
+			iter.current.Additions = additions
+			iter.current.Deletions = deletions
 		}
 	}
-	if currentCommit != nil {
-		res = append(res, currentCommit)
+
+	if iter.current != nil {
+		c := iter.current
+		iter.current = nil
+		return c, nil
 	}
 
-	return res, nil
+	return nil, io.EOF
 }
 
-func Execute(repoPath string) (Result, error) {
+func Execute(repoPath string) (*CommitIter, error) {
 	gitPath, err := exec.LookPath("git")
 	if err != nil {
 		return nil, err
@@ -141,18 +153,14 @@ func Execute(repoPath string) (Result, error) {
 		return nil, err
 	}
 
-	res, err := parseLog(stdout)
-	if err != nil {
-		return nil, err
-	}
-
 	// stderr, err = ioutil.ReadAll(stderr)
 	// if err != nil {
 	// 	return nil, err
 	// }
 
-	if err := cmd.Wait(); err != nil {
-		return nil, err
-	}
-	return res, nil
+	// if err := cmd.Wait(); err != nil {
+	// 	return nil, err
+	// }
+
+	return newCommitIter(stdout), nil
 }
