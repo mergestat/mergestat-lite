@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -50,7 +51,7 @@ func (m *gitLogCLIModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3
 func (m *gitLogCLIModule) DestroyModule() {}
 
 func (v *gitLogCLITable) Open() (sqlite3.VTabCursor, error) {
-	return &commitCLICursor{index: 0, repoPath: v.repoPath}, nil
+	return &commitCLICursor{repoPath: v.repoPath}, nil
 }
 
 func (v *gitLogCLITable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -65,32 +66,47 @@ func (v *gitLogCLITable) Disconnect() error {
 func (v *gitLogCLITable) Destroy() error { return nil }
 
 type commitCLICursor struct {
-	index    int
 	repoPath string
-	results  gitlog.Result
+	iter     *gitlog.CommitIter
+	current  *gitlog.Commit
 }
 
 func (vc *commitCLICursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	res, err := gitlog.Execute(vc.repoPath)
+	iter, err := gitlog.Execute(vc.repoPath)
 	if err != nil {
 		return err
 	}
-	vc.index = 0
-	vc.results = res
+	vc.iter = iter
+
+	commit, err := iter.Next()
+	if err != nil {
+		return err
+	}
+
+	vc.current = commit
 	return nil
 }
 
 func (vc *commitCLICursor) Next() error {
-	vc.index++
+	commit, err := vc.iter.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
+	}
+
+	vc.current = commit
 	return nil
 }
 
 func (vc *commitCLICursor) EOF() bool {
-	return vc.index >= len(vc.results)
+	return vc.current == nil
 }
 
 func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	current := vc.results[vc.index]
+	current := vc.current
 	switch col {
 	case 0:
 		//commit id
@@ -138,11 +154,9 @@ func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *commitCLICursor) Rowid() (int64, error) {
-	return int64(vc.index), nil
+	return int64(0), nil
 }
 
 func (vc *commitCLICursor) Close() error {
-	vc.index = 0
-	vc.results = nil
 	return nil
 }
