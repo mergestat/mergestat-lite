@@ -39,7 +39,38 @@ func clearQuery(g *gocui.Gui, v *gocui.View) error {
 func nextView(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (active + 1) % len(viewArr)
 	name := viewArr[nextIndex]
-	if v.Name() == "Query" && v.Buffer() != "" {
+	if _, err := setCurrentViewOnTop(g, name); err != nil {
+		return err
+	}
+	if v.Name() == "Query" {
+		g.Cursor = true
+	} else {
+		g.Cursor = false
+	}
+	v.Rewind()
+	active = nextIndex
+	return nil
+}
+
+func handleClick(g *gocui.Gui, v *gocui.View) error {
+	if _, err := g.SetCurrentView(v.Name()); err != nil {
+		return err
+	}
+	if v.Name() == "Query" {
+		g.Cursor = true
+	} else {
+		g.Cursor = false
+	}
+
+	return nil
+}
+
+func runQuery(g *gocui.Gui, v *gocui.View) error {
+	input, err := g.View("Query")
+	if err != nil {
+		return err
+	}
+	if input.Buffer() != "" {
 		out, err := g.View("Output")
 		if err != nil {
 			return err
@@ -71,22 +102,6 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 	}
-
-	if _, err := setCurrentViewOnTop(g, name); err != nil {
-		return err
-	}
-
-	g.Cursor = true
-	v.Rewind()
-	active = nextIndex
-	return nil
-}
-
-func handleClick(g *gocui.Gui, v *gocui.View) error {
-	if _, err := g.SetCurrentView(v.Name()); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -183,6 +198,9 @@ func RunGUI(repo string) {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.KeyTab, gocui.ModNone, nextView); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyCtrlSpace, gocui.ModNone, runQuery); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, clearQuery); err != nil {
