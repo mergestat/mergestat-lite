@@ -90,8 +90,10 @@ func runQuery(g *gocui.Gui, v *gocui.View) error {
 		start := time.Now()
 		rows, err := git.DB.Query(query)
 		if err != nil {
-			return err
+			fmt.Fprint(out, err)
+			return nil
 		}
+
 		err = displayDB(rows, out)
 		if err != nil {
 			return err
@@ -110,7 +112,8 @@ func previousLine(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x, y-1)
 	if err != nil {
-		//do nothing
+		//do nothing print for lint
+		fmt.Print()
 	}
 
 	return nil
@@ -120,7 +123,9 @@ func nextLine(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x, y+1)
 	if err != nil {
-		//do nothing
+		//do nothing print for lint
+
+		fmt.Print()
 	}
 
 	return nil
@@ -130,7 +135,8 @@ func goLeft(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x-1, y)
 	if err != nil {
-		//do nothing
+		//do nothing print for lint
+		fmt.Print()
 	}
 
 	return nil
@@ -140,7 +146,8 @@ func goRight(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x+1, y)
 	if err != nil {
-		//do nothing
+		//do nothing print for lint
+		fmt.Print()
 	}
 
 	return nil
