@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	viewArr  = []string{"Query", "Info", "Output"}
+	viewArr  = []string{"Query", "Output"}
 	active   = 0
 	query    = ""
 	repoPath = ""
@@ -42,7 +42,8 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 	if _, err := setCurrentViewOnTop(g, name); err != nil {
 		return err
 	}
-	if v.Name() == "Query" {
+	// since going to next this actually sets g.Cursor to true for the Query view
+	if v.Name() == "Output" {
 		g.Cursor = true
 	} else {
 		g.Cursor = false
@@ -53,15 +54,16 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 }
 
 func handleClick(g *gocui.Gui, v *gocui.View) error {
-	if _, err := g.SetCurrentView(v.Name()); err != nil {
-		return err
+	if v.Name() != "Info" {
+		if _, err := g.SetCurrentView(v.Name()); err != nil {
+			return err
+		}
+		if v.Name() == "Query" {
+			g.Cursor = true
+		} else {
+			g.Cursor = false
+		}
 	}
-	if v.Name() == "Query" {
-		g.Cursor = true
-	} else {
-		g.Cursor = false
-	}
-
 	return nil
 }
 
