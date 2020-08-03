@@ -90,6 +90,47 @@ func handleClick(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func previousLine(g *gocui.Gui, v *gocui.View) error {
+
+	x, y := v.Origin()
+	err := v.SetOrigin(x, y-1)
+	if err != nil {
+		//do nothing?
+	}
+
+	return nil
+}
+func nextLine(g *gocui.Gui, v *gocui.View) error {
+
+	x, y := v.Origin()
+	err := v.SetOrigin(x, y+1)
+	if err != nil {
+		//do nothing?
+	}
+
+	return nil
+}
+func goLeft(g *gocui.Gui, v *gocui.View) error {
+
+	x, y := v.Origin()
+	err := v.SetOrigin(x-1, y)
+	if err != nil {
+		//do nothing?
+	}
+
+	return nil
+}
+func goRight(g *gocui.Gui, v *gocui.View) error {
+
+	x, y := v.Origin()
+	err := v.SetOrigin(x+1, y)
+	if err != nil {
+		//do nothing?
+	}
+
+	return nil
+}
+
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*3/10); err != nil {
@@ -108,7 +149,6 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
-		v.Editable = true
 		v.Wrap = true
 	}
 	if v, err := g.SetView("Output", 0, maxY*3/10+1, maxX, maxY-1); err != nil {
@@ -117,7 +157,7 @@ func layout(g *gocui.Gui) error {
 		}
 		v.Title = "Output"
 		v.Wrap = false
-		v.Editable = true
+
 	}
 	return nil
 }
@@ -151,15 +191,24 @@ func RunGUI(repo string) {
 	if err := g.SetKeybinding("", gocui.MouseLeft, gocui.ModNone, handleClick); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding("", gocui.KeyCtrlV, gocui.ModNone, handleClick); err != nil {
+	if err := g.SetKeybinding("", gocui.MouseWheelUp, gocui.ModNone, previousLine); err != nil {
 		log.Panicln(err)
 	}
-	// if err := g.SetKeybinding("Info", gocui.KeyBackspace, gocui.ModNone, handleClick); err != nil {
-	// 	log.Panicln(err)
-	// }
-	// if err := g.SetKeybinding("Output", gocui.KeyBackspace, gocui.ModNone, handleClick); err != nil {
-	// 	log.Panicln(err)
-	// }
+	if err := g.SetKeybinding("", gocui.MouseWheelDown, gocui.ModNone, nextLine); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, previousLine); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, nextLine); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyArrowRight, gocui.ModNone, goRight); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyArrowLeft, gocui.ModNone, goLeft); err != nil {
+		log.Panicln(err)
+	}
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
