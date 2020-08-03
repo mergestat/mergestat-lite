@@ -76,7 +76,7 @@ func runQuery(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 		out.Clear()
-		query = v.Buffer()
+		query = input.Buffer()
 		path, err := getRepo(repoPath)
 		if err != nil {
 			return err
@@ -110,7 +110,7 @@ func previousLine(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x, y-1)
 	if err != nil {
-		//do nothing?
+		//do nothing
 	}
 
 	return nil
@@ -120,7 +120,7 @@ func nextLine(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x, y+1)
 	if err != nil {
-		//do nothing?
+		//do nothing
 	}
 
 	return nil
@@ -130,7 +130,7 @@ func goLeft(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x-1, y)
 	if err != nil {
-		//do nothing?
+		//do nothing
 	}
 
 	return nil
@@ -140,7 +140,7 @@ func goRight(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x+1, y)
 	if err != nil {
-		//do nothing?
+		//do nothing
 	}
 
 	return nil
