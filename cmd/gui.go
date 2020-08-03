@@ -228,10 +228,10 @@ func RunGUI(repo string) {
 	if err := g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, nextLine); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding("", gocui.KeyArrowRight, gocui.ModNone, goRight); err != nil {
+	if err := g.SetKeybinding("Output", gocui.KeyArrowRight, gocui.ModNone, goRight); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding("", gocui.KeyArrowLeft, gocui.ModNone, goLeft); err != nil {
+	if err := g.SetKeybinding("Output", gocui.KeyArrowLeft, gocui.ModNone, goLeft); err != nil {
 		log.Panicln(err)
 	}
 
