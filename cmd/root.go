@@ -30,7 +30,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
-	rootCmd.PersistentFlags().BoolVar(&gui, "gui", false, "whether to use the CLUI defaults to false")
+	rootCmd.PersistentFlags().BoolVarP(&gui, "interface", "i", false, "whether to use the CLUI defaults to false")
 
 }
 
