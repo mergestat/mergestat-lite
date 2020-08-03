@@ -82,6 +82,14 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func handleClick(g *gocui.Gui, v *gocui.View) error {
+	if _, err := g.SetCurrentView(v.Name()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*3/10); err != nil {
@@ -127,6 +135,7 @@ func RunGUI(repo string) {
 	g.Highlight = true
 	g.Cursor = true
 	g.SelFgColor = gocui.ColorGreen
+	g.Mouse = true
 
 	g.SetManagerFunc(layout)
 
@@ -139,6 +148,18 @@ func RunGUI(repo string) {
 	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, clearQuery); err != nil {
 		log.Panicln(err)
 	}
+	if err := g.SetKeybinding("", gocui.MouseLeft, gocui.ModNone, handleClick); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyCtrlV, gocui.ModNone, handleClick); err != nil {
+		log.Panicln(err)
+	}
+	// if err := g.SetKeybinding("Info", gocui.KeyBackspace, gocui.ModNone, handleClick); err != nil {
+	// 	log.Panicln(err)
+	// }
+	// if err := g.SetKeybinding("Output", gocui.KeyBackspace, gocui.ModNone, handleClick); err != nil {
+	// 	log.Panicln(err)
+	// }
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
