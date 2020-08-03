@@ -26,12 +26,14 @@ type Commit struct {
 type Result []*Commit
 
 type CommitIter struct {
+	reader  io.ReadCloser
 	scanner *bufio.Scanner
 	current *Commit
 }
 
-func newCommitIter(reader io.Reader) *CommitIter {
+func newCommitIter(reader io.ReadCloser) *CommitIter {
 	return &CommitIter{
+		reader:  reader,
 		scanner: bufio.NewScanner(reader),
 		current: nil,
 	}
@@ -121,6 +123,10 @@ func (iter *CommitIter) Next() (*Commit, error) {
 		return c, nil
 	}
 
+	err := iter.reader.Close()
+	if err != nil {
+		return nil, err
+	}
 	return nil, io.EOF
 }
 
