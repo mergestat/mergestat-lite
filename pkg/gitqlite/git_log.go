@@ -137,26 +137,17 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(tree.ID().String())
 
 	case 12:
-		if int(commit.NumParents()) > 0 {
-			additions, _, err := statCalc(commit)
-			if err != nil {
-				return err
-			}
-			c.ResultInt(additions)
-		} else {
-			c.ResultInt(0)
+		additions, _, err := statCalc(commit)
+		if err != nil {
+			return err
 		}
+		c.ResultInt(additions)
 	case 13:
-		if int(commit.NumParents()) > 0 {
-			_, deletions, err := statCalc(commit)
-			if err != nil {
-				return err
-			}
-			c.ResultInt(deletions)
-		} else {
-			c.ResultInt(0)
+		_, deletions, err := statCalc(commit)
+		if err != nil {
+			return err
 		}
-
+		c.ResultInt(deletions)
 	}
 	return nil
 }
@@ -221,28 +212,34 @@ func (vc *commitCursor) Close() error {
 
 //statCalc calculates the number of additions/deletions and returns in format additions, deletions
 func statCalc(c *object.Commit) (int, int, error) {
-	p, err := c.Parent(0)
-	if err != nil {
-		return 0, 0, err
-	}
-	parentTree, err := p.Tree()
-	if err != nil {
-		return 0, 0, err
-	}
-	tree, err := c.Tree()
-	if err != nil {
-		return 0, 0, err
-	}
-
-	patch, err := parentTree.Patch(tree)
-	if err != nil {
-		return 0, 0, err
-	}
 	additions, deletions := 0, 0
-	stats := patch.Stats()
-	for i := range stats {
-		additions += stats[i].Addition
-		deletions += stats[i].Deletion
+	if c.NumParents() == 0 {
+		fileIter, err := c.Files()
+		if err != nil {
+			return 0, 0, err
+		}
+
+		err = fileIter.ForEach(func(file *object.File) error {
+			l, err := file.Lines()
+			if err != nil {
+				return err
+			}
+			additions += len(l)
+			return nil
+		})
+
+		if err != nil {
+			return 0, 0, err
+		}
+	} else {
+		stats, err := c.Stats()
+		if err != nil {
+			return 0, 0, err
+		}
+		for _, stat := range stats {
+			additions += stat.Addition
+			deletions += stat.Deletion
+		}
 	}
 	return additions, deletions, nil
 }

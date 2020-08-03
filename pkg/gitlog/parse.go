@@ -98,23 +98,20 @@ func (iter *CommitIter) Next() (*Commit, error) {
 		case strings.TrimSpace(line) == "": // ignore empty lines
 		default:
 			s := strings.Split(line, "\t")
-			var additions int
-			var deletions int
-			var err error
 			if s[0] != "-" {
-				additions, err = strconv.Atoi(s[0])
+				additions, err := strconv.Atoi(s[0])
 				if err != nil {
 					return nil, err
 				}
+				iter.current.Additions += additions
 			}
 			if s[1] != "-" {
-				deletions, err = strconv.Atoi(s[1])
+				deletions, err := strconv.Atoi(s[1])
 				if err != nil {
 					return nil, err
 				}
+				iter.current.Deletions += deletions
 			}
-			iter.current.Additions = additions
-			iter.current.Deletions = deletions
 		}
 	}
 
