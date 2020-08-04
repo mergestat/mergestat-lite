@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"text/tabwriter"
 	"time"
 
 	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
@@ -54,16 +55,16 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 }
 
 func handleClick(g *gocui.Gui, v *gocui.View) error {
-	if v.Name() != "Info" {
-		if _, err := g.SetCurrentView(v.Name()); err != nil {
-			return err
-		}
-		if v.Name() == "Query" {
-			g.Cursor = true
-		} else {
-			g.Cursor = false
-		}
+	//if v.Name() != "Info" {
+	if _, err := g.SetCurrentView(v.Name()); err != nil {
+		return err
 	}
+	if v.Name() == "Query" {
+		g.Cursor = true
+	} else {
+		g.Cursor = false
+	}
+	//}
 	return nil
 }
 
@@ -176,6 +177,7 @@ func layout(g *gocui.Gui) error {
 		}
 		v.Title = "Info"
 		v.Wrap = true
+		v.Editable = true
 	}
 	if v, err := g.SetView("Output", 0, maxY*3/10+1, maxX, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
@@ -284,12 +286,13 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	if err != nil {
 		return err
 	}
+	w := tabwriter.NewWriter(out, 0, 0, 1, ' ', 0)
 	out.Clear()
 	path, err := filepath.Abs(repoPath)
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(out, "Repo: "+path+"\n")
+	fmt.Fprintln(w, "Repo \t: "+path+"\t")
 	rows, err := git.DB.Query("Select id from commits")
 	if err != nil {
 		return err
@@ -298,7 +301,7 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	for rows.Next() {
 		index++
 	}
-	fmt.Fprintf(out, "Number of commits %d\n", index)
+	fmt.Fprintln(w, "Number of commits \t:", index, "\t")
 
 	rows, err = git.DB.Query("Select distinct author_name from commits")
 	if err != nil {
@@ -308,9 +311,10 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	for rows.Next() {
 		index++
 	}
-	fmt.Fprintf(out, "Number of authors %d\n", index)
+	fmt.Fprintln(w, "Number of authors \t:", index, "\t")
 
-	fmt.Fprintln(out, "Time taken to execute query"+length.String())
+	fmt.Fprintln(w, "Time taken to execute query\t:", length.String(), "\t")
+	w.Flush()
 	return nil
 
 }
