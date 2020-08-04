@@ -59,23 +59,23 @@ var rootCmd = &cobra.Command{
 				repo = cwd
 			}
 		}
-		if gui {
-			RunGUI(repo)
-		} else {
-			info, err := os.Stdin.Stat()
-			handleError(err)
+		info, err := os.Stdin.Stat()
+		handleError(err)
 
-			var query string
-			if len(args) > 0 {
-				query = args[0]
-			} else if info.Mode()&os.ModeCharDevice == 0 {
-				query, err = readStdin()
-				handleError(err)
-			} else {
-				err = cmd.Help()
-				handleError(err)
-				os.Exit(0)
-			}
+		var query string
+		if len(args) > 0 {
+			query = args[0]
+		} else if info.Mode()&os.ModeCharDevice == 0 {
+			query, err = readStdin()
+			handleError(err)
+		} else {
+			err = cmd.Help()
+			handleError(err)
+			os.Exit(0)
+		}
+		if gui {
+			RunGUI(repo, query)
+		} else {
 
 			// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
 			if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed

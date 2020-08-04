@@ -164,9 +164,11 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Query"
 		v.Editable = true
 		v.Wrap = true
+		fmt.Fprint(v, query)
 		if _, err = setCurrentViewOnTop(g, "Query"); err != nil {
 			return err
 		}
+
 	}
 	if v, err := g.SetView("Info", maxX/2+1, 0, maxX-1, maxY*3/10); err != nil {
 		if err != gocui.ErrUnknownView {
@@ -189,12 +191,13 @@ func layout(g *gocui.Gui) error {
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
-func RunGUI(repo string) {
+func RunGUI(repo string, q string) {
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer g.Close()
+	query = q
 	repoPath = repo
 	g.Highlight = true
 	g.Cursor = true
