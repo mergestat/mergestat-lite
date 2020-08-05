@@ -376,6 +376,26 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	fmt.Fprintln(w, "Number of authors \t:", index, "\t")
 
+	rows, err = git.DB.Query("select Distinct name from branches where name like 'origin%'")
+	if err != nil {
+		return err
+	}
+	index = 0
+	for rows.Next() {
+		index++
+	}
+	fmt.Fprintln(w, "Number of remote branches \t:", index, "\t")
+
+	rows, err = git.DB.Query("select Distinct name from branches where remote like 'origin'")
+	if err != nil {
+		return err
+	}
+	index = 0
+	for rows.Next() {
+		index++
+	}
+	fmt.Fprintln(w, "Number of local branches \t:", index, "\t")
+
 	fmt.Fprintln(w, "Time taken to execute query\t:", length.String(), "\t")
 	w.Flush()
 	return nil
