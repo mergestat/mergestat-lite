@@ -1,0 +1,15 @@
+# This is a collection of default queries
+
+---
+details:
+- "Get all entries from commits table"
+- "Get distinct author emails from commits table"
+- "Get number of commits for each author by email"
+- "Get number of additions and deletions for each author"
+- "Get number of commits for each author broken down by day of the week"
+queries:
+- "SELECT * FROM commits"
+- "SELECT DISTINCT author_email FROM commits"
+- "SELECT author_email, count(*) FROM commits GROUP BY author_email ORDER BY count(*) DESC"
+- "SELECT count(*) AS commits, SUM(additions) AS additions, SUM(deletions) AS  deletions, author_email FROM commits GROUP BY author_email ORDER BY commits"
+- "SELECT count(*) AS commits, count(CASE WHEN strftime('%w',author_when)='0' THEN 1 END) AS sunday, count(CASE WHEN strftime('%w',author_when)='1' THEN 1 END) AS monday, count(CASE WHEN strftime('%w',author_when)='2' THEN 1 END) AS tuesday, count(CASE WHEN strftime('%w',author_when)='3' THEN 1 END) AS wednesday,count(CASE WHEN strftime('%w',author_when)='4' THEN 1 END) AS thursday,count(CASE WHEN strftime('%w',author_when)='5' THEN 1 END) AS friday,count(CASE WHEN strftime('%w',author_when)='6' THEN 1 END) AS saturday, author_email FROM commits GROUP BY author_email ORDER BY commits"

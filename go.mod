@@ -3,6 +3,7 @@ module github.com/augmentable-dev/gitqlite
 go 1.13
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/gitsight/go-vcsurl v1.0.0
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/jroimartin/gocui v0.4.0
@@ -14,5 +15,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
 	golang.org/x/sys v0.0.0-20200722175500-76b94024e4b6 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 )

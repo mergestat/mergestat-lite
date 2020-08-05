@@ -6,11 +6,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"text/tabwriter"
 	"time"
 
 	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
 	"github.com/go-git/go-git/v5"
+	"gopkg.in/yaml.v2"
 
 	"github.com/jroimartin/gocui"
 )
@@ -20,7 +23,13 @@ var (
 	active   = 0
 	query    = ""
 	repoPath = ""
+	conf     ymlConfig
 )
+
+type ymlConfig struct {
+	Details []string
+	Queries []string
+}
 
 func setCurrentViewOnTop(g *gocui.Gui, name string) (*gocui.View, error) {
 	if _, err := g.SetCurrentView(name); err != nil {
@@ -72,6 +81,21 @@ func runQuery(g *gocui.Gui, v *gocui.View) error {
 	input, err := g.View("Query")
 	if err != nil {
 		return err
+	}
+	choice, err := g.View("Selection")
+	if err != nil {
+		return err
+	}
+	if choice.Buffer() != "" {
+		x := strings.Trim(choice.Buffer(), "\n")
+		i64, err := strconv.ParseInt(x, 10, 32)
+		if err != nil {
+			fmt.Fprint(choice, err)
+			return nil
+		}
+		i := int(i64)
+		input.Clear()
+		fmt.Fprint(input, conf.Queries[i])
 	}
 	if input.Buffer() != "" {
 		out, err := g.View("Output")
@@ -158,7 +182,7 @@ func goRight(g *gocui.Gui, v *gocui.View) error {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*3/10); err != nil {
+	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*4/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -171,7 +195,7 @@ func layout(g *gocui.Gui) error {
 		}
 
 	}
-	if v, err := g.SetView("Info", maxX/2+1, 0, maxX-1, maxY*3/10); err != nil {
+	if v, err := g.SetView("Info", maxX*7/10+1, maxY*4/10+1, maxX-1, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -179,7 +203,7 @@ func layout(g *gocui.Gui) error {
 		v.Wrap = true
 		v.Editable = true
 	}
-	if v, err := g.SetView("Output", 0, maxY*3/10+1, maxX, maxY-1); err != nil {
+	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX*7/10, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -187,9 +211,49 @@ func layout(g *gocui.Gui) error {
 		v.Wrap = false
 
 	}
+	if v, err := g.SetView("Default", maxX/2+1, 0, maxX-1, maxY*3/10-1); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "Default's"
+		blob, err := ioutil.ReadFile("cmd/conf.yml")
+		if err != nil {
+			return nil
+		}
+		if err := yaml.Unmarshal(blob, &conf); err != nil {
+			return err
+		}
+		for i, s := range conf.Details {
+			fmt.Fprintf(v, "%d: %s \n", i, s)
+		}
+
+	}
+	if v, err := g.SetView("Selection", maxX/2+1, maxY*3/10, maxX-1, maxY*4/10); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "Selection"
+		v.Editable = true
+	}
 	return nil
 }
+func test(g *gocui.Gui, v *gocui.View) error {
+	blob, err := ioutil.ReadFile("cmd/conf.yml")
+	if err != nil {
+		return err
+	}
+	if err := yaml.Unmarshal(blob, &conf); err != nil {
+		fmt.Fprintln(v, err)
+		return nil
 
+	}
+	for _, s := range conf.Queries {
+		fmt.Fprintf(v, s)
+	}
+
+	fmt.Fprintln(v, conf)
+	return nil
+}
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
@@ -239,6 +303,9 @@ func RunGUI(repo string, q string) {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("Output", gocui.KeyArrowLeft, gocui.ModNone, goLeft); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyCtrlT, gocui.ModNone, test); err != nil {
 		log.Panicln(err)
 	}
 
