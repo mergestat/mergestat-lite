@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	viewArr  = []string{"Query", "Output"}
+	viewArr  = []string{"Query", "Selection", "Output"}
 	active   = 0
 	query    = ""
 	repoPath = ""
@@ -64,16 +64,16 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 }
 
 func handleClick(g *gocui.Gui, v *gocui.View) error {
-	//if v.Name() != "Info" {
-	if _, err := g.SetCurrentView(v.Name()); err != nil {
-		return err
+	if v.Name() != "Info" && v.Name() != "Default" {
+		if _, err := g.SetCurrentView(v.Name()); err != nil {
+			return err
+		}
+		if v.Name() == "Query" {
+			g.Cursor = true
+		} else {
+			g.Cursor = false
+		}
 	}
-	if v.Name() == "Query" {
-		g.Cursor = true
-	} else {
-		g.Cursor = false
-	}
-	//}
 	return nil
 }
 
@@ -87,7 +87,7 @@ func runQuery(g *gocui.Gui, v *gocui.View) error {
 		return err
 	}
 	if choice.Buffer() != "" {
-		x := strings.Trim(choice.Buffer(), "\n")
+		x := strings.Trim(choice.Buffer(), "\n ")
 		i64, err := strconv.ParseInt(x, 10, 32)
 		if err != nil {
 			fmt.Fprint(choice, err)
@@ -202,6 +202,8 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Info"
 		v.Wrap = true
 		v.Editable = true
+		fmt.Fprintln(v, "Keybinds: \n Ctrl+C\t: exit \n Ctrl+Space\t: execute query \n Ctrl+Q\t: clear query box")
+
 	}
 	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX*7/10, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
@@ -238,20 +240,7 @@ func layout(g *gocui.Gui) error {
 	return nil
 }
 func test(g *gocui.Gui, v *gocui.View) error {
-	blob, err := ioutil.ReadFile("cmd/conf.yml")
-	if err != nil {
-		return err
-	}
-	if err := yaml.Unmarshal(blob, &conf); err != nil {
-		fmt.Fprintln(v, err)
-		return nil
-
-	}
-	for _, s := range conf.Queries {
-		fmt.Fprintf(v, s)
-	}
-
-	fmt.Fprintln(v, conf)
+	//for use with testing uses ctrl+t
 	return nil
 }
 func quit(g *gocui.Gui, v *gocui.View) error {
@@ -359,6 +348,7 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	if err != nil {
 		return err
 	}
+	fmt.Fprint(w, "Keybinds: \n Ctrl+C\t: exit \n Ctrl+Space\t: execute query \n Ctrl+Q\t: clear query box\n\n")
 	fmt.Fprintln(w, "Repo \t: "+path+"\t")
 	rows, err := git.DB.Query("Select id from commits")
 	if err != nil {
