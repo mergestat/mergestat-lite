@@ -3,12 +3,12 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -v -tags=sqlite_vtable gitqlite.go
+RUN go build -v -tags=sqlite_vtable askgit.go
 
 FROM debian:buster-slim
 WORKDIR /app/
 RUN mkdir /repo
-COPY --from=builder /app/gitqlite .
+COPY --from=builder /app/askgit .
 
-ENTRYPOINT ["./gitqlite", "--repo", "/repo"]
+ENTRYPOINT ["./askgit", "--repo", "/repo"]
 
