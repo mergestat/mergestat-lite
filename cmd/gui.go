@@ -83,7 +83,10 @@ func handleClick(g *gocui.Gui, v *gocui.View) error {
 
 func handleCursor(g *gocui.Gui, v *gocui.View) error {
 	if v.Buffer() == "" {
-		v.SetCursor(0, 0)
+		err := v.SetCursor(0, 0)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 
