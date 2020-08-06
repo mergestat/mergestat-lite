@@ -40,7 +40,7 @@ func handleError(err error) {
 var rootCmd = &cobra.Command{
 	Use: `askgit "SELECT * FROM commits"`,
 	Long: `
-	askgit is a CLI for querying git repositories with SQL, using SQLite virtual tables.
+  askgit is a CLI for querying git repositories with SQL, using SQLite virtual tables.
   Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/askgit`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
