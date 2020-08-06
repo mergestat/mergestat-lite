@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
+	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
 	"github.com/go-git/go-git/v5"
 	"github.com/olekukonko/tablewriter"
@@ -38,10 +38,10 @@ func handleError(err error) {
 }
 
 var rootCmd = &cobra.Command{
-	Use: `gitqlite "SELECT * FROM commits"`,
+	Use: `askgit "SELECT * FROM commits"`,
 	Long: `
-  gitqlite is a CLI for querying git repositories with SQL, using SQLite virtual tables.
-  Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/gitqlite`,
+	askgit is a CLI for querying git repositories with SQL, using SQLite virtual tables.
+  Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/askgit`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
 		info, err := os.Stdin.Stat()

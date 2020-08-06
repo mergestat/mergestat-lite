@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/augmentable-dev/gitqlite/cmd"
+	"github.com/augmentable-dev/askgit/cmd"
 )
 
 func main() {
