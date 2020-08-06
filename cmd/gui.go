@@ -148,6 +148,10 @@ func runQuery(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 		out.Clear()
+		err = out.SetOrigin(0, 0)
+		if err != nil {
+			return err
+		}
 		query = input.Buffer()
 		path, err := getRepo(repoPath)
 		if err != nil {
