@@ -68,11 +68,47 @@ func handleClick(g *gocui.Gui, v *gocui.View) error {
 		if _, err := g.SetCurrentView(v.Name()); err != nil {
 			return err
 		}
-		if v.Name() == "Query" {
+		if v.Name() == "Query" || v.Name() == "Selection" {
 			g.Cursor = true
 		} else {
 			g.Cursor = false
 		}
+		err := handleCursor(g, v)
+		if err != nil {
+			return nil
+		}
+	}
+	return nil
+}
+
+func handleCursor(g *gocui.Gui, v *gocui.View) error {
+	if v.Buffer() == "" {
+		v.SetCursor(0, 0)
+		return nil
+	}
+
+	b := v.BufferLines()
+	var y int
+	y = len(b) - 1
+	if y < 0 {
+		y = 0
+	}
+	var x int
+	x = len(b[len(b)-1])
+	if x < 0 {
+		x = 0
+	}
+	xb, yb := v.Cursor()
+	if xb > x {
+		xb = x
+	}
+	if yb > y {
+		yb = y
+	}
+	err := v.SetCursor(xb, yb)
+	if err != nil {
+		fmt.Fprintf(v, "%s, xb: %d, yb: %d x: %d, y: %d", err, xb, yb, x, y)
+		return nil
 	}
 	return nil
 }
@@ -280,6 +316,9 @@ func RunGUI(repo string, q string) {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.MouseLeft, gocui.ModNone, handleClick); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.MouseRelease, gocui.ModNone, handleCursor); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.MouseWheelUp, gocui.ModNone, previousLine); err != nil {
