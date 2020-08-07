@@ -251,7 +251,7 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Info"
 		//v.Wrap = true
 		v.Editable = true
-		fmt.Fprintln(v, "Keybinds \n Ctrl+C\t exit \n Ctrl+Space\t execute query \n Ctrl+Q\t clear query box")
+		fmt.Fprintln(v, "Keybinds \n Ctrl+C\t exit \n Alt+Enter\t execute query \n Ctrl+Q\t clear query box")
 
 	}
 	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX*7/10, maxY-1); err != nil {
@@ -316,13 +316,16 @@ func RunGUI(repo string, q string) {
 	if err := g.SetKeybinding("", gocui.KeyTab, gocui.ModNone, nextView); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding("", gocui.KeyCtrlSpace, gocui.ModNone, runQuery); err != nil {
-		log.Panicln(err)
-	}
+	// if err := g.SetKeybinding("", gocui.KeyCtrlSpace, gocui.ModNone, runQuery); err != nil {
+	// 	log.Panicln(err)
+	// }
 	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, clearQuery); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.MouseLeft, gocui.ModNone, handleClick); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModAlt, runQuery); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.MouseRelease, gocui.ModNone, handleCursor); err != nil {
@@ -400,7 +403,7 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(w, "Keybinds: \n Ctrl+C\t exit \n Ctrl+Space\t execute query \n Ctrl+Q\t clear query box\n\n")
+	fmt.Fprint(w, "Keybinds: \n Ctrl+C\t exit \n Alt+Enter\t execute query \n Ctrl+Q\t clear query box\n\n")
 	fmt.Fprintln(w, "Repo \t "+path+"\t")
 	rows, err := git.DB.Query("Select id from commits")
 	if err != nil {
