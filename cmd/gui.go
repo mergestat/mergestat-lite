@@ -249,9 +249,9 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
-		v.Wrap = true
+		//v.Wrap = true
 		v.Editable = true
-		fmt.Fprintln(v, "Keybinds: \n Ctrl+C\t: exit \n Ctrl+Space\t: execute query \n Ctrl+Q\t: clear query box")
+		fmt.Fprintln(v, "Keybinds \n Ctrl+C\t exit \n Ctrl+Space\t execute query \n Ctrl+Q\t clear query box")
 
 	}
 	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX*7/10, maxY-1); err != nil {
@@ -400,8 +400,8 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(w, "Keybinds: \n Ctrl+C\t: exit \n Ctrl+Space\t: execute query \n Ctrl+Q\t: clear query box\n\n")
-	fmt.Fprintln(w, "Repo \t: "+path+"\t")
+	fmt.Fprint(w, "Keybinds: \n Ctrl+C\t exit \n Ctrl+Space\t execute query \n Ctrl+Q\t clear query box\n\n")
+	fmt.Fprintln(w, "Repo \t "+path+"\t")
 	rows, err := git.DB.Query("Select id from commits")
 	if err != nil {
 		return err
@@ -410,7 +410,7 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	for rows.Next() {
 		index++
 	}
-	fmt.Fprintln(w, "Number of commits \t:", index, "\t")
+	fmt.Fprintln(w, "# Commits \t", index, "\t")
 
 	rows, err = git.DB.Query("Select distinct author_name from commits")
 	if err != nil {
@@ -420,7 +420,7 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	for rows.Next() {
 		index++
 	}
-	fmt.Fprintln(w, "Number of authors \t:", index, "\t")
+	fmt.Fprintln(w, "# Authors \t", index, "\t")
 
 	rows, err = git.DB.Query("select Distinct name from branches where name like 'origin%'")
 	if err != nil {
@@ -430,7 +430,7 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	for rows.Next() {
 		index++
 	}
-	fmt.Fprintln(w, "Number of remote branches \t:", index, "\t")
+	fmt.Fprintln(w, "# Remote branches \t", index, "\t")
 
 	rows, err = git.DB.Query("select Distinct name from branches where remote like 'origin'")
 	if err != nil {
@@ -440,9 +440,9 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	for rows.Next() {
 		index++
 	}
-	fmt.Fprintln(w, "Number of local branches \t:", index, "\t")
+	fmt.Fprintln(w, "# Local branches \t", index, "\t")
 
-	fmt.Fprintln(w, "Time taken to execute query\t:", length.String(), "\t")
+	fmt.Fprintln(w, "Query time (ms)\t", length.String(), "\t")
 	w.Flush()
 	return nil
 
