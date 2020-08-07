@@ -1,13 +1,13 @@
-[![GoDev](https://img.shields.io/static/v1?label=godev&message=reference&color=00add8)](https://pkg.go.dev/github.com/augmentable-dev/gitqlite)
-[![BuildStatus](https://github.com/augmentable-dev/gitqlite/workflows/tests/badge.svg)](https://github.com/augmentable-dev/gitqlite/actions?workflow=tests)
-[![Go Report Card](https://goreportcard.com/badge/github.com/augmentable-dev/gitqlite)](https://goreportcard.com/report/github.com/augmentable-dev/gitqlite)
-[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/augmentable-dev/gitqlite)](https://www.tickgit.com/browse?repo=github.com/augmentable-dev/gitqlite)
-[![codecov](https://codecov.io/gh/augmentable-dev/gitqlite/branch/master/graph/badge.svg)](https://codecov.io/gh/augmentable-dev/gitqlite)
+[![GoDev](https://img.shields.io/static/v1?label=godev&message=reference&color=00add8)](https://pkg.go.dev/github.com/augmentable-dev/askgit)
+[![BuildStatus](https://github.com/augmentable-dev/askgit/workflows/tests/badge.svg)](https://github.com/augmentable-dev/askgit/actions?workflow=tests)
+[![Go Report Card](https://goreportcard.com/badge/github.com/augmentable-dev/askgit)](https://goreportcard.com/report/github.com/augmentable-dev/askgit)
+[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/augmentable-dev/askgit)](https://www.tickgit.com/browse?repo=github.com/augmentable-dev/askgit)
+[![codecov](https://codecov.io/gh/augmentable-dev/askgit/branch/master/graph/badge.svg)](https://codecov.io/gh/augmentable-dev/askgit)
 
 
-# gitqlite
+# askgit
 
-`gitqlite` is a tool for running SQL queries on git repositories.
+`askgit` is a command-line tool for running SQL queries on git repositories.
 It's meant for ad-hoc querying of git repositories on disk through a common interface (SQL), as an alternative to patching together various shell commands.
 It can execute queries that look like:
 ```sql
@@ -21,13 +21,13 @@ More in-depth examples and documentation can be found below.
 ***More Installation Instructions Coming Soon***
 
 ```
-go get -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
+go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit
 ```
 
 Will use the go tool chain to install a binary to `$GOBIN`.
 
 ```
-GOBIN=$(pwd) go get -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite
+GOBIN=$(pwd) go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit
 ```
 
 Will produce a binary in your current directory.
@@ -38,23 +38,23 @@ Will produce a binary in your current directory.
 Build an image locally using docker
 
 ```
-docker build -t gitqlite:latest .
+docker build -t askgit:latest .
 ```
 
-Or use an official image from [docker hub](https://hub.docker.com/repository/docker/augmentable/gitqlite)
+Or use an official image from [docker hub](https://hub.docker.com/repository/docker/augmentable/askgit)
 
 ```
-docker pull augmentable/gitqlite:latest
+docker pull augmentable/askgit:latest
 ```
 
 #### Running commands
 
-`gitqlite` operates on a git repository. This repository needs to be attached as a volume. This example uses the (bash) built-in command `pwd` for the current working directory
+`askgit` operates on a git repository. This repository needs to be attached as a volume. This example uses the (bash) built-in command `pwd` for the current working directory
 
 > [**pwd**] Print the absolute pathname of the current working directory.
 
 ```
-docker run -v `pwd`:/repo:ro gitqlite "SELECT * FROM commits"
+docker run -v `pwd`:/repo:ro askgit "SELECT * FROM commits"
 ```
 
 #### Running commands from STDIN
@@ -62,30 +62,30 @@ docker run -v `pwd`:/repo:ro gitqlite "SELECT * FROM commits"
 For piping commands via STDIN, the docker command needs to be told to run non-interactively, as well as attaching the repository at `/repo`.
 
 ```
-cat query.sql | docker run -i -v `pwd`:/repo:ro gitqlite
+cat query.sql | docker run -i -v `pwd`:/repo:ro askgit
 ```
 
 ## Usage
 
 ```
-gitqlite -h
+askgit -h
 ```
 
 Will output the most up to date usage instructions for your version of the CLI.
 Typically the first argument is a SQL query string:
 
 ```
-gitqlite "SELECT * FROM commits"
+askgit "SELECT * FROM commits"
 ```
 
 Your current working directory will be used as the path to the git repository to query by default.
 Use the `--repo` flag to specify an alternate path, or even a remote repository reference (http(s) or ssh).
-`gitqlite` will clone the remote repository to a temporary directory before executing a query.
+`askgit` will clone the remote repository to a temporary directory before executing a query.
 
 You can also pass a query in via `stdin`:
 
 ```
-cat query.sql | gitqlite
+cat query.sql | askgit
 ```
 
 By default, output will be an ASCII table.

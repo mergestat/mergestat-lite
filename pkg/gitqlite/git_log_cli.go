@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/augmentable-dev/gitqlite/pkg/gitlog"
+	"github.com/augmentable-dev/askgit/pkg/gitlog"
 	"github.com/mattn/go-sqlite3"
 )
 

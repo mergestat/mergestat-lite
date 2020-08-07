@@ -1,4 +1,4 @@
-module github.com/augmentable-dev/gitqlite
+module github.com/augmentable-dev/askgit
 
 go 1.13
 

@@ -2,7 +2,7 @@ vet:
 	go vet -v -tags=sqlite_vtable ./...
 
 build:
-	go build -v -tags=sqlite_vtable gitqlite.go
+	go build -v -tags=sqlite_vtable askgit.go
 
 lint:
 	golangci-lint run --build-tags sqlite_vtable
