@@ -10,16 +10,23 @@ details:
 queries:
 - "SELECT * FROM commits"
 - "SELECT DISTINCT author_email FROM commits"
-- "SELECT author_email, count(*) FROM commits GROUP BY author_email ORDER BY count(*) DESC"
-- "SELECT count(*) AS commits, SUM(additions) AS additions, SUM(deletions) AS  deletions, author_email FROM commits GROUP BY author_email ORDER BY commits"
-- "SELECT
-    count(*) AS commits,
-    count(CASE WHEN strftime('%w',author_when)='0' THEN 1 END) AS sunday,
-    count(CASE WHEN strftime('%w',author_when)='1' THEN 1 END) AS monday,
-    count(CASE WHEN strftime('%w',author_when)='2' THEN 1 END) AS tuesday,
-    count(CASE WHEN strftime('%w',author_when)='3' THEN 1 END) AS wednesday,
-    count(CASE WHEN strftime('%w',author_when)='4' THEN 1 END) AS thursday,
-    count(CASE WHEN strftime('%w',author_when)='5' THEN 1 END) AS friday,
-    count(CASE WHEN strftime('%w',author_when)='6' THEN 1 END) AS saturday,
-    author_email
+- "SELECT \n
+    author_email, count(*) \n
+    FROM commits GROUP BY author_email \n
+    ORDER BY count(*) DESC"
+- "SELECT \n
+    count(*) AS commits, SUM(additions) AS additions, SUM(deletions) AS  deletions, author_email \n
+    FROM commits \n
+    GROUP BY author_email\n
+    ORDER BY commits"
+- "SELECT\n
+    count(*) AS commits,\n
+    count(CASE WHEN strftime('%w',author_when)='0' THEN 1 END) AS sunday,\n
+    count(CASE WHEN strftime('%w',author_when)='1' THEN 1 END) AS monday,\n
+    count(CASE WHEN strftime('%w',author_when)='2' THEN 1 END) AS tuesday,\n
+    count(CASE WHEN strftime('%w',author_when)='3' THEN 1 END) AS wednesday,\n
+    count(CASE WHEN strftime('%w',author_when)='4' THEN 1 END) AS thursday,\n
+    count(CASE WHEN strftime('%w',author_when)='5' THEN 1 END) AS friday,\n
+    count(CASE WHEN strftime('%w',author_when)='6' THEN 1 END) AS saturday,\n
+    author_email\n
     FROM commits GROUP BY author_email ORDER BY commits"

@@ -141,6 +141,7 @@ func runQuery(g *gocui.Gui, v *gocui.View) error {
 			return nil
 		}
 		fmt.Fprint(input, conf.Queries[i])
+		choice.Clear()
 	}
 	if input.Buffer() != "" {
 		out, err := g.View("Output")
