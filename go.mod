@@ -3,6 +3,7 @@ module github.com/augmentable-dev/askgit
 go 1.13
 
 require (
+	github.com/augmentable-dev/gitqlite v0.0.1
 	github.com/gitsight/go-vcsurl v1.0.0
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/jroimartin/gocui v0.4.0

@@ -11,7 +11,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/augmentable-dev/gitqlite/pkg/gitqlite"
+	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/go-git/go-git/v5"
 	"gopkg.in/yaml.v2"
 
