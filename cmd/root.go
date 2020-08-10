@@ -97,9 +97,6 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				handleError(err)
 			}
-			// err, rows := getRows(query, repo)
-			// handleError(err)
-			// defer rows.Close()
 			g, err := gitqlite.New(repo, &gitqlite.Options{
 				SkipGitCLI: skipGitCLI,
 			})
@@ -122,13 +119,6 @@ func Execute() {
 	}
 
 }
-
-// func getRows(query string, repo string) (error, *sql.Rows) {
-
-// 	defer rows.Close()
-
-// 	return nil, rows
-// }
 
 func readStdin() (string, error) {
 	reader := bufio.NewReader(os.Stdin)
