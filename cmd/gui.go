@@ -253,7 +253,7 @@ func goRight(g *gocui.Gui, v *gocui.View) error {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*3/10); err != nil {
+	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*2/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -266,7 +266,7 @@ func layout(g *gocui.Gui) error {
 		}
 
 	}
-	if v, err := g.SetView("Keybinds", 0, maxY*3/10+1, maxX/2-1, maxY*5/10); err != nil {
+	if v, err := g.SetView("Keybinds", 0, maxY*2/10+1, maxX/2-1, maxY*4/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -278,7 +278,7 @@ func layout(g *gocui.Gui) error {
 		fmt.Fprint(w, "Ctrl+C\t exit \nAlt+Enter\t execute query \nCtrl+Q\t clear query box\n\n")
 
 	}
-	if v, err := g.SetView("Info", maxX/2, maxY*3/10+1, maxX-1, maxY*5/10); err != nil {
+	if v, err := g.SetView("Info", maxX/2, maxY*2/10+1, maxX-1, maxY*4/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -287,7 +287,7 @@ func layout(g *gocui.Gui) error {
 		//v.Editable = true
 
 	}
-	if v, err := g.SetView("Output", 0, maxY*5/10+1, maxX, maxY-1); err != nil {
+	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -295,7 +295,7 @@ func layout(g *gocui.Gui) error {
 		v.Wrap = false
 
 	}
-	if v, err := g.SetView("Default", maxX/2, 0, maxX-1, maxY*2/10-1); err != nil {
+	if v, err := g.SetView("Default", maxX/2, 0, maxX-1, maxY*2/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
