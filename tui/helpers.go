@@ -14,6 +14,7 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+//Gets the repo from the provided path(can be local ssh or http(s))
 func GetRepo(remote string) (string, error) {
 
 	path, err := filepath.Abs(remote)
@@ -49,6 +50,8 @@ func GetRepo(remote string) (string, error) {
 
 	return path, nil
 }
+
+//Displays a selection of information into the Info view
 func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Duration) error {
 	out, err := g.View("Info")
 	if err != nil {

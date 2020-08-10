@@ -8,12 +8,18 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+var (
+	viewArr = []string{"Query", "Output"}
+)
+
 func SetCurrentViewOnTop(g *gocui.Gui, name string) (*gocui.View, error) {
 	if _, err := g.SetCurrentView(name); err != nil {
 		return nil, err
 	}
 	return g.SetViewOnTop(name)
 }
+
+//Clear's the query view
 func ClearQuery(g *gocui.Gui, v *gocui.View) error {
 	q, err := g.View("Query")
 	if err != nil {
@@ -23,6 +29,8 @@ func ClearQuery(g *gocui.Gui, v *gocui.View) error {
 	q.Rewind()
 	return nil
 }
+
+// goes to the next view in the viewArr
 func NextView(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (active + 1) % len(viewArr)
 	name := viewArr[nextIndex]
@@ -40,6 +48,7 @@ func NextView(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+//handles Left click.
 func HandleClick(g *gocui.Gui, v *gocui.View) error {
 	if v.Name() == "Default" {
 		_, y := v.Cursor()
@@ -69,6 +78,7 @@ func HandleClick(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+//Makes sure Cursor is not more right or more down than allowed
 func HandleCursor(g *gocui.Gui, v *gocui.View) error {
 	if v.Buffer() == "" {
 		err := v.SetCursor(0, 0)
@@ -105,6 +115,7 @@ func HandleCursor(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+//Run's the query
 func RunQuery(g *gocui.Gui, v *gocui.View) error {
 	input, err := g.View("Query")
 	if err != nil {
@@ -149,6 +160,7 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+//Goes to the previous line
 func PreviousLine(g *gocui.Gui, v *gocui.View) error {
 
 	x, y := v.Origin()
@@ -160,6 +172,7 @@ func PreviousLine(g *gocui.Gui, v *gocui.View) error {
 
 	return nil
 }
+
 func NextLine(g *gocui.Gui, v *gocui.View) error {
 
 	x, y := v.Origin()

@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	viewArr  = []string{"Query", "Output"}
 	active   = 0
 	query    = ""
 	repoPath = ""
@@ -44,8 +43,6 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Keybinds"
-		//v.Wrap = true
-		//v.Editable = true
 		w := tabwriter.NewWriter(v, 0, 0, 1, ' ', 0)
 
 		fmt.Fprint(w, "Ctrl+C\t exit \nAlt+Enter\t execute query \nCtrl+Q\t clear query box\nDefault L-click \t select a default to be displayed in the query view\n\n")
@@ -56,8 +53,6 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
-		//v.Wrap = true
-		//v.Editable = true
 
 	}
 	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX, maxY-1); err != nil {
@@ -115,9 +110,6 @@ func RunGUI(repo string, q string) {
 	if err := g.SetKeybinding("", gocui.KeyTab, gocui.ModNone, NextView); err != nil {
 		log.Panicln(err)
 	}
-	// if err := g.SetKeybinding("", gocui.KeyCtrlSpace, gocui.ModNone, runQuery); err != nil {
-	// 	log.Panicln(err)
-	// }
 	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, ClearQuery); err != nil {
 		log.Panicln(err)
 	}
