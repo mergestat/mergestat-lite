@@ -64,7 +64,27 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 }
 
 func handleClick(g *gocui.Gui, v *gocui.View) error {
-	if v.Name() != "Info" && v.Name() != "Default" {
+	if v.Name() == "Default" {
+		_, y := v.Cursor()
+		if y < len(conf.Queries) {
+			input, err := g.View("Query")
+			if err != nil {
+				return err
+			}
+			input.Clear()
+			fmt.Fprint(input, conf.Queries[y])
+			err = runQuery(g, input)
+			if err != nil {
+				out, err := g.View("Ouptut")
+				if err != nil {
+					return err
+				}
+				fmt.Fprint(out, err)
+				return nil
+			}
+
+		}
+	} else if v.Name() != "Info" && v.Name() != "Keybinds" {
 		if _, err := g.SetCurrentView(v.Name()); err != nil {
 			return err
 		}
@@ -92,22 +112,23 @@ func handleCursor(g *gocui.Gui, v *gocui.View) error {
 
 	b := v.BufferLines()
 	var y int
+	var x int
+	xb, yb := v.Cursor()
 	y = len(b) - 1
 	if y < 0 {
 		y = 0
 	}
-	var x int
-	x = len(b[len(b)-1])
-	if x < 0 {
-		x = 0
-	}
-	xb, yb := v.Cursor()
-	if xb > x {
-		xb = x
-	}
 	if yb > y {
 		yb = y
 	}
+	x = len(b[yb])
+	if x < 0 {
+		x = 0
+	}
+	if xb > x {
+		xb = x
+	}
+
 	err := v.SetCursor(xb, yb)
 	if err != nil {
 		fmt.Fprintf(v, "%s, xb: %d, yb: %d x: %d, y: %d", err, xb, yb, x, y)
@@ -232,7 +253,7 @@ func goRight(g *gocui.Gui, v *gocui.View) error {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*4/10); err != nil {
+	if v, err := g.SetView("Query", 0, 0, maxX/2-1, maxY*3/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -245,17 +266,28 @@ func layout(g *gocui.Gui) error {
 		}
 
 	}
-	if v, err := g.SetView("Info", maxX*7/10+1, maxY*4/10+1, maxX-1, maxY-1); err != nil {
+	if v, err := g.SetView("Keybinds", 0, maxY*3/10+1, maxX/2-1, maxY*5/10); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "Keybinds"
+		//v.Wrap = true
+		//v.Editable = true
+		w := tabwriter.NewWriter(v, 0, 0, 1, ' ', 0)
+
+		fmt.Fprint(w, "Ctrl+C\t exit \nAlt+Enter\t execute query \nCtrl+Q\t clear query box\n\n")
+
+	}
+	if v, err := g.SetView("Info", maxX/2, maxY*3/10+1, maxX-1, maxY*5/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Title = "Info"
 		//v.Wrap = true
-		v.Editable = true
-		fmt.Fprintln(v, "Keybinds \n Ctrl+C\t exit \n Alt+Enter\t execute query \n Ctrl+Q\t clear query box")
+		//v.Editable = true
 
 	}
-	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX*7/10, maxY-1); err != nil {
+	if v, err := g.SetView("Output", 0, maxY*5/10+1, maxX, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -263,7 +295,7 @@ func layout(g *gocui.Gui) error {
 		v.Wrap = false
 
 	}
-	if v, err := g.SetView("Default", maxX/2+1, 0, maxX-1, maxY*3/10-1); err != nil {
+	if v, err := g.SetView("Default", maxX/2, 0, maxX-1, maxY*2/10-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -280,7 +312,7 @@ func layout(g *gocui.Gui) error {
 		}
 
 	}
-	if v, err := g.SetView("Selection", maxX/2+1, maxY*3/10, maxX-1, maxY*4/10); err != nil {
+	if v, err := g.SetView("Selection", maxX/2, maxY*2/10, maxX-1, maxY*3/10); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -404,7 +436,6 @@ func displayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(w, "Keybinds: \n Ctrl+C\t exit \n Alt+Enter\t execute query \n Ctrl+Q\t clear query box\n\n")
 	fmt.Fprintln(w, "Repo \t "+path+"\t")
 	rows, err := git.DB.Query("Select id from commits")
 	if err != nil {
