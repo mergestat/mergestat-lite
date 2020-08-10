@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -141,28 +139,6 @@ func runQuery(g *gocui.Gui, v *gocui.View) error {
 	input, err := g.View("Query")
 	if err != nil {
 		return err
-	}
-	choice, err := g.View("Selection")
-	if err != nil {
-		return err
-	}
-	if choice.Buffer() != "" {
-		x := strings.Trim(choice.Buffer(), "\n ")
-		i64, err := strconv.ParseInt(x, 10, 32)
-		if err != nil {
-			choice.Clear()
-			fmt.Fprint(choice, "Please input a valid number")
-			return nil
-		}
-		i := int(i64)
-		input.Clear()
-		if i >= len(conf.Queries) {
-			choice.Clear()
-			fmt.Fprint(choice, "Please input a number defined above")
-			return nil
-		}
-		fmt.Fprint(input, conf.Queries[i])
-		choice.Clear()
 	}
 	if input.Buffer() != "" {
 		out, err := g.View("Output")
