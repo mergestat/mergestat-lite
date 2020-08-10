@@ -34,7 +34,7 @@ func layout(g *gocui.Gui) error {
 		v.Editable = true
 		v.Wrap = true
 		fmt.Fprint(v, query)
-		if _, err = setCurrentViewOnTop(g, "Query"); err != nil {
+		if _, err = SetCurrentViewOnTop(g, "Query"); err != nil {
 			return err
 		}
 

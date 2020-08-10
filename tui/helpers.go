@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
-	"github.com/go-git/go-git"
+	"github.com/go-git/go-git/v5"
+
 	"github.com/jroimartin/gocui"
 )
 

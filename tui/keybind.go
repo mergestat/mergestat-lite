@@ -26,7 +26,7 @@ func ClearQuery(g *gocui.Gui, v *gocui.View) error {
 func NextView(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (active + 1) % len(viewArr)
 	name := viewArr[nextIndex]
-	if _, err := setCurrentViewOnTop(g, name); err != nil {
+	if _, err := SetCurrentViewOnTop(g, name); err != nil {
 		return err
 	}
 	// since going to next this actually sets g.Cursor to true for the Query view
@@ -61,7 +61,7 @@ func HandleClick(g *gocui.Gui, v *gocui.View) error {
 		} else {
 			g.Cursor = false
 		}
-		err := handleCursor(g, v)
+		err := HandleCursor(g, v)
 		if err != nil {
 			return nil
 		}
@@ -125,9 +125,7 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 		if err != nil {
 			return err
 		}
-		git, err := gitqlite.New(path, &gitqlite.Options{
-			SkipGitCLI: skipGitCLI,
-		})
+		git, err := gitqlite.New(path, &gitqlite.Options{})
 		if err != nil {
 			return err
 		}
@@ -138,7 +136,7 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 			return nil
 		}
 
-		err = displayDB(rows, out)
+		err = gitqlite.DisplayDB(rows, out, "")
 		if err != nil {
 			return err
 		}
