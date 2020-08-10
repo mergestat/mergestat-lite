@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
+	"github.com/augmentable-dev/askgit/tui"
 	"github.com/gitsight/go-vcsurl"
 	"github.com/go-git/go-git/v5"
 	"github.com/olekukonko/tablewriter"
@@ -74,7 +75,7 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		if gui {
-			RunGUI(repo, query)
+			tui.RunGUI(repo, query)
 		} else {
 
 			// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
