@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	viewArr  = []string{"Query", "Selection", "Output"}
+	viewArr  = []string{"Query", "Output"}
 	active   = 0
 	query    = ""
 	repoPath = ""
@@ -88,7 +88,7 @@ func handleClick(g *gocui.Gui, v *gocui.View) error {
 		if _, err := g.SetCurrentView(v.Name()); err != nil {
 			return err
 		}
-		if v.Name() == "Query" || v.Name() == "Selection" {
+		if v.Name() == "Query" {
 			g.Cursor = true
 		} else {
 			g.Cursor = false
@@ -311,13 +311,6 @@ func layout(g *gocui.Gui) error {
 			fmt.Fprintf(v, "%d: %s \n", i, s)
 		}
 
-	}
-	if v, err := g.SetView("Selection", maxX/2, maxY*2/10, maxX-1, maxY*3/10); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		v.Title = "Selection"
-		v.Editable = true
 	}
 	return nil
 }
