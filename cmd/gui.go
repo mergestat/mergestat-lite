@@ -71,15 +71,6 @@ func handleClick(g *gocui.Gui, v *gocui.View) error {
 			}
 			input.Clear()
 			fmt.Fprint(input, conf.Queries[y])
-			err = runQuery(g, input)
-			if err != nil {
-				out, err := g.View("Ouptut")
-				if err != nil {
-					return err
-				}
-				fmt.Fprint(out, err)
-				return nil
-			}
 
 		}
 	} else if v.Name() != "Info" && v.Name() != "Keybinds" {
@@ -251,7 +242,7 @@ func layout(g *gocui.Gui) error {
 		//v.Editable = true
 		w := tabwriter.NewWriter(v, 0, 0, 1, ' ', 0)
 
-		fmt.Fprint(w, "Ctrl+C\t exit \nAlt+Enter\t execute query \nCtrl+Q\t clear query box\n\n")
+		fmt.Fprint(w, "Ctrl+C\t exit \nAlt+Enter\t execute query \nCtrl+Q\t clear query box\nDefault L-click \t select a default to be displayed in the query view\n\n")
 
 	}
 	if v, err := g.SetView("Info", maxX/2, maxY*2/10+1, maxX-1, maxY*4/10); err != nil {
