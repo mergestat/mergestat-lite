@@ -2,11 +2,8 @@ package tui
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"text/tabwriter"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/jroimartin/gocui"
 )
@@ -15,13 +12,13 @@ var (
 	active   = 0
 	query    = ""
 	repoPath = ""
-	conf     ymlConfig
+	//conf     ymlConfig
 )
 
-type ymlConfig struct {
-	Details []string
-	Queries []string
-}
+// type ymlConfig struct {
+// 	Details []string
+// 	Queries []string
+// }
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
@@ -45,7 +42,7 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Keybinds"
 		w := tabwriter.NewWriter(v, 0, 0, 1, ' ', 0)
 
-		fmt.Fprint(w, "Ctrl+C\t exit \nAlt+Enter\t execute query \nCtrl+Q\t clear query box\nDefault L-click \t select a default to be displayed in the query view\n\n")
+		fmt.Fprint(w, "Ctrl+C\t exit \nCtrl+E\t execute query \nCtrl+Q\t clear query box\nDefault L-click \t select a default to be displayed in the query view\n\n")
 
 	}
 	if v, err := g.SetView("Info", maxX/2, maxY*2/10+1, maxX-1, maxY*4/10); err != nil {
@@ -68,15 +65,15 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Default's"
-		blob, err := ioutil.ReadFile("tui/conf.yml")
-		if err != nil {
-			return nil
-		}
-		if err := yaml.Unmarshal(blob, &conf); err != nil {
-			return err
-		}
-		for i, s := range conf.Details {
-			fmt.Fprintf(v, "%d: %s \n", i, s)
+		//blob, err := ioutil.ReadFile("tui/conf.yml")
+		// if err != nil {
+		// 	return nil
+		// }
+		// if err := yaml.Unmarshal(blob, &conf); err != nil {
+		// 	return err
+		// }
+		for i, s := range Queries {
+			fmt.Fprintf(v, "%d: %s \n", i, s[1])
 		}
 
 	}
@@ -116,7 +113,7 @@ func RunGUI(repo string, q string) {
 	if err := g.SetKeybinding("", gocui.MouseLeft, gocui.ModNone, HandleClick); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModAlt, RunQuery); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyCtrlE, gocui.ModNone, RunQuery); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding("", gocui.MouseRelease, gocui.ModNone, HandleCursor); err != nil {

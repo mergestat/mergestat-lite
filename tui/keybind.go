@@ -52,13 +52,13 @@ func NextView(g *gocui.Gui, v *gocui.View) error {
 func HandleClick(g *gocui.Gui, v *gocui.View) error {
 	if v.Name() == "Default" {
 		_, y := v.Cursor()
-		if y < len(conf.Queries) {
+		if y < len(Queries) {
 			input, err := g.View("Query")
 			if err != nil {
 				return err
 			}
 			input.Clear()
-			fmt.Fprint(input, conf.Queries[y])
+			fmt.Fprint(input, Queries[y][0])
 
 		}
 	} else if v.Name() != "Info" && v.Name() != "Keybinds" {
