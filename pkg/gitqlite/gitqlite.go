@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/mattn/go-sqlite3"
@@ -12,8 +13,8 @@ import (
 
 // GitQLite loads git repositories into sqlite
 type GitQLite struct {
-	DB       *sql.DB
-	RepoPath string
+	DB        *sql.DB
+	RepoPaths []string
 }
 type Options struct {
 	SkipGitCLI bool
@@ -56,20 +57,23 @@ func init() {
 }
 
 // New creates an instance of GitQLite
-func New(repoPath string, options *Options) (*GitQLite, error) {
+func New(repoPaths []string, options *Options) (*GitQLite, error) {
 	// see https://github.com/mattn/go-sqlite3/issues/204
 	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
+	repoPath := strings.Join(repoPaths, " ")
 	db, err := sql.Open("gitqlite", fmt.Sprintf("file:%x?mode=memory", md5.Sum([]byte(repoPath))))
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = git.PlainOpen(repoPath)
-	if err != nil {
-		return nil, err
+	for _, x := range repoPaths {
+		_, err = git.PlainOpen(x)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	g := &GitQLite{DB: db, RepoPath: repoPath}
+	g := &GitQLite{DB: db, RepoPaths: repoPaths}
 
 	err = g.ensureTables(options)
 	if err != nil {
@@ -86,30 +90,30 @@ func (g *GitQLite) ensureTables(options *Options) error {
 	localGitExists := err == nil
 
 	if options.SkipGitCLI || !localGitExists {
-		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log(%q);", g.RepoPath))
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log(%q);", g.RepoPaths))
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli(%q);", g.RepoPath))
+		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli(%q);", g.RepoPaths))
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree(%q);", g.RepoPaths))
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS refs USING git_ref(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS refs USING git_ref(%q);", g.RepoPaths))
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS tags USING git_tag(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS tags USING git_tag(%q);", g.RepoPaths))
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch(%q);", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch(%q);", g.RepoPaths))
 	if err != nil {
 		return err
 	}

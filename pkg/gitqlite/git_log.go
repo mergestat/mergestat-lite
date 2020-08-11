@@ -15,13 +15,14 @@ import (
 type gitLogModule struct{}
 
 type gitLogTable struct {
-	repoPath string
-	repo     *git.Repository
+	repoPath []string
+	repo     []*git.Repository
 }
 
 func (m *gitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
+			repo TEXT,
 			id TEXT,
 			message TEXT,
 			summary TEXT,
@@ -43,8 +44,13 @@ func (m *gitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 
 	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
 	// we need to pop those off when referring to the actual directory in the fs
+	fmt.Println(args[3])
+
 	repoPath := args[3][1 : len(args[3])-1]
-	return &gitLogTable{repoPath: repoPath}, nil
+	repoPath = strings.ReplaceAll(repoPath, "\"", "")
+	repoPaths := strings.Split(repoPath, " ")
+	fmt.Println(repoPath, "\n", repoPaths)
+	return &gitLogTable{repoPath: repoPaths}, nil
 }
 
 func (m *gitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
@@ -54,13 +60,17 @@ func (m *gitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 func (m *gitLogModule) DestroyModule() {}
 
 func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.PlainOpen(v.repoPath)
-	if err != nil {
-		return nil, err
+	var repo []*git.Repository
+	for _, x := range v.repoPath {
+		r, err := git.PlainOpen(x)
+		if err != nil {
+			return nil, err
+		}
+		repo = append(repo, r)
 	}
 	v.repo = repo
 
-	return &commitCursor{repo: v.repo}, nil
+	return &commitCursor{repo: v.repo, repoName: v.repoPath}, nil
 }
 
 func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -76,7 +86,9 @@ func (v *gitLogTable) Disconnect() error {
 func (v *gitLogTable) Destroy() error { return nil }
 
 type commitCursor struct {
-	repo       *git.Repository
+	repo       []*git.Repository
+	repoName   []string
+	index      int
 	current    *object.Commit
 	commitIter object.CommitIter
 }
@@ -88,33 +100,35 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 	switch col {
 	case 0:
+		c.ResultText(vc.repoName[vc.index])
+	case 1:
 		//commit id
 		c.ResultText(commit.ID().String())
-	case 1:
+	case 2:
 		//commit message
 		c.ResultText(commit.Message)
-	case 2:
+	case 3:
 		//commit summary
 		c.ResultText(strings.Split(commit.Message, "\n")[0])
-	case 3:
+	case 4:
 		//commit author name
 		c.ResultText(author.Name)
-	case 4:
+	case 5:
 		//commit author email
 		c.ResultText(author.Email)
-	case 5:
+	case 6:
 		//author when
 		c.ResultText(author.When.Format(time.RFC3339Nano))
-	case 6:
+	case 7:
 		//committer name
 		c.ResultText(committer.Name)
-	case 7:
+	case 8:
 		//committer email
 		c.ResultText(committer.Email)
-	case 8:
+	case 9:
 		//committer when
 		c.ResultText(committer.When.Format(time.RFC3339Nano))
-	case 9:
+	case 10:
 		//parent_id
 		if int(commit.NumParents()) > 0 {
 			p, err := commit.Parent(0)
@@ -125,10 +139,10 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		} else {
 			c.ResultNull()
 		}
-	case 10:
+	case 11:
 		//parent_count
 		c.ResultInt(int(commit.NumParents()))
-	case 11:
+	case 12:
 		//tree_id
 		tree, err := vc.current.Tree()
 		if err != nil {
@@ -136,13 +150,13 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		}
 		c.ResultText(tree.ID().String())
 
-	case 12:
+	case 13:
 		additions, _, err := statCalc(commit)
 		if err != nil {
 			return err
 		}
 		c.ResultInt(additions)
-	case 13:
+	case 14:
 		_, deletions, err := statCalc(commit)
 		if err != nil {
 			return err
@@ -153,7 +167,7 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	headRef, err := vc.repo.Head()
+	headRef, err := vc.repo[vc.index].Head()
 	if err != nil {
 		if err == plumbing.ErrReferenceNotFound {
 			return nil
@@ -161,7 +175,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 		return err
 	}
 
-	iter, err := vc.repo.Log(&git.LogOptions{
+	iter, err := vc.repo[vc.index].Log(&git.LogOptions{
 		From:  headRef.Hash(),
 		Order: git.LogOrderCommitterTime,
 	})
@@ -179,11 +193,41 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 
 	return nil
 }
+func (vc *commitCursor) FilterNoBS() error {
+	headRef, err := vc.repo[vc.index].Head()
+	if err != nil {
+		if err == plumbing.ErrReferenceNotFound {
+			return nil
+		}
+		return err
+	}
 
+	iter, err := vc.repo[vc.index].Log(&git.LogOptions{
+		From:  headRef.Hash(),
+		Order: git.LogOrderCommitterTime,
+	})
+	if err != nil {
+		return err
+	}
+	vc.commitIter = iter
+
+	commit, err := iter.Next()
+	if err != nil {
+		return err
+	}
+
+	vc.current = commit
+
+	return nil
+}
 func (vc *commitCursor) Next() error {
 	commit, err := vc.commitIter.Next()
 	if err != nil {
 		if err == io.EOF {
+			if len(vc.repo) > vc.index+1 {
+				vc.index++
+				return vc.FilterNoBS()
+			}
 			vc.current = nil
 			return nil
 		}

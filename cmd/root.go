@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
@@ -20,6 +21,7 @@ import (
 //define flags in here
 var (
 	repo       string
+	repos      []string
 	format     string
 	skipGitCLI bool
 )
@@ -64,39 +66,15 @@ var rootCmd = &cobra.Command{
 
 		// if a repo path is not supplied as a flag, use the current directory
 		if repo == "" {
-			if len(args) > 1 {
-				repo = args[1]
-			} else {
-				repo = cwd
-			}
+			repo = cwd
 		}
-
-		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
-		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
-			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
-				dir, err := ioutil.TempDir("", "repo")
-				handleError(err)
-
-				_, err = git.PlainClone(dir, false, &git.CloneOptions{
-					URL: r,
-				})
-				handleError(err)
-
-				defer func() {
-					err := os.RemoveAll(dir)
-					handleError(err)
-				}()
-
-				repo = dir
-			}
-		}
-
-		repo, err = filepath.Abs(repo)
-		if err != nil {
+		repos = strings.Split(repo, " ")
+		for i, x := range repos {
+			repos[i], err = filepath.Abs(getRepo(x))
 			handleError(err)
 		}
 
-		g, err := gitqlite.New(repo, &gitqlite.Options{
+		g, err := gitqlite.New(repos, &gitqlite.Options{
 			SkipGitCLI: skipGitCLI,
 		})
 		handleError(err)
@@ -108,6 +86,30 @@ var rootCmd = &cobra.Command{
 		err = displayDB(rows)
 		handleError(err)
 	},
+}
+
+func getRepo(rep string) string {
+	// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
+
+	if remote, err := vcsurl.Parse(rep); err == nil { // if it can be parsed
+		if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
+			dir, err := ioutil.TempDir("", "repo")
+			handleError(err)
+
+			_, err = git.PlainClone(dir, false, &git.CloneOptions{
+				URL: r,
+			})
+			handleError(err)
+
+			defer func() {
+				err := os.RemoveAll(dir)
+				handleError(err)
+			}()
+
+			return dir
+		}
+	}
+	return rep
 }
 
 // Execute runs the root command
