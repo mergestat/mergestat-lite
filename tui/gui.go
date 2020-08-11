@@ -5,6 +5,7 @@ import (
 	"log"
 	"text/tabwriter"
 
+	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/jroimartin/gocui"
 )
 
@@ -50,6 +51,18 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
+		path, err := GetRepo(repoPath)
+		if err != nil {
+			return err
+		}
+		git, err := gitqlite.New(path, &gitqlite.Options{})
+		if err != nil {
+			return err
+		}
+		err = DisplayInformation(g, git, 0)
+		if err != nil {
+			return err
+		}
 
 	}
 	if v, err := g.SetView("Output", 0, maxY*4/10+1, maxX, maxY-1); err != nil {
