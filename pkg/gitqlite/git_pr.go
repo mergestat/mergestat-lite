@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/github"
@@ -25,6 +26,7 @@ func (m *gitPrModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab
 			number TEXT,
 			title TEXT,
 			author TEXT,
+			author_page TEXT,
 			pr_when DATETIME,
 			state TEXT,
 			mergeSHA TEXT
@@ -75,27 +77,30 @@ type prCursor struct {
 }
 
 func (vc *prCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	pr := vc.current
+	tempr := vc.current
 
 	switch col {
 	case 0:
 		//pr id
-		c.ResultText(string(int((pr.GetID()))))
+		c.ResultInt(*tempr.Number)
 	case 1:
 		//pr title
-		c.ResultText(pr.GetTitle())
+		c.ResultText(tempr.GetTitle())
 	case 2:
 		//pr autho name
-		c.ResultText(pr.User.GetLogin())
+		c.ResultText(tempr.User.GetLogin())
 	case 3:
-		//when pr created
-		c.ResultText(pr.GetCreatedAt().String())
+		//pr autho name
+		c.ResultText(*tempr.GetUser().URL)
 	case 4:
-		//pr state
-		c.ResultText(pr.GetState())
+		//when pr created
+		c.ResultText(tempr.GetCreatedAt().Format(time.RFC3339Nano))
 	case 5:
+		//pr state
+		c.ResultText(tempr.GetState())
+	case 6:
 		//merge commit sha
-		c.ResultText(pr.GetMergeCommitSHA())
+		c.ResultText(tempr.GetMergeCommitSHA())
 	}
 	return nil
 }
@@ -109,10 +114,10 @@ func (vc *prCursor) Filter(idxNum int, idxStr string, vals []interface{}) error 
 	tc := oauth2.NewClient(ctx, ts)
 
 	client := github.NewClient(tc)
-	info := strings.Split(vc.repoName, "/")
+	info := strings.Split(vc.repoName, ":")
 	fmt.Fprintln(os.Stdout, info)
 
-	owner, repo := info[len(info)-2], info[len(info)-1]
+	owner, repo := info[1], info[2]
 	fmt.Fprintln(os.Stdout, owner, repo)
 
 	pr, _, err := client.PullRequests.List(context.Background(), owner, repo, &github.PullRequestListOptions{State: "all", ListOptions: github.ListOptions{PerPage: 50}})
@@ -120,7 +125,9 @@ func (vc *prCursor) Filter(idxNum int, idxStr string, vals []interface{}) error 
 		fmt.Println(err)
 		return err
 	}
+	fmt.Print(len(pr))
 	vc.pr = pr
+	vc.current = pr[0]
 	vc.index = 0
 	return nil
 }

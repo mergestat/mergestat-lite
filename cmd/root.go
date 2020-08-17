@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
@@ -74,8 +75,21 @@ var rootCmd = &cobra.Command{
 		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
 		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
 			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
-				dir, err := ioutil.TempDir("", "repo")
-				handleError(err)
+				var dir string
+				repo = strings.ReplaceAll(repo, ".git", "")
+				if strings.Contains(repo, "http") {
+					stuff := strings.Split(repo, "/")
+					owner, rep := stuff[3], stuff[4]
+					dir, err = ioutil.TempDir("", ":"+owner+":"+rep+":")
+					handleError(err)
+				} else {
+					stuff := strings.Split(repo, ":")
+					x := stuff[1]
+					y := strings.Split(x, "/")
+					owner, rep := y[0], y[1]
+					dir, err = ioutil.TempDir("", ":"+owner+":"+rep+":")
+					handleError(err)
+				}
 
 				_, err = git.PlainClone(dir, false, &git.CloneOptions{
 					URL: r,
@@ -90,12 +104,11 @@ var rootCmd = &cobra.Command{
 				repo = dir
 			}
 		}
-
 		repo, err = filepath.Abs(repo)
 		if err != nil {
 			handleError(err)
 		}
-
+		fmt.Print(repo)
 		g, err := gitqlite.New(repo, &gitqlite.Options{
 			SkipGitCLI: skipGitCLI,
 		})
