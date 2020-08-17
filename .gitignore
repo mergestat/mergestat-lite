@@ -1,1 +1,2 @@
 coverage.out
+vendor/github.com/go-git/go-billy/v5/.gitignore
