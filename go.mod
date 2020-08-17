@@ -7,6 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/mattn/go v0.0.0-20171011075504-07f7db3ea99f
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/olekukonko/tablewriter v0.0.4
