@@ -86,6 +86,10 @@ func TestPr(t *testing.T) {
 	if len(columns) != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
 	}
+	_, _, err = GetContents(rows)
+	if err != nil {
+		t.Fatalf("error in retrieving rows")
+	}
 	// numRows := GetRowsCount(rows)
 
 	// expected = prCount
