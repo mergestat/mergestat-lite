@@ -22,6 +22,7 @@ type Commit struct {
 	CommitterWhen  time.Time
 	Additions      int
 	Deletions      int
+	Files          string
 }
 type Result []*Commit
 
@@ -113,6 +114,9 @@ func (iter *CommitIter) Next() (*Commit, error) {
 					return nil, err
 				}
 				iter.current.Deletions += deletions
+			}
+			if s[2] != "-" {
+				iter.current.Files += s[2] + " "
 			}
 		}
 	}
