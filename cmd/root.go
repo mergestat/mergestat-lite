@@ -108,7 +108,6 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			handleError(err)
 		}
-		fmt.Print(repo)
 		g, err := gitqlite.New(repo, &gitqlite.Options{
 			SkipGitCLI: skipGitCLI,
 		})
