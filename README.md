@@ -114,6 +114,7 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 | tree_id         | TEXT     |
 | additions       | INT      |
 | deletions       | INT      |
+| changed_files   | TEXT     |
 
 #### `files`
 
