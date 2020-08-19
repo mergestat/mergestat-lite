@@ -3,6 +3,7 @@ package gitqlite
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -23,7 +24,8 @@ func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 			commit_id TEXT,
 			file TEXT,
 			additions INT(10),
-			deletions INT(10)
+			deletions INT(10),
+			commit_when DATETIME
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -90,6 +92,8 @@ func (vc *statsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 3:
 		deletions := vc.stats[vc.statIndex].Deletion
 		c.ResultInt(deletions)
+	case 4:
+		c.ResultText(vc.current.Author.When.Format(time.RFC3339Nano))
 	}
 	return nil
 }
