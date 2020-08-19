@@ -33,10 +33,7 @@ func (m *gitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			committer_when DATETIME, 
 			parent_id TEXT,
 			parent_count INT(10),
-			tree_id TEXT,
-			additions INT(10),
-			deletions INT(10),
-			changed_files TEXT
+			tree_id TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -137,24 +134,6 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		}
 		c.ResultText(tree.ID().String())
 
-	case 12:
-		additions, _, _, err := statCalc(commit)
-		if err != nil {
-			return err
-		}
-		c.ResultInt(additions)
-	case 13:
-		_, deletions, _, err := statCalc(commit)
-		if err != nil {
-			return err
-		}
-		c.ResultInt(deletions)
-	case 14:
-		_, _, file, err := statCalc(commit)
-		if err != nil {
-			return err
-		}
-		c.ResultText(file)
 	}
 	return nil
 }
@@ -215,41 +194,4 @@ func (vc *commitCursor) Close() error {
 	}
 	vc.current = nil
 	return nil
-}
-
-//statCalc calculates the number of additions/deletions and returns in format additions, deletions
-func statCalc(c *object.Commit) (int, int, string, error) {
-	additions, deletions, filename := 0, 0, ""
-	if c.NumParents() == 0 {
-		fileIter, err := c.Files()
-		if err != nil {
-			return 0, 0, "", err
-		}
-
-		err = fileIter.ForEach(func(file *object.File) error {
-			l, err := file.Lines()
-			if err != nil {
-				return err
-			}
-			additions += len(l)
-			return nil
-		})
-
-		if err != nil {
-			return 0, 0, "", err
-		}
-	} else {
-		stats, err := c.Stats()
-		if err != nil {
-			return 0, 0, "", err
-		}
-
-		for _, stat := range stats {
-			additions += stat.Addition
-			deletions += stat.Deletion
-			filename += stat.Name + " "
-
-		}
-	}
-	return additions, deletions, filename, nil
 }
