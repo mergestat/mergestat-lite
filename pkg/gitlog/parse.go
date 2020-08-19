@@ -20,9 +20,9 @@ type Commit struct {
 	CommitterName  string
 	CommitterEmail string
 	CommitterWhen  time.Time
-	Additions      int
-	Deletions      int
-	Files          string
+	Additions      []int
+	Deletions      []int
+	Files          []string
 }
 type Result []*Commit
 
@@ -106,17 +106,17 @@ func (iter *CommitIter) Next() (*Commit, error) {
 				if err != nil {
 					return nil, err
 				}
-				iter.current.Additions += additions
+				iter.current.Additions = append(iter.current.Additions, additions)
 			}
 			if s[1] != "-" {
 				deletions, err := strconv.Atoi(s[1])
 				if err != nil {
 					return nil, err
 				}
-				iter.current.Deletions += deletions
+				iter.current.Deletions = append(iter.current.Deletions, deletions)
 			}
 			if s[2] != "-" {
-				iter.current.Files += s[2] + " "
+				iter.current.Files = append(iter.current.Files, s[2])
 			}
 		}
 	}

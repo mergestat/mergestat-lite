@@ -53,6 +53,10 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("git_stats_cli", &gitStatsCLIModule{})
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
@@ -94,8 +98,16 @@ func (g *GitQLite) ensureTables(options *Options) error {
 		if err != nil {
 			return err
 		}
+		_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats(%q);", g.RepoPath))
+		if err != nil {
+			return err
+		}
 	} else {
 		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli(%q);", g.RepoPath))
+		if err != nil {
+			return err
+		}
+		_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats_cli(%q);", g.RepoPath))
 		if err != nil {
 			return err
 		}
@@ -114,10 +126,6 @@ func (g *GitQLite) ensureTables(options *Options) error {
 		return err
 	}
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch(%q);", g.RepoPath))
-	if err != nil {
-		return err
-	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}

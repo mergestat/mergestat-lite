@@ -30,10 +30,7 @@ func (m *gitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.
 			committer_when DATETIME, 
 			parent_id TEXT,
 			parent_count INT(10),
-			tree_id TEXT,
-			additions INT(10),
-			deletions INT(10),
-			changed_files TEXT
+			tree_id TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -145,12 +142,6 @@ func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 11:
 		//tree_id
 		c.ResultText(current.TreeID)
-	case 12:
-		c.ResultInt(current.Additions)
-	case 13:
-		c.ResultInt(current.Deletions)
-	case 14:
-		c.ResultText(current.Files)
 
 	}
 	return nil
