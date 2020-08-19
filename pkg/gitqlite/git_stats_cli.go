@@ -96,7 +96,7 @@ func (vc *statsCLICursor) Next() error {
 
 	vc.current = commit
 	if len(vc.current.Additions) == 0 {
-		vc.Next()
+		return vc.Next()
 	}
 	return nil
 }
