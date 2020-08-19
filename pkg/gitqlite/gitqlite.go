@@ -49,6 +49,10 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("git_stats", &gitStatsModule{})
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
@@ -110,6 +114,10 @@ func (g *GitQLite) ensureTables(options *Options) error {
 		return err
 	}
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch(%q);", g.RepoPath))
+	if err != nil {
+		return err
+	}
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats(%q);", g.RepoPath))
 	if err != nil {
 		return err
 	}
