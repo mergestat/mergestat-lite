@@ -81,9 +81,12 @@ func (vc *statsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//commit id
 		c.ResultText(commit.ID().String())
 	case 1:
-
-		file := vc.stats[vc.statIndex].Name
-		c.ResultText(file)
+		if len(vc.stats) > 0 {
+			file := vc.stats[vc.statIndex].Name
+			c.ResultText(file)
+		} else {
+			c.ResultText(" ")
+		}
 
 	case 2:
 		additions := vc.stats[vc.statIndex].Addition
@@ -167,6 +170,11 @@ func (vc *statsCursor) Next() error {
 		stats, err := commit.Stats()
 		if err != nil {
 			return err
+		}
+		if len(stats) == 0 {
+			vc.stats = stats
+			vc.current = commit
+			return vc.Next()
 		}
 		vc.stats = stats
 	}
