@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
@@ -101,13 +102,35 @@ var rootCmd = &cobra.Command{
 		})
 		handleError(err)
 
-		rows, err := g.DB.Query(query)
+		var rows *sql.Rows
+		if strings.HasPrefix(query, ".") {
+			rows, err = queryMetaCommand(g, query)
+		} else {
+			rows, err = g.DB.Query(query)
+		}
 		handleError(err)
-
 		defer rows.Close()
 		err = displayDB(rows)
 		handleError(err)
 	},
+}
+
+func queryMetaCommand(g *gitqlite.GitQLite, c string) (rows *sql.Rows, err error) {
+	// run command if presented string is prefix of full command name
+	// ex) ".t", ".tab", and ".table" are all valid command specification for ".tables"
+	if strings.HasPrefix(".tables", c) {
+		return g.DB.Query(
+			`
+				SELECT name
+				FROM sqlite_master
+				WHERE
+					type IN ('table','view') AND
+					name NOT LIKE 'sqlite_%'
+			`,
+		)
+	}
+
+	return nil, fmt.Errorf("meta command %q does not exist", c)
 }
 
 // Execute runs the root command
