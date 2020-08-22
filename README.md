@@ -94,6 +94,8 @@ See `-h` for all the options.
 
 ### Tables
 
+You can get list of tables by using `askgit .tables`.
+
 #### `commits`
 
 Similar to `git log`, the `commits` table includes all commits in the history of the currently checked out commit.
