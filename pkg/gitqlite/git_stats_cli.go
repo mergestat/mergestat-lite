@@ -79,7 +79,7 @@ func (vc *statsCLICursor) Filter(idxNum int, idxStr string, vals []interface{}) 
 }
 
 func (vc *statsCLICursor) Next() error {
-	if vc.statIndex+1 < len(vc.current.Additions) {
+	if vc.statIndex+1 < len(vc.current.Files) {
 		vc.statIndex++
 		return nil
 	}
@@ -92,11 +92,15 @@ func (vc *statsCLICursor) Next() error {
 		}
 		return err
 	}
+
 	vc.statIndex = 0
 
 	vc.current = commit
-	if len(vc.current.Additions) == 0 {
-		return vc.Next()
+	if len(vc.current.Files) == 0 {
+		err = vc.Next()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -113,11 +117,25 @@ func (vc *statsCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(current.SHA)
 
 	case 1:
-		c.ResultText(current.Files[vc.statIndex])
+		if len(current.Files) > vc.statIndex {
+			c.ResultText(current.Files[vc.statIndex])
+		} else {
+			c.ResultText("")
+		}
 	case 2:
-		c.ResultInt(current.Deletions[vc.statIndex])
+		if len(current.Deletions) > vc.statIndex {
+
+			c.ResultInt(current.Deletions[vc.statIndex])
+		} else {
+			c.ResultInt(0)
+		}
 	case 3:
-		c.ResultInt(current.Additions[vc.statIndex])
+		if len(current.Additions) > vc.statIndex {
+
+			c.ResultInt(current.Additions[vc.statIndex])
+		} else {
+			c.ResultInt(0)
+		}
 	case 4:
 		//committer when
 		c.ResultText(current.CommitterWhen.Format(time.RFC3339Nano))
