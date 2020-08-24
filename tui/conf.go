@@ -1,22 +1,27 @@
 package tui
 
-var (
-	Queries = [][]string{
+type ExampleQuery struct {
+	Query       string
+	Description string
+}
 
-		[]string{"SELECT * FROM commits", "all entries from commits table"},
-		[]string{"SELECT DISTINCT author_email FROM commits", "distinct author emails from commits table"},
-		[]string{`SELECT 
+var (
+	Queries = []ExampleQuery{
+
+		{"SELECT * FROM commits", "all entries from commits table"},
+		{"SELECT DISTINCT author_email FROM commits", "distinct author emails from commits table"},
+		{`SELECT 
 		author_email, count(*) 
 		FROM commits GROUP BY author_email 
 		ORDER BY count(*) DESC`,
 			`number of commits for each author by email`},
-		[]string{`SELECT 
+		{`SELECT 
 		count(*) AS commits, SUM(additions) AS additions, SUM(deletions) AS  deletions, author_email 
 		FROM commits 
 		GROUP BY author_email
 		ORDER BY commits`,
 			`number of additions and deletions for each author`},
-		[]string{`SELECT
+		{`SELECT
 		count(*) AS commits,
 		count(CASE WHEN strftime('%w',author_when)='0' THEN 1 END) AS sunday,
 		count(CASE WHEN strftime('%w',author_when)='1' THEN 1 END) AS monday,

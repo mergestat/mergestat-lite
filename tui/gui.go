@@ -86,7 +86,7 @@ func layout(g *gocui.Gui) error {
 		// 	return err
 		// }
 		for i, s := range Queries {
-			fmt.Fprintf(v, "%d: %s \n", i, s[1])
+			fmt.Fprintf(v, "%d: %s \n", i, s.Description)
 		}
 
 	}

@@ -58,7 +58,7 @@ func HandleClick(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 			input.Clear()
-			fmt.Fprint(input, Queries[y][0])
+			fmt.Fprint(input, Queries[y].Query)
 
 		}
 	} else if v.Name() != "Info" && v.Name() != "Keybinds" {
