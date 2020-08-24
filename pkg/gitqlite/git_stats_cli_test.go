@@ -3,8 +3,7 @@ package gitqlite
 import (
 	"testing"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/augmentable-dev/askgit/pkg/gitlog"
 )
 
 func TestStats(t *testing.T) {
@@ -13,31 +12,22 @@ func TestStats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	headRef, err := fixtureRepo.Head()
-	if err != nil {
-		t.Fatal(err)
-	}
-	commitChecker, err := fixtureRepo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
+	iter, err := gitlog.Execute(fixtureRepoDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	statsCount := 1
-	err = commitChecker.ForEach(func(c *object.Commit) error {
-		x, err := c.Stats()
-		if err != nil {
-			return err
-		}
-		for range x {
+	statsCount := 0
+	commit, err := iter.Next()
+	for ; err == nil; commit, err = iter.Next() {
+		for range commit.Additions {
 			statsCount++
 		}
-		return nil
-	})
-	if err != nil {
-		t.Fatal(err)
+
+		// if a != 0 || commit.Deletions[i] != 0 || commit.Files[i] != "" {
+		// 	statsCount++
+		// }
+
 	}
 
 	//checks commits
