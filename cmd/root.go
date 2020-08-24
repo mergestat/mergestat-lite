@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
-	"github.com/augmentable-dev/askgit/tui"
+	"github.com/augmentable-dev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
@@ -19,14 +19,14 @@ var (
 	repo       string
 	format     string
 	skipGitCLI bool
-	gui        bool
+	cui        bool
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
-	rootCmd.PersistentFlags().BoolVarP(&gui, "interactive", "i", false, "whether to use the CLUI defaults to false")
+	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interacive mode, which displays a terminal UI")
 
 }
 
@@ -69,45 +69,46 @@ var rootCmd = &cobra.Command{
 			handleError(err)
 			os.Exit(0)
 		}
-		if gui {
+
+		if cui {
 			tui.RunGUI(repo, query)
-		} else {
+			return
+		}
 
-			// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
-			if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
-				if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
-					dir, err := ioutil.TempDir("", "repo")
-					handleError(err)
-
-					_, err = git.PlainClone(dir, false, &git.CloneOptions{
-						URL: r,
-					})
-					handleError(err)
-
-					defer func() {
-						err := os.RemoveAll(dir)
-						handleError(err)
-					}()
-
-					repo = dir
-				}
-			}
-
-			repo, err = filepath.Abs(repo)
-			if err != nil {
+		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
+		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
+			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
+				dir, err := ioutil.TempDir("", "repo")
 				handleError(err)
+
+				_, err = git.PlainClone(dir, false, &git.CloneOptions{
+					URL: r,
+				})
+				handleError(err)
+
+				defer func() {
+					err := os.RemoveAll(dir)
+					handleError(err)
+				}()
+
+				repo = dir
 			}
-			g, err := gitqlite.New(repo, &gitqlite.Options{
-				SkipGitCLI: skipGitCLI,
-			})
-			handleError(err)
+		}
 
-			rows, err := g.DB.Query(query)
-			handleError(err)
-
-			err = gitqlite.DisplayDB(rows, os.Stdout, format)
+		repo, err = filepath.Abs(repo)
+		if err != nil {
 			handleError(err)
 		}
+		g, err := gitqlite.New(repo, &gitqlite.Options{
+			SkipGitCLI: skipGitCLI,
+		})
+		handleError(err)
+
+		rows, err := g.DB.Query(query)
+		handleError(err)
+
+		err = gitqlite.DisplayDB(rows, os.Stdout, format)
+		handleError(err)
 	},
 }
 
