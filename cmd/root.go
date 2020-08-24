@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
-	"github.com/augmentable-dev/askgit/tui"
+	"github.com/augmentable-dev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
