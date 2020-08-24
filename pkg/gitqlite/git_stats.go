@@ -139,6 +139,9 @@ func (vc *statsCursor) Next() error {
 	//for file, err := vc.fileIter.Next();err != io.EOF &&
 	if len(vc.stats) > vc.statIndex+1 {
 		vc.statIndex++
+		if vc.stats[vc.statIndex].Addition == 0 && vc.stats[vc.statIndex].Deletion == 0 {
+			return vc.Next()
+		}
 		return nil
 	}
 	vc.statIndex = 0

@@ -25,14 +25,18 @@ func TestGoGitStats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	statsCount := 1
+	statsCount := 0
 	err = commitChecker.ForEach(func(c *object.Commit) error {
 		x, err := c.Stats()
 		if err != nil {
 			return err
 		}
-		for range x {
-			statsCount++
+		for _, i := range x {
+			if i.Addition == 0 && i.Deletion == 0 {
+
+			} else {
+				statsCount++
+			}
 		}
 		return nil
 	})
