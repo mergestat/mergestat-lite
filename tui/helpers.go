@@ -2,54 +2,14 @@ package tui
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"text/tabwriter"
 	"time"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
-	"github.com/go-git/go-git/v5"
 
 	"github.com/jroimartin/gocui"
 )
-
-//Gets the repo from the provided path(can be local ssh or http(s))
-func GetRepo(remote string) (string, error) {
-
-	path, err := filepath.Abs(remote)
-	if err != nil {
-		return "", err
-	}
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		dir, err := ioutil.TempDir("", "repo")
-		if err != nil {
-			return "", err
-		}
-		_, err = git.PlainClone(dir, false, &git.CloneOptions{
-			URL: remote,
-		})
-		if err != nil {
-			return "", err
-		}
-		path = dir
-	} else {
-		repository, err := git.PlainOpen(path)
-		if err != nil {
-			return "", err
-		}
-
-		err = repository.Fetch(&git.FetchOptions{
-			Force: true,
-		})
-		if err != nil {
-			//do nothing
-			fmt.Print()
-		}
-	}
-
-	return path, nil
-}
 
 //Displays a selection of information into the Info view
 func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Duration) error {
@@ -59,7 +19,7 @@ func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	w := tabwriter.NewWriter(out, 0, 0, 1, ' ', 0)
 	out.Clear()
-	path, err := filepath.Abs(repoPath)
+	path, err := filepath.Abs(usrInpt)
 	if err != nil {
 		return err
 	}

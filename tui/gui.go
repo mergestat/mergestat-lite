@@ -13,6 +13,7 @@ var (
 	active   = 0
 	query    = ""
 	repoPath = ""
+	usrInpt  = ""
 	//conf     ymlConfig
 )
 
@@ -51,11 +52,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
-		path, err := GetRepo(repoPath)
-		if err != nil {
-			return err
-		}
-		git, err := gitqlite.New(path, &gitqlite.Options{})
+		git, err := gitqlite.New(repoPath, &gitqlite.Options{})
 		if err != nil {
 			return err
 		}
@@ -99,14 +96,15 @@ func test(g *gocui.Gui, v *gocui.View) error {
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
-func RunGUI(repo string, q string) {
+func RunGUI(repo string, directory string, q string) {
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer g.Close()
 	query = q
-	repoPath = repo
+	repoPath = directory
+	usrInpt = repo
 	g.Highlight = true
 	g.Cursor = true
 	g.SelFgColor = gocui.ColorGreen

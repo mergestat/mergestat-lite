@@ -132,11 +132,7 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 		query = input.Buffer()
-		path, err := GetRepo(repoPath)
-		if err != nil {
-			return err
-		}
-		git, err := gitqlite.New(path, &gitqlite.Options{})
+		git, err := gitqlite.New(repoPath, &gitqlite.Options{})
 		if err != nil {
 			return err
 		}
