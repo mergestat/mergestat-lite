@@ -92,22 +92,6 @@ By default, output will be an ASCII table.
 Use `--format json` or `--format csv` for alternatives.
 See `-h` for all the options.
 
-
-#### Using the GUI
-```
-gitqlite --gui
-```
-
-Will use gitqlite's Command line GUI(powered by gocui)
-Cycling from the query to the Output view will run gitqlite
-If --repo is not specified default is cwd
-
-Hotkeys:
-Tab - Cycle to next view
-Ctrl+C - Close GUI
-Ctrl+Q - Delete contents of Query field
-
-
 ### Tables
 
 #### `commits`
@@ -219,3 +203,11 @@ SELECT
     author_email
 FROM commits GROUP BY author_email ORDER BY commits
 ```
+
+
+#### Interactive mode
+```
+askgit --interactive
+```
+
+Will display a basic terminal UI for composing and executing queries, powered by [gocui](https://github.com/jroimartin/gocui).

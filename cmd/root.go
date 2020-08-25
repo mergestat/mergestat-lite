@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
-	"github.com/augmentable-dev/askgit/tui"
+	"github.com/augmentable-dev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
@@ -19,14 +19,14 @@ var (
 	repo       string
 	format     string
 	skipGitCLI bool
-	gui        bool
+	cui        bool
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
-	rootCmd.PersistentFlags().BoolVarP(&gui, "interactive", "i", false, "whether to use the CLUI defaults to false")
+	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interacive mode, which displays a terminal UI")
 
 }
 
@@ -94,7 +94,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			handleError(err)
 		}
-		if gui {
+		if cui {
 			tui.RunGUI(repo, dir, query)
 			os.Exit(0)
 		}
