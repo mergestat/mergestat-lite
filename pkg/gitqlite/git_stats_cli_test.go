@@ -61,7 +61,7 @@ func TestStats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Problem at row %d", index)
 	}
-
+	//TODO for some reason things are occasionally +- 1 from the expected. Could be problem with differences in how git parses or just how I'm doing... Figure that out
 	expected = statsCount
 	if (numRows[0][0]) != fmt.Sprint(expected+1) && (numRows[0][0]) != fmt.Sprint(expected-1) && (numRows[0][0]) != fmt.Sprint(expected) {
 		t.Fatalf("expected %d rows got: %s", expected, numRows[0][0])
