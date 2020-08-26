@@ -77,11 +77,12 @@ func TestGoGitStats(t *testing.T) {
 		t.Fatalf("expected %d rows got: %d", expected, numRows)
 	}
 
-	rows, err = instance.DB.Query("SELECT commit_id, file FROM stats")
+	//TODO: Value Checking instead of just making sure the number of rows and columns are correct
+	/*rows, err = instance.DB.Query("SELECT commit_id, file, additions,deletions FROM stats")
 	if err != nil {
 		t.Fatal(err)
 	}
-	/*rowNum, contents, err := GetContents(rows)
+	rowNum, contents, err := GetContents(rows)
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
@@ -99,39 +100,39 @@ func TestGoGitStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	 for the range of contents check against each stat to see if there are discrepancies
-	 for i, c := range contents {
-	 	stats, err := commit.Stats()
-	 	if err != nil {
-	 		t.Fatal(err)
-	 	}
+	//for the range of contents check against each stat to see if there are discrepancies
+	for i, c := range contents {
+		stats, err := commit.Stats()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(stats) > 0 {
+			if commit.ID().String() != c[0] {
+				t.Fatalf("expected %s %d %d at row %d got %s %s %s", commit.ID().String(), stats[statsIndex].Addition, stats[statsIndex].Deletion, i, c[0], c[2], c[3])
+			}
+			// if stats[statsIndex].Name != c[1] && c[1] != "NULL" {
+			// 	t.Fatalf("expected %s, %d, %d at row %d got %s", stats[statsIndex].Name, stats[statsIndex].Addition, stats[statsIndex].Deletion, i, c[1])
+			// }
+			if statsIndex < len(stats) {
+				statsIndex++
+			}
+			for statsIndex < len(stats) && stats[statsIndex].Addition == 0 && stats[statsIndex].Deletion == 0 {
+				statsIndex++
+			}
+		}
+		if statsIndex > len(stats)-1 {
+			commit, err = commitChecker.Next()
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					t.Fatal(err)
+				}
+			}
+			statsIndex = 0
+		}
 
-	 	if commit.ID().String() != c[0] {
-	 		t.Fatalf("expected %s %d %d at row %d got %s", commit.ID().String(), stats[statsIndex].Addition, stats[statsIndex].Deletion, i, c[0])
-	 	}
-	 	if stats[statsIndex].Name != c[1] && c[1] != "NULL" {
-	 		t.Fatalf("expected %s, %d, $d, at row %d got %d %s", stats[statsIndex].Name, stats[statsIndex].Addition, stats[statsIndex].Deletion, i, c[1])
-	 	}
-	 	if statsIndex < len(stats)-1 {
-	 		statsIndex++
-	 	}
-	 	for stats[statsIndex].Addition == 0 && stats[statsIndex].Deletion == 0 && statsIndex < len(stats)-1 {
-	 		statsIndex++
-	 	}
-	 	if statsIndex > len(stats)-1 {
-	 		commit, err = commitChecker.Next()
-	 		if err != nil {
-	 			if err == io.EOF {
-	 				break
-	 			} else {
-	 				t.Fatal(err)
-	 			}
-	 		}
-	 		statsIndex = 0
-	 	}
-
-	 }
-	*/
+	}*/
 
 }
 func BenchmarkGoGitstatsCounts(b *testing.B) {
