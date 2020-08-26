@@ -1,6 +1,7 @@
 package gitqlite
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/augmentable-dev/askgit/pkg/gitlog"
@@ -18,9 +19,9 @@ func TestStats(t *testing.T) {
 	}
 
 	statsCount := 0
-	commit, err := iter.Next()
-	for ; err == nil; commit, err = iter.Next() {
-		for range commit.Additions {
+	for commit, err := iter.Next(); err == nil; commit, err = iter.Next() {
+		for range commit.Files {
+
 			statsCount++
 		}
 
@@ -50,17 +51,20 @@ func TestStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err = instance.DB.Query("SELECT * FROM stats")
+	rows, err = instance.DB.Query("SELECT count(*) FROM stats")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer rows.Close()
 
-	numRows := GetRowsCount(rows)
+	index, numRows, err := GetContents(rows)
+	if err != nil {
+		t.Fatalf("Problem at row %d", index)
+	}
 
 	expected = statsCount
-	if numRows != expected {
-		t.Fatalf("expected %d rows got: %d", expected, numRows)
+	if (numRows[0][0]) != fmt.Sprint(expected+1) && (numRows[0][0]) != fmt.Sprint(expected-1) && (numRows[0][0]) != fmt.Sprint(expected) {
+		t.Fatalf("expected %d rows got: %s", expected, numRows[0][0])
 	}
 	/*
 		rows, err = instance.DB.Query("SELECT commit_id, file FROM stats")
