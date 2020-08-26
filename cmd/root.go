@@ -64,6 +64,8 @@ var rootCmd = &cobra.Command{
 		} else if info.Mode()&os.ModeCharDevice == 0 {
 			query, err = readStdin()
 			handleError(err)
+		} else if cui {
+			query = ""
 		} else {
 			err = cmd.Help()
 			handleError(err)
@@ -96,7 +98,7 @@ var rootCmd = &cobra.Command{
 		}
 		if cui {
 			tui.RunGUI(repo, dir, query)
-			os.Exit(0)
+			return 
 		}
 		g, err := gitqlite.New(dir, &gitqlite.Options{
 			SkipGitCLI: skipGitCLI,
