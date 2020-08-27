@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/augmentable-dev/askgit/pkg/gitlog"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 func TestStats(t *testing.T) {
@@ -118,6 +119,10 @@ func TestStats(t *testing.T) {
 		}
 	*/
 }
+// func Next(o object.CommitIter, s object.FileStats, index int) {
+// 	//Use this much like it is used in git_stats_cli to go to the next commit/stat selectively
+
+// }
 func BenchmarkStatsCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
