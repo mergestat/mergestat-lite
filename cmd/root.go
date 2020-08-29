@@ -93,7 +93,11 @@ var rootCmd = &cobra.Command{
 		}
 		fmt.Println(":", dir, ":")
 		fmt.Println(repo)
-		dir, err = filepath.Abs(dir)
+		if dir == "" {
+			dir, err = filepath.Abs(repo)
+		} else {
+			dir, err = filepath.Abs(dir)
+		}
 		if err != nil {
 			handleError(err)
 		}
