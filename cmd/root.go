@@ -76,7 +76,7 @@ var rootCmd = &cobra.Command{
 		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
 		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
 			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
-				dir, err := ioutil.TempDir("", "repo")
+				dir, err = ioutil.TempDir("", "repo")
 				handleError(err)
 
 				_, err = git.PlainClone(dir, false, &git.CloneOptions{
@@ -91,14 +91,15 @@ var rootCmd = &cobra.Command{
 
 			}
 		}
-
+		fmt.Println(":", dir, ":")
+		fmt.Println(repo)
 		dir, err = filepath.Abs(dir)
 		if err != nil {
 			handleError(err)
 		}
 		if cui {
 			tui.RunGUI(repo, dir, query)
-			return 
+			return
 		}
 		g, err := gitqlite.New(dir, &gitqlite.Options{
 			SkipGitCLI: skipGitCLI,
