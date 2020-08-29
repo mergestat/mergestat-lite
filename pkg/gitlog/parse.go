@@ -147,23 +147,9 @@ func Execute(repoPath string) (*CommitIter, error) {
 		return nil, err
 	}
 
-	// stderr, err := cmd.StderrPipe()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
-
-	// stderr, err = ioutil.ReadAll(stderr)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if err := cmd.Wait(); err != nil {
-	// 	return nil, err
-	// }
 
 	return newCommitIter(stdout), nil
 }

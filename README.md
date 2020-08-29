@@ -203,3 +203,11 @@ SELECT
     author_email
 FROM commits GROUP BY author_email ORDER BY commits
 ```
+
+
+#### Interactive mode
+```
+askgit --interactive
+```
+
+Will display a basic terminal UI for composing and executing queries, powered by [gocui](https://github.com/jroimartin/gocui).
