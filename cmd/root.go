@@ -91,8 +91,6 @@ var rootCmd = &cobra.Command{
 
 			}
 		}
-		fmt.Println(":", dir, ":")
-		fmt.Println(repo)
 		if dir == "" {
 			dir, err = filepath.Abs(repo)
 		} else {
