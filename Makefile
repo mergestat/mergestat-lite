@@ -4,6 +4,9 @@ vet:
 build:
 	go build -v -tags=sqlite_vtable askgit.go
 
+xbuild:
+	xgo -tags="sqlite_vtable" -targets="linux/386,linux/amd64,darwin/*" .
+
 lint:
 	golangci-lint run --build-tags sqlite_vtable
 
