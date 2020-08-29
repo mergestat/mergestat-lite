@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
-
 	"github.com/jroimartin/gocui"
 )
 
