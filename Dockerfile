@@ -10,5 +10,6 @@ WORKDIR /app/
 RUN mkdir /repo
 COPY --from=builder /app/askgit .
 
-ENTRYPOINT ["./askgit", "--repo", "/repo"]
+RUN apt-get update && apt-get install -y git
 
+ENTRYPOINT ["./askgit", "--repo", "/repo"]
