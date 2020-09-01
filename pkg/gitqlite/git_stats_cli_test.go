@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/augmentable-dev/askgit/pkg/gitlog"
-	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 func TestStats(t *testing.T) {
@@ -43,7 +42,7 @@ func TestStats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := 5
+	expected := 4
 	if len(columns) != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
 	}
@@ -119,6 +118,7 @@ func TestStats(t *testing.T) {
 		}
 	*/
 }
+
 // func Next(o object.CommitIter, s object.FileStats, index int) {
 // 	//Use this much like it is used in git_stats_cli to go to the next commit/stat selectively
 

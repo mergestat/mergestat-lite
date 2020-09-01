@@ -55,7 +55,7 @@ func TestGoGitStats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := 5
+	expected := 4
 	if len(columns) != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
 	}
