@@ -18,7 +18,14 @@ More in-depth examples and documentation can be found below.
 
 ## Installation
 
-***More Installation Instructions Coming Soon***
+### Homebrew
+
+```
+brew tap augmentable-dev/askgit
+brew install askgit
+```
+
+### Go
 
 ```
 go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit

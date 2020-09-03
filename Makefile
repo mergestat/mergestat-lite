@@ -6,6 +6,8 @@ build:
 
 xbuild:
 	xgo -tags="sqlite_vtable" -targets="linux/386,linux/amd64,darwin/*" .
+	ls askgit-* | xargs -I{} tar -czf "{}.tar.gz" "{}"
+	shasum -a 256 askgit-*.tar.gz > checksums.txt
 
 lint:
 	golangci-lint run --build-tags sqlite_vtable
