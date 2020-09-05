@@ -53,9 +53,9 @@ func TestStats(t *testing.T) {
 		if strings.Compare(vc.current.SHA, c[0]) != 0 {
 			t.Fatalf("expected %s at row %d got %s", vc.current.SHA, i, c[0])
 		}
-		if len(vc.current.Files) > vc.statIndex {
-			if vc.current.Files[vc.statIndex] != c[1] && c[1] != "NULL" {
-				t.Fatalf("expected %s at row %d got %s", vc.current.Files[vc.statIndex], i, c[1])
+		if len(vc.current.Stats) > vc.statIndex {
+			if vc.current.Stats[vc.statIndex].File != c[1] && c[1] != "NULL" {
+				t.Fatalf("expected %s at row %d got %s", vc.current.Stats[vc.statIndex].File, i, c[1])
 			}
 		}
 		err = vc.Next()
