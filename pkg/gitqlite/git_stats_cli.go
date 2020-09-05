@@ -77,7 +77,7 @@ func (vc *StatsCLICursor) Filter(idxNum int, idxStr string, vals []interface{}) 
 }
 
 func (vc *StatsCLICursor) Next() error {
-	if vc.statIndex+1 < len(vc.current.Files) {
+	if vc.statIndex+1 < len(vc.current.Stats) {
 		vc.statIndex++
 		return nil
 	}
@@ -94,7 +94,7 @@ func (vc *StatsCLICursor) Next() error {
 	vc.statIndex = 0
 
 	vc.current = commit
-	if len(vc.current.Files) == 0 {
+	if len(vc.current.Stats) == 0 {
 		err = vc.Next()
 		if err != nil {
 			return err
@@ -115,22 +115,22 @@ func (vc *StatsCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(current.SHA)
 
 	case 1:
-		if len(current.Files) > vc.statIndex {
-			c.ResultText(current.Files[vc.statIndex])
+		if len(current.Stats) > vc.statIndex {
+			c.ResultText(current.Stats[vc.statIndex].File)
 		} else {
 			c.ResultText("")
 		}
 	case 2:
-		if len(current.Deletions) > vc.statIndex {
+		if len(current.Stats) > vc.statIndex {
 
-			c.ResultInt(current.Deletions[vc.statIndex])
+			c.ResultInt(current.Stats[vc.statIndex].Deletions)
 		} else {
 			c.ResultInt(0)
 		}
 	case 3:
-		if len(current.Additions) > vc.statIndex {
+		if len(current.Stats) > vc.statIndex {
 
-			c.ResultInt(current.Additions[vc.statIndex])
+			c.ResultInt(current.Stats[vc.statIndex].Additions)
 		} else {
 			c.ResultInt(0)
 		}

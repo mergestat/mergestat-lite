@@ -20,9 +20,13 @@ type Commit struct {
 	CommitterName  string
 	CommitterEmail string
 	CommitterWhen  time.Time
-	Additions      []int
-	Deletions      []int
-	Files          []string
+	// use a struct instead of add,del,files maybe use a map with filename as key and additions and deletions
+	Stats []Stat
+}
+type Stat struct {
+	Additions int
+	Deletions int
+	File      string
 }
 type Result []*Commit
 
@@ -100,24 +104,27 @@ func (iter *CommitIter) Next() (*Commit, error) {
 			iter.current.Message = strings.TrimPrefix(line, message)
 		case strings.TrimSpace(line) == "": // ignore empty lines
 		default:
+			additions := 0
+			deletions := 0
+			file := ""
+			var err error
 			s := strings.Split(line, "\t")
 			if s[0] != "-" {
-				additions, err := strconv.Atoi(s[0])
+				additions, err = strconv.Atoi(s[0])
 				if err != nil {
 					return nil, err
 				}
-				iter.current.Additions = append(iter.current.Additions, additions)
 			}
 			if s[1] != "-" {
-				deletions, err := strconv.Atoi(s[1])
+				deletions, err = strconv.Atoi(s[1])
 				if err != nil {
 					return nil, err
 				}
-				iter.current.Deletions = append(iter.current.Deletions, deletions)
 			}
 			if s[2] != "-" {
-				iter.current.Files = append(iter.current.Files, s[2])
+				file = s[2]
 			}
+			iter.current.Stats = append(iter.current.Stats, Stat{Additions: additions, Deletions: deletions, File: file})
 		}
 	}
 
