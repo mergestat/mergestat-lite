@@ -1,7 +1,7 @@
 package gitqlite
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/augmentable-dev/askgit/pkg/gitlog"
@@ -17,21 +17,11 @@ func TestStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	statsCount := 0
-	for commit, err := iter.Next(); err == nil; commit, err = iter.Next() {
-		for range commit.Files {
-
-			statsCount++
-		}
-
-		// if a != 0 || commit.Deletions[i] != 0 || commit.Files[i] != "" {
-		// 	statsCount++
-		// }
-
+	commit, err := iter.Next()
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	//checks commits
+	vc := StatsCLICursor{repoPath: fixtureRepoDir, iter: iter, current: commit, statIndex: 0}
 	rows, err := instance.DB.Query("SELECT * FROM stats")
 	if err != nil {
 		t.Fatal(err)
@@ -41,88 +31,42 @@ func TestStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	expected := 4
 	if len(columns) != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
 	}
-	//for some reason rows close after above statement and ya gotta query again... and create the db again -_-
+	//instance closes after read and needs to be reopened
 	instance, err = New(fixtureRepoDir, &Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err = instance.DB.Query("SELECT count(*) FROM stats")
+
+	rows, err = instance.DB.Query("SELECT commit_id, file FROM stats")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer rows.Close()
-
-	index, numRows, err := GetContents(rows)
+	rowNum, contents, err := GetContents(rows)
 	if err != nil {
-		t.Fatalf("Problem at row %d", index)
+		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
-	//TODO for some reason things are occasionally +- 1 from the expected. Could be problem with differences in how git parses or just how I'm doing... Figure that out
-	expected = statsCount
-	if (numRows[0][0]) != fmt.Sprint(expected+1) && (numRows[0][0]) != fmt.Sprint(expected-1) && (numRows[0][0]) != fmt.Sprint(expected) {
-		t.Fatalf("expected %d rows got: %s", expected, numRows[0][0])
+	for i, c := range contents {
+		if strings.Compare(vc.current.SHA, c[0]) != 0 {
+			t.Fatalf("expected %s at row %d got %s", vc.current.SHA, i, c[0])
+		}
+		if len(vc.current.Files) > vc.statIndex {
+			if vc.current.Files[vc.statIndex] != c[1] && c[1] != "NULL" {
+				t.Fatalf("expected %s at row %d got %s", vc.current.Files[vc.statIndex], i, c[1])
+			}
+		}
+		err = vc.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+
 	}
-	/*
-		rows, err = instance.DB.Query("SELECT commit_id, file FROM stats")
-		if err != nil {
-			t.Fatal(err)
-		}
-		rowNum, contents, err := GetContents(rows)
-		if err != nil {
-			t.Fatalf("err %d at row Number %d", err, rowNum)
-		}
-		statsIndex := 0
-		// reset commitchecker
-		commitChecker, err = fixtureRepo.Log(&git.LogOptions{
-			From:  headRef.Hash(),
-			Order: git.LogOrderCommitterTime,
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
 
-		commit, err := commitChecker.Next()
-		if err != nil {
-			t.Fatal(err)
-		}
-		for i, c := range contents {
-			stats, err := commit.Stats()
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if commit.ID().String() != c[0] {
-				t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
-			}
-			if stats[statsIndex].Name != c[1] && c[1] != "NULL" {
-				t.Fatalf("expected %s at row %d got %s", stats[statsIndex].Name, i, c[1])
-			}
-			if statsIndex < len(stats)-1 {
-				statsIndex++
-			} else {
-				commit, err = commitChecker.Next()
-				if err != nil {
-					if err == io.EOF {
-						break
-					} else {
-						t.Fatal(err)
-					}
-				}
-				statsIndex = 0
-			}
-
-		}
-	*/
 }
 
-// func Next(o object.CommitIter, s object.FileStats, index int) {
-// 	//Use this much like it is used in git_stats_cli to go to the next commit/stat selectively
-
-// }
 func BenchmarkStatsCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})

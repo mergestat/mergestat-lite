@@ -39,7 +39,7 @@ func (m *gitStatsCLIModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlit
 func (m *gitStatsCLIModule) DestroyModule() {}
 
 func (v *gitStatsCLITable) Open() (sqlite3.VTabCursor, error) {
-	return &statsCLICursor{repoPath: v.repoPath}, nil
+	return &StatsCLICursor{repoPath: v.repoPath}, nil
 }
 
 func (v *gitStatsCLITable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -53,14 +53,14 @@ func (v *gitStatsCLITable) Disconnect() error {
 }
 func (v *gitStatsCLITable) Destroy() error { return nil }
 
-type statsCLICursor struct {
+type StatsCLICursor struct {
 	repoPath  string
 	iter      *gitlog.CommitIter
 	current   *gitlog.Commit
 	statIndex int
 }
 
-func (vc *statsCLICursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+func (vc *StatsCLICursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	iter, err := gitlog.Execute(vc.repoPath)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (vc *statsCLICursor) Filter(idxNum int, idxStr string, vals []interface{}) 
 	return nil
 }
 
-func (vc *statsCLICursor) Next() error {
+func (vc *StatsCLICursor) Next() error {
 	if vc.statIndex+1 < len(vc.current.Files) {
 		vc.statIndex++
 		return nil
@@ -103,11 +103,11 @@ func (vc *statsCLICursor) Next() error {
 	return nil
 }
 
-func (vc *statsCLICursor) EOF() bool {
+func (vc *StatsCLICursor) EOF() bool {
 	return vc.current == nil
 }
 
-func (vc *statsCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
+func (vc *StatsCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	current := vc.current
 	switch col {
 	case 0:
@@ -138,10 +138,10 @@ func (vc *statsCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func (vc *statsCLICursor) Rowid() (int64, error) {
+func (vc *StatsCLICursor) Rowid() (int64, error) {
 	return int64(0), nil
 }
 
-func (vc *statsCLICursor) Close() error {
+func (vc *StatsCLICursor) Close() error {
 	return nil
 }
