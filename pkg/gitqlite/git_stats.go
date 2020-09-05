@@ -48,7 +48,7 @@ func (v *gitStatsTable) Open() (sqlite3.VTabCursor, error) {
 	}
 	v.repo = repo
 
-	return &statsCursor{repo: v.repo}, nil
+	return &StatsCursor{repo: v.repo}, nil
 }
 
 func (v *gitStatsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -63,7 +63,7 @@ func (v *gitStatsTable) Disconnect() error {
 }
 func (v *gitStatsTable) Destroy() error { return nil }
 
-type statsCursor struct {
+type StatsCursor struct {
 	repo       *git.Repository
 	current    *object.Commit
 	stats      object.FileStats
@@ -71,7 +71,7 @@ type statsCursor struct {
 	commitIter object.CommitIter
 }
 
-func (vc *statsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
+func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	commit := vc.current
 
 	switch col {
@@ -97,7 +97,7 @@ func (vc *statsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func (vc *statsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	headRef, err := vc.repo.Head()
 	if err != nil {
 		if err == plumbing.ErrReferenceNotFound {
@@ -130,9 +130,10 @@ func (vc *statsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	return nil
 }
 
-func (vc *statsCursor) Next() error {
+func (vc *StatsCursor) Next() error {
 	// go to next file
 	//for file, err := vc.fileIter.Next();err != io.EOF &&
+	// if there are stats left go to the next stat
 	if len(vc.stats) > vc.statIndex+1 {
 		vc.statIndex++
 		if vc.stats[vc.statIndex].Addition == 0 && vc.stats[vc.statIndex].Deletion == 0 {
@@ -151,6 +152,7 @@ func (vc *statsCursor) Next() error {
 		return err
 	}
 
+	// edge case of initial commit
 	if commit.NumParents() == 0 {
 		files, err := commit.Files()
 		if err != nil {
@@ -165,6 +167,7 @@ func (vc *statsCursor) Next() error {
 			stat = append(stat, object.FileStat{Name: x.Name, Addition: len(lines), Deletion: 0})
 		}
 		vc.stats = stat
+		//case for when out of stats... go to next commit
 	} else {
 		stats, err := commit.Stats()
 		if err != nil {
@@ -182,15 +185,15 @@ func (vc *statsCursor) Next() error {
 	return nil
 }
 
-func (vc *statsCursor) EOF() bool {
+func (vc *StatsCursor) EOF() bool {
 	return vc.current == nil
 }
 
-func (vc *statsCursor) Rowid() (int64, error) {
+func (vc *StatsCursor) Rowid() (int64, error) {
 	return int64(0), nil
 }
 
-func (vc *statsCursor) Close() error {
+func (vc *StatsCursor) Close() error {
 	if vc.commitIter != nil {
 		vc.commitIter.Close()
 	}
