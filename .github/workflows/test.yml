@@ -20,7 +20,7 @@ jobs:
         cd ~/libgit2
         git checkout v1.0.1
         mkdir build && cd build
-        sudo cmake .. -DBUILD_CLAR=0
+        sudo cmake .. -DBUILD_CLAR=0 -DBUILD_SHARED_LIBS=0
         sudo cmake --build . --target install
 
     - name: Vet
