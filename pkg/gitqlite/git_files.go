@@ -23,7 +23,8 @@ func (m *gitTreeModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 				tree_id TEXT,
 				file_id TEXT,
 				name TEXT,
-				contents TEXT
+				contents TEXT,
+				executable INT
 				
 			)`, args[0]))
 	if err != nil {
@@ -48,17 +49,7 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(file.commitID)
 	case 1:
 		//tree id
-		commitID, err := git.NewOid(file.commitID)
-		if err != nil {
-			return err
-		}
-
-		commit, err := vc.repo.LookupCommit(commitID)
-		if err != nil {
-			return err
-		}
-		c.ResultText(commit.TreeId().String())
-		commit.Free()
+		c.ResultText(file.treeID)
 	case 2:
 		//file id
 		c.ResultText(file.Blob.Id().String())
@@ -67,7 +58,10 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(path.Join(file.path, file.Name))
 	case 4:
 		c.ResultText(string(file.Contents()))
+	case 5:
+		c.ResultBool(file.Filemode == git.FilemodeBlobExecutable)
 	}
+
 	return nil
 }
 

@@ -50,8 +50,8 @@ func TestFileCounts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(columns) != 5 {
-		t.Fatalf("expected %d columns got : %d", 5, len(columns))
+	if len(columns) != 6 {
+		t.Fatalf("expected %d columns got : %d", 6, len(columns))
 	}
 	commitChecker, err = fixtureRepo.Log(&git.LogOptions{
 		From:  headRef.Hash(),

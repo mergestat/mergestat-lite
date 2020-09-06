@@ -8,7 +8,8 @@ import (
 
 type treeEntryWithPath struct {
 	*git.TreeEntry
-	path string
+	path   string
+	treeID string
 }
 
 type commitFile struct {
@@ -84,12 +85,14 @@ func (iter *commitFileIter) Next() (*commitFile, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer tree.Free()
 
 	iter.treeEntries = make([]*treeEntryWithPath, 0)
 	iter.currentTreeEntryIndex = 0
+	treeID := tree.Id().String()
 	err = tree.Walk(func(path string, treeEntry *git.TreeEntry) int {
 		if treeEntry.Type == git.ObjectBlob {
-			iter.treeEntries = append(iter.treeEntries, &treeEntryWithPath{treeEntry, path})
+			iter.treeEntries = append(iter.treeEntries, &treeEntryWithPath{treeEntry, path, treeID})
 		}
 		return 0
 	})

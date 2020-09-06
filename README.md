@@ -128,15 +128,14 @@ The `files` table iterates over _ALL_ the files in a commit history, by default 
 The full table is every file in every tree of a commit history.
 Use the `commit_id` column to filter for files that belong to the work tree of a specific commit.
 
-| Column    | Type |
-|-----------|------|
-| commit_id | TEXT |
-| tree_id   | TEXT |
-| file_id   | TEXT |
-| name      | TEXT |
-| mode      | TEXT |
-| type      | TEXT |
-| contents  | TEXT |
+| Column     | Type |
+|------------|------|
+| commit_id  | TEXT |
+| tree_id    | TEXT |
+| file_id    | TEXT |
+| name       | TEXT |
+| contents   | TEXT |
+| executable | INT  |
 
 
 #### `refs`
