@@ -20,9 +20,8 @@ jobs:
         cd libgit2
         git checkout v1.0.1
         mkdir build && cd build
-        cmake ..
-        cmake .. -DCMAKE_INSTALL_PREFIX=/install/prefix
-        cmake --build . --target install
+        sudo cmake .. -DCMAKE_INSTALL_PREFIX=/install/prefix
+        sudo cmake --build . --target install
 
     - name: Vet
       run: make vet
