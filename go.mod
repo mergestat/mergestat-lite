@@ -7,6 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/jroimartin/gocui v0.4.0
+	github.com/libgit2/git2go/v30 v30.0.9
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v1.14.2
 	github.com/nsf/termbox-go v0.0.0-20200418040025-38ba6e5628f1 // indirect

@@ -1,14 +1,12 @@
 package gitqlite
 
 import (
+	"bytes"
 	"fmt"
-	"io"
-	"strings"
+	"log"
 	"time"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -54,7 +52,7 @@ func (m *gitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 func (m *gitLogModule) DestroyModule() {}
 
 func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.PlainOpen(v.repoPath)
+	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -77,25 +75,25 @@ func (v *gitLogTable) Destroy() error { return nil }
 
 type commitCursor struct {
 	repo       *git.Repository
-	current    *object.Commit
-	commitIter object.CommitIter
+	current    *git.Commit
+	commitIter *git.RevWalk
 }
 
 func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	commit := vc.current
-	author := commit.Author
-	committer := commit.Committer
+	author := commit.Author()
+	committer := commit.Committer()
 
 	switch col {
 	case 0:
 		//commit id
-		c.ResultText(commit.ID().String())
+		c.ResultText(commit.Id().String())
 	case 1:
 		//commit message
-		c.ResultText(commit.Message)
+		c.ResultText(commit.Message())
 	case 2:
 		//commit summary
-		c.ResultText(strings.Split(commit.Message, "\n")[0])
+		c.ResultText(commit.Summary())
 	case 3:
 		//commit author name
 		c.ResultText(author.Name)
@@ -116,34 +114,28 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(committer.When.Format(time.RFC3339Nano))
 	case 9:
 		//parent_id
-		if int(commit.NumParents()) > 0 {
-			p, err := commit.Parent(0)
-			if err != nil {
-				return err
-			}
-			c.ResultText(p.ID().String())
+		if int(commit.ParentCount()) > 0 {
+			p := commit.Parent(0)
+			c.ResultText(p.Id().String())
+			p.Free()
 		} else {
 			c.ResultNull()
 		}
 	case 10:
 		//parent_count
-		c.ResultInt(int(commit.NumParents()))
+		c.ResultInt(int(commit.ParentCount()))
 	case 11:
 		//tree_id
-		tree, err := vc.current.Tree()
-		if err != nil {
-			return err
-		}
-		c.ResultText(tree.ID().String())
+		c.ResultText(commit.TreeId().String())
 
 	case 12:
-		additions, _, err := statCalc(commit)
+		additions, _, err := statCalc(vc.repo, commit)
 		if err != nil {
 			return err
 		}
 		c.ResultInt(additions)
 	case 13:
-		_, deletions, err := statCalc(commit)
+		_, deletions, err := statCalc(vc.repo, commit)
 		if err != nil {
 			return err
 		}
@@ -153,24 +145,27 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	headRef, err := vc.repo.Head()
-	if err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return nil
-		}
-		return err
-	}
-
-	iter, err := vc.repo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
+	revWalk, err := vc.repo.Walk()
 	if err != nil {
 		return err
 	}
-	vc.commitIter = iter
 
-	commit, err := iter.Next()
+	err = revWalk.PushHead()
+	if err != nil {
+		return err
+	}
+
+	revWalk.Sorting(git.SortNone)
+
+	vc.commitIter = revWalk
+
+	id := new(git.Oid)
+	err = revWalk.Next(id)
+	if err != nil {
+		return err
+	}
+
+	commit, err := vc.repo.LookupCommit(id)
 	if err != nil {
 		return err
 	}
@@ -181,15 +176,22 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 }
 
 func (vc *commitCursor) Next() error {
-	commit, err := vc.commitIter.Next()
+	id := new(git.Oid)
+	err := vc.commitIter.Next(id)
 	if err != nil {
-		if err == io.EOF {
+		if id.IsZero() {
+			vc.current.Free()
 			vc.current = nil
 			return nil
 		}
 		return err
 	}
 
+	commit, err := vc.repo.LookupCommit(id)
+	if err != nil {
+		return err
+	}
+	vc.current.Free()
 	vc.current = commit
 	return nil
 }
@@ -203,43 +205,84 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
-	if vc.commitIter != nil {
-		vc.commitIter.Close()
-	}
-	vc.current = nil
+	vc.repo.Free()
 	return nil
 }
 
-//statCalc calculates the number of additions/deletions and returns in format additions, deletions
-func statCalc(c *object.Commit) (int, int, error) {
-	additions, deletions := 0, 0
-	if c.NumParents() == 0 {
-		fileIter, err := c.Files()
-		if err != nil {
-			return 0, 0, err
-		}
-
-		err = fileIter.ForEach(func(file *object.File) error {
-			l, err := file.Lines()
-			if err != nil {
-				return err
-			}
-			additions += len(l)
-			return nil
-		})
-
-		if err != nil {
-			return 0, 0, err
-		}
-	} else {
-		stats, err := c.Stats()
-		if err != nil {
-			return 0, 0, err
-		}
-		for _, stat := range stats {
-			additions += stat.Addition
-			deletions += stat.Deletion
-		}
+// statCalc calculates the number of additions/deletions and returns in format additions, deletions
+func statCalc(r *git.Repository, c *git.Commit) (int, int, error) {
+	tree, err := c.Tree()
+	if err != nil {
+		return 0, 0, err
 	}
-	return additions, deletions, nil
+	defer tree.Free()
+
+	if c.ParentCount() == 0 {
+		var additions int
+		err = tree.Walk(func(path string, treeEntry *git.TreeEntry) int {
+			if treeEntry.Type == git.ObjectBlob {
+				blob, err := r.LookupBlob(treeEntry.Id)
+				if err != nil {
+					return 1
+				}
+				defer blob.Free()
+				contents := blob.Contents()
+				lineSep := []byte{'\n'}
+				additions += bytes.Count(contents, lineSep)
+			}
+			return 0
+		})
+		if err != nil {
+			return 0, 0, err
+		}
+		return additions, 0, nil
+
+	}
+
+	parent := c.Parent(0)
+	parentTree, err := parent.Tree()
+	if err != nil {
+		return 0, 0, err
+	}
+	defer parent.Free()
+	defer parentTree.Free()
+
+	diffOpt, err := git.DefaultDiffOptions()
+	if err != nil {
+		return 0, 0, err
+	}
+
+	diff, err := r.DiffTreeToTree(parentTree, tree, &diffOpt)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer func() {
+		err := diff.Free()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	diffFindOpt, err := git.DefaultDiffFindOptions()
+	if err != nil {
+		return 0, 0, err
+	}
+
+	err = diff.FindSimilar(&diffFindOpt)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	stats, err := diff.Stats()
+	if err != nil {
+		return 0, 0, err
+	}
+	defer func() {
+		err := stats.Free()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	return stats.Insertions(), stats.Deletions(), nil
 }
