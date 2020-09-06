@@ -138,7 +138,7 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 | type   | TEXT |
 | hash   | TEXT |
 
-#### 'stats'
+#### `stats`
 | Column    | Type |
 |-----------|------|
 | commit_id | TEXT |
