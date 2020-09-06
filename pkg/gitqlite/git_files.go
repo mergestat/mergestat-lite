@@ -116,6 +116,9 @@ func (vc *treeCursor) Next() error {
 
 func (vc *treeCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	iter, err := NewCommitTreeIter(vc.repo)
+	if err != nil {
+		return err
+	}
 
 	vc.iterator = iter
 
