@@ -16,10 +16,11 @@ import (
 
 //define flags in here
 var (
-	repo       string
-	format     string
-	skipGitCLI bool
-	cui        bool
+	repo         string
+	format       string
+	skipGitCLI   bool
+	cui          bool
+	defaultQuery = 0
 )
 
 func init() {
@@ -27,7 +28,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
 	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interacive mode, which displays a terminal UI")
-
+	rootCmd.PersistentFlags().IntVar(&defaultQuery, "query", 0, "used to pick a default query")
 }
 
 func handleError(err error) {
@@ -66,6 +67,12 @@ var rootCmd = &cobra.Command{
 			handleError(err)
 		} else if cui {
 			query = ""
+		} else if defaultQuery != 0 {
+			if len(tui.Queries) > defaultQuery-1 {
+				query = tui.Queries[defaultQuery-1].Query
+			} else {
+				fmt.Printf("Incorrect index Queries are from 1 - %d", len(tui.Queries))
+			}
 		} else {
 			err = cmd.Help()
 			handleError(err)
