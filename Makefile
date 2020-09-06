@@ -6,11 +6,6 @@ vet:
 build:
 	go build -v -tags=$(gotags) askgit.go
 
-xbuild:
-	xgo -tags=$(gotags) -targets="linux/386,linux/amd64,darwin/*" .
-	ls askgit-* | xargs -I{} tar -czf "{}.tar.gz" "{}"
-	shasum -a 256 askgit-*.tar.gz > checksums.txt
-
 lint:
 	golangci-lint run --build-tags $(gotags)
 
