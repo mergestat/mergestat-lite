@@ -16,11 +16,11 @@ jobs:
 
     - name: Install libgit2
       run: |
-        git clone https://github.com/libgit2/libgit2.git
-        cd libgit2
+        git clone https://github.com/libgit2/libgit2.git ~/libgit2
+        cd ~/libgit2
         git checkout v1.0.1
         mkdir build && cd build
-        sudo cmake .. -DCMAKE_INSTALL_PREFIX=/install/prefix
+        sudo cmake .. -DCMAKE_INSTALL_PREFIX=$PKG_CONFIG_PATH
         sudo cmake --build . --target install
 
     - name: Vet
