@@ -83,7 +83,7 @@ func TestGoGitCommits(t *testing.T) {
 	}
 
 }
-func BenchmarkGoGitCommitCounts(b *testing.B) {
+func BenchmarkCommitCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
 		if err != nil {

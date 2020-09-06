@@ -83,7 +83,7 @@ func TestCommitCounts(t *testing.T) {
 	}
 
 }
-func BenchmarkCommitCounts(b *testing.B) {
+func BenchmarkCLICommitCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		instance, err := New(fixtureRepoDir, &Options{})
 		if err != nil {
