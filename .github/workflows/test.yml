@@ -27,7 +27,7 @@ jobs:
       run: make vet
     
     - name: Test
-      run: make test
+      run: make test-cover
     
     - name: Upload coverage
       uses: codecov/codecov-action@v1
