@@ -20,7 +20,7 @@ jobs:
         cd ~/libgit2
         git checkout v1.0.1
         mkdir build && cd build
-        sudo cmake .. -DCMAKE_INSTALL_PREFIX=$PKG_CONFIG_PATH/libgit2
+        sudo cmake .. -DCMAKE_INSTALL_PREFIX=$PKG_CONFIG_PATH/libgit2 -DBUILD_CLAR=0
         sudo cmake --build . --target install
 
     - name: Vet
