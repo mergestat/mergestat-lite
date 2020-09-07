@@ -2,11 +2,8 @@ package gitqlite
 
 import (
 	"fmt"
-	"io"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/storer"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -14,18 +11,15 @@ type gitBranchModule struct{}
 
 type gitBranchTable struct {
 	repoPath string
-	repo     *git.Repository
 }
 
 func (m *gitBranchModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			name TEXT,
-			remote TEXT,
+			remote BOOL,
 			target TEXT,
-			type TEXT,
-			hash TEXT,
-			ref_name TEXT
+			head BOOL
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -44,25 +38,13 @@ func (m *gitBranchModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3
 func (m *gitBranchModule) DestroyModule() {}
 
 func (v *gitBranchTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.PlainOpen(v.repoPath)
-	if err != nil {
-		return nil, err
-	}
-	v.repo = repo
-
-	return &branchCursor{repo: v.repo}, nil
-
-}
-
-func remoteBranches(s storer.ReferenceStorer) (storer.ReferenceIter, error) {
-	refs, err := s.IterReferences()
+	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return storer.NewReferenceFilteredIter(func(ref *plumbing.Reference) bool {
-		return ref.Name().IsRemote()
-	}, refs), nil
+	return &branchCursor{repo: repo}, nil
+
 }
 
 func (v *gitBranchTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -72,118 +54,77 @@ func (v *gitBranchTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.In
 }
 
 func (v *gitBranchTable) Disconnect() error {
-	v.repo = nil
 	return nil
 }
 
 func (v *gitBranchTable) Destroy() error { return nil }
 
+type currentBranch struct {
+	*git.Branch
+	branchType git.BranchType
+}
+
 type branchCursor struct {
-	repo             *git.Repository
-	current          *plumbing.Reference
-	localBranchIter  storer.ReferenceIter
-	remoteBranchIter storer.ReferenceIter
+	repo    *git.Repository
+	current *currentBranch
+	iter    *git.BranchIterator
 }
 
 func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	branchRef := vc.current
-	branch, err := vc.repo.Branch(branchRef.Name().Short())
-	if err != nil {
-		switch col {
-		case 0:
-			//branch name
-			c.ResultText(branchRef.Name().Short())
-		case 1:
-			//branch remote
-			c.ResultText(branchRef.Name().String())
-		case 2:
-			//branch merge
-			c.ResultText(branchRef.Target().String())
-		case 3:
-			//branchger rebase
-			c.ResultText(branchRef.Type().String())
-		case 4:
-			//Branch hash
-			c.ResultText(branchRef.Hash().String())
-		case 5:
-			//BranchRef Name
-			c.ResultText(branchRef.Name().String())
+	branch := vc.current
+	switch col {
+	case 0:
+		//branch name
+		name, err := branch.Name()
+		if err != nil {
+			return err
 		}
-		return nil
-	} else {
-
-		switch col {
-		case 0:
-			//branch name
-			c.ResultText(branch.Name)
-		case 1:
-			//branch remote
-			c.ResultText(branch.Remote)
-		case 2:
-			//branch merge
-			c.ResultText(branchRef.Target().String())
-		case 3:
-			//branchger rebase
-			c.ResultText(branchRef.Type().String())
-		case 4:
-			//Branch hash
-			c.ResultText(branchRef.Hash().String())
-		case 5:
-			//BranchRef Name
-			c.ResultText(branchRef.Name().String())
+		c.ResultText(name)
+	case 1:
+		c.ResultBool(branch.IsRemote())
+	case 2:
+		switch branch.Type() {
+		case git.ReferenceSymbolic:
+			c.ResultText(branch.SymbolicTarget())
+		case git.ReferenceOid:
+			c.ResultText(branch.Target().String())
 		}
-		return nil
+	case 3:
+		isHead, err := branch.IsHead()
+		if err != nil {
+			return err
+		}
+		c.ResultBool(isHead)
 	}
+	return nil
 }
 
 func (vc *branchCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	localBranchIterator, err := vc.repo.Branches()
+	branchIter, err := vc.repo.NewBranchIterator(git.BranchAll)
 	if err != nil {
 		return err
 	}
 
-	vc.localBranchIter = localBranchIterator
+	vc.iter = branchIter
 
-	remoteBranchIterator, err := remoteBranches(vc.repo.Storer)
+	branch, branchType, err := vc.iter.Next()
 	if err != nil {
 		return err
 	}
 
-	vc.remoteBranchIter = remoteBranchIterator
-
-	branchRef, err := localBranchIterator.Next()
-	if err != nil {
-		if err == io.EOF {
-			return nil
-		}
-		return err
-	}
-
-	vc.current = branchRef
+	vc.current = &currentBranch{branch, branchType}
 
 	return nil
 }
 
 func (vc *branchCursor) Next() error {
-	branchRef, err := vc.localBranchIter.Next()
+	branch, branchType, err := vc.iter.Next()
 	if err != nil {
-		if err == io.EOF {
-			branchRef, err = vc.remoteBranchIter.Next()
-			if err != nil {
-				if err == io.EOF {
-					vc.current = nil
-					return nil
-				}
-				return err
-			}
-			vc.current = branchRef
-			return nil
-
-		} else {
-			return err
-		}
+		return err
 	}
-	vc.current = branchRef
+
+	vc.current.Free()
+	vc.current = &currentBranch{branch, branchType}
 	return nil
 }
 
@@ -196,11 +137,7 @@ func (vc *branchCursor) Rowid() (int64, error) {
 }
 
 func (vc *branchCursor) Close() error {
-	if vc.localBranchIter != nil {
-		vc.localBranchIter.Close()
-	}
-	if vc.remoteBranchIter != nil {
-		vc.remoteBranchIter.Close()
-	}
+	vc.current.Free()
+	vc.iter.Free()
 	return nil
 }
