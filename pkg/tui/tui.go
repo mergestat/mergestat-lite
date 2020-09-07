@@ -82,8 +82,8 @@ func layout(g *gocui.Gui) error {
 		// if err := yaml.Unmarshal(blob, &conf); err != nil {
 		// 	return err
 		// }
-		for i, s := range Queries {
-			fmt.Fprintf(v, "%d: %s \n", i, s.Description)
+		for i, _ := range Queries {
+			fmt.Fprintf(v, "%s\n", i)
 		}
 
 	}
