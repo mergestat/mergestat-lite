@@ -14,13 +14,7 @@ var (
 	query    = ""
 	repoPath = ""
 	usrInpt  = ""
-	//conf     ymlConfig
 )
-
-// type ymlConfig struct {
-// 	Details []string
-// 	Queries []string
-// }
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
@@ -75,15 +69,8 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Default's"
-		//blob, err := ioutil.ReadFile("tui/conf.yml")
-		// if err != nil {
-		// 	return nil
-		// }
-		// if err := yaml.Unmarshal(blob, &conf); err != nil {
-		// 	return err
-		// }
-		for i, s := range Queries {
-			fmt.Fprintf(v, "%d: %s \n", i, s.Description)
+		for i := range Queries {
+			fmt.Fprintf(v, "%s\n", i)
 		}
 
 	}
