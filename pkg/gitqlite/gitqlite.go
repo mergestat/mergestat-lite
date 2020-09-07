@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/go-git/go-git/v5"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -61,7 +61,7 @@ func New(repoPath string, options *Options) (*GitQLite, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = git.PlainOpen(repoPath)
+	_, err = git.OpenRepository(repoPath)
 	if err != nil {
 		return nil, err
 	}

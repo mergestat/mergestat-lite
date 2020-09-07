@@ -137,10 +137,14 @@ func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 func (vc *tagCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	tags := make([]*currentTag, 0)
-	vc.repo.Tags.Foreach(func(name string, id *git.Oid) error {
+	err := vc.repo.Tags.Foreach(func(name string, id *git.Oid) error {
 		tags = append(tags, &currentTag{name, id})
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
 	vc.tags = tags
 
 	return nil
