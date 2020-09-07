@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-git/go-git/v5"
+	git "github.com/libgit2/git2go/v30"
 )
 
 var (
@@ -31,9 +31,7 @@ func initFixtureRepo() (func() error, error) {
 		return nil, err
 	}
 
-	fixtureRepo, err = git.PlainClone(dir, false, &git.CloneOptions{
-		URL: fixtureRepoCloneURL,
-	})
+	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
 	if err != nil {
 		return nil, err
 	}

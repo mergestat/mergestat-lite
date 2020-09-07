@@ -2,11 +2,8 @@ package gitqlite
 
 import (
 	"fmt"
-	"io"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/storer"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -27,7 +24,6 @@ func (m *gitTagModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			tagger_name TEXT,
 			tagger_email TEXT,
 			message TEXT,
-			pgp TEXT,
 			target_type TEXT
 		)`, args[0]))
 	if err != nil {
@@ -47,7 +43,7 @@ func (m *gitTagModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 func (m *gitTagModule) DestroyModule() {}
 
 func (v *gitTagTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.PlainOpen(v.repoPath)
+	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -69,63 +65,68 @@ func (v *gitTagTable) Disconnect() error {
 }
 func (v *gitTagTable) Destroy() error { return nil }
 
+type currentTag struct {
+	name string
+	id   *git.Oid
+}
+
 type tagCursor struct {
-	repo    *git.Repository
-	current *plumbing.Reference
-	tagIter storer.ReferenceIter
+	repo  *git.Repository
+	index int
+	tags  []*currentTag
 }
 
 func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	lightweight := false
-	tag, err := vc.repo.TagObject(vc.current.Hash())
+	current := vc.tags[vc.index]
+
+	ref, err := vc.repo.References.Lookup(current.name)
 	if err != nil {
-		lightweight = true
+		return err
 	}
+	defer ref.Free()
+
+	isLightweight := false
+	tag, err := vc.repo.LookupTag(current.id)
+	if err != nil {
+		isLightweight = true
+	} else {
+		defer tag.Free()
+	}
+
 	switch col {
 	case 0:
-		//tag id
-		c.ResultText(vc.current.Hash().String())
+		c.ResultText(ref.Name())
 	case 1:
-		//tag name
-		c.ResultText(vc.current.Name().String())
+		c.ResultText(ref.Shorthand())
 	case 2:
-		//is tag lightweight
-		c.ResultBool(lightweight)
+		c.ResultBool(isLightweight)
 	case 3:
-		//tag tagger name
-		c.ResultText(vc.current.Target().Short())
+		if tag != nil {
+			c.ResultText(tag.Target().Id().String())
+		} else {
+			c.ResultText(ref.Target().String())
+		}
 	case 4:
-		//tagger email
-		if err == nil {
-			c.ResultText(tag.Tagger.Email)
+		if tag != nil {
+			c.ResultText(tag.Tagger().Name)
 		} else {
 			c.ResultNull()
 		}
 	case 5:
-		//message
-		if err == nil {
-			c.ResultText(tag.Message)
+		if tag != nil {
+			c.ResultText(tag.Tagger().Email)
 		} else {
 			c.ResultNull()
 		}
 	case 6:
-		//PGP
-		if err == nil {
-			c.ResultText(tag.PGPSignature)
+		if tag != nil {
+			c.ResultText(tag.Message())
 		} else {
 			c.ResultNull()
 		}
 	case 7:
-		//target_type
-		if err == nil {
-			c.ResultText(tag.TargetType.String())
-		} else {
-			c.ResultNull()
-		}
-	case 8:
-		//target
-		if err == nil {
-			c.ResultText(tag.Target.String())
+		if tag != nil {
+			c.ResultText(tag.TargetType().String())
 		} else {
 			c.ResultNull()
 		}
@@ -135,39 +136,23 @@ func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *tagCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	tagIterator, err := vc.repo.Tags()
-	if err != nil {
-		return err
-	}
-
-	vc.tagIter = tagIterator
-
-	tag, err := tagIterator.Next()
-	if err != nil {
-		return err
-	}
-
-	vc.current = tag
+	tags := make([]*currentTag, 0)
+	vc.repo.Tags.Foreach(func(name string, id *git.Oid) error {
+		tags = append(tags, &currentTag{name, id})
+		return nil
+	})
+	vc.tags = tags
 
 	return nil
 }
 
 func (vc *tagCursor) Next() error {
-	tag, err := vc.tagIter.Next()
-	if err != nil {
-		if err == io.EOF {
-			vc.current = nil
-			return nil
-		}
-		return err
-	}
-
-	vc.current = tag
+	vc.index++
 	return nil
 }
 
 func (vc *tagCursor) EOF() bool {
-	return vc.current == nil
+	return vc.index >= len(vc.tags)
 }
 
 func (vc *tagCursor) Rowid() (int64, error) {
@@ -175,8 +160,5 @@ func (vc *tagCursor) Rowid() (int64, error) {
 }
 
 func (vc *tagCursor) Close() error {
-	if vc.tagIter != nil {
-		vc.tagIter.Close()
-	}
 	return nil
 }

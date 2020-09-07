@@ -1,35 +1,32 @@
 package gitqlite
 
 import (
-	"io"
 	"testing"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	git "github.com/libgit2/git2go/v30"
 )
 
-func TestGoGitCommits(t *testing.T) {
+func TestCommits(t *testing.T) {
 	instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	headRef, err := fixtureRepo.Head()
+	revWalk, err := fixtureRepo.Walk()
 	if err != nil {
 		t.Fatal(err)
 	}
-	commitChecker, err := fixtureRepo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
+	defer revWalk.Free()
+
+	err = revWalk.PushHead()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	commitCount := 0
-	err = commitChecker.ForEach(func(c *object.Commit) error {
+	err = revWalk.Iterate(func(c *git.Commit) bool {
 		commitCount++
-		return nil
+		return true
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -41,10 +38,12 @@ func TestGoGitCommits(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer rows.Close()
+
 	columns, err := rows.Columns()
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	expected := 14
 	if len(columns) != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
@@ -64,22 +63,23 @@ func TestGoGitCommits(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
-	for i, c := range contents {
-		commit, err := commitChecker.Next()
-		if err != nil {
-			if err == io.EOF {
-				break
-			} else {
-				t.Fatal(err)
-			}
-		}
-		if commit.ID().String() != c[0] {
-			t.Fatalf("expected %s at row %d got %s", commit.ID().String(), i, c[0])
-		}
-		if commit.Author.Name != c[1] {
-			t.Fatalf("expected %s at row %d got %s", commit.Author.Name, i, c[1])
+
+	i := 0
+	err = revWalk.Iterate(func(commit *git.Commit) bool {
+		c := contents[i]
+		if commit.Id().String() != c[0] {
+			t.Fatalf("expected %s at row %d got %s", commit.Id().String(), i, c[0])
 		}
 
+		if commit.Author().Name != c[1] {
+			t.Fatalf("expected %s at row %d got %s", commit.Author().Name, i, c[1])
+		}
+
+		i++
+		return true
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 
 }

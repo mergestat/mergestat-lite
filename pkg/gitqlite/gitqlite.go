@@ -38,14 +38,11 @@ func init() {
 				return err
 			}
 
-			err = conn.CreateModule("git_ref", &gitRefModule{})
-			if err != nil {
-				return err
-			}
 			err = conn.CreateModule("git_tag", &gitTagModule{})
 			if err != nil {
 				return err
 			}
+
 			err = conn.CreateModule("git_branch", &gitBranchModule{})
 			if err != nil {
 				return err
@@ -98,10 +95,6 @@ func (g *GitQLite) ensureTables(options *Options) error {
 	}
 
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree('%s');", g.RepoPath))
-	if err != nil {
-		return err
-	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS refs USING git_ref('%s');", g.RepoPath))
 	if err != nil {
 		return err
 	}
