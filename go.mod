@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/gitsight/go-vcsurl v1.0.0
 	github.com/go-git/go-git/v5 v5.1.0
+	github.com/gobwas/glob v0.2.3
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/jroimartin/gocui v0.4.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
