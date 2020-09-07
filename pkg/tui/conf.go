@@ -1,27 +1,24 @@
 package tui
 
-type ExampleQuery struct {
-	Query       string
-	Description string
-}
-
 var (
-	Queries = []ExampleQuery{
+	Queries = map[string]string{
 
-		{"SELECT * FROM commits", "all entries from commits table"},
-		{"SELECT DISTINCT author_email FROM commits", "distinct author emails from commits table"},
-		{`SELECT 
+		"commit-info": "SELECT * FROM commits",
+
+		"distinct-authors": "SELECT DISTINCT author_email FROM commits",
+
+		"commits-per-author": `SELECT 
 		author_email, count(*) 
 		FROM commits GROUP BY author_email 
 		ORDER BY count(*) DESC`,
-			`number of commits for each author by email`},
-		{`SELECT 
+
+		"author-stats": `SELECT 
 		count(*) AS commits, SUM(additions) AS additions, SUM(deletions) AS  deletions, author_email 
 		FROM commits 
 		GROUP BY author_email
 		ORDER BY commits`,
-			`number of additions and deletions for each author`},
-		{`SELECT
+
+		"author-commits-dow": `SELECT
 		count(*) AS commits,
 		count(CASE WHEN strftime('%w',author_when)='0' THEN 1 END) AS sunday,
 		count(CASE WHEN strftime('%w',author_when)='1' THEN 1 END) AS monday,
@@ -32,6 +29,5 @@ var (
 		count(CASE WHEN strftime('%w',author_when)='6' THEN 1 END) AS saturday,
 		author_email
 		FROM commits GROUP BY author_email ORDER BY commits`,
-			`number of commits for each author day of the week`},
 	}
 )
