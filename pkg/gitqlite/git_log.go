@@ -61,12 +61,6 @@ func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 	return &commitCursor{repo: v.repo}, nil
 }
 
-func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
-	// TODO this should actually be implemented!
-	dummy := make([]bool, len(cst))
-	return &sqlite3.IndexResult{Used: dummy}, nil
-}
-
 func (v *gitLogTable) Disconnect() error {
 	v.repo = nil
 	return nil
@@ -144,33 +138,68 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
+func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+	used := make([]bool, len(cst))
+	for c, constraint := range cst {
+		switch {
+		case constraint.Usable && constraint.Column == 0 && constraint.Op == sqlite3.OpEQ:
+			used[c] = true
+			return &sqlite3.IndexResult{Used: used, IdxNum: 1, IdxStr: "commit-by-id", EstimatedCost: 1.0, EstimatedRows: 1}, nil
+		}
+	}
+
+	return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
+}
+
 func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	revWalk, err := vc.repo.Walk()
-	if err != nil {
-		return err
+	switch idxNum {
+	case 0:
+		// no index is used, walk over all commits
+		revWalk, err := vc.repo.Walk()
+		if err != nil {
+			return err
+		}
+
+		err = revWalk.PushHead()
+		if err != nil {
+			return err
+		}
+
+		revWalk.Sorting(git.SortNone)
+
+		vc.commitIter = revWalk
+
+		id := new(git.Oid)
+		err = revWalk.Next(id)
+		if err != nil {
+			return err
+		}
+
+		commit, err := vc.repo.LookupCommit(id)
+		if err != nil {
+			return err
+		}
+
+		vc.current = commit
+	case 1:
+		// commit-by-id - lookup a commit by the ID used in the query
+		revWalk, err := vc.repo.Walk()
+		if err != nil {
+			return err
+		}
+		// nothing is pushed to this revWalk
+		vc.commitIter = revWalk
+
+		id, err := git.NewOid(vals[0].(string))
+		if err != nil {
+			return err
+		}
+		commit, err := vc.repo.LookupCommit(id)
+		if err != nil {
+			return err
+		}
+		vc.current = commit
 	}
-
-	err = revWalk.PushHead()
-	if err != nil {
-		return err
-	}
-
-	revWalk.Sorting(git.SortNone)
-
-	vc.commitIter = revWalk
-
-	id := new(git.Oid)
-	err = revWalk.Next(id)
-	if err != nil {
-		return err
-	}
-
-	commit, err := vc.repo.LookupCommit(id)
-	if err != nil {
-		return err
-	}
-
-	vc.current = commit
 
 	return nil
 }
@@ -205,6 +234,7 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
+	vc.commitIter.Free()
 	vc.repo.Free()
 	return nil
 }
