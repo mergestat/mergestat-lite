@@ -24,8 +24,7 @@ func (m *gitTreeModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 				file_id TEXT,
 				name TEXT,
 				contents TEXT,
-				executable INT
-				
+				executable BOOL
 			)`, args[0]))
 	if err != nil {
 		return nil, err

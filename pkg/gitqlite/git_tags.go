@@ -17,7 +17,7 @@ type gitTagTable struct {
 func (m *gitTagModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
-			id TEXT,
+			full_name TEXT,
 			name TEXT,
 			lightweight BOOL,
 			target TEXT,

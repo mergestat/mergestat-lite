@@ -29,10 +29,10 @@ func (m *gitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.
 			committer_email TEXT,
 			committer_when DATETIME, 
 			parent_id TEXT,
-			parent_count INT(10),
+			parent_count INT,
 			tree_id TEXT,
-			additions INT(10),
-			deletions INT(10)
+			additions INT,
+			deletions INT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
