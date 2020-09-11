@@ -64,6 +64,9 @@ func NewCommitFileIter(repo *git.Repository, opt *commitFileIterOptions) (*commi
 		}
 
 		tree, err := commit.Tree()
+		if err != nil {
+			return nil, err
+		}
 		defer tree.Free()
 
 		treeEntries := make([]*treeEntryWithPath, 0)
