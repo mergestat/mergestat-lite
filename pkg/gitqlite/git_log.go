@@ -140,6 +140,7 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	used := make([]bool, len(cst))
+	// TODO this loop construct won't work well for multiple constraints...
 	for c, constraint := range cst {
 		switch {
 		case constraint.Usable && constraint.Column == 0 && constraint.Op == sqlite3.OpEQ:

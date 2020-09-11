@@ -89,6 +89,8 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 
 func (v *gitTreeTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	used := make([]bool, len(cst))
+	// TODO implement an index for file name glob patterns?
+	// TODO this loop construct won't work well for multiple constraints...
 	for c, constraint := range cst {
 		switch {
 		case constraint.Usable && constraint.Column == 0 && constraint.Op == sqlite3.OpEQ:
