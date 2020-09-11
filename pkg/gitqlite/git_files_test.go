@@ -3,6 +3,7 @@ package gitqlite
 import (
 	"fmt"
 	"path"
+	"strconv"
 	"testing"
 
 	git "github.com/libgit2/git2go/v30"
@@ -99,9 +100,63 @@ func TestFileColumns(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Println(entry)
-
 	if entry.Name != path.Base(contents[0][3]) {
 		t.Fatalf("expected file_name to be %s got %s", entry.Name, path.Base(contents[0][3]))
+	}
+}
+
+func TestFileByID(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	o, err := fixtureRepo.RevparseSingle("HEAD~3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer o.Free()
+
+	commit, err := o.AsCommit()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer commit.Free()
+
+	rows, err := instance.DB.Query(fmt.Sprintf("SELECT count(*) FROM files WHERE commit_id = '%s'", commit.Id().String()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	tree, err := commit.Tree()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tree.Free()
+
+	count := 0
+	err = tree.Walk(func(path string, entry *git.TreeEntry) int {
+		if entry.Type == git.ObjectBlob {
+			count++
+		}
+		return 0
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, contents, err := GetContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	gotCount, err := strconv.Atoi(contents[0][0])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if gotCount != count {
+		t.Fatalf("expected %d, got %d", count, gotCount)
 	}
 }
