@@ -1,6 +1,7 @@
 package gitqlite
 
 import (
+	"fmt"
 	"testing"
 
 	git "github.com/libgit2/git2go/v30"
@@ -81,8 +82,48 @@ func TestCommits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 }
+
+func TestCommitByID(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	o, err := fixtureRepo.RevparseSingle("HEAD~3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer o.Free()
+
+	commit, err := o.AsCommit()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer commit.Free()
+
+	rows, err := instance.DB.Query(fmt.Sprintf("SELECT * FROM commits WHERE id = '%s'", commit.Id().String()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	_, contents, err := GetContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count := len(contents)
+
+	if count != 1 {
+		t.Fatalf("expected 1 commit, got %d", count)
+	}
+
+	if contents[0][0] != commit.Id().String() {
+		t.Fatalf("expected commit ID: %s, got %s", commit.Id().String(), contents[0][0])
+	}
+}
+
 func BenchmarkCommitCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		instance, err := New(fixtureRepoDir, &Options{})
