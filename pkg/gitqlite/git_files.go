@@ -64,12 +64,6 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func (v *gitTreeTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
-	// TODO this should actually be implemented!
-	dummy := make([]bool, len(cst))
-	return &sqlite3.IndexResult{Used: dummy}, nil
-}
-
 func (v *gitTreeTable) Disconnect() error {
 	v.repo = nil
 	return nil
@@ -93,22 +87,30 @@ func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
 	return &treeCursor{repo: v.repo}, nil
 }
 
-func (vc *treeCursor) Next() error {
-	//Iterates to next file
-	file, err := vc.iterator.Next()
-	if err != nil {
-		if err == io.EOF {
-			vc.current = nil
-			return nil
+func (v *gitTreeTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+	used := make([]bool, len(cst))
+	for c, constraint := range cst {
+		switch {
+		case constraint.Usable && constraint.Column == 0 && constraint.Op == sqlite3.OpEQ:
+			used[c] = true
+			return &sqlite3.IndexResult{Used: used, IdxNum: 1, IdxStr: "files-by-commit-id", EstimatedCost: 1.0, EstimatedRows: 1}, nil
 		}
-		return err
 	}
-	vc.current = file
-	return nil
+
+	return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
 }
 
 func (vc *treeCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	iter, err := NewCommitTreeIter(vc.repo)
+	var opt *commitFileIterOptions
+
+	switch idxNum {
+	case 0:
+		opt = &commitFileIterOptions{}
+	case 1:
+		opt = &commitFileIterOptions{commitID: vals[0].(string)}
+	}
+
+	iter, err := NewCommitFileIter(vc.repo, opt)
 	if err != nil {
 		return err
 	}
@@ -127,6 +129,21 @@ func (vc *treeCursor) Filter(idxNum int, idxStr string, vals []interface{}) erro
 	vc.current = file
 	return nil
 }
+
+func (vc *treeCursor) Next() error {
+	//Iterates to next file
+	file, err := vc.iterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
+	}
+	vc.current = file
+	return nil
+}
+
 func (vc *treeCursor) EOF() bool {
 	return vc.current == nil
 }
