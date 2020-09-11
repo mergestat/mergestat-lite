@@ -120,6 +120,10 @@ func (vc *branchCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 func (vc *branchCursor) Next() error {
 	branch, branchType, err := vc.iter.Next()
 	if err != nil {
+		if branch == nil {
+			vc.current = nil
+			return nil
+		}
 		return err
 	}
 
@@ -137,7 +141,9 @@ func (vc *branchCursor) Rowid() (int64, error) {
 }
 
 func (vc *branchCursor) Close() error {
-	vc.current.Free()
+	if vc.current != nil {
+		vc.current.Free()
+	}
 	vc.iter.Free()
 	return nil
 }
