@@ -67,9 +67,7 @@ func GetRowsCount(rows *sql.Rows) int {
 	return count
 }
 func GetContents(rows *sql.Rows) (int, [][]string, error) {
-	var (
-		count int = 0
-	)
+	count := 0
 	columns, err := rows.Columns()
 	if err != nil {
 		return count, nil, err

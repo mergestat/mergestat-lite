@@ -1,6 +1,8 @@
 package gitqlite
 
 import (
+	"fmt"
+	"path"
 	"testing"
 
 	git "github.com/libgit2/git2go/v30"
@@ -43,48 +45,63 @@ func TestFileCounts(t *testing.T) {
 	if numFileRows != numFiles {
 		t.Fatalf("expected %d rows got : %d", numFiles, numFileRows)
 	}
+}
 
-	// columnQuery, err := instance.DB.Query("SELECT * FROM files LIMIT 1")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// columns, err := columnQuery.Columns()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// if len(columns) != 6 {
-	// 	t.Fatalf("expected %d columns got : %d", 6, len(columns))
-	// }
-	// commitChecker, err = fixtureRepo.Log(&git.LogOptions{
-	// 	From:  headRef.Hash(),
-	// 	Order: git.LogOrderCommitterTime,
-	// })
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// commit, err := commitChecker.Next()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// tree, err := commit.Tree()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// files := tree.Files()
-	// file, err := files.Next()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// index, contents, err := GetContents(columnQuery)
-	// if err != nil {
-	// 	t.Fatalf("%s in GetContents at row %d", err, index)
-	// }
+func TestFileColumns(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	// if file.Name != contents[0][3] {
-	// 	t.Fatalf("Expected fileName to be %s got %s", file.Name, contents[0][2])
-	// }
-	// if file.Hash.String() != contents[0][2] {
-	// 	t.Fatalf("Expected Hash %s got Hash %s", file.Hash.String(), contents[0][0])
-	// }
+	columnQuery, err := instance.DB.Query("SELECT * FROM files LIMIT 1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer columnQuery.Close()
 
+	columns, err := columnQuery.Columns()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(columns) != 6 {
+		t.Fatalf("expected %d columns got : %d", 6, len(columns))
+	}
+
+	_, contents, err := GetContents(columnQuery)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	commitID, err := git.NewOid(contents[0][0])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	commit, err := fixtureRepo.LookupCommit(commitID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer commit.Free()
+
+	tree, err := commit.Tree()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tree.Free()
+
+	if contents[0][1] != tree.Id().String() {
+		t.Fatalf("expected tree_id %s, got: %s", tree.Id().String(), contents[0][1])
+	}
+
+	entry, err := tree.EntryByPath(contents[0][3])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(entry)
+
+	if entry.Name != path.Base(contents[0][3]) {
+		t.Fatalf("expected file_name to be %s got %s", entry.Name, path.Base(contents[0][3]))
+	}
 }
