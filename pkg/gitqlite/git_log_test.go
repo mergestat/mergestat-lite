@@ -7,7 +7,7 @@ import (
 )
 
 func TestCommits(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
+	instance, err := New(fixtureRepoDir, &Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestCommits(t *testing.T) {
 }
 func BenchmarkCommitCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
+		instance, err := New(fixtureRepoDir, &Options{})
 		if err != nil {
 			b.Fatal(err)
 		}

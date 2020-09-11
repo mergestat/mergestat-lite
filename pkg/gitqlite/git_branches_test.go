@@ -61,7 +61,7 @@ func TestBranches(t *testing.T) {
 
 func BenchmarkBranchCount(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
+		instance, err := New(fixtureRepoDir, &Options{})
 		if err != nil {
 			b.Fatal(err)
 		}

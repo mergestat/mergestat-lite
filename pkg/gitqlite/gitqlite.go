@@ -17,7 +17,7 @@ type GitQLite struct {
 	RepoPath string
 }
 type Options struct {
-	SkipGitCLI bool
+	UseGitCLI bool
 }
 
 func init() {
@@ -81,7 +81,7 @@ func (g *GitQLite) ensureTables(options *Options) error {
 	_, err := exec.LookPath("git")
 	localGitExists := err == nil
 	g.RepoPath = strings.ReplaceAll(g.RepoPath, "'", "''")
-	if options.SkipGitCLI || !localGitExists {
+	if !options.UseGitCLI || !localGitExists {
 		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", g.RepoPath))
 		if err != nil {
 			return err
