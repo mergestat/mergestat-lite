@@ -72,7 +72,7 @@ var rootCmd = &cobra.Command{
 			if val, ok := tui.Queries[presetQuery]; ok {
 				query = val
 			} else {
-				handleError(errors.New("Unknown Preset Query" + presetQuery))
+				handleError(errors.New(fmt.Sprintf("Unknown Preset Query: %s", presetQuery)))
 			}
 		} else {
 			err = cmd.Help()
