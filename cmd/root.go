@@ -28,7 +28,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
 	rootCmd.PersistentFlags().BoolVar(&useGitCLI, "use-git-cli", false, "whether to use the locally installed git command (if it's available). Defaults to false.")
 	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interactive mode, which displays a terminal UI")
-	rootCmd.PersistentFlags().StringVar(&presetQuery, "preset", "", "used to pick a default query")
+	rootCmd.PersistentFlags().StringVar(&presetQuery, "preset", "", "used to pick a preset query")
 }
 
 func handleError(err error) {
