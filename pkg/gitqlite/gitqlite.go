@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/go-git/go-git/v5"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -17,7 +17,7 @@ type GitQLite struct {
 	RepoPath string
 }
 type Options struct {
-	SkipGitCLI bool
+	UseGitCLI bool
 }
 
 func init() {
@@ -38,14 +38,11 @@ func init() {
 				return err
 			}
 
-			err = conn.CreateModule("git_ref", &gitRefModule{})
-			if err != nil {
-				return err
-			}
 			err = conn.CreateModule("git_tag", &gitTagModule{})
 			if err != nil {
 				return err
 			}
+
 			err = conn.CreateModule("git_branch", &gitBranchModule{})
 			if err != nil {
 				return err
@@ -64,7 +61,7 @@ func New(repoPath string, options *Options) (*GitQLite, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = git.PlainOpen(repoPath)
+	_, err = git.OpenRepository(repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +81,7 @@ func (g *GitQLite) ensureTables(options *Options) error {
 	_, err := exec.LookPath("git")
 	localGitExists := err == nil
 	g.RepoPath = strings.ReplaceAll(g.RepoPath, "'", "''")
-	if options.SkipGitCLI || !localGitExists {
+	if !options.UseGitCLI || !localGitExists {
 		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", g.RepoPath))
 		if err != nil {
 			return err
@@ -98,10 +95,6 @@ func (g *GitQLite) ensureTables(options *Options) error {
 	}
 
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree('%s');", g.RepoPath))
-	if err != nil {
-		return err
-	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS refs USING git_ref('%s');", g.RepoPath))
 	if err != nil {
 		return err
 	}

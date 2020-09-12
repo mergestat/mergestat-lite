@@ -10,23 +10,23 @@ import (
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/augmentable-dev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
-	"github.com/go-git/go-git/v5"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/spf13/cobra"
 )
 
 //define flags in here
 var (
-	repo       string
-	format     string
-	skipGitCLI bool
-	cui        bool
+	repo      string
+	format    string
+	useGitCLI bool
+	cui       bool
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' and 'json'")
-	rootCmd.PersistentFlags().BoolVar(&skipGitCLI, "skip-git-cli", false, "whether to *not* use the locally installed git command (if it's available). Defaults to false.")
-	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interacive mode, which displays a terminal UI")
+	rootCmd.PersistentFlags().BoolVar(&useGitCLI, "use-git-cli", false, "whether to use the locally installed git command (if it's available). Defaults to false.")
+	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interactive mode, which displays a terminal UI")
 
 }
 
@@ -79,9 +79,7 @@ var rootCmd = &cobra.Command{
 				dir, err = ioutil.TempDir("", "repo")
 				handleError(err)
 
-				_, err = git.PlainClone(dir, false, &git.CloneOptions{
-					URL: r,
-				})
+				_, err = git.Clone(r, dir, &git.CloneOptions{})
 				handleError(err)
 
 				defer func() {
@@ -104,7 +102,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 		g, err := gitqlite.New(dir, &gitqlite.Options{
-			SkipGitCLI: skipGitCLI,
+			UseGitCLI: useGitCLI,
 		})
 		handleError(err)
 

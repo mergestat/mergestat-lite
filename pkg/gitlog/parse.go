@@ -137,7 +137,7 @@ func Execute(repoPath string) (*CommitIter, error) {
 	}
 
 	args := []string{"log"}
-	args = append(args, "--format=commit %H%ntree %T%nparent %P%nAuthor: %an %ae%nAuthorDate: %aI%nCommit: %cn %ce%nCommitDate: %cI%nMessage: %s", "--numstat")
+	args = append(args, "--format=commit %H%ntree %T%nparent %P%nAuthor: %an %ae%nAuthorDate: %aI%nCommit: %cn %ce%nCommitDate: %cI%nMessage: %s", "--numstat", "-m", "-c", "--date-order")
 
 	cmd := exec.Command(gitPath, args...)
 	cmd.Dir = repoPath
