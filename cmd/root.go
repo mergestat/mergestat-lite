@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -72,7 +71,7 @@ var rootCmd = &cobra.Command{
 			if val, ok := tui.Queries[presetQuery]; ok {
 				query = val
 			} else {
-				handleError(errors.New(fmt.Sprintf("Unknown Preset Query: %s", presetQuery)))
+				handleError(fmt.Errorf("Unknown Preset Query: %s", presetQuery))
 			}
 		} else {
 			err = cmd.Help()
