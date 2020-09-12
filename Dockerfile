@@ -1,9 +1,12 @@
-FROM golang:1.14 as builder
+FROM golang:1.14-buster as builder
 WORKDIR /app
+COPY scripts .
+RUN apt-get update && apt-get -y install cmake libssl-dev
+RUN ./install_libgit2.sh
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -v -tags=sqlite_vtable askgit.go
+RUN make build
 
 FROM debian:buster-slim
 WORKDIR /app/
