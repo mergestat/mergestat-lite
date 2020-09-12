@@ -95,9 +95,6 @@ You can also pass a query in via `stdin`:
 cat query.sql | askgit
 ```
 
-There are also a number of preset queries provided by default.
-Use `--preset <query-key>` to supply one.
-
 By default, output will be an ASCII table.
 Use `--format json` or `--format csv` for alternatives.
 See `-h` for all the options.
