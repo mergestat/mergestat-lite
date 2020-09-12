@@ -40,7 +40,7 @@ func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	fmt.Fprintln(w, "# Authors \t", distinctAuthorCount, "\t")
 
-	row = git.DB.QueryRow("select count(distinct name) from branches where name like 'origin%'")
+	row = git.DB.QueryRow("select count(distinct name) from branches where remote = 1")
 	var distinctRemotes int
 	err = row.Scan(&distinctRemotes)
 	if err != nil {
@@ -48,7 +48,7 @@ func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	fmt.Fprintln(w, "# Remote branches \t", distinctRemotes, "\t")
 
-	row = git.DB.QueryRow("select count(distinct name) from branches where remote like 'origin'")
+	row = git.DB.QueryRow("select count(distinct name) from branches where remote = 0")
 	var distinctLocals int
 	err = row.Scan(&distinctLocals)
 	if err != nil {

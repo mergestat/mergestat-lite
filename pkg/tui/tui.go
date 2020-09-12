@@ -68,7 +68,7 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "Default's"
+		v.Title = "Preset Queries"
 		for i := range Queries {
 			fmt.Fprintf(v, "%s\n", i)
 		}
