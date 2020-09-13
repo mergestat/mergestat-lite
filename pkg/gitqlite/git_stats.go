@@ -4,10 +4,6 @@ import (
 	"fmt"
 
 	git "github.com/libgit2/git2go/v30"
-
-	//"github.com/go-git/go-git/v5"
-	// "github.com/go-git/go-git/v5/plumbing"
-	// "github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -93,25 +89,6 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	// headRef, err := vc.repo.Head()
-	// if err != nil {
-	// 	if err == plumbing.ErrReferenceNotFound {
-	// 		return nil
-	// 	}
-	// 	return err
-	// }
-
-	// iter, err := vc.repo.Walk()
-	// if err != nil {
-	// 	return err
-	// }
-	// vc.commitIter = *iter
-
-	// commit := vc.commitIter.Next()
-	// stats, err := vc.repo.DiffTreeToTree()
-	// if err != nil {
-	// 	return err
-	// }
 	revWalk, err := vc.repo.Walk()
 	if err != nil {
 		return err
@@ -131,7 +108,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
-	
+
 	commit, err := vc.repo.LookupCommit(id)
 	if err != nil {
 		return err
@@ -175,58 +152,6 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 }
 
 func (vc *StatsCursor) Next() error {
-	// go to next file
-	//for file, err := vc.fileIter.Next();err != io.EOF &&
-	// if there are stats left go to the next stat
-	// if len(vc.stats) > vc.statIndex+1 {
-	// 	vc.statIndex++
-	// 	if vc.stats[vc.statIndex].Addition == 0 && vc.stats[vc.statIndex].Deletion == 0 {
-	// 		return vc.Next()
-	// 	}
-	// 	return nil
-	// }
-	// vc.statIndex = 0
-
-	// commit, err := vc.commitIter.Next()
-	// if err != nil {
-	// 	if err == io.EOF {
-	// 		vc.current = nil
-	// 		return nil
-	// 	}
-	// 	return err
-	// }
-
-	// // edge case of initial commit
-	// if commit.NumParents() == 0 {
-	// 	files, err := commit.Files()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	var stat object.FileStats
-	// 	for x, err := files.Next(); err != io.EOF; x, err = files.Next() {
-	// 		lines, err := x.Lines()
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		stat = append(stat, object.FileStat{Name: x.Name, Addition: len(lines), Deletion: 0})
-	// 	}
-	// 	vc.stats = stat
-	// 	//case for when out of stats... go to next commit
-	// } else {
-	// 	stats, err := commit.Stats()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if len(stats) == 0 {
-	// 		vc.stats = stats
-	// 		vc.current = commit
-	// 		return vc.Next()
-	// 	}
-	// 	vc.stats = stats
-	// }
-	// vc.current = commit
-
-	// return nil
 	oldTree, err := vc.current.Tree()
 	if err != nil {
 		return err
