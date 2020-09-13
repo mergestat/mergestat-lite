@@ -22,7 +22,8 @@ func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 			files_changed INT(10),
 			additions TEXT,
 			deletions TEXT,
-			files TEXT
+			files TEXT,
+			stuff TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -99,8 +100,14 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		// fmt.Println(stattos)
 		// c.ResultText(fmt.Sprint(stattos))
 		c.ResultText(vc.stats[vc.statIndex+2])
-
+	case 5:
+		stuff, err := vc.commitStats.String(4, 0)
+		if err != nil {
+			return err
+		}
+		c.ResultText(stuff)
 	}
+
 	return nil
 }
 func trimTheFat(s []string) []string {
@@ -170,6 +177,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return nil
 	}
+	statsString = strings.ReplaceAll(statsString, "\n", " ")
 	stats := trimTheFat(strings.Split(statsString, " "))
 	diff.Free()
 	oldTree.Free()
@@ -178,15 +186,17 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	vc.statIndex = 0
 	vc.commitStats = diffStats
 	vc.current = commit
-
+	if len(vc.stats) == 0 {
+		vc.Next()
+	}
 	return nil
 }
 
 func (vc *StatsCursor) Next() error {
-	if vc.statIndex+5 < len(vc.stats) {
-		vc.statIndex += 3
-		return nil
-	}
+	// if vc.statIndex+5 < len(vc.stats) {
+	// 	vc.statIndex += 3
+	// 	return nil
+	// }
 	oldTree, err := vc.current.Tree()
 	if err != nil {
 		return err
