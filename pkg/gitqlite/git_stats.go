@@ -22,7 +22,7 @@ func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			commit_id TEXT,
-			file TEXT,
+			files_changed INT(10),
 			additions INT(10),
 			deletions INT(10)
 		)`, args[0]))
@@ -68,7 +68,6 @@ type StatsCursor struct {
 	repo       *git.Repository
 	current    *git.Commit
 	stats      *git.DiffStats
-	statIndex  int
 	commitIter *git.RevWalk
 }
 
@@ -132,12 +131,15 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
-
+	
 	commit, err := vc.repo.LookupCommit(id)
 	if err != nil {
 		return err
 	}
 	oldTree, err := commit.Tree()
+	if err != nil {
+		return nil
+	}
 	err = revWalk.Next(id)
 	if err != nil {
 		return err
@@ -147,17 +149,27 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		return err
 	}
 	tree, err := commit.Tree()
+	if err != nil {
+		return nil
+	}
 	defaults, err := git.DefaultDiffOptions()
 	if err != nil {
 		return nil
 	}
 	diff, err := vc.repo.DiffTreeToTree(oldTree, tree, &defaults)
+	if err != nil {
+		return nil
+	}
 	diffStats, err := diff.Stats()
+	if err != nil {
+		return nil
+	}
 	diff.Free()
+	oldTree.Free()
+	tree.Free()
 	vc.current = commit
 	vc.stats = diffStats
 	vc.current = commit
-	vc.statIndex = 0
 
 	return nil
 }
@@ -215,8 +227,12 @@ func (vc *StatsCursor) Next() error {
 	// vc.current = commit
 
 	// return nil
+	oldTree, err := vc.current.Tree()
+	if err != nil {
+		return err
+	}
 	id := new(git.Oid)
-	err := vc.commitIter.Next(id)
+	err = vc.commitIter.Next(id)
 	if err != nil {
 		if id.IsZero() {
 			vc.current.Free()
@@ -230,6 +246,31 @@ func (vc *StatsCursor) Next() error {
 	if err != nil {
 		return err
 	}
+	tree, err := commit.Tree()
+	if err != nil {
+		return nil
+	}
+	defaults, err := git.DefaultDiffOptions()
+	if err != nil {
+		return nil
+	}
+	diff, err := vc.repo.DiffTreeToTree(oldTree, tree, &defaults)
+	if err != nil {
+		return nil
+	}
+	diffStats, err := diff.Stats()
+	if err != nil {
+		return err
+	}
+	err = diff.Free()
+	if err != nil {
+		return nil
+	}
+	oldTree.Free()
+	tree.Free()
+	diff.Free()
+	vc.stats.Free()
+	vc.stats = diffStats
 	vc.current.Free()
 	vc.current = commit
 	return nil
