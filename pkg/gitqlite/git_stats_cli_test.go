@@ -69,7 +69,7 @@ func TestStats(t *testing.T) {
 
 func BenchmarkStatsCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{SkipGitCLI: true})
+		instance, err := New(fixtureRepoDir, &Options{UseGitCLI: true})
 		if err != nil {
 			b.Fatal(err)
 		}
