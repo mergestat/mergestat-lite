@@ -1,14 +1,12 @@
 package gitqlite
 
 import (
+	"bytes"
 	"fmt"
-	"io"
-	"strings"
+	"log"
 	"time"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -52,19 +50,13 @@ func (m *gitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 func (m *gitLogModule) DestroyModule() {}
 
 func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.PlainOpen(v.repoPath)
+	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
 	v.repo = repo
 
 	return &commitCursor{repo: v.repo}, nil
-}
-
-func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
-	// TODO this should actually be implemented!
-	dummy := make([]bool, len(cst))
-	return &sqlite3.IndexResult{Used: dummy}, nil
 }
 
 func (v *gitLogTable) Disconnect() error {
@@ -75,25 +67,25 @@ func (v *gitLogTable) Destroy() error { return nil }
 
 type commitCursor struct {
 	repo       *git.Repository
-	current    *object.Commit
-	commitIter object.CommitIter
+	current    *git.Commit
+	commitIter *git.RevWalk
 }
 
 func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	commit := vc.current
-	author := commit.Author
-	committer := commit.Committer
+	author := commit.Author()
+	committer := commit.Committer()
 
 	switch col {
 	case 0:
 		//commit id
-		c.ResultText(commit.ID().String())
+		c.ResultText(commit.Id().String())
 	case 1:
 		//commit message
-		c.ResultText(commit.Message)
+		c.ResultText(commit.Message())
 	case 2:
 		//commit summary
-		c.ResultText(strings.Split(commit.Message, "\n")[0])
+		c.ResultText(commit.Summary())
 	case 3:
 		//commit author name
 		c.ResultText(author.Name)
@@ -114,68 +106,120 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(committer.When.Format(time.RFC3339Nano))
 	case 9:
 		//parent_id
-		if int(commit.NumParents()) > 0 {
-			p, err := commit.Parent(0)
-			if err != nil {
-				return err
-			}
-			c.ResultText(p.ID().String())
+		if int(commit.ParentCount()) > 0 {
+			p := commit.Parent(0)
+			c.ResultText(p.Id().String())
+			p.Free()
 		} else {
 			c.ResultNull()
 		}
 	case 10:
 		//parent_count
-		c.ResultInt(int(commit.NumParents()))
+		c.ResultInt(int(commit.ParentCount()))
 	case 11:
 		//tree_id
-		tree, err := vc.current.Tree()
+		c.ResultText(commit.TreeId().String())
+
+	case 12:
+		additions, _, err := statCalc(vc.repo, commit)
 		if err != nil {
 			return err
 		}
-		c.ResultText(tree.ID().String())
-
+		c.ResultInt(additions)
+	case 13:
+		_, deletions, err := statCalc(vc.repo, commit)
+		if err != nil {
+			return err
+		}
+		c.ResultInt(deletions)
 	}
 	return nil
 }
 
-func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	headRef, err := vc.repo.Head()
-	if err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return nil
+func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+	used := make([]bool, len(cst))
+	// TODO this loop construct won't work well for multiple constraints...
+	for c, constraint := range cst {
+		switch {
+		case constraint.Usable && constraint.Column == 0 && constraint.Op == sqlite3.OpEQ:
+			used[c] = true
+			return &sqlite3.IndexResult{Used: used, IdxNum: 1, IdxStr: "commit-by-id", EstimatedCost: 1.0, EstimatedRows: 1}, nil
 		}
-		return err
 	}
 
-	iter, err := vc.repo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
-	if err != nil {
-		return err
-	}
-	vc.commitIter = iter
+	return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
+}
 
-	commit, err := iter.Next()
-	if err != nil {
-		return err
-	}
+func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+	switch idxNum {
+	case 0:
+		// no index is used, walk over all commits
+		revWalk, err := vc.repo.Walk()
+		if err != nil {
+			return err
+		}
 
-	vc.current = commit
+		err = revWalk.PushHead()
+		if err != nil {
+			return err
+		}
+
+		revWalk.Sorting(git.SortNone)
+
+		vc.commitIter = revWalk
+
+		id := new(git.Oid)
+		err = revWalk.Next(id)
+		if err != nil {
+			return err
+		}
+
+		commit, err := vc.repo.LookupCommit(id)
+		if err != nil {
+			return err
+		}
+
+		vc.current = commit
+	case 1:
+		// commit-by-id - lookup a commit by the ID used in the query
+		revWalk, err := vc.repo.Walk()
+		if err != nil {
+			return err
+		}
+		// nothing is pushed to this revWalk
+		vc.commitIter = revWalk
+
+		id, err := git.NewOid(vals[0].(string))
+		if err != nil {
+			return err
+		}
+		commit, err := vc.repo.LookupCommit(id)
+		if err != nil {
+			return err
+		}
+		vc.current = commit
+	}
 
 	return nil
 }
 
 func (vc *commitCursor) Next() error {
-	commit, err := vc.commitIter.Next()
+	id := new(git.Oid)
+	err := vc.commitIter.Next(id)
 	if err != nil {
-		if err == io.EOF {
+		if id.IsZero() {
+			vc.current.Free()
 			vc.current = nil
 			return nil
 		}
 		return err
 	}
 
+	commit, err := vc.repo.LookupCommit(id)
+	if err != nil {
+		return err
+	}
+	vc.current.Free()
 	vc.current = commit
 	return nil
 }
@@ -189,9 +233,85 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
-	if vc.commitIter != nil {
-		vc.commitIter.Close()
-	}
-	vc.current = nil
+	vc.commitIter.Free()
+	vc.repo.Free()
 	return nil
+}
+
+// statCalc calculates the number of additions/deletions and returns in format additions, deletions
+func statCalc(r *git.Repository, c *git.Commit) (int, int, error) {
+	tree, err := c.Tree()
+	if err != nil {
+		return 0, 0, err
+	}
+	defer tree.Free()
+
+	if c.ParentCount() == 0 {
+		var additions int
+		err = tree.Walk(func(path string, treeEntry *git.TreeEntry) int {
+			if treeEntry.Type == git.ObjectBlob {
+				blob, err := r.LookupBlob(treeEntry.Id)
+				if err != nil {
+					return 1
+				}
+				defer blob.Free()
+				contents := blob.Contents()
+				lineSep := []byte{'\n'}
+				additions += bytes.Count(contents, lineSep)
+			}
+			return 0
+		})
+		if err != nil {
+			return 0, 0, err
+		}
+		return additions, 0, nil
+
+	}
+
+	parent := c.Parent(0)
+	parentTree, err := parent.Tree()
+	if err != nil {
+		return 0, 0, err
+	}
+	defer parent.Free()
+	defer parentTree.Free()
+
+	diffOpt, err := git.DefaultDiffOptions()
+	if err != nil {
+		return 0, 0, err
+	}
+
+	diff, err := r.DiffTreeToTree(parentTree, tree, &diffOpt)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer func() {
+		err := diff.Free()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	diffFindOpt, err := git.DefaultDiffFindOptions()
+	if err != nil {
+		return 0, 0, err
+	}
+
+	err = diff.FindSimilar(&diffFindOpt)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	stats, err := diff.Stats()
+	if err != nil {
+		return 0, 0, err
+	}
+	defer func() {
+		err := stats.Free()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	return stats.Insertions(), stats.Deletions(), nil
 }

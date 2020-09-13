@@ -6,8 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	git "github.com/libgit2/git2go/v30"
 )
 
 var (
@@ -32,9 +31,7 @@ func initFixtureRepo() (func() error, error) {
 		return nil, err
 	}
 
-	fixtureRepo, err = git.PlainClone(dir, false, &git.CloneOptions{
-		URL: fixtureRepoCloneURL,
-	})
+	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -75,15 +72,21 @@ func TestParse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	commitIter, err := fixtureRepo.Log(&git.LogOptions{})
+	revWalk, err := fixtureRepo.Walk()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer revWalk.Free()
+
+	err = revWalk.PushHead()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	shouldBeCount := 0
-	err = commitIter.ForEach(func(*object.Commit) error {
+	err = revWalk.Iterate(func(*git.Commit) bool {
 		shouldBeCount++
-		return nil
+		return true
 	})
 	if err != nil {
 		t.Fatal(err)

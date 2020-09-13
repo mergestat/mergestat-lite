@@ -18,7 +18,14 @@ More in-depth examples and documentation can be found below.
 
 ## Installation
 
-***More Installation Instructions Coming Soon***
+### Homebrew
+
+```
+brew tap augmentable-dev/askgit
+brew install askgit
+```
+
+### Go
 
 ```
 go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit
@@ -54,7 +61,7 @@ docker pull augmentable/askgit:latest
 > [**pwd**] Print the absolute pathname of the current working directory.
 
 ```
-docker run -v `pwd`:/repo:ro askgit "SELECT * FROM commits"
+docker run -v `pwd`:/repo:ro augmentable/askgit "SELECT * FROM commits"
 ```
 
 #### Running commands from STDIN
@@ -62,7 +69,7 @@ docker run -v `pwd`:/repo:ro askgit "SELECT * FROM commits"
 For piping commands via STDIN, the docker command needs to be told to run non-interactively, as well as attaching the repository at `/repo`.
 
 ```
-cat query.sql | docker run -i -v `pwd`:/repo:ro askgit
+cat query.sql | docker run -i -v `pwd`:/repo:ro augmentable/askgit
 ```
 
 ## Usage
@@ -119,24 +126,37 @@ The `files` table iterates over _ALL_ the files in a commit history, by default 
 The full table is every file in every tree of a commit history.
 Use the `commit_id` column to filter for files that belong to the work tree of a specific commit.
 
-| Column    | Type |
-|-----------|------|
-| commit_id | TEXT |
-| tree_id   | TEXT |
-| file_id   | TEXT |
-| name      | TEXT |
-| mode      | TEXT |
-| type      | TEXT |
-| contents  | TEXT |
+| Column     | Type |
+|------------|------|
+| commit_id  | TEXT |
+| tree_id    | TEXT |
+| file_id    | TEXT |
+| name       | TEXT |
+| contents   | TEXT |
+| executable | BOOL |
 
 
-#### `refs`
+#### `branches`
 
 | Column | Type |
 |--------|------|
 | name   | TEXT |
-| type   | TEXT |
-| hash   | TEXT |
+| remote | BOOL |
+| target | TEXT |
+| head   | BOOL |
+
+#### `tags`
+
+| Column       | Type |
+|--------------|------|
+| full_name    | TEXT |
+| name         | TEXT |
+| lightweight  | BOOL |
+| target       | TEXT |
+| tagger_name  | TEXT |
+| tagger_email | TEXT |
+| message      | TEXT |
+| target_type  | TEXT |
 
 #### `stats`
 | Column    | Type |
