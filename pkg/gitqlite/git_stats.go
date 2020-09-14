@@ -22,8 +22,7 @@ func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 			files_changed INT(10),
 			additions TEXT,
 			deletions TEXT,
-			files TEXT,
-			stuff TEXT
+			full_info TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -67,9 +66,9 @@ type StatsCursor struct {
 	repo        *git.Repository
 	current     *git.Commit
 	commitStats *git.DiffStats
-	statIndex   int
-	stats       []string
-	commitIter  *git.RevWalk
+	//statIndex   int
+	//stats       []string
+	commitIter *git.RevWalk
 }
 
 func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
@@ -81,14 +80,10 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(commit.Id().String())
 	case 1:
 		c.ResultInt(vc.commitStats.FilesChanged())
-
 	case 2:
-		c.ResultText(vc.stats[vc.statIndex])
-
-	case 3:
 		//deletions := vc.commitStats.Deletions()
-		c.ResultText(vc.stats[vc.statIndex+1])
-	case 4:
+		c.ResultInt(vc.commitStats.Insertions())
+	case 3:
 		// statString, err := vc.stats.String(4, 0)
 		// if err != nil {
 		// 	return err
@@ -99,26 +94,35 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		// stattos = trimTheFat(stattos)
 		// fmt.Println(stattos)
 		// c.ResultText(fmt.Sprint(stattos))
-		c.ResultText(vc.stats[vc.statIndex+2])
-	case 5:
-		stuff, err := vc.commitStats.String(4, 0)
+		c.ResultInt(vc.commitStats.Deletions())
+	case 4:
+		diffInfo, err := vc.commitStats.String(4, 1000)
 		if err != nil {
 			return err
 		}
-		c.ResultText(stuff)
+		c.ResultText(diffInfo)
 	}
 
 	return nil
 }
-func trimTheFat(s []string) []string {
-	var newArr []string
-	for _, x := range s {
-		if x != "" {
-			newArr = append(newArr, x)
-		}
-	}
-	return newArr
-}
+
+// func trimTheFat(s []string) []string {
+// 	var newArr []string
+// 	for _, x := range s {
+// 		holder := ""
+// 		for _, y := range x {
+// 			if y != ' ' && y != '\n' && y != ',' {
+// 				holder += y
+// 			}
+// 		}
+// 		if x != "" && x != " " && x != "\n" {
+// 			x = strings.TrimSpace(x)
+// 			newArr = append(newArr, x)
+// 			//fmt.Println(x)
+// 		}
+// 	}
+// 	return newArr
+// }
 
 func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	revWalk, err := vc.repo.Walk()
@@ -173,22 +177,22 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return nil
 	}
-	statsString, err := diffStats.String(4, 0)
-	if err != nil {
-		return nil
-	}
-	statsString = strings.ReplaceAll(statsString, "\n", " ")
-	stats := trimTheFat(strings.Split(statsString, " "))
+	// statsString, err := diffStats.String(4, 0)
+	// if err != nil {
+	// 	return nil
+	// }
+	//statsString = strings.ReplaceAll(statsString, "\n", " ")
+	//stats := trimTheFat(strings.Split(statsString, " "))
 	diff.Free()
 	oldTree.Free()
 	tree.Free()
-	vc.stats = stats
-	vc.statIndex = 0
+	// vc.stats = stats
+	// vc.statIndex = 0
 	vc.commitStats = diffStats
 	vc.current = commit
-	if len(vc.stats) == 0 {
-		vc.Next()
-	}
+	// if len(vc.stats) == 0 {
+	// 	vc.Next()
+	// }
 	return nil
 }
 
@@ -237,7 +241,7 @@ func (vc *StatsCursor) Next() error {
 		return nil
 	}
 	statsString = strings.ReplaceAll(statsString, "\n", " ")
-	stats := trimTheFat(strings.Split(statsString, " "))
+	//stats := trimTheFat(strings.Split(statsString, " "))
 
 	err = diff.Free()
 	if err != nil {
@@ -247,14 +251,14 @@ func (vc *StatsCursor) Next() error {
 	tree.Free()
 	diff.Free()
 	vc.commitStats.Free()
-	vc.statIndex = 0
+	//vc.statIndex = 0
 	vc.commitStats = diffStats
-	vc.stats = stats
+	//vc.stats = stats
 	vc.current.Free()
 	vc.current = commit
-	if len(stats) == 0 {
-		vc.Next()
-	}
+	// if len(stats) == 0 {
+	// 	vc.Next()
+	// }
 	return nil
 }
 
