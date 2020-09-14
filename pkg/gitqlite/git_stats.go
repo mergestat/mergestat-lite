@@ -102,10 +102,17 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(vc.stats[vc.statIndex+2])
 	case 5:
 		stuff, err := vc.commitStats.String(4, 0)
+		//stuff = strings.ReplaceAll(stuff, "\n", " ")
+		stuffs := strings.Split(stuff, " ")
+		stuffs = trimTheFat(stuffs)
+		//fmt.Print(stuffs)
+		stuff = strings.Join(stuffs, " ")
+		fmt.Print()
+		fmt.Println(strings.Split(stuff, " "))
 		if err != nil {
 			return err
 		}
-		c.ResultText(stuff)
+		c.ResultText("")
 	}
 
 	return nil
@@ -113,7 +120,7 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 func trimTheFat(s []string) []string {
 	var newArr []string
 	for _, x := range s {
-		if x != "" {
+		if x != " " && x != "\n" && x != "" {
 			newArr = append(newArr, x)
 		}
 	}
