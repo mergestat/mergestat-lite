@@ -67,10 +67,7 @@ type StatsCursor struct {
 	commitStats *git.DiffStats
 	diff        *git.Diff
 	deltaIndex  int
-	//commitPatches []*git.Patch
-	//hunks         []git.BlameHunk
-	//stats       []string
-	commitIter *git.RevWalk
+	commitIter  *git.RevWalk
 }
 
 func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
@@ -79,8 +76,6 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	deletions := 0
 	filename := ""
 	holder, err := vc.diff.Patch(vc.deltaIndex)
-	fmt.Println(vc.deltaIndex)
-	//num, _ := vc.diff.NumDeltas()
 	if err != nil {
 		fmt.Printf("84 : %s, %d", err, vc.deltaIndex)
 
@@ -94,7 +89,6 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	h, err := holder.String()
 	if err != nil {
 		fmt.Printf("94 : %s", err)
-
 		return err
 	}
 	filename = deltaHolder.NewFile.Path
@@ -105,15 +99,12 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		} else if strings.HasPrefix(line, "+") && !strings.HasPrefix(line, "+++") {
 			additions++
 		}
-		//fmt.Println(h + "\n")
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
 
 	}
-
-	fmt.Printf("additions %d, Deletions %d\n", additions, deletions)
 	switch col {
 	case 0:
 		//commit id
@@ -121,43 +112,14 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 1:
 		c.ResultText(filename)
 	case 2:
-		//deletions := vc.commitStats.Deletions()
 		c.ResultInt(additions)
 	case 3:
-		// statString, err := vc.stats.String(4, 0)
-		// if err != nil {
-		// 	return err
-		// }
-		// //info := strings.Split(statString, "|")
-		// //filename := info[0]
-		// stattos := strings.Split(statString, " ")
-		// stattos = trimTheFat(stattos)
-		// fmt.Println(stattos)
-		// c.ResultText(fmt.Sprint(stattos))
 		c.ResultInt(deletions)
 
 	}
 
 	return nil
 }
-
-// func trimTheFat(s []string) []string {
-// 	var newArr []string
-// 	for _, x := range s {
-// 		holder := ""
-// 		for _, y := range x {
-// 			if y != ' ' && y != '\n' && y != ',' {
-// 				holder += y
-// 			}
-// 		}
-// 		if x != "" && x != " " && x != "\n" {
-// 			x = strings.TrimSpace(x)
-// 			newArr = append(newArr, x)
-// 			//fmt.Println(x)
-// 		}
-// 	}
-// 	return newArr
-// }
 
 func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	revWalk, err := vc.repo.Walk()
@@ -217,49 +179,17 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		fmt.Println(err)
 		return nil
 	}
-	// defaultOpt, err := git.DefaultBlameOptions()
-	// if err != nil {
-	// 	return err
-	// }
-	// blame, err := vc.repo.BlameFile(vc.repo.Path(), &defaultOpt)
-	// if err != nil {
-	// 	return err
-	// }
-	// hunkCount := blame.HunkCount()
-	// var hunks []git.BlameHunk
-	// for i := 0; i < hunkCount; i++ {
-	// 	hunk, err := blame.HunkByIndex(i)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	hunks = append(hunks, hunk)
-	// }
 	diffStats, err := diff.Stats()
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-	//statsString, err := diffStats.String(4, 0)
-	// if err != nil {
-	// 	return nil
-	// }
-	//statsString = strings.ReplaceAll(statsString, "\n", " ")
-	//stats := trimTheFat(strings.Split(statsString, " "))
 	oldTree.Free()
 	tree.Free()
-	// vc.stats = stats
-	//vc.hunks = hunks
 	vc.diff = diff
 	vc.deltaIndex = 0
 	vc.commitStats = diffStats
 	vc.current = commit
-	// vc.commitPatches = patches
-	// for _, i := range patches {
-	// 	i.Free()
-	// }
-	// if len(vc.stats) == 0 {
-	// 	vc.Next()
-	// }
 	return nil
 }
 
@@ -316,82 +246,6 @@ func (vc *StatsCursor) Next() error {
 		fmt.Println(err)
 		return nil
 	}
-	// defaultOpt, err := git.DefaultBlameOptions()
-	// if err != nil {
-	// 	return err
-	// }
-	// blame, err := vc.repo.BlameFile(vc.repo.Path(), &defaultOpt)
-	// if err != nil {
-	// 	return err
-	// }
-	// hunkCount := blame.HunkCount()
-	// var hunks []git.BlameHunk
-	// for i := 0; i < hunkCount; i++ {
-	// 	hunk, err := blame.HunkByIndex(i)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	hunks = append(hunks, hunk)
-	// }
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return nil
-	// }
-	// fmt.Printf("\nnumber deltas %d\n", noDeltas)
-	// var additions int
-	// var deletions int
-	// var info []string
-	// var filename string
-	// var patches []*git.Patch
-	// for i := 0; i < noDeltas; i++ {
-	// 	holder, err := diff.Patch(i)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return err
-	// 	}
-	// 	//s, _ := holder.String()
-	// 	//fmt.Print(s + " stuff \n\n")
-	// 	deltaHolder, err := diff.Delta(i)
-	// 	//fmt.Print("status string" + deltaHolder.Status.String() + "\n")
-
-	// 	fmt.Print(deltaHolder.NewFile.Path + "\n\n")
-
-	// 	patches = append(patches, holder)
-	// 	h, err := holder.String()
-	// 	//fmt.Print(h)
-	// 	//fmt.Println("\n\n")
-	// 	info = append(info, h)
-	// }
-	// file := strings.Join(info, "")
-	// fileLines := strings.Split(file, "\n")
-	// for _, line := range fileLines {
-	// 	if strings.HasPrefix(line, "---") {
-	// 		filename = strings.TrimPrefix(line, "---")
-	// 	} else if strings.HasPrefix(line, "-") {
-	// 		deletions++
-	// 	} else if strings.HasPrefix(line, "+") && !strings.HasPrefix(line, "+++") {
-	// 		additions++
-	// 	}
-	// 	//fmt.Println(h + "\n")
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return err
-	// 	}
-
-	// }
-	//fmt.Println(info)
-	//fmt.Printf("additions %d deletions %d filename %s", additions, deletions, filename)
-
-	// statsString, err := diffStats.String(4, 0)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return nil
-	// }
-	//statsString = strings.ReplaceAll(statsString, "\n", " ")
-	//stats := trimTheFat(strings.Split(statsString, " "))
-
-	//vc.statIndex = 0
 	vc.diff = diff
 	vc.deltaIndex = 0
 	vc.commitStats = diffStats
@@ -407,10 +261,6 @@ func (vc *StatsCursor) Next() error {
 	oldTree.Free()
 	tree.Free()
 	vc.commitStats.Free()
-
-	// if len(stats) == 0 {
-	// 	vc.Next()
-	// }
 	return nil
 }
 
