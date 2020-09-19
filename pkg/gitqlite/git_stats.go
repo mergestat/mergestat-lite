@@ -190,6 +190,14 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	vc.deltaIndex = 0
 	vc.commitStats = diffStats
 	vc.current = commit
+	numDeltas, err := vc.diff.NumDeltas()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	if vc.deltaIndex >= numDeltas {
+		return vc.Next()
+	}
 	return nil
 }
 
@@ -256,7 +264,7 @@ func (vc *StatsCursor) Next() error {
 		return nil
 	}
 	if vc.deltaIndex >= numDeltas {
-		vc.Next()
+		return vc.Next()
 	}
 	oldTree.Free()
 	tree.Free()
