@@ -33,7 +33,7 @@ func TestStatsTable(t *testing.T) {
 	}
 
 	//checks commits
-	rows, err := instance.DB.Query("SELECT DISTINCT commit_id FROM stats")
+	rows, err := instance.DB.Query("SELECT * FROM stats")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,6 +48,11 @@ func TestStatsTable(t *testing.T) {
 	if len(columns) != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
 	}
+	rows, err = instance.DB.Query("SELECT DISTINCT commit_id FROM stats")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
 	numRows := GetRowsCount(rows)
 
 	expected = commitCount
@@ -62,7 +67,7 @@ func BenchmarkStats(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		rows, err := instance.DB.Query("SELECT * FROM commits")
+		rows, err := instance.DB.Query("SELECT * FROM stats")
 		if err != nil {
 			b.Fatal(err)
 		}

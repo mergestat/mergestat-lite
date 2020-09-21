@@ -8,7 +8,7 @@ import (
 )
 
 func TestStats(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
+	instance, err := New(fixtureRepoDir, &Options{UseGitCLI: true})
 	if err != nil {
 		t.Fatal(err)
 	}
