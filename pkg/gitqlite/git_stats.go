@@ -72,8 +72,6 @@ type StatsCursor struct {
 
 func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	commit := vc.current
-	additions := 0
-	deletions := 0
 	filename := ""
 	holder, err := vc.diff.Patch(vc.deltaIndex)
 	if err != nil {
@@ -92,6 +90,35 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		return err
 	}
 	filename = deltaHolder.NewFile.Path
+
+	switch col {
+	case 0:
+		//commit id
+		c.ResultText(commit.Id().String())
+	case 1:
+		c.ResultText(filename)
+	case 2:
+		additions, _, err := countChanges(h)
+		if err != nil {
+			return err
+		}
+
+		c.ResultInt(additions)
+	case 3:
+		_, deletions, err := countChanges(h)
+		if err != nil {
+			return err
+		}
+		c.ResultInt(deletions)
+
+	}
+
+	return nil
+}
+
+func countChanges(h string) (ins int, del int, err error) {
+	additions := 0
+	deletions := 0
 	fileLines := strings.Split(h, "\n")
 	for _, line := range fileLines {
 		if strings.HasPrefix(line, "-") && !strings.HasPrefix(line, "---") {
@@ -100,27 +127,12 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 			additions++
 		}
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return 0, 0, err
 		}
 
 	}
-	switch col {
-	case 0:
-		//commit id
-		c.ResultText(commit.Id().String())
-	case 1:
-		c.ResultText(filename)
-	case 2:
-		c.ResultInt(additions)
-	case 3:
-		c.ResultInt(deletions)
-
-	}
-
-	return nil
+	return additions, deletions, err
 }
-
 func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	revWalk, err := vc.repo.Walk()
 	if err != nil {
