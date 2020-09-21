@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
@@ -33,7 +34,7 @@ func init() {
 func handleError(err error) {
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
 }
 
@@ -76,10 +77,17 @@ var rootCmd = &cobra.Command{
 		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
 		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
 			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
+				cloneOptions := &git.CloneOptions{}
+				// use FetchOptions instead of directly RemoteCallbacks
+				// https://github.com/libgit2/git2go/commit/36e0a256fe79f87447bb730fda53e5cbc90eb47c
+				cloneOptions.FetchOptions = &git.FetchOptions{
+					RemoteCallbacks: git.RemoteCallbacks{
+						CredentialsCallback:      credentialsCallback,
+						CertificateCheckCallback: certificateCheckCallback,
+					}}
 				dir, err = ioutil.TempDir("", "repo")
 				handleError(err)
-
-				_, err = git.Clone(r, dir, &git.CloneOptions{})
+				_, err = git.Clone(r, dir, cloneOptions)
 				handleError(err)
 
 				defer func() {
@@ -89,11 +97,13 @@ var rootCmd = &cobra.Command{
 
 			}
 		}
+
 		if dir == "" {
 			dir, err = filepath.Abs(repo)
 		} else {
 			dir, err = filepath.Abs(dir)
 		}
+
 		if err != nil {
 			handleError(err)
 		}
@@ -108,7 +118,6 @@ var rootCmd = &cobra.Command{
 
 		rows, err := g.DB.Query(query)
 		handleError(err)
-
 		err = gitqlite.DisplayDB(rows, os.Stdout, format)
 		handleError(err)
 	},
@@ -131,4 +140,16 @@ func readStdin() (string, error) {
 	}
 	returnString := string(output)
 	return returnString, nil
+}
+func credentialsCallback(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
+	usr, _ := user.Current()
+	publicSSH := usr.HomeDir + "/.ssh/id_rsa.pub"
+	privateSSH := usr.HomeDir + "/.ssh/id_rsa"
+	cred, ret := git.NewCredSshKey("git", publicSSH, privateSSH, "")
+	return cred, ret
+}
+
+// Made this one just return 0 during troubleshooting...
+func certificateCheckCallback(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+	return 0
 }
