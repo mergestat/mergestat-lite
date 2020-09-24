@@ -34,7 +34,7 @@ func init() {
 func handleError(err error) {
 	if err != nil {
 		fmt.Println(err)
-		panic(err)
+		os.Exit(1)
 	}
 }
 
