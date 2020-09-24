@@ -89,8 +89,8 @@ var rootCmd = &cobra.Command{
 				// https://github.com/libgit2/git2go/commit/36e0a256fe79f87447bb730fda53e5cbc90eb47c
 				cloneOptions.FetchOptions = &git.FetchOptions{
 					RemoteCallbacks: git.RemoteCallbacks{
-						CredentialsCallback:      credentialsCallback,
-						CertificateCheckCallback: certificateCheckCallback,
+						CredentialsCallback:      CredentialsCallback,
+						CertificateCheckCallback: CertificateCheckCallback,
 					}}
 				dir, err = ioutil.TempDir("", "repo")
 				handleError(err)
@@ -148,7 +148,7 @@ func readStdin() (string, error) {
 	returnString := string(output)
 	return returnString, nil
 }
-func credentialsCallback(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
+func CredentialsCallback(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
 	usr, _ := user.Current()
 	publicSSH := usr.HomeDir + "/.ssh/id_rsa.pub"
 	privateSSH := usr.HomeDir + "/.ssh/id_rsa"
@@ -157,6 +157,6 @@ func credentialsCallback(url string, username string, allowedTypes git.CredType)
 }
 
 // Made this one just return 0 during troubleshooting...
-func certificateCheckCallback(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+func CertificateCheckCallback(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
 	return 0
 }

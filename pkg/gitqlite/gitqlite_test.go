@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"testing"
 
 	git "github.com/libgit2/git2go/v30"
+	//"github.com/augmentable-dev/askgit/cmd"
 )
 
 var (
@@ -15,6 +17,18 @@ var (
 	fixtureRepoDir      string
 )
 
+func CredentialsCallback(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
+	usr, _ := user.Current()
+	publicSSH := usr.HomeDir + "/.ssh/id_rsa.pub"
+	privateSSH := usr.HomeDir + "/.ssh/id_rsa"
+	cred, ret := git.NewCredSshKey("git", publicSSH, privateSSH, "")
+	return cred, ret
+}
+
+// Made this one just return 0 during troubleshooting...
+func CertificateCheckCallback(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+	return 0
+}
 func TestMain(m *testing.M) {
 	close, err := initFixtureRepo()
 	if err != nil {
@@ -30,8 +44,15 @@ func initFixtureRepo() (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
+	cloneOptions := &git.CloneOptions{}
+	// use FetchOptions instead of directly RemoteCallbacks
+	// https://github.com/libgit2/git2go/commit/36e0a256fe79f87447bb730fda53e5cbc90eb47c
+	cloneOptions.FetchOptions = &git.FetchOptions{
+		RemoteCallbacks: git.RemoteCallbacks{
+			CredentialsCallback:      CredentialsCallback,
+			CertificateCheckCallback: CertificateCheckCallback,
+		}}
+	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, cloneOptions)
 	if err != nil {
 		return nil, err
 	}
