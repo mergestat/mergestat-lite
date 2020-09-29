@@ -81,13 +81,32 @@ func (vc *diffCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	switch col {
 	case 0:
 		//commit id
-		c.ResultText(vc.blames[vc.blamesIndex].filename)
+		if vc.blamesIndex < len(vc.blames) {
+			c.ResultText(vc.blames[vc.blamesIndex].filename)
+		} else {
+			c.ResultText("problem")
+		}
 	case 1:
-		c.ResultText(vc.blames[vc.blamesIndex].linesChanged)
+		if vc.blamesIndex < len(vc.blames) {
+
+			c.ResultText(vc.blames[vc.blamesIndex].linesChanged)
+		} else {
+			c.ResultText("problem")
+		}
 	case 2:
-		c.ResultText(vc.blames[vc.blamesIndex].author)
+		if vc.blamesIndex < len(vc.blames) {
+
+			c.ResultText(vc.blames[vc.blamesIndex].author)
+		} else {
+			c.ResultText("problem")
+		}
 	case 3:
-		c.ResultText(vc.blames[vc.blamesIndex].commitId)
+		if vc.blamesIndex < len(vc.blames) {
+
+			c.ResultText(vc.blames[vc.blamesIndex].commitId)
+		} else {
+			c.ResultText("problem")
+		}
 
 	}
 
@@ -181,17 +200,13 @@ func (vc *diffCursor) Filter(idxNum int, idxStr string, vals []interface{}) erro
 	return nil
 }
 func (vc *diffCursor) NextBlame() error {
-	fmt.Println("nextBlame")
-	fmt.Println("size of blames", len(vc.blames))
-	fmt.Println("index", vc.blamesIndex)
-	if vc.blamesIndex+1 < len(vc.blames) {
+	if vc.blamesIndex+2 < len(vc.blames) {
 		vc.blamesIndex++
 		return nil
 	}
 	return io.EOF
 }
 func (vc *diffCursor) nextDiffDelta() error {
-	fmt.Println("nextDiffDelta")
 	vc.blames = make([]credit, 0)
 
 	numDeltas, err := vc.diff.NumDeltas()
@@ -199,8 +214,6 @@ func (vc *diffCursor) nextDiffDelta() error {
 		fmt.Println(err)
 		return nil
 	}
-	fmt.Println("numDeltas ", numDeltas)
-	fmt.Println("deltaIndex", vc.deltaIndex)
 	if vc.deltaIndex < numDeltas-1 {
 		vc.deltaIndex += 1
 		deltaHolder, err := vc.diff.Delta(vc.deltaIndex)
@@ -223,11 +236,9 @@ func (vc *diffCursor) nextDiffDelta() error {
 		vc.blamesIndex = 0
 		return nil
 	}
-	fmt.Println("should go to nextCommitDiff")
 	return io.EOF
 }
 func (vc *diffCursor) Next() error {
-	fmt.Println("next")
 	err := vc.NextBlame()
 	if err == io.EOF {
 		err = vc.nextDiffDelta()
@@ -239,8 +250,6 @@ func (vc *diffCursor) Next() error {
 			fmt.Println(err)
 			return nil
 		}
-		fmt.Println("numDeltas", numDeltas)
-		fmt.Println("deltaIndex", vc.deltaIndex)
 		for vc.deltaIndex >= numDeltas-1 {
 			err = vc.nextCommitDiff()
 			if err != nil {
@@ -278,7 +287,6 @@ func (vc *diffCursor) Next() error {
 	}
 }
 func (vc *diffCursor) nextCommitDiff() error {
-	fmt.Println("next commit diff")
 	oldTree, err := vc.current.Tree()
 	if err != nil {
 		return err
@@ -298,7 +306,6 @@ func (vc *diffCursor) nextCommitDiff() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(commit.RawMessage())
 	tree, err := commit.Tree()
 	if err != nil {
 		fmt.Println(err)
