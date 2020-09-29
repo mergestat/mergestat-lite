@@ -158,7 +158,6 @@ func (vc *diffCursor) Filter(idxNum int, idxStr string, vals []interface{}) erro
 		fmt.Println(err)
 		return nil
 	}
-	fmt.Println("numDeltas", numDeltas)
 	if vc.deltaIndex >= numDeltas {
 		return vc.Next()
 	}
@@ -182,7 +181,9 @@ func (vc *diffCursor) Filter(idxNum int, idxStr string, vals []interface{}) erro
 	return nil
 }
 func (vc *diffCursor) NextBlame() error {
-
+	fmt.Println("nextBlame")
+	fmt.Println("size of blames", len(vc.blames))
+	fmt.Println("index", vc.blamesIndex)
 	if vc.blamesIndex+1 < len(vc.blames) {
 		vc.blamesIndex++
 		return nil
@@ -190,11 +191,16 @@ func (vc *diffCursor) NextBlame() error {
 	return io.EOF
 }
 func (vc *diffCursor) nextDiffDelta() error {
+	fmt.Println("nextDiffDelta")
+	vc.blames = make([]credit, 0)
+
 	numDeltas, err := vc.diff.NumDeltas()
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
+	fmt.Println("numDeltas ", numDeltas)
+	fmt.Println("deltaIndex", vc.deltaIndex)
 	if vc.deltaIndex < numDeltas-1 {
 		vc.deltaIndex += 1
 		deltaHolder, err := vc.diff.Delta(vc.deltaIndex)
@@ -202,7 +208,6 @@ func (vc *diffCursor) nextDiffDelta() error {
 			fmt.Printf("89 : %s", err)
 			return err
 		}
-		vc.blames = nil
 		blame, err := vc.repo.BlameFile(deltaHolder.NewFile.Path, &git.BlameOptions{})
 		if err != nil {
 			return err
@@ -218,23 +223,25 @@ func (vc *diffCursor) nextDiffDelta() error {
 		vc.blamesIndex = 0
 		return nil
 	}
+	fmt.Println("should go to nextCommitDiff")
 	return io.EOF
 }
 func (vc *diffCursor) Next() error {
-
+	fmt.Println("next")
 	err := vc.NextBlame()
 	if err == io.EOF {
 		err = vc.nextDiffDelta()
 	}
 	if err == io.EOF {
 
-		vc.deltaIndex = 0
 		numDeltas, err := vc.diff.NumDeltas()
 		if err != nil {
 			fmt.Println(err)
 			return nil
 		}
-		for vc.deltaIndex >= numDeltas {
+		fmt.Println("numDeltas", numDeltas)
+		fmt.Println("deltaIndex", vc.deltaIndex)
+		for vc.deltaIndex >= numDeltas-1 {
 			err = vc.nextCommitDiff()
 			if err != nil {
 				return err
@@ -243,6 +250,7 @@ func (vc *diffCursor) Next() error {
 			if err != nil {
 				return err
 			}
+			vc.deltaIndex = 0
 		}
 		deltaHolder, err := vc.diff.Delta(vc.deltaIndex)
 		if err != nil {
@@ -270,6 +278,7 @@ func (vc *diffCursor) Next() error {
 	}
 }
 func (vc *diffCursor) nextCommitDiff() error {
+	fmt.Println("next commit diff")
 	oldTree, err := vc.current.Tree()
 	if err != nil {
 		return err
@@ -289,6 +298,7 @@ func (vc *diffCursor) nextCommitDiff() error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(commit.RawMessage())
 	tree, err := commit.Tree()
 	if err != nil {
 		fmt.Println(err)
