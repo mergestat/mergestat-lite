@@ -19,7 +19,7 @@ func TestBlame(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	branchRows, err := instance.DB.Query("SELECT DISTINCT name FROM blame")
+	branchRows, err := instance.DB.Query("SELECT DISTINCT filename FROM blame")
 	if err != nil {
 		t.Fatal(err)
 	}
