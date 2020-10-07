@@ -47,7 +47,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			err = conn.CreateModule("git_diff", &gitDiffModule{})
+			err = conn.CreateModule("git_blame", &gitBlameModule{})
 			if err != nil {
 				return err
 			}
@@ -110,7 +110,7 @@ func (g *GitQLite) ensureTables(options *Options) error {
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS diff USING git_diff('%s');", g.RepoPath))
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", g.RepoPath))
 	if err != nil {
 		return err
 	}
