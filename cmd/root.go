@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
+	"path"
 	"path/filepath"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
@@ -82,25 +84,45 @@ var rootCmd = &cobra.Command{
 
 		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
 		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
-			if r, err := remote.Remote(vcsurl.HTTPS); err == nil { // if it can be resolved into an HTTPS remote
-				dir, err = ioutil.TempDir("", "repo")
-				handleError(err)
+			dir, err = ioutil.TempDir("", "repo")
+			handleError(err)
 
-				_, err = git.Clone(r, dir, &git.CloneOptions{})
-				handleError(err)
+			cloneOptions := &git.CloneOptions{}
 
-				defer func() {
-					err := os.RemoveAll(dir)
-					handleError(err)
-				}()
+			if _, err := remote.Remote(vcsurl.SSH); err == nil { // if SSH, use "default" credentials
+				// use FetchOptions instead of directly RemoteCallbacks
+				// https://github.com/libgit2/git2go/commit/36e0a256fe79f87447bb730fda53e5cbc90eb47c
+				cloneOptions.FetchOptions = &git.FetchOptions{
+					RemoteCallbacks: git.RemoteCallbacks{
+						CredentialsCallback: func(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
+							usr, _ := user.Current()
+							publicSSH := path.Join(usr.HomeDir, ".ssh/id_rsa.pub")
+							privateSSH := path.Join(usr.HomeDir, ".ssh/id_rsa")
 
+							cred, ret := git.NewCredSshKey("git", publicSSH, privateSSH, "")
+							return cred, ret
+						},
+						CertificateCheckCallback: func(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+							return git.ErrOk
+						},
+					}}
 			}
+
+			_, err = git.Clone(repo, dir, cloneOptions)
+			handleError(err)
+
+			defer func() {
+				err := os.RemoveAll(dir)
+				handleError(err)
+			}()
 		}
+
 		if dir == "" {
 			dir, err = filepath.Abs(repo)
 		} else {
 			dir, err = filepath.Abs(dir)
 		}
+
 		if err != nil {
 			handleError(err)
 		}
@@ -115,7 +137,6 @@ var rootCmd = &cobra.Command{
 
 		rows, err := g.DB.Query(query)
 		handleError(err)
-
 		err = gitqlite.DisplayDB(rows, os.Stdout, format)
 		handleError(err)
 	},

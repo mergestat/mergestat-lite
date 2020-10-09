@@ -30,7 +30,6 @@ func initFixtureRepo() (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
 	if err != nil {
 		return nil, err
