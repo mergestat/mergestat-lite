@@ -103,7 +103,7 @@ var rootCmd = &cobra.Command{
 							return cred, ret
 						},
 						CertificateCheckCallback: func(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
-							return 0
+							return git.ErrOk
 						},
 					}}
 			}
