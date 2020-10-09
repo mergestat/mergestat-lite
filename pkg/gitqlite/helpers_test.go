@@ -23,7 +23,6 @@ func TestStrSplit(t *testing.T) {
 		t.Fatalf("expected string: %s, got %s", "hello", contents[0][0])
 	}
 
-
 	rows, err = instance.DB.Query("SELECT str_split('hello world', ' ', 10)")
 	if err != nil {
 		t.Fatal(err)
