@@ -30,10 +30,8 @@ func (m *gitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			committer_email TEXT,
 			committer_when DATETIME, 
 			parent_id TEXT,
-			parent_count INT,
-			tree_id TEXT,
-			additions INT,
-			deletions INT
+			parent_count INT(10),
+			tree_id TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
