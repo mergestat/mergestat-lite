@@ -47,7 +47,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			err = conn.CreateModule("git_branch", &gitStatsCLIModule{})
+			err = conn.CreateModule("git_stats_cli", &gitStatsCLIModule{})
 			if err != nil {
 				return err
 			}
