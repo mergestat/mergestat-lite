@@ -154,10 +154,6 @@ func (vc *commitCLICursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 11:
 		//tree_id
 		c.ResultText(current.TreeID)
-	case 12:
-		c.ResultInt(current.Additions)
-	case 13:
-		c.ResultInt(current.Deletions)
 
 	}
 	return nil
