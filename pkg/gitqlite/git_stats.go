@@ -280,7 +280,11 @@ func (vc *StatsCursor) Next() error {
 	}
 	oldTree.Free()
 	tree.Free()
-	vc.commitStats.Free()
+	err = vc.commitStats.Free()
+	if err != nil {
+		fmt.Print()
+		//doNothing
+	}
 	return nil
 }
 
