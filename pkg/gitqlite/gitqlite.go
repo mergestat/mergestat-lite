@@ -47,6 +47,10 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("git_stats", &gitStatsModule{})
+			if err != nil {
+				return err
+			}
 
 			err = loadHelperFuncs(conn)
 			if err != nil {
@@ -88,6 +92,10 @@ func (g *GitQLite) ensureTables(options *Options) error {
 	g.RepoPath = strings.ReplaceAll(g.RepoPath, "'", "''")
 	if !options.UseGitCLI || !localGitExists {
 		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", g.RepoPath))
+		if err != nil {
+			return err
+		}
+		_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_stats('%s');", g.RepoPath))
 		if err != nil {
 			return err
 		}
