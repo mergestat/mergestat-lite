@@ -95,16 +95,17 @@ func (g *GitQLite) ensureTables(options *Options) error {
 		if err != nil {
 			return err
 		}
-		_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats('%s');", g.RepoPath))
-		if err != nil {
-			return err
-		}
+
 	} else {
 		_, err := g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli('%s');", g.RepoPath))
 		if err != nil {
 			return err
 		}
 
+	}
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats('%s');", g.RepoPath))
+	if err != nil {
+		return err
 	}
 
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree('%s');", g.RepoPath))
