@@ -66,12 +66,13 @@ type StatsCursor struct {
 	current     *git.Commit
 	commitStats *git.DiffStats
 	diff        *git.Diff
+	lastCommit  *git.Commit
 	deltaIndex  int
 	commitIter  *git.RevWalk
 }
 
 func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	commit := vc.current
+	commit := vc.lastCommit
 	filename := ""
 	holder, err := vc.diff.Patch(vc.deltaIndex)
 	if err != nil {
@@ -98,14 +99,14 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 1:
 		c.ResultText(filename)
 	case 2:
-		additions, _, err := countChanges(h)
+		_, additions, err := countChanges(h)
 		if err != nil {
 			return err
 		}
 
 		c.ResultInt(additions)
 	case 3:
-		_, deletions, err := countChanges(h)
+		deletions, _, err := countChanges(h)
 		if err != nil {
 			return err
 		}
@@ -116,7 +117,7 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func countChanges(h string) (ins int, del int, err error) {
+func countChanges(h string) (del int, ins int, err error) {
 	additions := 0
 	deletions := 0
 	fileLines := strings.Split(h, "\n")
@@ -158,6 +159,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
+	vc.lastCommit = commit
 	oldTree, err := commit.Tree()
 	if err != nil {
 		fmt.Println(err)
@@ -269,6 +271,8 @@ func (vc *StatsCursor) Next() error {
 	vc.diff = diff
 	vc.deltaIndex = 0
 	vc.commitStats = diffStats
+	vc.lastCommit.Free()
+	vc.lastCommit = vc.current
 	vc.current = commit
 	numDeltas, err = vc.diff.NumDeltas()
 	if err != nil {
