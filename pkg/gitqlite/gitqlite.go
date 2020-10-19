@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"os/exec"
+	"os/user"
+	"path"
 	"strings"
 
+	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
@@ -139,4 +142,27 @@ func loadHelperFuncs(conn *sqlite3.SQLiteConn) error {
 	}
 
 	return nil
+}
+func CreateAuthenticationCallback(remote *vcsurl.VCS) *git.CloneOptions {
+	cloneOptions := &git.CloneOptions{}
+
+	if _, err := remote.Remote(vcsurl.SSH); err == nil { // if SSH, use "default" credentials
+		// use FetchOptions instead of directly RemoteCallbacks
+		// https://github.com/libgit2/git2go/commit/36e0a256fe79f87447bb730fda53e5cbc90eb47c
+		cloneOptions.FetchOptions = &git.FetchOptions{
+			RemoteCallbacks: git.RemoteCallbacks{
+				CredentialsCallback: func(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
+					usr, _ := user.Current()
+					publicSSH := path.Join(usr.HomeDir, ".ssh/id_rsa.pub")
+					privateSSH := path.Join(usr.HomeDir, ".ssh/id_rsa")
+
+					cred, ret := git.NewCredSshKey("git", publicSSH, privateSSH, "")
+					return cred, ret
+				},
+				CertificateCheckCallback: func(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+					return git.ErrOk
+				},
+			}}
+	}
+	return cloneOptions
 }
