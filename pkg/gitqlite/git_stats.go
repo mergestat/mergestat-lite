@@ -99,14 +99,15 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 1:
 		c.ResultText(filename)
 	case 2:
-		_, additions, err := countChanges(h)
+		additions, _, err := countChanges(h)
+		fmt.Print(h, "\n")
 		if err != nil {
 			return err
 		}
 
 		c.ResultInt(additions)
 	case 3:
-		deletions, _, err := countChanges(h)
+		_, deletions, err := countChanges(h)
 		if err != nil {
 			return err
 		}
@@ -117,7 +118,7 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func countChanges(h string) (del int, ins int, err error) {
+func countChanges(h string) (ins int, del int, err error) {
 	additions := 0
 	deletions := 0
 	fileLines := strings.Split(h, "\n")
@@ -183,7 +184,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		fmt.Println(err)
 		return nil
 	}
-	diff, err := vc.repo.DiffTreeToTree(oldTree, tree, &defaults)
+	diff, err := vc.repo.DiffTreeToTree(tree, oldTree, &defaults)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -254,7 +255,7 @@ func (vc *StatsCursor) Next() error {
 		fmt.Println(err)
 		return nil
 	}
-	diff, err := vc.repo.DiffTreeToTree(oldTree, tree, &defaults)
+	diff, err := vc.repo.DiffTreeToTree(tree, oldTree, &defaults)
 	if err != nil {
 		fmt.Println(err)
 		return nil
