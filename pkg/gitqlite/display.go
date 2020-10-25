@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/olekukonko/tablewriter"
@@ -12,6 +13,11 @@ import (
 func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
 
 	switch format {
+	case "single":
+		err := single(rows, w)
+		if err != nil {
+			return err
+		}
 	case "csv":
 		err := csvDisplay(rows, ',', w)
 		if err != nil {
@@ -35,6 +41,35 @@ func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
 		}
 
 	}
+	return nil
+}
+func single(rows *sql.Rows, write io.Writer) error {
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return err
+	}
+	pointers := make([]interface{}, len(columns))
+	container := make([]sql.NullString, len(columns))
+
+	for i := range pointers {
+		pointers[i] = &container[i]
+	}
+	rows.Next()
+	err = rows.Scan(pointers...)
+	if err != nil {
+		return err
+	}
+
+	r := make([]string, len(columns))
+	for i, c := range container {
+		if c.Valid {
+			r[i] = c.String
+		}
+	}
+
+	fmt.Println(r[0])
+
 	return nil
 }
 
@@ -127,7 +162,6 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	table := tablewriter.NewWriter(write)
 	table.SetHeader(columns)
 	for rows.Next() {
-
 		err := rows.Scan(pointers...)
 		if err != nil {
 			return err
@@ -147,6 +181,7 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 			return err
 		}
 	}
+
 	table.Render()
 	return nil
 }
