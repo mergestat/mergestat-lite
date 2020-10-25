@@ -161,9 +161,7 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	}
 	table := tablewriter.NewWriter(write)
 	table.SetHeader(columns)
-	numRows := 0
 	for rows.Next() {
-		numRows++
 		err := rows.Scan(pointers...)
 		if err != nil {
 			return err
