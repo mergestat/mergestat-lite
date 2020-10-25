@@ -68,7 +68,7 @@ func single(rows *sql.Rows, write io.Writer) error {
 		}
 	}
 
-	fmt.Printf("%s : %s\n", columns[0], r[0])
+	fmt.Println(r[0])
 
 	return nil
 }
