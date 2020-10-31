@@ -161,7 +161,6 @@ func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
 	if err != nil {
 		return err
 	}
-	defer diff.Free()
 	diffFindOpts, err := git.DefaultDiffFindOptions()
 	if err != nil {
 		return err
@@ -171,7 +170,7 @@ func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
 		return err
 	}
 
-	diff.ForEach(func(delta git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
+	err = diff.ForEach(func(delta git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
 		perHunkCB := func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
 			perLineCB := func(line git.DiffLine) error {
 				if vc.sindex == -1 {
@@ -207,6 +206,9 @@ func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
 		}
 		return perHunkCB, nil
 	}, git.DiffDetailLines)
+	if err != nil {
+		return err
+	}
 	// for x, j := range stats {
 	// 	fmt.Println(x, j)
 	// }
