@@ -97,7 +97,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	defer revWalk.Free()
 	err = revWalk.PushHead()
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return err
 	}
 	vc.sindex = -1
@@ -112,7 +112,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	})
 
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return err
 	}
 	vc.sindex = 0
@@ -209,8 +209,5 @@ func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
 	if err != nil {
 		return err
 	}
-	// for x, j := range stats {
-	// 	fmt.Println(x, j)
-	// }
 	return nil
 }
