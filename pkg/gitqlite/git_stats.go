@@ -102,10 +102,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	vc.sindex = -1
 	err = revWalk.Iterate(func(commit *git.Commit) bool {
 		err := calcStats(commit, vc)
-		if err != nil {
-			return false
-		}
-		return true
+		return err == nil
 	})
 
 	if err != nil {
