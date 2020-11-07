@@ -1,7 +1,6 @@
 package gitqlite
 
 import (
-	"strings"
 	"testing"
 
 	git "github.com/libgit2/git2go/v30"
@@ -26,9 +25,7 @@ func TestStatsTable(t *testing.T) {
 
 	commitCount := 0
 	err = revWalk.Iterate(func(c *git.Commit) bool {
-		if !strings.Contains(strings.ToLower(c.Summary()), "merge") {
-			commitCount++
-		}
+		commitCount++
 		return true
 	})
 	if err != nil {

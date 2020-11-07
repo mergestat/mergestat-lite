@@ -97,22 +97,18 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	defer revWalk.Free()
 	err = revWalk.PushHead()
 	if err != nil {
-		//fmt.Println(err)
 		return err
 	}
 	vc.sindex = -1
-	var prevCommit *git.Commit
 	err = revWalk.Iterate(func(commit *git.Commit) bool {
-		err := calcStats(commit, prevCommit, vc)
+		err := calcStats(commit, vc)
 		if err != nil {
 			return false
 		}
-		prevCommit = commit
 		return true
 	})
 
 	if err != nil {
-		//fmt.Println(err)
 		return err
 	}
 	vc.sindex = 0
@@ -138,26 +134,31 @@ func (vc *StatsCursor) Close() error {
 	vc.stats = nil
 	return nil
 }
-func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
-	if commit == nil || prevCommit == nil {
+func calcStats(commit *git.Commit, vc *StatsCursor) error {
+	parent := commit.Parent(0)
+	if parent == nil {
 		return nil
 	}
+	defer parent.Free()
+
 	repo := commit.Owner()
 	tree, err := commit.Tree()
 	if err != nil {
 		return err
 	}
 	defer tree.Free()
-	prevTree, err := prevCommit.Tree()
+
+	parentTree, err := parent.Tree()
 	if err != nil {
 		return err
 	}
-	defer prevTree.Free()
+	defer parentTree.Free()
+
 	diffOpts, err := git.DefaultDiffOptions()
 	if err != nil {
 		return err
 	}
-	diff, err := repo.DiffTreeToTree(tree, prevTree, &diffOpts)
+	diff, err := repo.DiffTreeToTree(parentTree, tree, &diffOpts)
 	if err != nil {
 		return err
 	}
@@ -175,10 +176,10 @@ func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
 			perLineCB := func(line git.DiffLine) error {
 				if vc.sindex == -1 {
 					if line.Origin == git.DiffLineAddition {
-						vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 1, 0})
+						vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 1, 0})
 						vc.sindex++
 					} else if line.Origin == git.DiffLineDeletion {
-						vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 0, 1})
+						vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 0, 1})
 						vc.sindex++
 					}
 				} else {
@@ -190,11 +191,11 @@ func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
 						}
 					} else {
 						if line.Origin == git.DiffLineAddition {
-							vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 1, 0})
+							vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 1, 0})
 							vc.sindex++
 
 						} else if line.Origin == git.DiffLineDeletion {
-							vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 0, 1})
+							vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 0, 1})
 							vc.sindex++
 
 						}
