@@ -105,6 +105,7 @@ func TestParse(t *testing.T) {
 		t.Fatalf("incorrect number of commits, expected: %d got: %d", shouldBeCount, count)
 	}
 }
+
 func CreateAuthenticationCallback(remote *vcsurl.VCS) *git.CloneOptions {
 	cloneOptions := &git.CloneOptions{}
 

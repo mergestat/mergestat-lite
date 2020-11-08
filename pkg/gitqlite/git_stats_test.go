@@ -1,9 +1,10 @@
 package gitqlite
 
 import (
+	"io"
 	"testing"
 
-	git "github.com/libgit2/git2go/v30"
+	"github.com/augmentable-dev/askgit/pkg/gitlog"
 )
 
 func TestStatsTable(t *testing.T) {
@@ -12,42 +13,53 @@ func TestStatsTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	revWalk, err := fixtureRepo.Walk()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer revWalk.Free()
-
-	err = revWalk.PushHead()
+	iter, err := gitlog.Execute(fixtureRepoDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	commitCount := 0
-	err = revWalk.Iterate(func(c *git.Commit) bool {
-		commitCount++
-		return true
-	})
+	wantCommits := make([]*gitlog.Commit, 0)
+
+	for {
+		commit, err := iter.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			t.Fatal(err)
+		}
+		wantCommits = append(wantCommits, commit)
+	}
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	//checks commits
-	rows, err := instance.DB.Query("SELECT * FROM stats")
+	rows, err := instance.DB.Query("SELECT count(*) FROM stats GROUP BY commit_id")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer rows.Close()
 
-	columns, err := rows.Columns()
+	_, contents, err := GetContents(rows)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := 4
-	if len(columns) != expected {
-		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
+	if len(contents) != len(wantCommits) {
+		t.Fatalf("want: %d commits, got: %d", len(wantCommits), len(contents))
 	}
+
+	// columns, err := rows.Columns()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	// expected := 4
+	// if len(columns) != expected {
+	// 	t.Fatalf("expected %d columns, got: %d", expected, len(columns))
+	// }
+
 	// TODO: find a good way to do feature checking. Stats doesn't include commits that are merges so it is hard to do a pure count of commits for the table.
 	// instance, err = New(fixtureRepoDir, &Options{})
 	// if err != nil {
