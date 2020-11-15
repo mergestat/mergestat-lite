@@ -131,12 +131,20 @@ func getCommitCount(t *testing.T) []string {
 // 	}
 // 	defer revWalk.Free()
 
+// func createRevWalk(t *testing.T) *git.RevWalk {
+// 	revWalk, err := fixtureRepo.Walk()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	defer revWalk.Free()
+
 // 	err = revWalk.PushHead()
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	return revWalk
 // }
+
 func TestCommitByID(t *testing.T) {
 	o, err := fixtureRepo.RevparseSingle("HEAD~3")
 	if err != nil {
