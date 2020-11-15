@@ -20,8 +20,8 @@ func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 			CREATE TABLE %q (
 			commit_id TEXT,
 			file TEXT,
-			additions TEXT,
-			deletions TEXT
+			additions INT,
+			deletions INT
 			)`, args[0]))
 	if err != nil {
 		return nil, err
