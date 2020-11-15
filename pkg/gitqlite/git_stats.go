@@ -14,12 +14,6 @@ type gitStatsTable struct {
 	repoPath string
 	repo     *git.Repository
 }
-type fileStats struct {
-	commitId  string
-	fileName  string
-	additions int
-	deletions int
-}
 
 func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
