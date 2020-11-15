@@ -19,7 +19,7 @@ func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 	err := c.DeclareVTab(fmt.Sprintf(`
 			CREATE TABLE %q (
 			commit_id TEXT,
-			files_changed TEXT,
+			file TEXT,
 			additions TEXT,
 			deletions TEXT
 			)`, args[0]))
