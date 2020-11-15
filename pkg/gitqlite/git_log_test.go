@@ -43,13 +43,30 @@ func runQuery(t *testing.T, query string) []string {
 		t.Fatal(err)
 	}
 	defer rows.Close()
+
+	// columns, err := rows.Columns()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	// expected := 14
+	// if len(columns) != expected {
+	// 	t.Fatalf("expected %d columns, got: %d", expected, len(columns))
+	// }
+
+	// rows, err = instance.DB.Query(query)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 	rowNum, contents, err := GetContents(rows)
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
 	var ret []string
 	for _, entry := range contents {
-		ret = append(ret, entry...)
+		for _, s := range entry {
+			ret = append(ret, s)
+		}
 	}
 
 	return ret
@@ -123,7 +140,14 @@ func getCommitCount(t *testing.T) []string {
 	//revWalk.Free()
 	return ret
 }
+func createRevWalk(t *testing.T) *git.RevWalk {
+	revWalk, err := fixtureRepo.Walk()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer revWalk.Free()
 
+<<<<<<< HEAD
 // func createRevWalk(t *testing.T) *git.RevWalk {
 // 	revWalk, err := fixtureRepo.Walk()
 // 	if err != nil {
@@ -144,6 +168,14 @@ func getCommitCount(t *testing.T) []string {
 // 	}
 // 	return revWalk
 // }
+=======
+	err = revWalk.PushHead()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return revWalk
+}
+>>>>>>> initial table based testing for git_log
 func TestCommitByID(t *testing.T) {
 	o, err := fixtureRepo.RevparseSingle("HEAD~3")
 	if err != nil {
