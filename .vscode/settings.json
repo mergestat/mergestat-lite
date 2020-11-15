@@ -2,6 +2,9 @@
     "go.buildFlags": [
         "-tags='sqlite_vtable'"
     ],
+    "go.testFlags": [
+        "-v"
+    ],
     "go.vetFlags": [
         "-tags='sqlite_vtable'"
     ],
