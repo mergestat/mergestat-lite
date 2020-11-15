@@ -1,0 +1,5 @@
+SELECT
+    DISTINCT strftime(author_when, %H),
+    COUNT(*) commits,
+    author_email
+FROM commits GROUP BY author_email ORDER BY commits
