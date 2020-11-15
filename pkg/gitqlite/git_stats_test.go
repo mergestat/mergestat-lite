@@ -2,10 +2,28 @@ package gitqlite
 
 import (
 	"io"
+	"strconv"
 	"testing"
 
 	"github.com/augmentable-dev/askgit/pkg/gitlog"
 )
+
+func TestStatsIterator(t *testing.T) {
+	iter, err := NewCommitStatsIter(fixtureRepo, &commitStatsIterOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for {
+		stat, err := iter.Next()
+		if err == io.EOF {
+			break
+		}
+		if stat.commitID == "" {
+			t.Fatal("invalid commit")
+		}
+	}
+}
 
 func TestStatsTable(t *testing.T) {
 	instance, err := New(fixtureRepoDir, &Options{})
@@ -18,8 +36,8 @@ func TestStatsTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wantCommits := make([]*gitlog.Commit, 0)
-
+	totalAdditions := 0
+	totalDeletions := 0
 	for {
 		commit, err := iter.Next()
 		if err != nil {
@@ -28,14 +46,15 @@ func TestStatsTable(t *testing.T) {
 			}
 			t.Fatal(err)
 		}
-		wantCommits = append(wantCommits, commit)
+		totalAdditions += commit.Additions
+		totalDeletions += commit.Deletions
 	}
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	rows, err := instance.DB.Query("SELECT count(*) FROM stats GROUP BY commit_id")
+	rows, err := instance.DB.Query("SELECT sum(additions) AS a, sum(deletions) AS d FROM stats")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,36 +65,23 @@ func TestStatsTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(contents) != len(wantCommits) {
-		t.Fatalf("want: %d commits, got: %d", len(wantCommits), len(contents))
+	gotAdditions, err := strconv.Atoi(contents[0][0])
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	// columns, err := rows.Columns()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	gotDeletions, err := strconv.Atoi(contents[0][1])
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	// expected := 4
-	// if len(columns) != expected {
-	// 	t.Fatalf("expected %d columns, got: %d", expected, len(columns))
-	// }
+	if totalAdditions != gotAdditions {
+		t.Fatalf("expected: %d, got: %d total additions", totalAdditions, gotAdditions)
+	}
 
-	// TODO: find a good way to do feature checking. Stats doesn't include commits that are merges so it is hard to do a pure count of commits for the table.
-	// instance, err = New(fixtureRepoDir, &Options{})
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// rows, err = instance.DB.Query("SELECT DISTINCT commit_id FROM stats")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// defer rows.Close()
-	// numRows := GetRowsCount(rows)
-
-	// expected = commitCount
-	// if numRows != expected {
-	// 	t.Fatalf("expected %d rows got: %d", expected, numRows)
-	// }
+	if totalDeletions != gotDeletions {
+		t.Fatalf("expected: %d, got: %d total deletions", totalDeletions, gotDeletions)
+	}
 }
 
 func BenchmarkStats(b *testing.B) {

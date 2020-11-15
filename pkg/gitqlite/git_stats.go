@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"fmt"
+	"io"
 
 	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
@@ -67,60 +68,73 @@ func (v *gitStatsTable) Disconnect() error {
 func (v *gitStatsTable) Destroy() error { return nil }
 
 type StatsCursor struct {
-	repo   *git.Repository
-	stats  []fileStats
-	sindex int
+	repo     *git.Repository
+	iterator *commitStatsIter
+	current  *commitStat
 }
 
 func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-
+	stat := vc.current
 	switch col {
 	case 0:
 		//commit id
-		c.ResultText(vc.stats[vc.sindex].commitId)
+		c.ResultText(stat.commitID)
 	case 1:
-		c.ResultText(vc.stats[vc.sindex].fileName)
+		c.ResultText(stat.file)
 	case 2:
-		c.ResultInt(vc.stats[vc.sindex].additions)
+		c.ResultInt(stat.additions)
 	case 3:
-		c.ResultInt(vc.stats[vc.sindex].deletions)
+		c.ResultInt(stat.deletions)
 
 	}
 
 	return nil
 }
 func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	revWalk, err := vc.repo.Walk()
-	if err != nil {
-		return err
-	}
-	defer revWalk.Free()
-	err = revWalk.PushHead()
-	if err != nil {
-		return err
-	}
-	vc.sindex = -1
-	err = revWalk.Iterate(func(commit *git.Commit) bool {
-		err := calcStats(commit, vc)
-		return err == nil
-	})
+	var opt *commitStatsIterOptions
 
+	switch idxNum {
+	case 0:
+		opt = &commitStatsIterOptions{}
+	case 1:
+		opt = &commitStatsIterOptions{commitID: vals[0].(string)}
+	}
+
+	iter, err := NewCommitStatsIter(vc.repo, opt)
 	if err != nil {
 		return err
 	}
-	vc.sindex = 0
+
+	vc.iterator = iter
+
+	file, err := vc.iterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
+	}
+
+	vc.current = file
 	return nil
 }
 
 func (vc *StatsCursor) Next() error {
-	if vc.sindex < len(vc.stats) {
-		vc.sindex++
+	file, err := vc.iterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
 	}
+	vc.current = file
 	return nil
 }
 
 func (vc *StatsCursor) EOF() bool {
-	return vc.sindex == len(vc.stats)
+	return vc.current == nil
 }
 
 func (vc *StatsCursor) Rowid() (int64, error) {
@@ -128,84 +142,6 @@ func (vc *StatsCursor) Rowid() (int64, error) {
 }
 
 func (vc *StatsCursor) Close() error {
-	vc.stats = nil
-	return nil
-}
-func calcStats(commit *git.Commit, vc *StatsCursor) error {
-	parent := commit.Parent(0)
-	if parent == nil {
-		return nil
-	}
-	defer parent.Free()
-
-	repo := commit.Owner()
-	tree, err := commit.Tree()
-	if err != nil {
-		return err
-	}
-	defer tree.Free()
-
-	parentTree, err := parent.Tree()
-	if err != nil {
-		return err
-	}
-	defer parentTree.Free()
-
-	diffOpts, err := git.DefaultDiffOptions()
-	if err != nil {
-		return err
-	}
-	diff, err := repo.DiffTreeToTree(parentTree, tree, &diffOpts)
-	if err != nil {
-		return err
-	}
-	diffFindOpts, err := git.DefaultDiffFindOptions()
-	if err != nil {
-		return err
-	}
-	err = diff.FindSimilar(&diffFindOpts)
-	if err != nil {
-		return err
-	}
-
-	err = diff.ForEach(func(delta git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
-		perHunkCB := func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
-			perLineCB := func(line git.DiffLine) error {
-				if vc.sindex == -1 {
-					if line.Origin == git.DiffLineAddition {
-						vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 1, 0})
-						vc.sindex++
-					} else if line.Origin == git.DiffLineDeletion {
-						vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 0, 1})
-						vc.sindex++
-					}
-				} else {
-					if vc.stats[vc.sindex].fileName == delta.NewFile.Path {
-						if line.Origin == git.DiffLineAddition {
-							vc.stats[vc.sindex].additions++
-						} else if line.Origin == git.DiffLineDeletion {
-							vc.stats[vc.sindex].deletions++
-						}
-					} else {
-						if line.Origin == git.DiffLineAddition {
-							vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 1, 0})
-							vc.sindex++
-
-						} else if line.Origin == git.DiffLineDeletion {
-							vc.stats = append(vc.stats, fileStats{commit.Id().String(), delta.NewFile.Path, 0, 1})
-							vc.sindex++
-
-						}
-					}
-				}
-				return nil
-			}
-			return perLineCB, nil
-		}
-		return perHunkCB, nil
-	}, git.DiffDetailLines)
-	if err != nil {
-		return err
-	}
+	vc.iterator.Close()
 	return nil
 }
