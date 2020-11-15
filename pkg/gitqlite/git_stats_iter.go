@@ -1,7 +1,6 @@
 package gitqlite
 
 import (
-	"fmt"
 	"io"
 
 	git "github.com/libgit2/git2go/v30"
@@ -70,9 +69,6 @@ func stats(commit *git.Commit) ([]*commitStat, error) {
 		stat := &commitStat{
 			commitID: commit.Id().String(),
 			file:     delta.NewFile.Path,
-		}
-		if stat.commitID == "" {
-			fmt.Println(stat)
 		}
 		stats = append(stats, stat)
 		return func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {

@@ -31,6 +31,55 @@ func TestStatsTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	rows, err := instance.DB.Query("SELECT * FROM stats")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	_, contents, err := GetContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(contents[0]) != 4 {
+		t.Fatalf("expected 4 columns, got %d", len(contents[0]))
+	}
+
+}
+
+func TestStatsTableCommitIDIndex(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rows, err := instance.DB.Query("SELECT * FROM stats WHERE commit_id = (SELECT id FROM commits LIMIT 1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	_, contents, err := GetContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(contents[0]) != 4 {
+		t.Fatalf("expected 4 columns, got %d", len(contents[0]))
+	}
+
+	// TODO actually test the results here?
+	// this test case added to activate the code path that looks up commit stats by commit id
+	// (avoiding a full table scan)
+}
+
+func TestStatsTotals(t *testing.T) {
+	instance, err := New(fixtureRepoDir, &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	iter, err := gitlog.Execute(fixtureRepoDir)
 	if err != nil {
 		t.Fatal(err)

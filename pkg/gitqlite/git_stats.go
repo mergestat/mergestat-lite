@@ -50,9 +50,18 @@ func (v *gitStatsTable) Open() (sqlite3.VTabCursor, error) {
 }
 
 func (v *gitStatsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
-	// TODO this should actually be implemented!
-	dummy := make([]bool, len(cst))
-	return &sqlite3.IndexResult{Used: dummy}, nil
+	used := make([]bool, len(cst))
+	// TODO implement an index for file name glob patterns?
+	// TODO this loop construct won't work well for multiple constraints...
+	for c, constraint := range cst {
+		switch {
+		case constraint.Usable && constraint.Column == 0 && constraint.Op == sqlite3.OpEQ:
+			used[c] = true
+			return &sqlite3.IndexResult{Used: used, IdxNum: 1, IdxStr: "stats-by-commit-id", EstimatedCost: 1.0, EstimatedRows: 1}, nil
+		}
+	}
+
+	return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
 }
 
 func (v *gitStatsTable) Disconnect() error {
