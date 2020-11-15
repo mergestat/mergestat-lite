@@ -2,81 +2,143 @@ package gitqlite
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	git "github.com/libgit2/git2go/v30"
 )
 
+type test struct {
+	name  string
+	query string
+	want  []string
+}
+
 func TestCommits(t *testing.T) {
-	revWalk, err := fixtureRepo.Walk()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer revWalk.Free()
 
-	err = revWalk.PushHead()
-	if err != nil {
-		t.Fatal(err)
+	//this only works if you test one thing at a time.
+	testCases := []test{
+		{"checkCommits", "SELECT COUNT(*) FROM commits", getCommitCount(t)},
+		{"getAuthors", "SELECT author_name FROM commits", getAuthors(t)},
+		{"getID's", "SELECT id FROM commits", getIDs(t)},
+	}
+	for _, tc := range testCases {
+		expected := tc.want
+		results := runQuery(t, tc.query)
+		if len(expected) != len(results) {
+			t.Fatalf("expected %d entries got %d, test: %s, %s, %s", len(expected), len(results), tc.name, expected, results)
+		}
+		for x := 0; x < len(expected); x++ {
+			if results[x] != expected[x] {
+				t.Fatalf("expected %s, got %s, test %s", expected[x], results[x], tc.name)
+			}
+		}
 	}
 
-	commitCount := 0
-	err = revWalk.Iterate(func(c *git.Commit) bool {
-		commitCount++
-		return true
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
+}
+func runQuery(t *testing.T, query string) []string {
 	//checks commits
-	rows, err := fixtureDB.Query("SELECT * FROM commits")
+	rows, err := fixtureDB.Query(query)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer rows.Close()
 
-	columns, err := rows.Columns()
-	if err != nil {
-		t.Fatal(err)
-	}
+	// columns, err := rows.Columns()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
-	expected := 12
-	if len(columns) != expected {
-		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
-	}
-	numRows := GetRowsCount(rows)
+	// expected := 14
+	// if len(columns) != expected {
+	// 	t.Fatalf("expected %d columns, got: %d", expected, len(columns))
+	// }
 
-	expected = commitCount
-	if numRows != expected {
-		t.Fatalf("expected %d rows got: %d", expected, numRows)
-	}
-
-	rows, err = fixtureDB.Query("SELECT id, author_name FROM commits")
-	if err != nil {
-		t.Fatal(err)
-	}
+	// rows, err = instance.DB.Query(query)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 	rowNum, contents, err := GetContents(rows)
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
+	var ret []string
+	for _, entry := range contents {
+		for _, s := range entry {
+			ret = append(ret, s)
+		}
+	}
 
-	i := 0
+	return ret
+}
+func getAuthors(t *testing.T) []string {
+	//revWalk := createRevWalk(t)
+	revWalk, err := fixtureRepo.Walk()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = revWalk.PushHead()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var authors []string
+
 	err = revWalk.Iterate(func(commit *git.Commit) bool {
-		c := contents[i]
-		if commit.Id().String() != c[0] {
-			t.Fatalf("expected %s at row %d got %s", commit.Id().String(), i, c[0])
-		}
-
-		if commit.Author().Name != c[1] {
-			t.Fatalf("expected %s at row %d got %s", commit.Author().Name, i, c[1])
-		}
-
-		i++
+		authors = append(authors, commit.Author().Name)
 		return true
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	return authors
+}
+func getIDs(t *testing.T) []string {
+	revWalk, err := fixtureRepo.Walk()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = revWalk.PushHead()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var IDs []string
+	err = revWalk.Iterate(func(commit *git.Commit) bool {
+		IDs = append(IDs, commit.Id().String())
+		return true
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return IDs
+}
+func getCommitCount(t *testing.T) []string {
+	//revWalk := createRevWalk(t)
+	revWalk, err := fixtureRepo.Walk()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = revWalk.PushHead()
+	if err != nil {
+		t.Fatal(err)
+	}
+	count := 0
+	err = revWalk.Iterate(func(commit *git.Commit) bool {
+		count++
+		return true
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := fmt.Sprintf("%d", count)
+	ret := strings.Split(r, " ")
+
+	//revWalk.Free()
+	return ret
 }
 
 func TestCommitByID(t *testing.T) {
