@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"fmt"
+	"io"
 
 	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
@@ -13,18 +14,12 @@ type gitStatsTable struct {
 	repoPath string
 	repo     *git.Repository
 }
-type fileStats struct {
-	commitId  string
-	fileName  string
-	additions int
-	deletions int
-}
 
 func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 			CREATE TABLE %q (
 			commit_id TEXT,
-			files_changed TEXT,
+			file TEXT,
 			additions TEXT,
 			deletions TEXT
 			)`, args[0]))
@@ -55,9 +50,18 @@ func (v *gitStatsTable) Open() (sqlite3.VTabCursor, error) {
 }
 
 func (v *gitStatsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
-	// TODO this should actually be implemented!
-	dummy := make([]bool, len(cst))
-	return &sqlite3.IndexResult{Used: dummy}, nil
+	used := make([]bool, len(cst))
+	// TODO implement an index for file name glob patterns?
+	// TODO this loop construct won't work well for multiple constraints...
+	for c, constraint := range cst {
+		switch {
+		case constraint.Usable && constraint.Column == 0 && constraint.Op == sqlite3.OpEQ:
+			used[c] = true
+			return &sqlite3.IndexResult{Used: used, IdxNum: 1, IdxStr: "stats-by-commit-id", EstimatedCost: 1.0, EstimatedRows: 1}, nil
+		}
+	}
+
+	return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
 }
 
 func (v *gitStatsTable) Disconnect() error {
@@ -67,67 +71,73 @@ func (v *gitStatsTable) Disconnect() error {
 func (v *gitStatsTable) Destroy() error { return nil }
 
 type StatsCursor struct {
-	repo   *git.Repository
-	stats  []fileStats
-	sindex int
+	repo     *git.Repository
+	iterator *commitStatsIter
+	current  *commitStat
 }
 
 func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-
+	stat := vc.current
 	switch col {
 	case 0:
 		//commit id
-		c.ResultText(vc.stats[vc.sindex].commitId)
+		c.ResultText(stat.commitID)
 	case 1:
-		c.ResultText(vc.stats[vc.sindex].fileName)
+		c.ResultText(stat.file)
 	case 2:
-		c.ResultInt(vc.stats[vc.sindex].additions)
+		c.ResultInt(stat.additions)
 	case 3:
-		c.ResultInt(vc.stats[vc.sindex].deletions)
+		c.ResultInt(stat.deletions)
 
 	}
 
 	return nil
 }
 func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	revWalk, err := vc.repo.Walk()
-	if err != nil {
-		return err
-	}
-	defer revWalk.Free()
-	err = revWalk.PushHead()
-	if err != nil {
-		//fmt.Println(err)
-		return err
-	}
-	vc.sindex = -1
-	var prevCommit *git.Commit
-	err = revWalk.Iterate(func(commit *git.Commit) bool {
-		err := calcStats(commit, prevCommit, vc)
-		if err != nil {
-			return false
-		}
-		prevCommit = commit
-		return true
-	})
+	var opt *commitStatsIterOptions
 
+	switch idxNum {
+	case 0:
+		opt = &commitStatsIterOptions{}
+	case 1:
+		opt = &commitStatsIterOptions{commitID: vals[0].(string)}
+	}
+
+	iter, err := NewCommitStatsIter(vc.repo, opt)
 	if err != nil {
-		//fmt.Println(err)
 		return err
 	}
-	vc.sindex = 0
+
+	vc.iterator = iter
+
+	file, err := vc.iterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
+	}
+
+	vc.current = file
 	return nil
 }
 
 func (vc *StatsCursor) Next() error {
-	if vc.sindex < len(vc.stats) {
-		vc.sindex++
+	file, err := vc.iterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
 	}
+	vc.current = file
 	return nil
 }
 
 func (vc *StatsCursor) EOF() bool {
-	return vc.sindex == len(vc.stats)
+	return vc.current == nil
 }
 
 func (vc *StatsCursor) Rowid() (int64, error) {
@@ -135,79 +145,6 @@ func (vc *StatsCursor) Rowid() (int64, error) {
 }
 
 func (vc *StatsCursor) Close() error {
-	vc.stats = nil
-	return nil
-}
-func calcStats(commit, prevCommit *git.Commit, vc *StatsCursor) error {
-	if commit == nil || prevCommit == nil {
-		return nil
-	}
-	repo := commit.Owner()
-	tree, err := commit.Tree()
-	if err != nil {
-		return err
-	}
-	defer tree.Free()
-	prevTree, err := prevCommit.Tree()
-	if err != nil {
-		return err
-	}
-	defer prevTree.Free()
-	diffOpts, err := git.DefaultDiffOptions()
-	if err != nil {
-		return err
-	}
-	diff, err := repo.DiffTreeToTree(tree, prevTree, &diffOpts)
-	if err != nil {
-		return err
-	}
-	diffFindOpts, err := git.DefaultDiffFindOptions()
-	if err != nil {
-		return err
-	}
-	err = diff.FindSimilar(&diffFindOpts)
-	if err != nil {
-		return err
-	}
-
-	err = diff.ForEach(func(delta git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
-		perHunkCB := func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
-			perLineCB := func(line git.DiffLine) error {
-				if vc.sindex == -1 {
-					if line.Origin == git.DiffLineAddition {
-						vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 1, 0})
-						vc.sindex++
-					} else if line.Origin == git.DiffLineDeletion {
-						vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 0, 1})
-						vc.sindex++
-					}
-				} else {
-					if vc.stats[vc.sindex].fileName == delta.NewFile.Path {
-						if line.Origin == git.DiffLineAddition {
-							vc.stats[vc.sindex].additions++
-						} else if line.Origin == git.DiffLineDeletion {
-							vc.stats[vc.sindex].deletions++
-						}
-					} else {
-						if line.Origin == git.DiffLineAddition {
-							vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 1, 0})
-							vc.sindex++
-
-						} else if line.Origin == git.DiffLineDeletion {
-							vc.stats = append(vc.stats, fileStats{prevCommit.Id().String(), delta.NewFile.Path, 0, 1})
-							vc.sindex++
-
-						}
-					}
-				}
-				return nil
-			}
-			return perLineCB, nil
-		}
-		return perHunkCB, nil
-	}, git.DiffDetailLines)
-	if err != nil {
-		return err
-	}
+	vc.iterator.Close()
 	return nil
 }
