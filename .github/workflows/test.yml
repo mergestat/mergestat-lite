@@ -44,5 +44,5 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v1
         with:
-          version: v1.26
+          version: v1.29
           args: --build-tags sqlite_vtable,static,system_libgit2
