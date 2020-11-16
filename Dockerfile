@@ -1,4 +1,4 @@
-FROM golang:1.14-buster as builder
+FROM golang:1.15-buster as builder
 WORKDIR /app
 COPY scripts .
 RUN apt-get update && apt-get -y install cmake libssl-dev
