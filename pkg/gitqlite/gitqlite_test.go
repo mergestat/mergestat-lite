@@ -2,10 +2,12 @@ package gitqlite
 
 import (
 	"database/sql"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
 
+	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v30"
 )
 
@@ -30,8 +32,14 @@ func initFixtureRepo() (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
-	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
+	remote, err := vcsurl.Parse(fixtureRepoCloneURL)
 	if err != nil {
+		return nil, err
+	}
+	cloneOptions := CreateAuthenticationCallback(remote)
+	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, cloneOptions)
+	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 

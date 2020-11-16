@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/user"
-	"path"
 	"path/filepath"
 
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
@@ -86,7 +84,7 @@ var rootCmd = &cobra.Command{
 		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
 			dir, err = ioutil.TempDir("", "repo")
 			handleError(err)
-			cloneOptions := CreateAuthenticationCallback(remote)
+			cloneOptions := gitqlite.CreateAuthenticationCallback(remote)
 			_, err = git.Clone(repo, dir, cloneOptions)
 			handleError(err)
 
@@ -128,29 +126,6 @@ func Execute() {
 		handleError(err)
 	}
 
-}
-func CreateAuthenticationCallback(remote *vcsurl.VCS) *git.CloneOptions {
-	cloneOptions := &git.CloneOptions{}
-
-	if _, err := remote.Remote(vcsurl.SSH); err == nil { // if SSH, use "default" credentials
-		// use FetchOptions instead of directly RemoteCallbacks
-		// https://github.com/libgit2/git2go/commit/36e0a256fe79f87447bb730fda53e5cbc90eb47c
-		cloneOptions.FetchOptions = &git.FetchOptions{
-			RemoteCallbacks: git.RemoteCallbacks{
-				CredentialsCallback: func(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
-					usr, _ := user.Current()
-					publicSSH := path.Join(usr.HomeDir, ".ssh/id_rsa.pub")
-					privateSSH := path.Join(usr.HomeDir, ".ssh/id_rsa")
-
-					cred, ret := git.NewCredSshKey("git", publicSSH, privateSSH, "")
-					return cred, ret
-				},
-				CertificateCheckCallback: func(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
-					return git.ErrOk
-				},
-			}}
-	}
-	return cloneOptions
 }
 
 func readStdin() (string, error) {
