@@ -43,7 +43,6 @@ func runQuery(t *testing.T, query string) []string {
 		t.Fatal(err)
 	}
 	defer rows.Close()
-
 	rowNum, contents, err := GetContents(rows)
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
@@ -124,19 +123,20 @@ func getCommitCount(t *testing.T) []string {
 	//revWalk.Free()
 	return ret
 }
-func createRevWalk(t *testing.T) *git.RevWalk {
-	revWalk, err := fixtureRepo.Walk()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer revWalk.Free()
 
-	err = revWalk.PushHead()
-	if err != nil {
-		t.Fatal(err)
-	}
-	return revWalk
-}
+// func createRevWalk(t *testing.T) *git.RevWalk {
+// 	revWalk, err := fixtureRepo.Walk()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	defer revWalk.Free()
+
+// 	err = revWalk.PushHead()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	return revWalk
+// }
 func TestCommitByID(t *testing.T) {
 	o, err := fixtureRepo.RevparseSingle("HEAD~3")
 	if err != nil {

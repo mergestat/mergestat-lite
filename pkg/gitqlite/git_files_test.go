@@ -25,6 +25,42 @@ func TestFileCounts(t *testing.T) {
 			}
 		}
 	}
+	// instance, err := New(fixtureRepoDir, &Options{})
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	// commitChecker, err := fixtureRepo.Walk()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	// err = commitChecker.PushHead()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	// defer commitChecker.Free()
+
+	// numFiles := 0
+	// err = commitChecker.Iterate(func(commit *git.Commit) bool {
+	// 	numFiles++
+	// 	return true
+	// })
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	// fileRows, err := instance.DB.Query("SELECT DISTINCT commit_id FROM files")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+	// defer fileRows.Close()
+
+	// numFileRows := GetRowsCount(fileRows)
+	// if numFileRows != numFiles {
+	// 	t.Fatalf("expected %d rows got : %d", numFiles, numFileRows)
+	// }
 }
 
 func TestFileColumns(t *testing.T) {
