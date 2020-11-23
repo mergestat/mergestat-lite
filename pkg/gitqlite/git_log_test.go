@@ -144,7 +144,6 @@ func getCommitCount(t *testing.T) []string {
 // 	}
 // 	return revWalk
 // }
-
 func TestCommitByID(t *testing.T) {
 	o, err := fixtureRepo.RevparseSingle("HEAD~3")
 	if err != nil {
