@@ -1,62 +1,65 @@
 package gitqlite
 
 import (
+	"io"
 	"testing"
 
 	git "github.com/libgit2/git2go/v30"
 )
 
 func TestBranches(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
+	testCases := []test{
+		{"checkCommits", "SELECT name, target FROM branches", getAllBranchInfo(t)},
+	}
+	for _, tc := range testCases {
+		expected := tc.want
+		results := runQuery(t, tc.query)
+		if len(expected) != len(results) {
+			t.Fatalf("expected %d entries got %d, test: %s, %s, %s", len(expected), len(results), tc.name, expected, results)
+		}
+		for x := 0; x < len(expected); x++ {
+			if results[x] != expected[x] {
+				t.Fatalf("expected %s, got %s, test %s", expected[x], results[x], tc.name)
+			}
+		}
 	}
 
+}
+func getAllBranchInfo(t *testing.T) []string {
+	var branchInfo []string
 	branchIter, err := fixtureRepo.NewBranchIterator(git.BranchAll)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer branchIter.Free()
-
-	branchRows, err := instance.DB.Query("SELECT * FROM branches")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rowNum, contents, err := GetContents(branchRows)
-	if err != nil {
-		t.Fatalf("err %d at row Number %d", err, rowNum)
-	}
-
-	for i, c := range contents {
+	for {
 		branch, _, err := branchIter.Next()
 		if err != nil {
 			if branch != nil {
 				t.Fatal(err)
 			}
-		}
-
-		name, err := branch.Name()
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if name != c[0] {
-			t.Fatalf("exepcted %s at row %d got %s", name, i, c[0])
-		}
-
-		switch branch.Type() {
-		case git.ReferenceSymbolic:
-			if branch.SymbolicTarget() != c[2] {
-				t.Fatalf("expected %s at row %d got %s", branch.SymbolicTarget(), i, c[2])
-			}
-		case git.ReferenceOid:
-			if branch.Target().String() != c[2] {
-				t.Fatalf("expected %s at row %d got %s", branch.Target().String(), i, c[2])
+			if err == io.EOF {
+				break
 			}
 		}
+		if branch != nil {
+			name, err := branch.Name()
+			if err != nil {
+				break
+			}
+			branchInfo = append(branchInfo, name)
 
+			switch branch.Type() {
+			case git.ReferenceSymbolic:
+				branchInfo = append(branchInfo, branch.SymbolicTarget())
+			case git.ReferenceOid:
+				branchInfo = append(branchInfo, branch.Target().String())
+			}
+		} else {
+			break
+		}
 	}
+	return branchInfo
 }
 
 func BenchmarkBranchCount(b *testing.B) {
