@@ -61,7 +61,7 @@ docker pull augmentable/askgit:latest
 > [**pwd**] Print the absolute pathname of the current working directory.
 
 ```
-docker run -v `pwd`:/repo:ro augmentable/askgit "SELECT * FROM commits"
+docker run --rm -v `pwd`:/repo:ro augmentable/askgit "SELECT * FROM commits"
 ```
 
 #### Running commands from STDIN
@@ -69,7 +69,7 @@ docker run -v `pwd`:/repo:ro augmentable/askgit "SELECT * FROM commits"
 For piping commands via STDIN, the docker command needs to be told to run non-interactively, as well as attaching the repository at `/repo`.
 
 ```
-cat query.sql | docker run -i -v `pwd`:/repo:ro augmentable/askgit
+cat query.sql | docker run --rm -i -v `pwd`:/repo:ro augmentable/askgit
 ```
 
 ## Usage
