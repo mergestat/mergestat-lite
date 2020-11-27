@@ -10,13 +10,17 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type gitLogCLIModule struct{}
+type GitLogCLIModule struct{}
+
+func NewGitLogCLIModule() *GitLogCLIModule {
+	return &GitLogCLIModule{}
+}
 
 type gitLogCLITable struct {
 	repoPath string
 }
 
-func (m *gitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			id TEXT,
@@ -42,11 +46,11 @@ func (m *gitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.
 	return &gitLogCLITable{repoPath: repoPath}, nil
 }
 
-func (m *gitLogCLIModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitLogCLIModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	return m.Create(c, args)
 }
 
-func (m *gitLogCLIModule) DestroyModule() {}
+func (m *GitLogCLIModule) DestroyModule() {}
 
 func (v *gitLogCLITable) Open() (sqlite3.VTabCursor, error) {
 	return &commitCLICursor{repoPath: v.repoPath}, nil

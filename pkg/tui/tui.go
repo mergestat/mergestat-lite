@@ -5,7 +5,7 @@ import (
 	"log"
 	"text/tabwriter"
 
-	"github.com/augmentable-dev/askgit/pkg/gitqlite"
+	"github.com/augmentable-dev/askgit/pkg/askgit"
 	"github.com/jroimartin/gocui"
 )
 
@@ -46,7 +46,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
-		git, err := gitqlite.New(repoPath, &gitqlite.Options{})
+		git, err := askgit.New(repoPath, &askgit.Options{})
 		if err != nil {
 			return err
 		}

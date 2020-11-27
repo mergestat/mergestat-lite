@@ -5,17 +5,12 @@ import (
 )
 
 func TestTags(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	tags, err := fixtureRepo.Tags.List()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	tagRows, err := instance.DB.Query("SELECT * FROM tags")
+	tagRows, err := fixtureDB.Query("SELECT * FROM tags")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,11 +44,7 @@ func TestTags(t *testing.T) {
 }
 func BenchmarkTagsCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{})
-		if err != nil {
-			b.Fatal(err)
-		}
-		rows, err := instance.DB.Query("SELECT * FROM tags")
+		rows, err := fixtureDB.Query("SELECT * FROM tags")
 		if err != nil {
 			b.Fatal(err)
 		}

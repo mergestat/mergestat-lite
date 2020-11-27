@@ -7,13 +7,17 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type gitBranchModule struct{}
+type GitBranchesModule struct{}
 
-type gitBranchTable struct {
+func NewGitBranchesModule() *GitBranchesModule {
+	return &GitBranchesModule{}
+}
+
+type gitBranchesTable struct {
 	repoPath string
 }
 
-func (m *gitBranchModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitBranchesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			name TEXT,
@@ -28,49 +32,49 @@ func (m *gitBranchModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.
 	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
 	// we need to pop those off when referring to the actual directory in the fs
 	repoPath := args[3][1 : len(args[3])-1]
-	return &gitBranchTable{repoPath: repoPath}, nil
+	return &gitBranchesTable{repoPath: repoPath}, nil
 }
 
-func (m *gitBranchModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitBranchesModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	return m.Create(c, args)
 }
 
-func (m *gitBranchModule) DestroyModule() {}
+func (m *GitBranchesModule) DestroyModule() {}
 
-func (v *gitBranchTable) Open() (sqlite3.VTabCursor, error) {
+func (v *gitBranchesTable) Open() (sqlite3.VTabCursor, error) {
 	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return &branchCursor{repo: repo}, nil
+	return &branchesCursor{repo: repo}, nil
 
 }
 
-func (v *gitBranchTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+func (v *gitBranchesTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	// TODO this should actually be implemented!
 	dummy := make([]bool, len(cst))
 	return &sqlite3.IndexResult{Used: dummy}, nil
 }
 
-func (v *gitBranchTable) Disconnect() error {
+func (v *gitBranchesTable) Disconnect() error {
 	return nil
 }
 
-func (v *gitBranchTable) Destroy() error { return nil }
+func (v *gitBranchesTable) Destroy() error { return nil }
 
 type currentBranch struct {
 	*git.Branch
 	branchType git.BranchType
 }
 
-type branchCursor struct {
+type branchesCursor struct {
 	repo    *git.Repository
 	current *currentBranch
 	iter    *git.BranchIterator
 }
 
-func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
+func (vc *branchesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	branch := vc.current
 	switch col {
 	case 0:
@@ -99,7 +103,7 @@ func (vc *branchCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func (vc *branchCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+func (vc *branchesCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	branchIter, err := vc.repo.NewBranchIterator(git.BranchAll)
 	if err != nil {
 		return err
@@ -117,7 +121,7 @@ func (vc *branchCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 	return nil
 }
 
-func (vc *branchCursor) Next() error {
+func (vc *branchesCursor) Next() error {
 	branch, branchType, err := vc.iter.Next()
 	if err != nil {
 		if branch == nil {
@@ -132,15 +136,15 @@ func (vc *branchCursor) Next() error {
 	return nil
 }
 
-func (vc *branchCursor) EOF() bool {
+func (vc *branchesCursor) EOF() bool {
 	return vc.current == nil
 }
 
-func (vc *branchCursor) Rowid() (int64, error) {
+func (vc *branchesCursor) Rowid() (int64, error) {
 	return int64(0), nil
 }
 
-func (vc *branchCursor) Close() error {
+func (vc *branchesCursor) Close() error {
 	if vc.current != nil {
 		vc.current.Free()
 	}

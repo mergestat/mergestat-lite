@@ -8,14 +8,18 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type gitStatsModule struct{}
+type GitStatsModule struct{}
+
+func NewGitStatsModule() *GitStatsModule {
+	return &GitStatsModule{}
+}
 
 type gitStatsTable struct {
 	repoPath string
 	repo     *git.Repository
 }
 
-func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 			CREATE TABLE %q (
 			commit_id TEXT,
@@ -33,11 +37,11 @@ func (m *gitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 	return &gitStatsTable{repoPath: repoPath}, nil
 }
 
-func (m *gitStatsModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitStatsModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	return m.Create(c, args)
 }
 
-func (m *gitStatsModule) DestroyModule() {}
+func (m *GitStatsModule) DestroyModule() {}
 
 func (v *gitStatsTable) Open() (sqlite3.VTabCursor, error) {
 	repo, err := git.OpenRepository(v.repoPath)
@@ -46,7 +50,7 @@ func (v *gitStatsTable) Open() (sqlite3.VTabCursor, error) {
 	}
 	v.repo = repo
 
-	return &StatsCursor{repo: v.repo}, nil
+	return &statsCursor{repo: v.repo}, nil
 }
 
 func (v *gitStatsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
@@ -70,13 +74,13 @@ func (v *gitStatsTable) Disconnect() error {
 }
 func (v *gitStatsTable) Destroy() error { return nil }
 
-type StatsCursor struct {
+type statsCursor struct {
 	repo     *git.Repository
 	iterator *commitStatsIter
 	current  *commitStat
 }
 
-func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
+func (vc *statsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	stat := vc.current
 	switch col {
 	case 0:
@@ -93,7 +97,7 @@ func (vc *StatsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 	return nil
 }
-func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+func (vc *statsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	var opt *commitStatsIterOptions
 
 	switch idxNum {
@@ -123,7 +127,7 @@ func (vc *StatsCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	return nil
 }
 
-func (vc *StatsCursor) Next() error {
+func (vc *statsCursor) Next() error {
 	file, err := vc.iterator.Next()
 	if err != nil {
 		if err == io.EOF {
@@ -136,15 +140,15 @@ func (vc *StatsCursor) Next() error {
 	return nil
 }
 
-func (vc *StatsCursor) EOF() bool {
+func (vc *statsCursor) EOF() bool {
 	return vc.current == nil
 }
 
-func (vc *StatsCursor) Rowid() (int64, error) {
+func (vc *statsCursor) Rowid() (int64, error) {
 	return int64(0), nil
 }
 
-func (vc *StatsCursor) Close() error {
+func (vc *statsCursor) Close() error {
 	vc.iterator.Close()
 	return nil
 }

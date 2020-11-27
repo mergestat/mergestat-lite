@@ -7,11 +7,6 @@ import (
 )
 
 func TestCommitCounts(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{UseGitCLI: true})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	revWalk, err := fixtureRepo.Walk()
 	if err != nil {
 		t.Fatal(err)
@@ -33,7 +28,7 @@ func TestCommitCounts(t *testing.T) {
 	}
 
 	//checks commits
-	rows, err := instance.DB.Query("SELECT * FROM commits")
+	rows, err := fixtureDB.Query("SELECT * FROM commits_cli")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +48,7 @@ func TestCommitCounts(t *testing.T) {
 		t.Fatalf("expected %d rows got: %d", expected, numRows)
 	}
 
-	rows, err = instance.DB.Query("SELECT id, author_name FROM commits")
+	rows, err = fixtureDB.Query("SELECT id, author_name FROM commits_cli")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,11 +78,7 @@ func TestCommitCounts(t *testing.T) {
 }
 func BenchmarkCLICommitCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{UseGitCLI: true})
-		if err != nil {
-			b.Fatal(err)
-		}
-		rows, err := instance.DB.Query("SELECT * FROM commits")
+		rows, err := fixtureDB.Query("SELECT * FROM commits")
 		if err != nil {
 			b.Fatal(err)
 		}

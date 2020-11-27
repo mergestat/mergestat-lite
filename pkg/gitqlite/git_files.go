@@ -9,14 +9,18 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type gitTreeModule struct{}
+type GitFilesModule struct{}
 
-type gitTreeTable struct {
+func NewGitFilesModule() *GitFilesModule {
+	return &GitFilesModule{}
+}
+
+type gitFilesTable struct {
 	repoPath string
 	repo     *git.Repository
 }
 
-func (m *gitTreeModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitFilesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 			CREATE TABLE %q(
 				commit_id TEXT,
@@ -30,16 +34,16 @@ func (m *gitTreeModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 		return nil, err
 	}
 	repoPath := args[3][1 : len(args[3])-1]
-	return &gitTreeTable{repoPath: repoPath}, nil
+	return &gitFilesTable{repoPath: repoPath}, nil
 }
 
-func (m *gitTreeModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitFilesModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	return m.Create(c, args)
 }
 
-func (m *gitTreeModule) DestroyModule() {}
+func (m *GitFilesModule) DestroyModule() {}
 
-func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
+func (vc *gitFilesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	file := vc.current
 
 	switch col {
@@ -64,30 +68,30 @@ func (vc *treeCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func (v *gitTreeTable) Disconnect() error {
+func (v *gitFilesTable) Disconnect() error {
 	v.repo = nil
 	return nil
 }
 
-func (v *gitTreeTable) Destroy() error { return nil }
+func (v *gitFilesTable) Destroy() error { return nil }
 
-type treeCursor struct {
+type gitFilesCursor struct {
 	repo     *git.Repository
 	iterator *commitFileIter
 	current  *commitFile
 }
 
-func (v *gitTreeTable) Open() (sqlite3.VTabCursor, error) {
+func (v *gitFilesTable) Open() (sqlite3.VTabCursor, error) {
 	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
 	v.repo = repo
 
-	return &treeCursor{repo: v.repo}, nil
+	return &gitFilesCursor{repo: v.repo}, nil
 }
 
-func (v *gitTreeTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+func (v *gitFilesTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	used := make([]bool, len(cst))
 	// TODO implement an index for file name glob patterns?
 	// TODO this loop construct won't work well for multiple constraints...
@@ -102,7 +106,7 @@ func (v *gitTreeTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.Info
 	return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
 }
 
-func (vc *treeCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+func (vc *gitFilesCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	var opt *commitFileIterOptions
 
 	switch idxNum {
@@ -132,7 +136,7 @@ func (vc *treeCursor) Filter(idxNum int, idxStr string, vals []interface{}) erro
 	return nil
 }
 
-func (vc *treeCursor) Next() error {
+func (vc *gitFilesCursor) Next() error {
 	//Iterates to next file
 	file, err := vc.iterator.Next()
 	if err != nil {
@@ -146,15 +150,15 @@ func (vc *treeCursor) Next() error {
 	return nil
 }
 
-func (vc *treeCursor) EOF() bool {
+func (vc *gitFilesCursor) EOF() bool {
 	return vc.current == nil
 }
 
-func (vc *treeCursor) Rowid() (int64, error) {
+func (vc *gitFilesCursor) Rowid() (int64, error) {
 	return int64(0), nil
 }
 
-func (vc *treeCursor) Close() error {
+func (vc *gitFilesCursor) Close() error {
 	vc.iterator.Close()
 	return nil
 }

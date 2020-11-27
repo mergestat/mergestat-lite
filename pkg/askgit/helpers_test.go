@@ -1,16 +1,16 @@
-package gitqlite
+package askgit
 
 import (
 	"testing"
 )
 
 func TestStrSplit(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
+	ag, err := New(fixtureRepoDir, &Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	rows, err := instance.DB.Query("SELECT str_split('hello world', ' ', 0)")
+	rows, err := ag.DB().Query("SELECT str_split('hello world', ' ', 0)")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +23,7 @@ func TestStrSplit(t *testing.T) {
 		t.Fatalf("expected string: %s, got %s", "hello", contents[0][0])
 	}
 
-	rows, err = instance.DB.Query("SELECT str_split('hello world', ' ', 10)")
+	rows, err = ag.DB().Query("SELECT str_split('hello world', ' ', 10)")
 	if err != nil {
 		t.Fatal(err)
 	}

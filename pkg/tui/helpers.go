@@ -6,12 +6,12 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/augmentable-dev/askgit/pkg/gitqlite"
+	"github.com/augmentable-dev/askgit/pkg/askgit"
 	"github.com/jroimartin/gocui"
 )
 
 //Displays a selection of information into the Info view
-func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Duration) error {
+func DisplayInformation(g *gocui.Gui, ag *askgit.AskGit, length time.Duration) error {
 	out, err := g.View("Info")
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	fmt.Fprintln(w, "Repo \t "+path+"\t")
 
-	row := git.DB.QueryRow("select count(*) from commits")
+	row := ag.DB().QueryRow("select count(*) from commits")
 	var commitCount int
 	err = row.Scan(&commitCount)
 	if err != nil {
@@ -32,7 +32,7 @@ func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	fmt.Fprintln(w, "# Commits \t", commitCount, "\t")
 
-	row = git.DB.QueryRow("select count(distinct author_name) from commits")
+	row = ag.DB().QueryRow("select count(distinct author_name) from commits")
 	var distinctAuthorCount int
 	err = row.Scan(&distinctAuthorCount)
 	if err != nil {
@@ -40,7 +40,7 @@ func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	fmt.Fprintln(w, "# Authors \t", distinctAuthorCount, "\t")
 
-	row = git.DB.QueryRow("select count(distinct name) from branches where remote = 1")
+	row = ag.DB().QueryRow("select count(distinct name) from branches where remote = 1")
 	var distinctRemotes int
 	err = row.Scan(&distinctRemotes)
 	if err != nil {
@@ -48,7 +48,7 @@ func DisplayInformation(g *gocui.Gui, git *gitqlite.GitQLite, length time.Durati
 	}
 	fmt.Fprintln(w, "# Remote branches \t", distinctRemotes, "\t")
 
-	row = git.DB.QueryRow("select count(distinct name) from branches where remote = 0")
+	row = ag.DB().QueryRow("select count(distinct name) from branches where remote = 0")
 	var distinctLocals int
 	err = row.Scan(&distinctLocals)
 	if err != nil {

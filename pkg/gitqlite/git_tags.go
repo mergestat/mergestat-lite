@@ -7,14 +7,18 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type gitTagModule struct{}
+type GitTagsModule struct{}
 
-type gitTagTable struct {
+func NewGitTagsModule() *GitTagsModule {
+	return &GitTagsModule{}
+}
+
+type gitTagsTable struct {
 	repoPath string
 	repo     *git.Repository
 }
 
-func (m *gitTagModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitTagsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			full_name TEXT,
@@ -33,50 +37,50 @@ func (m *gitTagModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
 	// we need to pop those off when referring to the actual directory in the fs
 	repoPath := args[3][1 : len(args[3])-1]
-	return &gitTagTable{repoPath: repoPath}, nil
+	return &gitTagsTable{repoPath: repoPath}, nil
 }
 
-func (m *gitTagModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitTagsModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	return m.Create(c, args)
 }
 
-func (m *gitTagModule) DestroyModule() {}
+func (m *GitTagsModule) DestroyModule() {}
 
-func (v *gitTagTable) Open() (sqlite3.VTabCursor, error) {
+func (v *gitTagsTable) Open() (sqlite3.VTabCursor, error) {
 	repo, err := git.OpenRepository(v.repoPath)
 	if err != nil {
 		return nil, err
 	}
 	v.repo = repo
 
-	return &tagCursor{repo: v.repo}, nil
+	return &tagsCursor{repo: v.repo}, nil
 
 }
 
-func (v *gitTagTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+func (v *gitTagsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	// TODO this should actually be implemented!
 	dummy := make([]bool, len(cst))
 	return &sqlite3.IndexResult{Used: dummy}, nil
 }
 
-func (v *gitTagTable) Disconnect() error {
+func (v *gitTagsTable) Disconnect() error {
 	v.repo = nil
 	return nil
 }
-func (v *gitTagTable) Destroy() error { return nil }
+func (v *gitTagsTable) Destroy() error { return nil }
 
 type currentTag struct {
 	name string
 	id   *git.Oid
 }
 
-type tagCursor struct {
+type tagsCursor struct {
 	repo  *git.Repository
 	index int
 	tags  []*currentTag
 }
 
-func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
+func (vc *tagsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	current := vc.tags[vc.index]
 
 	ref, err := vc.repo.References.Lookup(current.name)
@@ -135,7 +139,7 @@ func (vc *tagCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 }
 
-func (vc *tagCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+func (vc *tagsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	tags := make([]*currentTag, 0)
 	err := vc.repo.Tags.Foreach(func(name string, id *git.Oid) error {
 		tags = append(tags, &currentTag{name, id})
@@ -150,19 +154,19 @@ func (vc *tagCursor) Filter(idxNum int, idxStr string, vals []interface{}) error
 	return nil
 }
 
-func (vc *tagCursor) Next() error {
+func (vc *tagsCursor) Next() error {
 	vc.index++
 	return nil
 }
 
-func (vc *tagCursor) EOF() bool {
+func (vc *tagsCursor) EOF() bool {
 	return vc.index >= len(vc.tags)
 }
 
-func (vc *tagCursor) Rowid() (int64, error) {
+func (vc *tagsCursor) Rowid() (int64, error) {
 	return int64(0), nil
 }
 
-func (vc *tagCursor) Close() error {
+func (vc *tagsCursor) Close() error {
 	return nil
 }

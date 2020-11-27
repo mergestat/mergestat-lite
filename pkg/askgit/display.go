@@ -1,10 +1,9 @@
-package gitqlite
+package askgit
 
 import (
 	"database/sql"
 	"encoding/csv"
 	"encoding/json"
-	"fmt"
 	"io"
 
 	"github.com/olekukonko/tablewriter"
@@ -44,11 +43,11 @@ func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
 	return nil
 }
 func single(rows *sql.Rows, write io.Writer) error {
-
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
 	}
+
 	pointers := make([]interface{}, len(columns))
 	container := make([]sql.NullString, len(columns))
 
@@ -56,25 +55,23 @@ func single(rows *sql.Rows, write io.Writer) error {
 		pointers[i] = &container[i]
 	}
 	rows.Next()
+
 	err = rows.Scan(pointers...)
 	if err != nil {
 		return err
 	}
 
-	r := make([]string, len(columns))
-	for i, c := range container {
-		if c.Valid {
-			r[i] = c.String
-		}
-	}
+	output := container[0].String
 
-	fmt.Println(r[0])
+	_, err = write.Write([]byte(output))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func csvDisplay(rows *sql.Rows, commaChar rune, write io.Writer) error {
-
 	columns, err := rows.Columns()
 	if err != nil {
 		return err

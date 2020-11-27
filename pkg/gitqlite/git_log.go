@@ -1,23 +1,25 @@
 package gitqlite
 
 import (
-	"bytes"
 	"fmt"
-	"log"
 	"time"
 
 	git "github.com/libgit2/git2go/v30"
 	"github.com/mattn/go-sqlite3"
 )
 
-type gitLogModule struct{}
+type GitLogModule struct{}
+
+func NewGitLogModule() *GitLogModule {
+	return &GitLogModule{}
+}
 
 type gitLogTable struct {
 	repoPath string
 	repo     *git.Repository
 }
 
-func (m *gitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			id TEXT,
@@ -43,11 +45,11 @@ func (m *gitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 	return &gitLogTable{repoPath: repoPath}, nil
 }
 
-func (m *gitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	return m.Create(c, args)
 }
 
-func (m *gitLogModule) DestroyModule() {}
+func (m *GitLogModule) DestroyModule() {}
 
 func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
 	repo, err := git.OpenRepository(v.repoPath)
@@ -119,19 +121,6 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 11:
 		//tree_id
 		c.ResultText(commit.TreeId().String())
-
-	case 12:
-		additions, _, err := statCalc(vc.repo, commit)
-		if err != nil {
-			return err
-		}
-		c.ResultInt(additions)
-	case 13:
-		_, deletions, err := statCalc(vc.repo, commit)
-		if err != nil {
-			return err
-		}
-		c.ResultInt(deletions)
 	}
 	return nil
 }
@@ -236,82 +225,4 @@ func (vc *commitCursor) Close() error {
 	vc.commitIter.Free()
 	vc.repo.Free()
 	return nil
-}
-
-// statCalc calculates the number of additions/deletions and returns in format additions, deletions
-func statCalc(r *git.Repository, c *git.Commit) (int, int, error) {
-	tree, err := c.Tree()
-	if err != nil {
-		return 0, 0, err
-	}
-	defer tree.Free()
-
-	if c.ParentCount() == 0 {
-		var additions int
-		err = tree.Walk(func(path string, treeEntry *git.TreeEntry) int {
-			if treeEntry.Type == git.ObjectBlob {
-				blob, err := r.LookupBlob(treeEntry.Id)
-				if err != nil {
-					return 1
-				}
-				defer blob.Free()
-				contents := blob.Contents()
-				lineSep := []byte{'\n'}
-				additions += bytes.Count(contents, lineSep)
-			}
-			return 0
-		})
-		if err != nil {
-			return 0, 0, err
-		}
-		return additions, 0, nil
-
-	}
-
-	parent := c.Parent(0)
-	parentTree, err := parent.Tree()
-	if err != nil {
-		return 0, 0, err
-	}
-	defer parent.Free()
-	defer parentTree.Free()
-
-	diffOpt, err := git.DefaultDiffOptions()
-	if err != nil {
-		return 0, 0, err
-	}
-
-	diff, err := r.DiffTreeToTree(parentTree, tree, &diffOpt)
-	if err != nil {
-		return 0, 0, err
-	}
-	defer func() {
-		err := diff.Free()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	diffFindOpt, err := git.DefaultDiffFindOptions()
-	if err != nil {
-		return 0, 0, err
-	}
-
-	err = diff.FindSimilar(&diffFindOpt)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	stats, err := diff.Stats()
-	if err != nil {
-		return 0, 0, err
-	}
-	defer func() {
-		err := stats.Free()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	return stats.Insertions(), stats.Deletions(), nil
 }
