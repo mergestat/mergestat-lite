@@ -1,4 +1,4 @@
-package gitqlite
+package askgit
 
 import (
 	"database/sql"

@@ -10,10 +10,6 @@ import (
 )
 
 func TestFileCounts(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	commitChecker, err := fixtureRepo.Walk()
 	if err != nil {
@@ -36,7 +32,7 @@ func TestFileCounts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fileRows, err := instance.DB.Query("SELECT DISTINCT commit_id FROM files")
+	fileRows, err := fixtureDB.Query("SELECT DISTINCT commit_id FROM files")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,12 +45,8 @@ func TestFileCounts(t *testing.T) {
 }
 
 func TestFileColumns(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	columnQuery, err := instance.DB.Query("SELECT * FROM files LIMIT 1")
+	columnQuery, err := fixtureDB.Query("SELECT * FROM files LIMIT 1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,10 +98,6 @@ func TestFileColumns(t *testing.T) {
 }
 
 func TestFileByID(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	o, err := fixtureRepo.RevparseSingle("HEAD~3")
 	if err != nil {
@@ -123,7 +111,7 @@ func TestFileByID(t *testing.T) {
 	}
 	defer commit.Free()
 
-	rows, err := instance.DB.Query(fmt.Sprintf("SELECT count(*) FROM files WHERE commit_id = '%s'", commit.Id().String()))
+	rows, err := fixtureDB.Query(fmt.Sprintf("SELECT count(*) FROM files WHERE commit_id = '%s'", commit.Id().String()))
 	if err != nil {
 		t.Fatal(err)
 	}

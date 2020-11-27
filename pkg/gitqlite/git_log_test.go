@@ -8,11 +8,6 @@ import (
 )
 
 func TestCommits(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	revWalk, err := fixtureRepo.Walk()
 	if err != nil {
 		t.Fatal(err)
@@ -34,7 +29,7 @@ func TestCommits(t *testing.T) {
 	}
 
 	//checks commits
-	rows, err := instance.DB.Query("SELECT * FROM commits")
+	rows, err := fixtureDB.Query("SELECT * FROM commits")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +51,7 @@ func TestCommits(t *testing.T) {
 		t.Fatalf("expected %d rows got: %d", expected, numRows)
 	}
 
-	rows, err = instance.DB.Query("SELECT id, author_name FROM commits")
+	rows, err = fixtureDB.Query("SELECT id, author_name FROM commits")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,11 +80,6 @@ func TestCommits(t *testing.T) {
 }
 
 func TestCommitByID(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	o, err := fixtureRepo.RevparseSingle("HEAD~3")
 	if err != nil {
 		t.Fatal(err)
@@ -102,7 +92,7 @@ func TestCommitByID(t *testing.T) {
 	}
 	defer commit.Free()
 
-	rows, err := instance.DB.Query(fmt.Sprintf("SELECT * FROM commits WHERE id = '%s'", commit.Id().String()))
+	rows, err := fixtureDB.Query(fmt.Sprintf("SELECT * FROM commits WHERE id = '%s'", commit.Id().String()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,11 +116,7 @@ func TestCommitByID(t *testing.T) {
 
 func BenchmarkCommitCounts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{})
-		if err != nil {
-			b.Fatal(err)
-		}
-		rows, err := instance.DB.Query("SELECT * FROM commits")
+		rows, err := fixtureDB.Query("SELECT * FROM commits")
 		if err != nil {
 			b.Fatal(err)
 		}

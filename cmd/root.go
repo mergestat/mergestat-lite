@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/augmentable-dev/askgit/pkg/gitqlite"
+	"github.com/augmentable-dev/askgit/pkg/askgit"
 	"github.com/augmentable-dev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v30"
@@ -84,7 +84,7 @@ var rootCmd = &cobra.Command{
 		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
 			dir, err = ioutil.TempDir("", "repo")
 			handleError(err)
-			cloneOptions := gitqlite.CreateAuthenticationCallback(remote)
+			cloneOptions := askgit.CreateAuthenticationCallback(remote)
 			_, err = git.Clone(repo, dir, cloneOptions)
 			handleError(err)
 
@@ -107,25 +107,24 @@ var rootCmd = &cobra.Command{
 			tui.RunGUI(repo, dir, query)
 			return
 		}
-		g, err := gitqlite.New(dir, &gitqlite.Options{
+		ag, err := askgit.New(dir, &askgit.Options{
 			UseGitCLI: useGitCLI,
 		})
 		handleError(err)
 
-		rows, err := g.DB.Query(query)
+		rows, err := ag.DB().Query(query)
 		handleError(err)
-		err = gitqlite.DisplayDB(rows, os.Stdout, format)
+
+		err = askgit.DisplayDB(rows, os.Stdout, format)
 		handleError(err)
 	},
 }
 
 // Execute runs the root command
 func Execute() {
-
 	if err := rootCmd.Execute(); err != nil {
 		handleError(err)
 	}
-
 }
 
 func readStdin() (string, error) {

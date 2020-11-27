@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/augmentable-dev/askgit/pkg/gitqlite"
+	"github.com/augmentable-dev/askgit/pkg/askgit"
 	"github.com/jroimartin/gocui"
 )
 
@@ -133,23 +133,23 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 		query = input.Buffer()
-		git, err := gitqlite.New(repoPath, &gitqlite.Options{})
+		ag, err := askgit.New(repoPath, &askgit.Options{})
 		if err != nil {
 			return err
 		}
 		start := time.Now()
-		rows, err := git.DB.Query(query)
+		rows, err := ag.DB().Query(query)
 		if err != nil {
 			fmt.Fprint(out, err)
 			return nil
 		}
 
-		err = gitqlite.DisplayDB(rows, out, "")
+		err = askgit.DisplayDB(rows, out, "")
 		if err != nil {
 			return err
 		}
 		total := time.Since(start)
-		err = DisplayInformation(g, git, total)
+		err = DisplayInformation(g, ag, total)
 		if err != nil {
 			return err
 		}

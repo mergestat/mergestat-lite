@@ -7,18 +7,13 @@ import (
 )
 
 func TestBranches(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	branchIter, err := fixtureRepo.NewBranchIterator(git.BranchAll)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer branchIter.Free()
 
-	branchRows, err := instance.DB.Query("SELECT * FROM branches")
+	branchRows, err := fixtureDB.Query("SELECT * FROM branches")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,11 +56,7 @@ func TestBranches(t *testing.T) {
 
 func BenchmarkBranchCount(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{})
-		if err != nil {
-			b.Fatal(err)
-		}
-		rows, err := instance.DB.Query("SELECT * FROM branches")
+		rows, err := fixtureDB.Query("SELECT * FROM branches")
 		if err != nil {
 			b.Fatal(err)
 		}

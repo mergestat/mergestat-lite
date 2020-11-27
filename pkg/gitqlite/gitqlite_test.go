@@ -7,18 +7,60 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v30"
+	"github.com/mattn/go-sqlite3"
 )
 
 var (
 	fixtureRepoCloneURL = "https://github.com/augmentable-dev/tickgit"
 	fixtureRepo         *git.Repository
 	fixtureRepoDir      string
+	fixtureDB           *sql.DB
 )
+
+func init() {
+	sql.Register("gitqlite", &sqlite3.SQLiteDriver{
+		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
+			err := conn.CreateModule("git_log", NewGitLogModule())
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("git_log_cli", NewGitLogCLIModule())
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("git_tree", NewGitFilesModule())
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("git_tag", NewGitTagsModule())
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("git_branch", NewGitBranchesModule())
+			if err != nil {
+				return err
+			}
+			err = conn.CreateModule("git_stats", NewGitStatsModule())
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+	})
+}
 
 func TestMain(m *testing.M) {
 	close, err := initFixtureRepo()
+	if err != nil {
+		panic(err)
+	}
+	err = initFixtureDB(fixtureRepoDir)
 	if err != nil {
 		panic(err)
 	}
@@ -32,12 +74,9 @@ func initFixtureRepo() (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
-	remote, err := vcsurl.Parse(fixtureRepoCloneURL)
-	if err != nil {
-		return nil, err
-	}
-	cloneOptions := CreateAuthenticationCallback(remote)
-	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, cloneOptions)
+
+	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
+
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -54,15 +93,42 @@ func initFixtureRepo() (func() error, error) {
 	}, nil
 }
 
-func TestModuleInitialization(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
+func initFixtureDB(repoPath string) error {
+	db, err := sql.Open("gitqlite", ":memory:")
 	if err != nil {
-		t.Fatal(err)
+		return err
 	}
 
-	if instance.DB == nil {
-		t.Fatal("expected non-nil DB, got nil")
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", repoPath))
+	if err != nil {
+		return err
 	}
+
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits_cli USING git_log_cli('%s');", repoPath))
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats('%s');", repoPath))
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree('%s');", repoPath))
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS tags USING git_tag('%s');", repoPath))
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch('%s');", repoPath))
+	if err != nil {
+		return err
+	}
+
+	fixtureDB = db
+	return nil
 }
 
 func GetRowsCount(rows *sql.Rows) int {

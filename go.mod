@@ -3,6 +3,7 @@ module github.com/augmentable-dev/askgit
 go 1.13
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/gitsight/go-vcsurl v1.0.0
 	github.com/jroimartin/gocui v0.4.0
 	github.com/kr/text v0.2.0 // indirect

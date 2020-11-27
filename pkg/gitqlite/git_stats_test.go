@@ -26,12 +26,7 @@ func TestStatsIterator(t *testing.T) {
 }
 
 func TestStatsTable(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rows, err := instance.DB.Query("SELECT * FROM stats")
+	rows, err := fixtureDB.Query("SELECT * FROM stats")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,12 +44,7 @@ func TestStatsTable(t *testing.T) {
 }
 
 func TestStatsTableCommitIDIndex(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rows, err := instance.DB.Query("SELECT * FROM stats WHERE commit_id = (SELECT id FROM commits LIMIT 1)")
+	rows, err := fixtureDB.Query("SELECT * FROM stats WHERE commit_id = (SELECT id FROM commits LIMIT 1)")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,11 +65,6 @@ func TestStatsTableCommitIDIndex(t *testing.T) {
 }
 
 func TestStatsTotals(t *testing.T) {
-	instance, err := New(fixtureRepoDir, &Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	iter, err := gitlog.Execute(fixtureRepoDir)
 	if err != nil {
 		t.Fatal(err)
@@ -103,7 +88,7 @@ func TestStatsTotals(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rows, err := instance.DB.Query("SELECT sum(additions) AS a, sum(deletions) AS d FROM stats")
+	rows, err := fixtureDB.Query("SELECT sum(additions) AS a, sum(deletions) AS d FROM stats")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,11 +120,7 @@ func TestStatsTotals(t *testing.T) {
 
 func BenchmarkStats(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		instance, err := New(fixtureRepoDir, &Options{})
-		if err != nil {
-			b.Fatal(err)
-		}
-		rows, err := instance.DB.Query("SELECT * FROM stats")
+		rows, err := fixtureDB.Query("SELECT * FROM stats")
 		if err != nil {
 			b.Fatal(err)
 		}
