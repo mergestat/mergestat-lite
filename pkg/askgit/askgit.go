@@ -84,6 +84,12 @@ type Options struct {
 
 // New creates an instance of AskGit
 func New(repoPath string, options *Options) (*AskGit, error) {
+	// TODO with the addition of the GitHub API virtual tables, repoPath should no longer be required for creating
+	// as *AskGit instance, as the caller may just be interested in querying against the GitHub API (or some other
+	// to be define virtual table that doesn't need a repo on disk).
+	// This should be reformulated, as it means currently the askgit command requires a local git repo, even if the query
+	// only executes agains the GitHub API
+
 	// see https://github.com/mattn/go-sqlite3/issues/204
 	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
 	db, err := sql.Open("askgit", fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(repoPath))))
