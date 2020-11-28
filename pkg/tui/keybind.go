@@ -133,10 +133,6 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 		query = input.Buffer()
-		ag, err := askgit.New(repoPath, &askgit.Options{})
-		if err != nil {
-			return err
-		}
 		start := time.Now()
 		rows, err := ag.DB().Query(query)
 		if err != nil {

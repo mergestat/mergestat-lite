@@ -107,10 +107,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			handleError(err)
 		}
-		if cui {
-			tui.RunGUI(repo, dir, query)
-			return
-		}
+
 		ag, err := askgit.New(dir, &askgit.Options{
 			UseGitCLI:   useGitCLI,
 			GitHubOrg:   githubOrg,
@@ -118,6 +115,11 @@ var rootCmd = &cobra.Command{
 			GitHubToken: os.Getenv("GITHUB_TOKEN"),
 		})
 		handleError(err)
+
+		if cui {
+			tui.RunGUI(ag, query)
+			return
+		}
 
 		rows, err := ag.DB().Query(query)
 		handleError(err)
