@@ -143,16 +143,15 @@ func GetRowsCount(rows *sql.Rows) int {
 
 	return count
 }
-func GetContents(rows *sql.Rows) (int, [][]string, error) {
-	count := 0
+
+func GetRowContents(rows *sql.Rows) (colCount int, contents [][]string, err error) {
 	columns, err := rows.Columns()
 	if err != nil {
-		return count, nil, err
+		return colCount, nil, err
 	}
 
 	pointers := make([]interface{}, len(columns))
 	container := make([]sql.NullString, len(columns))
-	var ret [][]string
 
 	for i := range pointers {
 		pointers[i] = &container[i]
@@ -161,7 +160,7 @@ func GetContents(rows *sql.Rows) (int, [][]string, error) {
 	for rows.Next() {
 		err = rows.Scan(pointers...)
 		if err != nil {
-			return count, nil, err
+			return colCount, nil, err
 		}
 
 		r := make([]string, len(columns))
@@ -172,8 +171,8 @@ func GetContents(rows *sql.Rows) (int, [][]string, error) {
 				r[i] = "NULL"
 			}
 		}
-		ret = append(ret, r)
+		contents = append(contents, r)
 	}
-	return count, ret, err
+	return colCount, contents, err
 
 }

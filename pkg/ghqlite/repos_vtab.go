@@ -155,7 +155,7 @@ func (vc *reposCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 func (vc *reposCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	var rateLimiter *rate.Limiter
 	if vc.table.token == "" {
-		rateLimiter = rate.NewLimiter(rate.Every(time.Minute), 60)
+		rateLimiter = rate.NewLimiter(rate.Every(time.Minute), 30)
 	} else {
 		rateLimiter = rate.NewLimiter(rate.Every(time.Minute), 80)
 	}
