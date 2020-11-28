@@ -178,9 +178,9 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 
 **This functionality is under development and likely to change**
 
-The following GitHub tables execute API requests to retrieve data during query execution.
-As such, you should ensure the `GITHUB_TOKEN` environment variable is set so that authenticated API requests are made.
-Unauthenticated API requests (no `GITHUB_TOKEN` set) are subject to a stricter rate limit by GitHub, and may take longer to execute (as query execution will try to respect the rate limit).
+The following GitHub tables make GitHub API requests to retrieve data during query execution.
+As such, you should ensure the `GITHUB_TOKEN` environment variable is set so that API requests are authenticated.
+Unauthenticated API requests (no `GITHUB_TOKEN` set) are subject to a stricter rate limit by GitHub, and may take much longer to execute (as query execution will try to respect the applicable rate limit).
 
 ##### `repos`
 
