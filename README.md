@@ -178,16 +178,16 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 
 **This functionality is under development and likely to change**
 
-The following GitHub tables make GitHub API requests to retrieve data during query execution.
+The following tables make GitHub API requests to retrieve data during query execution.
 As such, you should ensure the `GITHUB_TOKEN` environment variable is set so that API requests are authenticated.
-Unauthenticated API requests (no `GITHUB_TOKEN` set) are subject to a stricter rate limit by GitHub, and may take much longer to execute (as query execution will try to respect the applicable rate limit).
+Unauthenticated API requests (no `GITHUB_TOKEN`) are subject to a stricter rate limit by GitHub, and may take longer to execute (query execution will try to respect the applicable rate limit).
 
 ##### `repos`
 
 This table will only be available if either `--github-org` or `--github-user` are provided.
 If both are provided, `--github-org` will be used.
-Each specifies the GitHub org or user to query repositories from when scanning the `repos` table.
-In other words, this table returns the repositories belonging to a given GitHub organzation or user.
+Each specifies the org or user to query repositories from when scanning the `repos` table.
+In other words, this table returns the repositories belonging to a GitHub organization or user, with the following schema:
 
 | Column            | Type     |
 |-------------------|----------|
