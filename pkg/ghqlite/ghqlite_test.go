@@ -16,7 +16,12 @@ var (
 func init() {
 	sql.Register("ghqlite", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := conn.CreateModule("github_repos", NewReposModule(OwnerTypeOrganization))
+			err := conn.CreateModule("github_org_repos", NewReposModule(OwnerTypeOrganization))
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("github_user_repos", NewReposModule(OwnerTypeUser))
 			if err != nil {
 				return err
 			}
@@ -45,7 +50,12 @@ func initFixtureDB() error {
 		return err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_repos(%s, '%s');", "augmentable-dev", os.Getenv("GITHUB_TOKEN")))
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS org_repos USING github_org_repos(%s, '%s');", "augmentable-dev", os.Getenv("GITHUB_TOKEN")))
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS user_repos USING github_user_repos(%s, '%s');", "patrickdevivo", os.Getenv("GITHUB_TOKEN")))
 	if err != nil {
 		return err
 	}
