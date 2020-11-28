@@ -11,6 +11,10 @@ func TestReposTable(t *testing.T) {
 	}
 
 	_, contents, err := GetRowContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if len(contents) != 5 {
 		t.Fatalf("expected: 5 rows, got: %d rows", len(contents))
 	}
