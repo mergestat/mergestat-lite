@@ -16,7 +16,7 @@ var (
 func init() {
 	sql.Register("ghqlite", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := conn.CreateModule("github_repos", NewReposModule())
+			err := conn.CreateModule("github_repos", NewReposModule(OwnerTypeOrganization))
 			if err != nil {
 				return err
 			}

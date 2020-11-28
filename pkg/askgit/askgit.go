@@ -49,7 +49,12 @@ func init() {
 				return err
 			}
 
-			err = conn.CreateModule("github_repos", ghqlite.NewReposModule())
+			err = conn.CreateModule("github_org_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeOrganization))
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("github_user_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeUser))
 			if err != nil {
 				return err
 			}
@@ -144,7 +149,14 @@ func (a *AskGit) ensureTables(options *Options) error {
 	}
 
 	if a.options.GitHubOrg != "" {
-		_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_repos(%s, '%s');", a.options.GitHubOrg, a.options.GitHubToken))
+		_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_org_repos(%s, '%s');", a.options.GitHubOrg, a.options.GitHubToken))
+		if err != nil {
+			return err
+		}
+	}
+
+	if a.options.GitHubUser != "" {
+		_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_user_repos(%s, '%s');", a.options.GitHubUser, a.options.GitHubToken))
 		if err != nil {
 			return err
 		}

@@ -10,10 +10,12 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type ReposModule struct{}
+type ReposModule struct {
+	ownerType OwnerType
+}
 
-func NewReposModule() *ReposModule {
-	return &ReposModule{}
+func NewReposModule(ownerType OwnerType) *ReposModule {
+	return &ReposModule{ownerType}
 }
 
 func (m *ReposModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
@@ -51,7 +53,7 @@ func (m *ReposModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab
 		return nil, err
 	}
 
-	return &reposTable{args[3], args[4][1 : len(args[4])-1]}, nil
+	return &reposTable{args[3], m.ownerType, args[4][1 : len(args[4])-1]}, nil
 }
 
 func (m *ReposModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
@@ -61,8 +63,9 @@ func (m *ReposModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 func (m *ReposModule) DestroyModule() {}
 
 type reposTable struct {
-	owner string
-	token string
+	owner     string
+	ownerType OwnerType
+	token     string
 }
 
 func (v *reposTable) Open() (sqlite3.VTabCursor, error) {
@@ -159,7 +162,7 @@ func (vc *reposCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	} else {
 		rateLimiter = rate.NewLimiter(rate.Every(time.Minute), 80)
 	}
-	iter := NewRepoIterator(vc.table.owner, OwnerTypeOrganization, vc.table.token, &RepoIteratorOptions{
+	iter := NewRepoIterator(vc.table.owner, vc.table.ownerType, vc.table.token, &RepoIteratorOptions{
 		PerPage:      100,
 		PreloadPages: 10,
 		RateLimiter:  rateLimiter,
