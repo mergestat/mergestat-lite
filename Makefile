@@ -1,4 +1,4 @@
-gotags = "sqlite_vtable,static,system_libgit2"
+gotags = "sqlite_vtable,sqlite_json1,static,system_libgit2"
 
 vet:
 	go vet -v -tags=$(gotags) ./...
