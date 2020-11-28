@@ -21,6 +21,7 @@ var (
 	useGitCLI   bool
 	cui         bool
 	presetQuery string
+	githubOrg   string
 )
 
 func init() {
@@ -29,6 +30,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&useGitCLI, "use-git-cli", false, "whether to use the locally installed git command (if it's available). Defaults to false.")
 	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interactive mode, which displays a terminal UI")
 	rootCmd.PersistentFlags().StringVar(&presetQuery, "preset", "", "used to pick a preset query")
+	rootCmd.PersistentFlags().StringVar(&githubOrg, "github-org", "", "used to pick a preset query")
 }
 
 func handleError(err error) {
@@ -108,7 +110,9 @@ var rootCmd = &cobra.Command{
 			return
 		}
 		ag, err := askgit.New(dir, &askgit.Options{
-			UseGitCLI: useGitCLI,
+			UseGitCLI:   useGitCLI,
+			GitHubOrg:   githubOrg,
+			GitHubToken: os.Getenv("GITHUB_TOKEN"),
 		})
 		handleError(err)
 

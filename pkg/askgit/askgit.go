@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/augmentable-dev/askgit/pkg/ghqlite"
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v30"
@@ -42,7 +43,13 @@ func init() {
 			if err != nil {
 				return err
 			}
+
 			err = conn.CreateModule("git_stats", gitqlite.NewGitStatsModule())
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("github_repos", ghqlite.NewReposModule())
 			if err != nil {
 				return err
 			}
@@ -60,10 +67,14 @@ func init() {
 type AskGit struct {
 	db       *sql.DB
 	repoPath string
+	options  *Options
 }
 
 type Options struct {
-	UseGitCLI bool
+	UseGitCLI   bool
+	GitHubToken string
+	GitHubOrg   string
+	GitHubUser  string
 }
 
 // New creates an instance of AskGit
@@ -79,7 +90,7 @@ func New(repoPath string, options *Options) (*AskGit, error) {
 		return nil, err
 	}
 
-	g := &AskGit{db: db, repoPath: repoPath}
+	g := &AskGit{db: db, repoPath: repoPath, options: options}
 
 	err = g.ensureTables(options)
 	if err != nil {
@@ -132,10 +143,12 @@ func (a *AskGit) ensureTables(options *Options) error {
 		return err
 	}
 
-	// _, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_repos(%s, '%s');", os.Getenv("GITHUB_ORG"), os.Getenv("GITHUB_TOKEN")))
-	// if err != nil {
-	// 	return err
-	// }
+	if a.options.GitHubOrg != "" {
+		_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_repos(%s, '%s');", a.options.GitHubOrg, a.options.GitHubToken))
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
