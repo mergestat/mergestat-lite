@@ -66,6 +66,10 @@ func TestMain(m *testing.M) {
 	}
 	code := m.Run()
 	close()
+	err = fixtureDB.Close()
+	if err != nil {
+		panic(err)
+	}
 	os.Exit(code)
 }
 
