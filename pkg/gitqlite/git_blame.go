@@ -130,7 +130,9 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	var entries []string
 	//var what []string
 	tree.Walk(func(s string, entry *git.TreeEntry) int {
-		entries = append(entries, s+entry.Name)
+		if entry.Type.String() == "Blob" {
+			entries = append(entries, s+entry.Name)
+		}
 		//what = append(what, s)
 		return 0
 	})
@@ -138,7 +140,7 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		fmt.Println(i)
 	}
 
-	blame, err := vc.repo.BlameFile(".gitignore", &opts)
+	blame, err := vc.repo.BlameFile("git_branches.go", &opts)
 	if err != nil {
 		fmt.Println(err)
 		return err
