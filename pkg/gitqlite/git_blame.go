@@ -1,6 +1,7 @@
 package gitqlite
 
 import (
+	"bytes"
 	"fmt"
 
 	git "github.com/libgit2/git2go/v30"
@@ -20,7 +21,8 @@ func (m *gitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 			path TEXT,
 			author TEXT,
 			email TEXT,
-			commit_id TEXT
+			commit_id TEXT,
+			contents TEXTS
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -61,11 +63,13 @@ func (v *gitBlameTable) Disconnect() error {
 func (v *gitBlameTable) Destroy() error { return nil }
 
 type blameCursor struct {
-	repo      *git.Repository
-	current   *git.Blame
-	filenames []string
-	fileIter  int
-	lineIter  int
+	repo                *git.Repository
+	current             *git.Blame
+	filenames           []string
+	fileIds             []*git.Oid
+	currentFileContents [][]byte
+	fileIter            int
+	lineIter            int
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
@@ -88,7 +92,10 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(line.FinalSignature.Email)
 	case 4:
 		c.ResultText(line.FinalCommitId.String())
+	case 5:
+		c.ResultText(string(vc.currentFileContents[vc.lineIter-1]))
 	}
+
 	return nil
 
 }
@@ -130,10 +137,12 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	 */
 	//entry := tree.EntryByIndex(1)
 	var entries []string
+	var ids []*git.Oid
 	//var what []string
 	tree.Walk(func(s string, entry *git.TreeEntry) int {
 		if entry.Type.String() == "Blob" {
 			entries = append(entries, s+entry.Name)
+			ids = append(ids, entry.Id)
 		}
 		//what = append(what, s)
 		return 0
@@ -147,6 +156,21 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		fmt.Println(err)
 		return err
 	}
+	currentFile, err := vc.repo.LookupBlob(ids[0])
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// fmt.Println(fmt.Sprintf("%s", currentFile.Contents()))
+	// fmt.Println(fmt.Sprint([]byte{'\n'}))
+	str := bytes.Split(currentFile.Contents(), []byte{'\n'})
+	//fmt.Println(str)
+
+	//sc := bufio.NewScanner(strings.NewReader(str))
+
+	vc.currentFileContents = str
+	fmt.Println(vc.currentFileContents)
+	vc.fileIds = ids
 	vc.filenames = entries
 	vc.current = blame
 	vc.lineIter = 1
@@ -169,6 +193,15 @@ func (vc *blameCursor) Next() error {
 				fmt.Println(err)
 				return err
 			}
+			currentFile, err := vc.repo.LookupBlob(vc.fileIds[vc.fileIter])
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			str := bytes.Split(currentFile.Contents(), []byte{'\n'})
+			//fmt.Println(str)
+
+			vc.currentFileContents = str
 			vc.current = blame
 			vc.lineIter = 1
 		} else {
