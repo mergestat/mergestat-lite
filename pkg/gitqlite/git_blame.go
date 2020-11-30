@@ -61,15 +61,17 @@ func (v *gitBlameTable) Disconnect() error {
 func (v *gitBlameTable) Destroy() error { return nil }
 
 type blameCursor struct {
-	repo    *git.Repository
-	current *git.Blame
-	iter    int
+	repo      *git.Repository
+	current   *git.Blame
+	filenames []string
+	fileIter  int
+	lineIter  int
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	//branch := vc.current
 	// line path author email commit
-	line, err := vc.current.HunkByLine(vc.iter)
+	line, err := vc.current.HunkByLine(vc.lineIter)
 	if err != nil {
 		return err
 	}
@@ -77,9 +79,9 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	switch col {
 	case 0:
 		//branch name
-		c.ResultText(fmt.Sprint(line.FinalStartLineNumber))
+		c.ResultText(fmt.Sprint(vc.lineIter))
 	case 1:
-		c.ResultText(line.OrigPath)
+		c.ResultText(vc.filenames[vc.fileIter])
 	case 2:
 		c.ResultText(line.FinalSignature.Name)
 	case 3:
@@ -136,26 +138,43 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		//what = append(what, s)
 		return 0
 	})
-	for _, i := range entries {
-		fmt.Println(i)
-	}
+	// for _, i := range entries {
+	// 	fmt.Println(i)
+	// }
 
-	blame, err := vc.repo.BlameFile("git_branches.go", &opts)
+	blame, err := vc.repo.BlameFile(entries[0], &opts)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
+	vc.filenames = entries
 	vc.current = blame
-	vc.iter = 1
+	vc.lineIter = 1
+	vc.fileIter = 1
 	return nil
 }
 
 func (vc *blameCursor) Next() error {
-	vc.iter++
-	_, err := vc.current.HunkByLine(vc.iter)
+	vc.lineIter++
+	_, err := vc.current.HunkByLine(vc.lineIter)
 	if err != nil {
-		vc.current = nil
-		return nil
+		if vc.fileIter < len(vc.filenames)-1 {
+			opts, err := git.DefaultBlameOptions()
+			if err != nil {
+				return err
+			}
+			vc.fileIter++
+			blame, err := vc.repo.BlameFile(vc.filenames[vc.fileIter], &opts)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			vc.current = blame
+			vc.lineIter = 1
+		} else {
+			vc.current = nil
+			return nil
+		}
 
 	}
 	return nil
