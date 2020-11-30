@@ -183,7 +183,6 @@ func (vc *blameCursor) Next() error {
 				return err
 			}
 			str := bytes.Split(currentFile.Contents(), []byte{'\n'})
-			//fmt.Println(str)
 
 			vc.currentFileContents = str
 			vc.current = blame
