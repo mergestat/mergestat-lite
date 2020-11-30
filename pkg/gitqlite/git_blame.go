@@ -19,8 +19,6 @@ func (m *gitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 		CREATE TABLE %q (
 			line_no TEXT,
 			path TEXT,
-			author TEXT,
-			email TEXT,
 			commit_id TEXT,
 			contents TEXTS
 		)`, args[0]))
@@ -85,12 +83,8 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 1:
 		c.ResultText(vc.filenames[vc.fileIter])
 	case 2:
-		c.ResultText(line.FinalSignature.Name)
-	case 3:
-		c.ResultText(line.FinalSignature.Email)
-	case 4:
 		c.ResultText(line.FinalCommitId.String())
-	case 5:
+	case 3:
 		c.ResultText(string(vc.currentFileContents[vc.lineIter-1]))
 	}
 
