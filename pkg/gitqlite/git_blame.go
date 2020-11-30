@@ -207,7 +207,10 @@ func (vc *blameCursor) Rowid() (int64, error) {
 
 func (vc *blameCursor) Close() error {
 	if vc.current != nil {
-		vc.current.Free()
+		err := vc.current.Free()
+		if err != nil {
+			return nil
+		}
 	}
 
 	return nil
