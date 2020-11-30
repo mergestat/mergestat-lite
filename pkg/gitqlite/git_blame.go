@@ -121,8 +121,23 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
-	entry := tree.EntryByIndex(1)
-	fmt.Println(entry.Name)
+	/* get file names by
+	* for each file in the 'head tree' go through each line and
+	*
+	*
+	 */
+	//entry := tree.EntryByIndex(1)
+	var entries []string
+	//var what []string
+	tree.Walk(func(s string, entry *git.TreeEntry) int {
+		entries = append(entries, s+entry.Name)
+		//what = append(what, s)
+		return 0
+	})
+	for _, i := range entries {
+		fmt.Println(i)
+	}
+
 	blame, err := vc.repo.BlameFile(".gitignore", &opts)
 	if err != nil {
 		fmt.Println(err)
