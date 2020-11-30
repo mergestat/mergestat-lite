@@ -73,8 +73,6 @@ type blameCursor struct {
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	//branch := vc.current
-	// line path author email commit
 	line, err := vc.current.HunkByLine(vc.lineIter)
 	if err != nil {
 		return err
@@ -105,7 +103,6 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
-	//var id string
 	revWalk, err := vc.repo.Walk()
 	if err != nil {
 		return err
@@ -130,27 +127,19 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
-	/* get file names by
-	* for each file in the 'head tree' go through each line and
-	*
-	*
-	 */
-	//entry := tree.EntryByIndex(1)
+
 	var entries []string
 	var ids []*git.Oid
-	//var what []string
-	tree.Walk(func(s string, entry *git.TreeEntry) int {
+	err = tree.Walk(func(s string, entry *git.TreeEntry) int {
 		if entry.Type.String() == "Blob" {
 			entries = append(entries, s+entry.Name)
 			ids = append(ids, entry.Id)
 		}
-		//what = append(what, s)
 		return 0
 	})
-	// for _, i := range entries {
-	// 	fmt.Println(i)
-	// }
-
+	if err != nil {
+		return err
+	}
 	blame, err := vc.repo.BlameFile(entries[0], &opts)
 	if err != nil {
 		fmt.Println(err)
@@ -161,12 +150,7 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		fmt.Println(err)
 		return err
 	}
-	// fmt.Println(fmt.Sprintf("%s", currentFile.Contents()))
-	// fmt.Println(fmt.Sprint([]byte{'\n'}))
 	str := bytes.Split(currentFile.Contents(), []byte{'\n'})
-	//fmt.Println(str)
-
-	//sc := bufio.NewScanner(strings.NewReader(str))
 
 	vc.currentFileContents = str
 	fmt.Println(vc.currentFileContents)
