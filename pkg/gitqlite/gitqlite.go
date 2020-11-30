@@ -54,6 +54,10 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("git_blame", &gitBlameModule{})
+			if err != nil {
+				return err
+			}
 
 			err = loadHelperFuncs(conn)
 			if err != nil {
@@ -120,6 +124,10 @@ func (g *GitQLite) ensureTables(options *Options) error {
 		return err
 	}
 	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch('%s');", g.RepoPath))
+	if err != nil {
+		return err
+	}
+	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", g.RepoPath))
 	if err != nil {
 		return err
 	}
