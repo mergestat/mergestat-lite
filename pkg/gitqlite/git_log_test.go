@@ -123,12 +123,13 @@ func getCommitCount(t *testing.T) []string {
 	//revWalk.Free()
 	return ret
 }
-func createRevWalk(t *testing.T) *git.RevWalk {
-	revWalk, err := fixtureRepo.Walk()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer revWalk.Free()
+
+// func createRevWalk(t *testing.T) *git.RevWalk {
+// 	revWalk, err := fixtureRepo.Walk()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	defer revWalk.Free()
 
 // func createRevWalk(t *testing.T) *git.RevWalk {
 // 	revWalk, err := fixtureRepo.Walk()
