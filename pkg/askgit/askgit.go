@@ -50,6 +50,10 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("git_blame", &gitBlameModule{})
+			if err != nil {
+				return err
+			}
 
 			err = loadHelperFuncs(conn)
 			if err != nil {
