@@ -10,6 +10,10 @@ import (
 
 type gitBlameModule struct{}
 
+func NewGitBlameModule() *gitBlameModule {
+	return &gitBlameModule{}
+}
+
 type gitBlameTable struct {
 	repoPath string
 }

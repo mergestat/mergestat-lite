@@ -46,7 +46,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			err = conn.CreateModule("git_blame", &gitBlameModule{})
+			err = conn.CreateModule("git_blame", gitqlite.NewGitBlameModule())
 			if err != nil {
 				return err
 			}
@@ -135,7 +135,7 @@ func (a *AskGit) ensureTables(options *Options) error {
 	if err != nil {
 		return err
 	}
-	_, err = g.DB.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", g.RepoPath))
+	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", a.RepoPath))
 	if err != nil {
 		return err
 	}
