@@ -85,7 +85,11 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
 	case 3:
-		c.ResultText(string(vc.currentFileContents[vc.lineIter-1]))
+		if string(vc.currentFileContents[vc.lineIter-1]) != "NULL" {
+			c.ResultText(string(vc.currentFileContents[vc.lineIter-1]) + " ")
+		} else {
+			c.ResultText(" ")
+		}
 	}
 
 	return nil
@@ -147,7 +151,7 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	str := bytes.Split(currentFile.Contents(), []byte{'\n'})
 
 	vc.currentFileContents = str
-	fmt.Println(vc.currentFileContents)
+	//fmt.Println(vc.currentFileContents)
 	vc.fileIds = ids
 	vc.filenames = entries
 	vc.current = blame
