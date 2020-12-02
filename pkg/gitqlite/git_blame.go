@@ -157,7 +157,7 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	vc.filenames = entries
 	vc.current = blame
 	vc.lineIter = 1
-	vc.fileIter = 1
+	vc.fileIter = 0
 	return nil
 }
 
