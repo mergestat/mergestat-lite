@@ -126,6 +126,10 @@ func initFixtureDB(repoPath string) error {
 	if err != nil {
 		return err
 	}
+	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", repoPath))
+	if err != nil {
+		return err
+	}
 
 	fixtureDB = db
 	return nil
