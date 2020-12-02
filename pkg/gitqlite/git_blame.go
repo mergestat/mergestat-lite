@@ -85,11 +85,8 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
 	case 3:
-		if string(vc.currentFileContents[vc.lineIter-1]) != "NULL" {
-			c.ResultText(string(vc.currentFileContents[vc.lineIter-1]) + " ")
-		} else {
-			c.ResultText(" ")
-		}
+		c.ResultText(string(vc.currentFileContents[vc.lineIter-1]) + " ")
+
 	}
 
 	return nil
