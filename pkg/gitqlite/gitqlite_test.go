@@ -49,6 +49,10 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("git_blame", NewGitBlameModule())
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
