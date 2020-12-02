@@ -135,7 +135,7 @@ func (a *AskGit) ensureTables(options *Options) error {
 	if err != nil {
 		return err
 	}
-	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", a.RepoPath))
+	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", a.repoPath))
 	if err != nil {
 		return err
 	}
