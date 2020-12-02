@@ -10,38 +10,57 @@ import (
 )
 
 func TestFileCounts(t *testing.T) {
-
-	commitChecker, err := fixtureRepo.Walk()
-	if err != nil {
-		t.Fatal(err)
+	testCases := []test{
+		{"checkCommits", "SELECT count(distinct commit_id) from files", getCommitCount(t)},
 	}
-
-	err = commitChecker.PushHead()
-	if err != nil {
-		t.Fatal(err)
+	for _, tc := range testCases {
+		expected := tc.want
+		results := runQuery(t, tc.query)
+		if len(expected) != len(results) {
+			t.Fatalf("expected %d entries got %d, test: %s, %s, %s", len(expected), len(results), tc.name, expected, results)
+		}
+		for x := 0; x < len(expected); x++ {
+			if results[x] != expected[x] {
+				t.Fatalf("expected %s, got %s, test %s", expected[x], results[x], tc.name)
+			}
+		}
 	}
+	// instance, err := New(fixtureRepoDir, &Options{})
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
-	defer commitChecker.Free()
+	// commitChecker, err := fixtureRepo.Walk()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
-	numFiles := 0
-	err = commitChecker.Iterate(func(commit *git.Commit) bool {
-		numFiles++
-		return true
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	// err = commitChecker.PushHead()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
-	fileRows, err := fixtureDB.Query("SELECT DISTINCT commit_id FROM files")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer fileRows.Close()
+	// defer commitChecker.Free()
 
-	numFileRows := GetRowsCount(fileRows)
-	if numFileRows != numFiles {
-		t.Fatalf("expected %d rows got : %d", numFiles, numFileRows)
-	}
+	// numFiles := 0
+	// err = commitChecker.Iterate(func(commit *git.Commit) bool {
+	// 	numFiles++
+	// 	return true
+	// })
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	// fileRows, err := instance.DB.Query("SELECT DISTINCT commit_id FROM files")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+	// defer fileRows.Close()
+
+	// numFileRows := GetRowsCount(fileRows)
+	// if numFileRows != numFiles {
+	// 	t.Fatalf("expected %d rows got : %d", numFiles, numFileRows)
+	// }
 }
 
 func TestFileColumns(t *testing.T) {
