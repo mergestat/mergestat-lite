@@ -102,30 +102,24 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
-	revWalk, err := vc.repo.Walk()
-	if err != nil {
-		return err
-	}
-	err = revWalk.PushHead()
-	if err != nil {
-		return err
-	}
-	revWalk.Sorting(git.SortNone)
 
-	oid := new(git.Oid)
-	err = revWalk.Next(oid)
+	head, err := vc.repo.Head()
 	if err != nil {
 		return err
 	}
+	defer head.Free()
 
-	commit, err := vc.repo.LookupCommit(oid)
+	commit, err := vc.repo.LookupCommit(head.Target())
 	if err != nil {
 		return err
 	}
+	defer commit.Free()
+
 	tree, err := commit.Tree()
 	if err != nil {
 		return err
 	}
+	defer tree.Free()
 
 	var entries []string
 	var ids []*git.Oid

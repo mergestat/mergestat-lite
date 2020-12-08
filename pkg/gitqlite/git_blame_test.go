@@ -26,22 +26,13 @@ func TestBlameCounts(t *testing.T) {
 }
 
 func getFilesCount(t *testing.T) int {
-	revWalk, err := fixtureRepo.Walk()
+	head, err := fixtureRepo.Head()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = revWalk.PushHead()
-	if err != nil {
-		t.Fatal(err)
-	}
-	revWalk.Sorting(git.SortNone)
-	oid := new(git.Oid)
-	err = revWalk.Next(oid)
-	if err != nil {
-		t.Fatal(err)
-	}
+	defer head.Free()
 
-	commit, err := fixtureRepo.LookupCommit(oid)
+	commit, err := fixtureRepo.LookupCommit(head.Target())
 	if err != nil {
 		t.Fatal(err)
 	}
