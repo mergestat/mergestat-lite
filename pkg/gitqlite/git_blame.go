@@ -21,10 +21,10 @@ type gitBlameTable struct {
 func (m *gitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
-			line_no TEXT,
+			line_no INT,
 			path TEXT,
 			commit_id TEXT,
-			contents TEXTS
+			contents TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
@@ -90,7 +90,8 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(line.FinalCommitId.String())
 	case 3:
 		c.ResultText(string(vc.currentFileContents[vc.lineIter-1]) + " ")
-
+	case 4:
+		c.ResultText(line.FinalSignature.Email)
 	}
 
 	return nil
