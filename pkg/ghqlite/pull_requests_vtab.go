@@ -59,7 +59,7 @@ func (m *PullRequestsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlit
 			head_ref TEXT,
 			head_sha TEXT,
 			head_repo_owner TEXT,
-			head_repo_name,
+			head_repo_name TEXT,
 			base_label TEXT,
 			base_ref TEXT,
 			base_sha TEXT,
