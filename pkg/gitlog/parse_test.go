@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/gitsight/go-vcsurl"
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 )
 
 var (

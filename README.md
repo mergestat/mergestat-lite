@@ -14,6 +14,9 @@ It can execute queries that look like:
 -- how many commits have been authored by user@email.com?
 SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 ```
+
+There's also preliminary support for executing queries against the GitHub API.
+
 More in-depth examples and documentation can be found below.
 
 ## Installation
@@ -101,7 +104,11 @@ See `-h` for all the options.
 
 ### Tables
 
-#### `commits`
+#### Local Git Repository
+
+When a repo is specified (either by the `--repo` flag or from the current directory), the following tables are available to query.
+
+##### `commits`
 
 Similar to `git log`, the `commits` table includes all commits in the history of the currently checked out commit.
 
@@ -120,7 +127,16 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 | parent_count    | INT      |
 | tree_id         | TEXT     |
 
-#### `files`
+##### `stats`
+
+| Column    | Type |
+|-----------|------|
+| commit_id | TEXT |
+| file      | TEXT |
+| additions | INT  |
+| deletions | INT  |
+
+##### `files`
 
 The `files` table iterates over _ALL_ the files in a commit history, by default from what's checked out in the repository.
 The full table is every file in every tree of a commit history.
@@ -136,7 +152,7 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 | executable | BOOL |
 
 
-#### `branches`
+##### `branches`
 
 | Column | Type |
 |--------|------|
@@ -145,7 +161,7 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 | target | TEXT |
 | head   | BOOL |
 
-#### `tags`
+##### `tags`
 
 | Column       | Type |
 |--------------|------|
@@ -158,14 +174,105 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 | message      | TEXT |
 | target_type  | TEXT |
 
-#### `stats`
+#### GitHub Tables
 
-| Column    | Type |
-|-----------|------|
-| commit_id | TEXT |
-| file      | TEXT |
-| additions | INT  |
-| deletions | INT  |
+**This functionality is under development and likely to change**
+
+The following tables make GitHub API requests to retrieve data during query execution.
+As such, you should ensure the `GITHUB_TOKEN` environment variable is set so that API requests are authenticated.
+Unauthenticated API requests (no `GITHUB_TOKEN`) are subject to a stricter rate limit by GitHub, and may take longer to execute (query execution will try to respect the applicable rate limit).
+
+##### `github_org_repos` and `github_user_repos`
+
+These tables can be queried as table-valued functions expecting a single parameter, like so:
+
+```sql
+-- return all repos from a github *org*
+SELECT * FROM github_org_repos('augmentable-dev')
+
+-- return all repos from a github *user*
+SELECT * FROM github_user_repos('augmentable-dev')
+```
+
+| Column            | Type     |
+|-------------------|----------|
+| id                | INT      |
+| node_id           | TEXT     |
+| name              | TEXT     |
+| full_name         | TEXT     |
+| owner             | TEXT     |
+| private           | BOOL     |
+| description       | TEXT     |
+| fork              | BOOL     |
+| homepage          | TEXT     |
+| language          | TEXT     |
+| forks_count       | INT      |
+| stargazers_count  | INT      |
+| watchers_count    | INT      |
+| size              | INT      |
+| default_branch    | TEXT     |
+| open_issues_count | INT      |
+| topics            | TEXT     |
+| has_issues        | BOOL     |
+| has_projects      | BOOL     |
+| has_wiki          | BOOL     |
+| has_pages         | BOOL     |
+| has_downloads     | BOOL     |
+| archived          | BOOL     |
+| pushed_at         | DATETIME |
+| created_at        | DATETIME |
+| updated_at        | DATETIME |
+| permissions       | TEXT     |
+
+##### `github_pull_requests`
+
+This table expects 2 parameters, `github_pull_requests('augmentable-dev', 'askgit')`:
+
+```sql
+SELECT count(*) FROM github_pull_requests('augmentable-dev', 'askgit') WHERE state = 'open'
+```
+
+| Column                    | Type     |
+|---------------------------|----------|
+| id                        | INT      |
+| node_id                   | TEXT     |
+| number                    | INT      |
+| state                     | TEXT     |
+| locked                    | BOOL     |
+| title                     | TEXT     |
+| user_login                | TEXT     |
+| body                      | TEXT     |
+| labels                    | TEXT     |
+| active_lock_reason        | TEXT     |
+| created_at                | DATETIME |
+| updated_at                | DATETIME |
+| closed_at                 | DATETIME |
+| merged_at                 | DATETIME |
+| merge_commit_sha          | TEXT     |
+| assignee_login            | TEXT     |
+| assignees                 | TEXT     |
+| requested_reviewer_logins | TEXT     |
+| head_label                | TEXT     |
+| head_ref                  | TEXT     |
+| head_sha                  | TEXT     |
+| head_repo_owner           | TEXT     |
+| head_repo_name            | TEXT     |
+| base_label                | TEXT     |
+| base_ref                  | TEXT     |
+| base_sha                  | TEXT     |
+| base_repo_owner           | TEXT     |
+| base_repo_name            | TEXT     |
+| author_association        | TEXT     |
+| merged                    | BOOL     |
+| mergeable                 | BOOL     |
+| mergeable_state           | BOOL     |
+| merged_by_login           | TEXT     |
+| comments                  | INT      |
+| maintainer_can_modify     | BOOL     |
+| commits                   | INT      |
+| additions                 | INT      |
+| deletions                 | INT      |
+| changed_files             | INT      |
 
 ### Example Queries
 

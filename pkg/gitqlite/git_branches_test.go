@@ -3,7 +3,7 @@ package gitqlite
 import (
 	"testing"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 )
 
 func TestBranches(t *testing.T) {
@@ -18,7 +18,7 @@ func TestBranches(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rowNum, contents, err := GetContents(branchRows)
+	rowNum, contents, err := GetRowContents(branchRows)
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
@@ -60,7 +60,7 @@ func BenchmarkBranchCount(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		rowNum, _, err := GetContents(rows)
+		rowNum, _, err := GetRowContents(rows)
 		if err != nil {
 			b.Fatalf("err %d at row Number %d", err, rowNum)
 		}
