@@ -198,7 +198,7 @@ func (vc *reposCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	iter := NewRepoIterator(owner, vc.table.module.ownerType, GitHubIteratorOptions{
 		Token:        vc.table.module.options.Token,
 		PerPage:      100,
-		PreloadPages: 10,
+		PreloadPages: 5,
 		RateLimiter:  vc.table.module.options.RateLimiter,
 	})
 	vc.iter = iter
