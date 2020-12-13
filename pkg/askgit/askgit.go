@@ -4,16 +4,19 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"fmt"
+	"os"
 	"os/exec"
 	"os/user"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/augmentable-dev/askgit/pkg/ghqlite"
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
+	"golang.org/x/time/rate"
 )
 
 func init() {
@@ -49,12 +52,29 @@ func init() {
 				return err
 			}
 
-			err = conn.CreateModule("github_org_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeOrganization))
+			githubToken := os.Getenv("GITHUB_TOKEN")
+			rateLimiter := rate.NewLimiter(rate.Every(2*time.Second), 1)
+
+			err = conn.CreateModule("github_org_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeOrganization, ghqlite.ReposModuleOptions{
+				Token:       githubToken,
+				RateLimiter: rateLimiter,
+			}))
 			if err != nil {
 				return err
 			}
 
-			err = conn.CreateModule("github_user_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeUser))
+			err = conn.CreateModule("github_user_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeUser, ghqlite.ReposModuleOptions{
+				Token:       githubToken,
+				RateLimiter: rateLimiter,
+			}))
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("github_pull_requests", ghqlite.NewPullRequestsModule(ghqlite.PullRequestsModuleOptions{
+				Token:       githubToken,
+				RateLimiter: rateLimiter,
+			}))
 			if err != nil {
 				return err
 			}
@@ -78,8 +98,6 @@ type AskGit struct {
 type Options struct {
 	UseGitCLI   bool
 	GitHubToken string
-	GitHubOrg   string
-	GitHubUser  string
 }
 
 // New creates an instance of AskGit
@@ -152,20 +170,6 @@ func (a *AskGit) ensureTables(options *Options) error {
 	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch('%s');", a.repoPath))
 	if err != nil {
 		return err
-	}
-
-	if a.options.GitHubOrg != "" {
-		_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_org_repos(%s, '%s');", a.options.GitHubOrg, a.options.GitHubToken))
-		if err != nil {
-			return err
-		}
-	}
-
-	if a.options.GitHubUser != "" {
-		_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_user_repos(%s, '%s');", a.options.GitHubUser, a.options.GitHubToken))
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil

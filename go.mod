@@ -9,7 +9,7 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/jroimartin/gocui v0.4.0
 	github.com/kr/text v0.2.0 // indirect
-	github.com/libgit2/git2go/v30 v30.2.2
+	github.com/libgit2/git2go/v31 v31.3.4
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v1.14.4
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
@@ -23,3 +23,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
+
+replace github.com/mattn/go-sqlite3 v1.14.4 => github.com/patrickdevivo/go-sqlite3 v1.14.6-0.20201211024840-146d4a910383

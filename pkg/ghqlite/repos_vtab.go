@@ -2,6 +2,7 @@ package ghqlite
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,15 +13,29 @@ import (
 
 type ReposModule struct {
 	ownerType OwnerType
+	options   ReposModuleOptions
 }
 
-func NewReposModule(ownerType OwnerType) *ReposModule {
-	return &ReposModule{ownerType}
+func NewReposModule(ownerType OwnerType, options ReposModuleOptions) *ReposModule {
+	if options.RateLimiter == nil {
+		if options.RateLimiter == nil {
+			options.RateLimiter = rate.NewLimiter(rate.Every(time.Second), 2)
+		}
+	}
+	return &ReposModule{ownerType, options}
 }
+
+type ReposModuleOptions struct {
+	Token       string
+	RateLimiter *rate.Limiter
+}
+
+func (m *ReposModule) EponymousOnlyModule() {}
 
 func (m *ReposModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %s (
+			repo_owner HIDDEN,
 			id INT,
 			node_id TEXT,
 			name TEXT,
@@ -52,8 +67,7 @@ func (m *ReposModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab
 	if err != nil {
 		return nil, err
 	}
-
-	return &reposTable{args[3], m.ownerType, args[4][1 : len(args[4])-1]}, nil
+	return &reposTable{m}, nil
 }
 
 func (m *ReposModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
@@ -63,17 +77,11 @@ func (m *ReposModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 func (m *ReposModule) DestroyModule() {}
 
 type reposTable struct {
-	owner     string
-	ownerType OwnerType
-	token     string
+	module *ReposModule
 }
 
 func (v *reposTable) Open() (sqlite3.VTabCursor, error) {
 	return &reposCursor{v, nil, nil, false}, nil
-}
-
-func (v *reposTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
-	return &sqlite3.IndexResult{}, nil
 }
 
 func (v *reposTable) Disconnect() error { return nil }
@@ -90,62 +98,64 @@ func (vc *reposCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	repo := vc.currentRepo
 	switch col {
 	case 0:
-		c.ResultInt64(repo.GetID())
+		c.ResultText(repo.GetOwner().GetName())
 	case 1:
-		c.ResultText(repo.GetNodeID())
+		c.ResultInt64(repo.GetID())
 	case 2:
-		c.ResultText(repo.GetName())
+		c.ResultText(repo.GetNodeID())
 	case 3:
-		c.ResultText(repo.GetFullName())
+		c.ResultText(repo.GetName())
 	case 4:
-		c.ResultText(repo.GetOwner().GetLogin())
+		c.ResultText(repo.GetFullName())
 	case 5:
-		c.ResultBool(repo.GetPrivate())
+		c.ResultText(repo.GetOwner().GetLogin())
 	case 6:
-		c.ResultText(repo.GetDescription())
+		c.ResultBool(repo.GetPrivate())
 	case 7:
-		c.ResultBool(repo.GetFork())
+		c.ResultText(repo.GetDescription())
 	case 8:
-		c.ResultText(repo.GetHomepage())
+		c.ResultBool(repo.GetFork())
 	case 9:
-		c.ResultText(repo.GetLanguage())
+		c.ResultText(repo.GetHomepage())
 	case 10:
-		c.ResultInt(repo.GetForksCount())
+		c.ResultText(repo.GetLanguage())
 	case 11:
-		c.ResultInt(repo.GetStargazersCount())
+		c.ResultInt(repo.GetForksCount())
 	case 12:
-		c.ResultInt(repo.GetWatchersCount())
+		c.ResultInt(repo.GetStargazersCount())
 	case 13:
-		c.ResultInt(repo.GetSize())
+		c.ResultInt(repo.GetWatchersCount())
 	case 14:
-		c.ResultText(repo.GetDefaultBranch())
+		c.ResultInt(repo.GetSize())
 	case 15:
-		c.ResultInt(repo.GetOpenIssuesCount())
+		c.ResultText(repo.GetDefaultBranch())
 	case 16:
+		c.ResultInt(repo.GetOpenIssuesCount())
+	case 17:
 		str, err := json.Marshal(repo.Topics)
 		if err != nil {
 			return err
 		}
 		c.ResultText(string(str))
-	case 17:
-		c.ResultBool(repo.GetHasIssues())
 	case 18:
-		c.ResultBool(repo.GetHasProjects())
+		c.ResultBool(repo.GetHasIssues())
 	case 19:
-		c.ResultBool(repo.GetHasWiki())
+		c.ResultBool(repo.GetHasProjects())
 	case 20:
-		c.ResultBool(repo.GetHasPages())
+		c.ResultBool(repo.GetHasWiki())
 	case 21:
-		c.ResultBool(repo.GetHasDownloads())
+		c.ResultBool(repo.GetHasPages())
 	case 22:
-		c.ResultBool(repo.GetArchived())
+		c.ResultBool(repo.GetHasDownloads())
 	case 23:
-		c.ResultText(repo.PushedAt.Format(time.RFC3339Nano))
+		c.ResultBool(repo.GetArchived())
 	case 24:
-		c.ResultText(repo.CreatedAt.Format(time.RFC3339Nano))
+		c.ResultText(repo.PushedAt.Format(time.RFC3339Nano))
 	case 25:
-		c.ResultText(repo.UpdatedAt.Format(time.RFC3339Nano))
+		c.ResultText(repo.CreatedAt.Format(time.RFC3339Nano))
 	case 26:
+		c.ResultText(repo.UpdatedAt.Format(time.RFC3339Nano))
+	case 27:
 		str, err := json.Marshal(repo.GetPermissions())
 		if err != nil {
 			return err
@@ -155,17 +165,41 @@ func (vc *reposCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func (vc *reposCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	var rateLimiter *rate.Limiter
-	if vc.table.token == "" {
-		rateLimiter = rate.NewLimiter(rate.Every(time.Minute), 30)
-	} else {
-		rateLimiter = rate.NewLimiter(rate.Every(time.Minute), 80)
+func (v *reposTable) BestIndex(constraints []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+	used := make([]bool, len(constraints))
+	repoOwnerCstUsed := false
+	for c, cst := range constraints {
+		switch cst.Column {
+		case 0: // repo_owner
+			if cst.Op != sqlite3.OpEQ { // if there's no equality constraint, fail
+				return nil, sqlite3.ErrConstraint
+			}
+			// if the constraint is usable, use it, otherwise fail
+			if used[c] = cst.Usable; !used[c] {
+				return nil, sqlite3.ErrConstraint
+			}
+			repoOwnerCstUsed = true
+		}
 	}
-	iter := NewRepoIterator(vc.table.owner, vc.table.ownerType, vc.table.token, &RepoIteratorOptions{
+
+	if !repoOwnerCstUsed {
+		return nil, errors.New("must supply a repo owner")
+	}
+
+	return &sqlite3.IndexResult{
+		IdxNum: 0,
+		IdxStr: "default",
+		Used:   used,
+	}, nil
+}
+
+func (vc *reposCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+	owner := vals[0].(string)
+	iter := NewRepoIterator(owner, vc.table.module.ownerType, GitHubIteratorOptions{
+		Token:        vc.table.module.options.Token,
 		PerPage:      100,
-		PreloadPages: 10,
-		RateLimiter:  rateLimiter,
+		PreloadPages: 5,
+		RateLimiter:  vc.table.module.options.RateLimiter,
 	})
 	vc.iter = iter
 	return vc.Next()

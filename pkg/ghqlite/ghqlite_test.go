@@ -2,7 +2,6 @@ package ghqlite
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"testing"
 
@@ -16,12 +15,23 @@ var (
 func init() {
 	sql.Register("ghqlite", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := conn.CreateModule("github_org_repos", NewReposModule(OwnerTypeOrganization))
+			err := conn.CreateModule("github_org_repos", NewReposModule(OwnerTypeOrganization, ReposModuleOptions{
+				Token: os.Getenv("GITHUB_TOKEN"),
+			}))
 			if err != nil {
 				return err
 			}
 
-			err = conn.CreateModule("github_user_repos", NewReposModule(OwnerTypeUser))
+			err = conn.CreateModule("github_user_repos", NewReposModule(OwnerTypeUser, ReposModuleOptions{
+				Token: os.Getenv("GITHUB_TOKEN"),
+			}))
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("github_pull_requests", NewPullRequestsModule(PullRequestsModuleOptions{
+				Token: os.Getenv("GITHUB_TOKEN"),
+			}))
 			if err != nil {
 				return err
 			}
@@ -46,16 +56,6 @@ func TestMain(m *testing.M) {
 
 func initFixtureDB() error {
 	db, err := sql.Open("ghqlite", ":memory:")
-	if err != nil {
-		return err
-	}
-
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS org_repos USING github_org_repos(%s, '%s');", "augmentable-dev", os.Getenv("GITHUB_TOKEN")))
-	if err != nil {
-		return err
-	}
-
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS user_repos USING github_user_repos(%s, '%s');", "patrickdevivo", os.Getenv("GITHUB_TOKEN")))
 	if err != nil {
 		return err
 	}

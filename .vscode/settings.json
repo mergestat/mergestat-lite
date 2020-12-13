@@ -10,5 +10,7 @@
     ],
     "go.toolsEnvVars": {
         "GOFLAGS": "-tags='sqlite_vtable'"
-    }
+    },
+    "go.testTimeout": "120s",
+    "go.testEnvFile": "${workspaceFolder}/.env"
 }
