@@ -142,13 +142,33 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 11:
 		c.ResultText(pr.GetActiveLockReason())
 	case 12:
-		c.ResultText(pr.GetCreatedAt().Format(time.RFC3339Nano))
+		t := pr.GetCreatedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 13:
-		c.ResultText(pr.GetUpdatedAt().Format(time.RFC3339Nano))
+		t := pr.GetUpdatedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 14:
-		c.ResultText(pr.GetClosedAt().Format(time.RFC3339Nano))
+		t := pr.GetClosedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 15:
-		c.ResultText(pr.GetMergedAt().Format(time.RFC3339Nano))
+		t := pr.GetMergedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 16:
 		c.ResultText(pr.GetMergeCommitSHA())
 	case 17:
