@@ -5,7 +5,7 @@ import (
 )
 
 func TestOrgReposTable(t *testing.T) {
-	rows, err := DB.Query("SELECT * FROM org_repos LIMIT 5")
+	rows, err := DB.Query("SELECT * FROM github_org_repos('augmentable-dev') LIMIT 5")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestOrgReposTable(t *testing.T) {
 }
 
 func TestUserReposTable(t *testing.T) {
-	rows, err := DB.Query("SELECT * FROM user_repos LIMIT 5")
+	rows, err := DB.Query("SELECT * FROM github_user_repos('patrickdevivo') LIMIT 5")
 	if err != nil {
 		t.Fatal(err)
 	}

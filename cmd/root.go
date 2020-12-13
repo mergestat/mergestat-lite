@@ -10,7 +10,7 @@ import (
 	"github.com/augmentable-dev/askgit/pkg/askgit"
 	"github.com/augmentable-dev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 	"github.com/spf13/cobra"
 )
 
@@ -21,8 +21,6 @@ var (
 	useGitCLI   bool
 	cui         bool
 	presetQuery string
-	githubOrg   string
-	githubUser  string
 )
 
 func init() {
@@ -31,8 +29,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&useGitCLI, "use-git-cli", false, "whether to use the locally installed git command (if it's available). Defaults to false.")
 	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interactive mode, which displays a terminal UI")
 	rootCmd.PersistentFlags().StringVar(&presetQuery, "preset", "", "used to pick a preset query")
-	rootCmd.PersistentFlags().StringVar(&githubOrg, "github-org", "", "used to specify a GitHub *org* to query against when scanning repos")
-	rootCmd.PersistentFlags().StringVar(&githubUser, "github-user", "", "used to specify a GitHub *user* to query against when scanning repos")
 }
 
 func handleError(err error) {
@@ -110,8 +106,6 @@ var rootCmd = &cobra.Command{
 
 		ag, err := askgit.New(dir, &askgit.Options{
 			UseGitCLI:   useGitCLI,
-			GitHubOrg:   githubOrg,
-			GitHubUser:  githubUser,
 			GitHubToken: os.Getenv("GITHUB_TOKEN"),
 		})
 		handleError(err)

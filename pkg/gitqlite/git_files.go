@@ -5,7 +5,7 @@ import (
 	"io"
 	"path"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
 )
 
