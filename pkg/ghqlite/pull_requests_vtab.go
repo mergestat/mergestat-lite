@@ -298,7 +298,7 @@ func (vc *pullRequestsCursor) Filter(idxNum int, idxStr string, vals []interface
 		orderBy = "updated"
 	}
 
-	direction := "asc"
+	var direction string
 	if idxNum <= 0 {
 		direction = "desc"
 	} else {
