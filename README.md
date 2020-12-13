@@ -182,12 +182,17 @@ The following tables make GitHub API requests to retrieve data during query exec
 As such, you should ensure the `GITHUB_TOKEN` environment variable is set so that API requests are authenticated.
 Unauthenticated API requests (no `GITHUB_TOKEN`) are subject to a stricter rate limit by GitHub, and may take longer to execute (query execution will try to respect the applicable rate limit).
 
-##### `repos`
+##### `github_org_repos` and github_user_repos
 
-This table will only be available if either `--github-org` or `--github-user` are provided.
-If both are provided, `--github-org` will be used.
-Each specifies the org or user to query repositories from when scanning the `repos` table.
-In other words, this table returns the repositories belonging to a GitHub organization or user, with the following schema:
+These tables can be queried as table-valued functions expecting a single parameter, like so:
+
+```sql
+-- return all repos from a github *org*
+SELECT * FROM github_org_repos('augmentable-dev')
+
+-- return all repos from a github *user*
+SELECT * FROM github_user_repos('augmentable-dev')
+```
 
 | Column            | Type     |
 |-------------------|----------|
@@ -218,6 +223,56 @@ In other words, this table returns the repositories belonging to a GitHub organi
 | created_at        | DATETIME |
 | updated_at        | DATETIME |
 | permissions       | TEXT     |
+
+##### `github_pull_requests`
+
+This table expects 2 parameters, `github_pull_requests('augmentable-dev', 'askgit')`:
+
+```sql
+SELECT count(*) FROM github_pull_requests('augmentable-dev', 'askgit') WHERE state = 'open'
+```
+
+| Column                    | Type     |
+|---------------------------|----------|
+| id                        | INT      |
+| node_id                   | TEXT     |
+| number                    | INT      |
+| state                     | TEXT     |
+| locked                    | BOOL     |
+| title                     | TEXT     |
+| user_login                | TEXT     |
+| body                      | TEXT     |
+| labels                    | TEXT     |
+| active_lock_reason        | TEXT     |
+| created_at                | DATETIME |
+| updated_at                | DATETIME |
+| closed_at                 | DATETIME |
+| merged_at                 | DATETIME |
+| merge_commit_sha          | TEXT     |
+| assignee_login            | TEXT     |
+| assignees                 | TEXT     |
+| requested_reviewer_logins | TEXT     |
+| head_label                | TEXT     |
+| head_ref                  | TEXT     |
+| head_sha                  | TEXT     |
+| head_repo_owner           | TEXT     |
+| head_repo_name            | TEXT     |
+| base_label                | TEXT     |
+| base_ref                  | TEXT     |
+| base_sha                  | TEXT     |
+| base_repo_owner           | TEXT     |
+| base_repo_name            | TEXT     |
+| author_association        | TEXT     |
+| merged                    | BOOL     |
+| mergeable                 | BOOL     |
+| mergeable_state           | BOOL     |
+| merged_by_login           | TEXT     |
+| comments                  | INT      |
+| maintainer_can_modify     | BOOL     |
+| commits                   | INT      |
+| additions                 | INT      |
+| deletions                 | INT      |
+| changed_files             | INT      |
 
 ### Example Queries
 
