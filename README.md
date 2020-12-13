@@ -182,7 +182,7 @@ The following tables make GitHub API requests to retrieve data during query exec
 As such, you should ensure the `GITHUB_TOKEN` environment variable is set so that API requests are authenticated.
 Unauthenticated API requests (no `GITHUB_TOKEN`) are subject to a stricter rate limit by GitHub, and may take longer to execute (query execution will try to respect the applicable rate limit).
 
-##### `github_org_repos` and github_user_repos
+##### `github_org_repos` and `github_user_repos`
 
 These tables can be queried as table-valued functions expecting a single parameter, like so:
 
