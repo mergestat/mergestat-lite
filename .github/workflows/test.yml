@@ -36,7 +36,7 @@ jobs:
         run: |
           git clone https://github.com/libgit2/libgit2.git ~/libgit2
           cd ~/libgit2
-          git checkout v1.0.1
+          git checkout v1.1.0
           mkdir build && cd build
           sudo cmake .. -DBUILD_CLAR=0
           sudo cmake --build . --target install

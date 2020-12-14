@@ -32,7 +32,7 @@ func TestStatsTable(t *testing.T) {
 	}
 	defer rows.Close()
 
-	_, contents, err := GetContents(rows)
+	_, contents, err := GetRowContents(rows)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestStatsTableCommitIDIndex(t *testing.T) {
 	}
 	defer rows.Close()
 
-	_, contents, err := GetContents(rows)
+	_, contents, err := GetRowContents(rows)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestStatsTotals(t *testing.T) {
 	}
 	defer rows.Close()
 
-	_, contents, err := GetContents(rows)
+	_, contents, err := GetRowContents(rows)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func BenchmarkStats(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		rowNum, _, err := GetContents(rows)
+		rowNum, _, err := GetRowContents(rows)
 		if err != nil {
 			b.Fatalf("err %d at row Number %d", err, rowNum)
 		}

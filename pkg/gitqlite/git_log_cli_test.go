@@ -3,7 +3,7 @@ package gitqlite
 import (
 	"testing"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 )
 
 func TestCommitCounts(t *testing.T) {
@@ -52,7 +52,7 @@ func TestCommitCounts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rowNum, contents, err := GetContents(rows)
+	rowNum, contents, err := GetRowContents(rows)
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
@@ -82,7 +82,7 @@ func BenchmarkCLICommitCounts(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		rowNum, _, err := GetContents(rows)
+		rowNum, _, err := GetRowContents(rows)
 		if err != nil {
 			b.Fatalf("err %d at row Number %d", err, rowNum)
 		}

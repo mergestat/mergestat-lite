@@ -37,7 +37,7 @@ func BenchmarkTagsCounts(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		rowNum, _, err := GetContents(rows)
+		rowNum, _, err := GetRowContents(rows)
 		if err != nil {
 			b.Fatalf("err %d at row Number %d", err, rowNum)
 		}

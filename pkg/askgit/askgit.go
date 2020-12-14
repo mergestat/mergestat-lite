@@ -4,15 +4,19 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"fmt"
+	"os"
 	"os/exec"
 	"os/user"
 	"path"
 	"strings"
+	"time"
 
+	"github.com/augmentable-dev/askgit/pkg/ghqlite"
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
+	"golang.org/x/time/rate"
 )
 
 func init() {
@@ -42,7 +46,35 @@ func init() {
 			if err != nil {
 				return err
 			}
+
 			err = conn.CreateModule("git_stats", gitqlite.NewGitStatsModule())
+			if err != nil {
+				return err
+			}
+
+			githubToken := os.Getenv("GITHUB_TOKEN")
+			rateLimiter := rate.NewLimiter(rate.Every(2*time.Second), 1)
+
+			err = conn.CreateModule("github_org_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeOrganization, ghqlite.ReposModuleOptions{
+				Token:       githubToken,
+				RateLimiter: rateLimiter,
+			}))
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("github_user_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeUser, ghqlite.ReposModuleOptions{
+				Token:       githubToken,
+				RateLimiter: rateLimiter,
+			}))
+			if err != nil {
+				return err
+			}
+
+			err = conn.CreateModule("github_pull_requests", ghqlite.NewPullRequestsModule(ghqlite.PullRequestsModuleOptions{
+				Token:       githubToken,
+				RateLimiter: rateLimiter,
+			}))
 			if err != nil {
 				return err
 			}
@@ -60,14 +92,22 @@ func init() {
 type AskGit struct {
 	db       *sql.DB
 	repoPath string
+	options  *Options
 }
 
 type Options struct {
-	UseGitCLI bool
+	UseGitCLI   bool
+	GitHubToken string
 }
 
 // New creates an instance of AskGit
 func New(repoPath string, options *Options) (*AskGit, error) {
+	// TODO with the addition of the GitHub API virtual tables, repoPath should no longer be required for creating
+	// as *AskGit instance, as the caller may just be interested in querying against the GitHub API (or some other
+	// to be define virtual table that doesn't need a repo on disk).
+	// This should be reformulated, as it means currently the askgit command requires a local git repo, even if the query
+	// only executes agains the GitHub API
+
 	// see https://github.com/mattn/go-sqlite3/issues/204
 	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
 	db, err := sql.Open("askgit", fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(repoPath))))
@@ -79,7 +119,7 @@ func New(repoPath string, options *Options) (*AskGit, error) {
 		return nil, err
 	}
 
-	g := &AskGit{db: db, repoPath: repoPath}
+	g := &AskGit{db: db, repoPath: repoPath, options: options}
 
 	err = g.ensureTables(options)
 	if err != nil {
@@ -131,11 +171,6 @@ func (a *AskGit) ensureTables(options *Options) error {
 	if err != nil {
 		return err
 	}
-
-	// _, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS repos USING github_repos(%s, '%s');", os.Getenv("GITHUB_ORG"), os.Getenv("GITHUB_TOKEN")))
-	// if err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
