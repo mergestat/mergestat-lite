@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 )
 
 type test struct {
@@ -163,7 +163,7 @@ func TestCommitByID(t *testing.T) {
 	}
 	defer rows.Close()
 
-	_, contents, err := GetContents(rows)
+	_, contents, err := GetRowContents(rows)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,7 +185,7 @@ func BenchmarkCommitCounts(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		rowNum, _, err := GetContents(rows)
+		rowNum, _, err := GetRowContents(rows)
 		if err != nil {
 			b.Fatalf("err %d at row Number %d", err, rowNum)
 		}

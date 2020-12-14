@@ -12,11 +12,10 @@ var (
 		FROM commits GROUP BY author_email 
 		ORDER BY count(*) DESC`,
 
-		"author-stats": `SELECT 
-		count(*) AS commits, SUM(additions) AS additions, SUM(deletions) AS  deletions, author_email 
-		FROM commits 
-		GROUP BY author_email
-		ORDER BY commits`,
+		"author-stats": `SELECT count(DISTINCT commits.id) AS commits, SUM(additions) AS additions, SUM(deletions) AS deletions, author_email
+		FROM commits LEFT JOIN stats ON commits.id = stats.commit_id
+		WHERE commits.parent_count < 2
+		GROUP BY author_email ORDER BY commits`,
 
 		"author-commits-dow": `SELECT
 			count(*) AS commits,
