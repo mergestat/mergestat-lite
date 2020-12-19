@@ -24,4 +24,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
-replace github.com/mattn/go-sqlite3 v1.14.4 => github.com/patrickdevivo/go-sqlite3 v1.14.6-0.20201211024840-146d4a910383
+replace github.com/mattn/go-sqlite3 v1.14.4 => github.com/patrickdevivo/go-sqlite3 v1.14.6-0.20201219185255-a526406471dd
