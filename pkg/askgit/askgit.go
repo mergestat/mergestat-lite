@@ -22,7 +22,7 @@ import (
 func init() {
 	sql.Register("askgit", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := conn.CreateModule("git_log", gitqlite.NewGitLogModule())
+			err := conn.CreateModule("commits", gitqlite.NewGitLogModule())
 			if err != nil {
 				return err
 			}
@@ -142,11 +142,10 @@ func (a *AskGit) ensureTables(options *Options) error {
 	localGitExists := err == nil
 	a.repoPath = strings.ReplaceAll(a.repoPath, "'", "''")
 	if !options.UseGitCLI || !localGitExists {
-		_, err := a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", a.repoPath))
-		if err != nil {
-			return err
-		}
-
+		// _, err := a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", a.repoPath))
+		// if err != nil {
+		// 	return err
+		// }
 	} else {
 		_, err := a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli('%s');", a.repoPath))
 		if err != nil {

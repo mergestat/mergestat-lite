@@ -2,78 +2,86 @@ package gitqlite
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"os/user"
+	"path"
+	"path/filepath"
 	"time"
 
+	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitLogModule struct{}
+type GitLogModule struct {
+	options commitTableModuleOptions
+}
 
 func NewGitLogModule() *GitLogModule {
 	return &GitLogModule{}
 }
 
-type gitLogTable struct {
+type commitTableModuleOptions struct {
 	repoPath string
-	repo     *git.Repository
+}
+type commitsTable struct {
+	module *GitLogModule
+}
+
+func (m *GitLogModule) EponymousOnlyModule() {}
+func (m *GitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+	return m.Create(c, args)
 }
 
 func (m *GitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+	print("create")
 	err := c.DeclareVTab(fmt.Sprintf(`
-		CREATE TABLE %q (
-			id TEXT,
-			message TEXT,
-			summary TEXT,
-			author_name TEXT,
-			author_email TEXT,
-			author_when DATETIME,
-			committer_name TEXT,
-			committer_email TEXT,
-			committer_when DATETIME, 
-			parent_id TEXT,
-			parent_count INT,
-			tree_id TEXT
-		)`, args[0]))
+	CREATE TABLE %q (
+		repoName HIDDEN,
+		id TEXT,
+		message TEXT,
+		summary TEXT,
+		author_name TEXT,
+		author_email TEXT,
+		author_when DATETIME,
+		committer_name TEXT,
+		committer_email TEXT,
+		committer_when DATETIME, 
+		parent_id TEXT,
+		parent_count INT,
+		tree_id TEXT
+	)`, args[0]))
 	if err != nil {
 		return nil, err
 	}
 
 	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
 	// we need to pop those off when referring to the actual directory in the fs
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitLogTable{repoPath: repoPath}, nil
-}
-
-func (m *GitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
-	return m.Create(c, args)
+	return &commitsTable{m}, nil
 }
 
 func (m *GitLogModule) DestroyModule() {}
 
-func (v *gitLogTable) Open() (sqlite3.VTabCursor, error) {
-	repo, err := git.OpenRepository(v.repoPath)
-	if err != nil {
-		return nil, err
-	}
-	v.repo = repo
+func (v *commitsTable) Open() (sqlite3.VTabCursor, error) {
 
-	return &commitCursor{repo: v.repo}, nil
+	return &commitCursor{nil, "", nil, nil}, nil
 }
 
-func (v *gitLogTable) Disconnect() error {
-	v.repo = nil
+func (v *commitsTable) Disconnect() error {
 	return nil
 }
-func (v *gitLogTable) Destroy() error { return nil }
+func (v *commitsTable) Destroy() error { return nil }
 
 type commitCursor struct {
 	repo       *git.Repository
+	repoName   string
 	current    *git.Commit
 	commitIter *git.RevWalk
 }
 
 func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
+	print("column")
 	commit := vc.current
 	author := commit.Author()
 	committer := commit.Committer()
@@ -125,7 +133,8 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	return nil
 }
 
-func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+func (v *commitsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
+	print("index")
 	used := make([]bool, len(cst))
 	// TODO this loop construct won't work well for multiple constraints...
 	for c, constraint := range cst {
@@ -135,12 +144,59 @@ func (v *gitLogTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoO
 			return &sqlite3.IndexResult{Used: used, IdxNum: 1, IdxStr: "commit-by-id", EstimatedCost: 1.0, EstimatedRows: 1}, nil
 		}
 	}
-
-	return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
+	//return &sqlite3.IndexResult{Used: used, EstimatedCost: 100}, nil
+	return &sqlite3.IndexResult{
+		IdxNum: 1,
+		IdxStr: "default",
+		Used:   used,
+	}, nil
 }
 
 func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	switch idxNum {
+	print("filter")
+	vc.repoName = vals[0].(string)
+	var (
+		dir string
+
+		err error
+	)
+	if remote, err := vcsurl.Parse(vc.repoName); err == nil { // if it can be parsed
+		dir, err = ioutil.TempDir("", "repo")
+
+		if err != nil {
+			return err
+		}
+		cloneOptions := CreateAuthenticationCallback(remote)
+		_, err = git.Clone(vc.repoName, dir, cloneOptions)
+		if err != nil {
+			print(err)
+			return err
+		}
+
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
+	}
+	println(dir)
+
+	if dir == "" {
+		dir, err = filepath.Abs(vc.repoName)
+	} else {
+		dir, err = filepath.Abs(dir)
+	}
+	if err != nil {
+		return err
+	}
+	println(dir)
+	println(vc.repoName)
+	repo, err := git.OpenRepository(dir)
+	if err != nil {
+		return err
+	}
+	vc.repo = repo
+	println(vc.repoName, vc.repo)
+	print(idxNum)
+	switch idxNum - 1 {
 	case 0:
 		// no index is used, walk over all commits
 		revWalk, err := vc.repo.Walk()
@@ -193,6 +249,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 }
 
 func (vc *commitCursor) Next() error {
+	print("next")
 	id := new(git.Oid)
 	err := vc.commitIter.Next(id)
 	if err != nil {
@@ -222,7 +279,31 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
-	vc.commitIter.Free()
-	vc.repo.Free()
+	// vc.commitIter.Free()
+	// vc.repo.Free()
 	return nil
+}
+func CreateAuthenticationCallback(remote *vcsurl.VCS) *git.CloneOptions {
+	print("callback")
+	cloneOptions := &git.CloneOptions{}
+
+	if _, err := remote.Remote(vcsurl.SSH); err == nil { // if SSH, use "default" credentials
+		// use FetchOptions instead of directly RemoteCallbacks
+		// https://github.com/libgit2/git2go/commit/36e0a256fe79f87447bb730fda53e5cbc90eb47c
+		cloneOptions.FetchOptions = &git.FetchOptions{
+			RemoteCallbacks: git.RemoteCallbacks{
+				CredentialsCallback: func(url string, username string, allowedTypes git.CredType) (*git.Cred, error) {
+					usr, _ := user.Current()
+					publicSSH := path.Join(usr.HomeDir, ".ssh/id_rsa.pub")
+					privateSSH := path.Join(usr.HomeDir, ".ssh/id_rsa")
+
+					cred, ret := git.NewCredSshKey("git", publicSSH, privateSSH, "")
+					return cred, ret
+				},
+				CertificateCheckCallback: func(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+					return git.ErrOk
+				},
+			}}
+	}
+	return cloneOptions
 }
