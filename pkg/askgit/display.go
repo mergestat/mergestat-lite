@@ -4,9 +4,14 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/jedib0t/go-pretty/table"
 )
 
 func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
@@ -150,21 +155,38 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	if err != nil {
 		return err
 	}
+	cols := make([]interface{}, len(columns))
+	for i, v := range columns {
+		cols[i] = v
+	}
 	pointers := make([]interface{}, len(columns))
 	container := make([]sql.NullString, len(columns))
 
 	for i := range pointers {
 		pointers[i] = &container[i]
 	}
-	table := tablewriter.NewWriter(write)
-	table.SetHeader(columns)
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	out, err := cmd.Output()
+	println(string(out))
+	val := strings.TrimSpace(strings.Split(string(out), " ")[1])
+	println(val)
+
+	width, err := strconv.Atoi(val)
+	if err != nil {
+		println(err.Error())
+	}
+	t := table.NewWriter()
+	println(width)
+	t.SetAllowedRowLength(width)
+	t.AppendHeader(cols)
 	for rows.Next() {
 		err := rows.Scan(pointers...)
 		if err != nil {
 			return err
 		}
 
-		r := make([]string, len(columns))
+		r := make([]interface{}, len(columns))
 		for i, c := range container {
 			if c.Valid {
 				r[i] = c.String
@@ -173,12 +195,12 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 			}
 		}
 
-		table.Append(r)
+		t.AppendRow(r)
 		if err != nil {
 			return err
 		}
 	}
 
-	table.Render()
+	fmt.Print(t.Render())
 	return nil
 }
