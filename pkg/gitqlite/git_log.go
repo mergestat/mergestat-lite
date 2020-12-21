@@ -35,7 +35,7 @@ func (m *GitLogModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 }
 
 func (m *GitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
-	print("create")
+	//print("create")
 	err := c.DeclareVTab(fmt.Sprintf(`
 	CREATE TABLE %q (
 		repoName HIDDEN,
@@ -81,7 +81,7 @@ type commitCursor struct {
 }
 
 func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	print("column")
+	//print("column")
 	commit := vc.current
 	author := commit.Author()
 	committer := commit.Committer()
@@ -134,7 +134,7 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (v *commitsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
-	print("index")
+	//print("index")
 	used := make([]bool, len(cst))
 	// TODO this loop construct won't work well for multiple constraints...
 	for c, constraint := range cst {
@@ -153,7 +153,7 @@ func (v *commitsTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.Info
 }
 
 func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	print("filter")
+	//print("filter")
 	vc.repoName = vals[0].(string)
 	var (
 		dir string
@@ -169,7 +169,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 		cloneOptions := CreateAuthenticationCallback(remote)
 		_, err = git.Clone(vc.repoName, dir, cloneOptions)
 		if err != nil {
-			print(err)
+			//print(err)
 			return err
 		}
 
@@ -177,7 +177,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 			_ = os.RemoveAll(dir)
 		}()
 	}
-	println(dir)
+	//println(dir)
 
 	if dir == "" {
 		dir, err = filepath.Abs(vc.repoName)
@@ -187,15 +187,15 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 	if err != nil {
 		return err
 	}
-	println(dir)
-	println(vc.repoName)
+	//println(dir)
+	//println(vc.repoName)
 	repo, err := git.OpenRepository(dir)
 	if err != nil {
 		return err
 	}
 	vc.repo = repo
-	println(vc.repoName, vc.repo)
-	print(idxNum)
+	//println(vc.repoName, vc.repo)
+	//print(idxNum)
 	switch idxNum - 1 {
 	case 0:
 		// no index is used, walk over all commits
@@ -249,7 +249,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 }
 
 func (vc *commitCursor) Next() error {
-	print("next")
+	//print("next")
 	id := new(git.Oid)
 	err := vc.commitIter.Next(id)
 	if err != nil {
@@ -284,7 +284,7 @@ func (vc *commitCursor) Close() error {
 	return nil
 }
 func CreateAuthenticationCallback(remote *vcsurl.VCS) *git.CloneOptions {
-	print("callback")
+	//print("callback")
 	cloneOptions := &git.CloneOptions{}
 
 	if _, err := remote.Remote(vcsurl.SSH); err == nil { // if SSH, use "default" credentials
