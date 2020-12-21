@@ -88,33 +88,35 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 	switch col {
 	case 0:
+		c.ResultText(vc.repoName)
+	case 1:
 		//commit id
 		c.ResultText(commit.Id().String())
-	case 1:
+	case 2:
 		//commit message
 		c.ResultText(commit.Message())
-	case 2:
+	case 3:
 		//commit summary
 		c.ResultText(commit.Summary())
-	case 3:
+	case 4:
 		//commit author name
 		c.ResultText(author.Name)
-	case 4:
+	case 5:
 		//commit author email
 		c.ResultText(author.Email)
-	case 5:
+	case 6:
 		//author when
 		c.ResultText(author.When.Format(time.RFC3339Nano))
-	case 6:
+	case 7:
 		//committer name
 		c.ResultText(committer.Name)
-	case 7:
+	case 8:
 		//committer email
 		c.ResultText(committer.Email)
-	case 8:
+	case 9:
 		//committer when
 		c.ResultText(committer.When.Format(time.RFC3339Nano))
-	case 9:
+	case 10:
 		//parent_id
 		if int(commit.ParentCount()) > 0 {
 			p := commit.Parent(0)
@@ -123,10 +125,10 @@ func (vc *commitCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		} else {
 			c.ResultNull()
 		}
-	case 10:
+	case 11:
 		//parent_count
 		c.ResultInt(int(commit.ParentCount()))
-	case 11:
+	case 12:
 		//tree_id
 		c.ResultText(commit.TreeId().String())
 	}
