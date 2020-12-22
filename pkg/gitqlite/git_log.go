@@ -14,17 +14,12 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitLogModule struct {
-	options commitTableModuleOptions
-}
+type GitLogModule struct{}
 
 func NewGitLogModule() *GitLogModule {
 	return &GitLogModule{}
 }
 
-type commitTableModuleOptions struct {
-	repoPath string
-}
 type commitsTable struct {
 	module *GitLogModule
 }
