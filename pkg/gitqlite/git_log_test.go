@@ -18,9 +18,9 @@ func TestCommits(t *testing.T) {
 
 	//this only works if you test one thing at a time.
 	testCases := []test{
-		{"checkCommits", "SELECT COUNT(*) FROM commits(" + fixtureRepoCloneURL + ")", getCommitCount(t)},
-		{"getAuthors", "SELECT author_name FROM commits(" + fixtureRepoCloneURL + ")", getAuthors(t)},
-		{"getID's", "SELECT id FROM commits(" + fixtureRepoCloneURL + ")", getIDs(t)},
+		{"checkCommits", "SELECT COUNT(*) FROM commits(" + "'" + fixtureRepoCloneURL + "'" + ")", getCommitCount(t)},
+		{"getAuthors", "SELECT author_name FROM commits(" + "'" + fixtureRepoCloneURL + "'" + ")", getAuthors(t)},
+		{"getID's", "SELECT id FROM commits(" + "'" + fixtureRepoCloneURL + "'" + ")", getIDs(t)},
 	}
 	for _, tc := range testCases {
 		expected := tc.want
@@ -157,7 +157,7 @@ func TestCommitByID(t *testing.T) {
 	}
 	defer commit.Free()
 
-	rows, err := fixtureDB.Query(fmt.Sprintf("SELECT * FROM commits WHERE id = '%s'", commit.Id().String()))
+	rows, err := fixtureDB.Query(fmt.Sprintf("SELECT * FROM commits("+"'"+fixtureRepoCloneURL+"'"+") WHERE id = '%s'", commit.Id().String()))
 	if err != nil {
 		t.Fatal(err)
 	}
