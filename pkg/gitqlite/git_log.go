@@ -155,7 +155,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 	var (
 		dir string
 	)
-	println(vc.repoName)
+	//println(vc.repoName)
 	if remote, err := vcsurl.Parse(vc.repoName); err == nil { // if it can be parsed
 		dir, err = ioutil.TempDir("", "repo")
 
