@@ -21,7 +21,7 @@ var (
 func init() {
 	sql.Register("gitqlite", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := conn.CreateModule("git_log", NewGitLogModule())
+			err := conn.CreateModule("commits", NewGitLogModule())
 			if err != nil {
 				return err
 			}
