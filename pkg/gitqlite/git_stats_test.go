@@ -44,7 +44,7 @@ func TestStatsTable(t *testing.T) {
 }
 
 func TestStatsTableCommitIDIndex(t *testing.T) {
-	rows, err := fixtureDB.Query("SELECT * FROM stats WHERE commit_id = (SELECT id FROM commits LIMIT 1)")
+	rows, err := fixtureDB.Query("SELECT * FROM stats WHERE commit_id = (SELECT id FROM commits('" + fixtureRepoCloneURL + "') LIMIT 1)")
 	if err != nil {
 		t.Fatal(err)
 	}
