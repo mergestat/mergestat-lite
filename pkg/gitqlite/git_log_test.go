@@ -18,9 +18,9 @@ func TestCommits(t *testing.T) {
 
 	//this only works if you test one thing at a time.
 	testCases := []test{
-		{"checkCommits", "SELECT COUNT(*) FROM commits", getCommitCount(t)},
-		{"getAuthors", "SELECT author_name FROM commits", getAuthors(t)},
-		{"getID's", "SELECT id FROM commits", getIDs(t)},
+		{"checkCommits", "SELECT COUNT(*) FROM commits(" + fixtureRepoCloneURL + ")", getCommitCount(t)},
+		{"getAuthors", "SELECT author_name FROM commits(" + fixtureRepoCloneURL + ")", getAuthors(t)},
+		{"getID's", "SELECT id FROM commits(" + fixtureRepoCloneURL + ")", getIDs(t)},
 	}
 	for _, tc := range testCases {
 		expected := tc.want
@@ -43,7 +43,7 @@ func runQuery(t *testing.T, query string) []string {
 		t.Fatal(err)
 	}
 	defer rows.Close()
-	rowNum, contents, err := GetContents(rows)
+	rowNum, contents, err := GetRowContents(rows)
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
