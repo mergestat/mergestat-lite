@@ -141,12 +141,7 @@ func (a *AskGit) ensureTables(options *Options) error {
 	_, err := exec.LookPath("git")
 	localGitExists := err == nil
 	a.repoPath = strings.ReplaceAll(a.repoPath, "'", "''")
-	if !options.UseGitCLI || !localGitExists {
-		// _, err := a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", a.repoPath))
-		// if err != nil {
-		// 	return err
-		// }
-	} else {
+	if options.UseGitCLI && localGitExists {
 		_, err := a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli('%s');", a.repoPath))
 		if err != nil {
 			return err
