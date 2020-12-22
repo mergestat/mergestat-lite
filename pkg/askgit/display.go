@@ -161,23 +161,25 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	}
 	pointers := make([]interface{}, len(columns))
 	container := make([]sql.NullString, len(columns))
-
 	for i := range pointers {
 		pointers[i] = &container[i]
 	}
 	cmd := exec.Command("stty", "size")
 	cmd.Stdin = os.Stdin
 	out, err := cmd.Output()
-	println(string(out))
+	if err != nil {
+		println(err.Error)
+		return err
+	}
 	val := strings.TrimSpace(strings.Split(string(out), " ")[1])
-	println(val)
 
 	width, err := strconv.Atoi(val)
 	if err != nil {
 		println(err.Error())
+		return err
 	}
 	t := table.NewWriter()
-	println(width)
+	t.Style().Options.SeparateRows = true
 	t.SetAllowedRowLength(width)
 	t.AppendHeader(cols)
 	for rows.Next() {
@@ -201,6 +203,6 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 		}
 	}
 
-	fmt.Print(t.Render())
+	fmt.Println(t.Render())
 	return nil
 }
