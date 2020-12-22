@@ -159,9 +159,8 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 	vc.repoName = vals[0].(string)
 	var (
 		dir string
-
-		err error
 	)
+	println(vc.repoName)
 	if remote, err := vcsurl.Parse(vc.repoName); err == nil { // if it can be parsed
 		dir, err = ioutil.TempDir("", "repo")
 
@@ -171,7 +170,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 		cloneOptions := CreateAuthenticationCallback(remote)
 		_, err = git.Clone(vc.repoName, dir, cloneOptions)
 		if err != nil {
-			//print(err)
+			println(err.Error())
 			return err
 		}
 
@@ -180,7 +179,7 @@ func (vc *commitCursor) Filter(idxNum int, idxStr string, vals []interface{}) er
 		}()
 	}
 	//println(dir)
-
+	var err error
 	if dir == "" {
 		dir, err = filepath.Abs(vc.repoName)
 	} else {
