@@ -103,11 +103,6 @@ func initFixtureDB(repoPath string) error {
 		return err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", repoPath))
-	if err != nil {
-		return err
-	}
-
 	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits_cli USING git_log_cli('%s');", repoPath))
 	if err != nil {
 		return err
