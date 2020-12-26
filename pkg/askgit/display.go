@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"encoding/json"
-	"fmt"
 	"io"
 
 	"github.com/jedib0t/go-pretty/table"
@@ -171,6 +170,8 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	t.Style().Options.SeparateRows = true
 	t.SetAllowedRowLength(width)
 	t.AppendHeader(cols)
+	t.SetOutputMirror(write)
+
 	for rows.Next() {
 		err := rows.Scan(pointers...)
 		if err != nil {
@@ -192,6 +193,6 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 		}
 	}
 
-	fmt.Println(t.Render())
+	t.Render()
 	return nil
 }
