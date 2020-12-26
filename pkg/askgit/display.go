@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/jedib0t/go-pretty/table"
+	"golang.org/x/term"
 )
 
 func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
@@ -150,21 +151,36 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	if err != nil {
 		return err
 	}
+	cols := make([]interface{}, len(columns))
+	for i, v := range columns {
+		cols[i] = v
+	}
 	pointers := make([]interface{}, len(columns))
 	container := make([]sql.NullString, len(columns))
-
 	for i := range pointers {
 		pointers[i] = &container[i]
 	}
-	table := tablewriter.NewWriter(write)
-	table.SetHeader(columns)
+
+	width, _, err := term.GetSize(0)
+	if err != nil {
+		// TODO - getting terminal size seems to fail with `operation not supported by device` in tests
+		// as a workaround for now, set a default width instead of returning an error, if one is encountered
+		width = 500
+	}
+
+	t := table.NewWriter()
+	t.Style().Options.SeparateRows = true
+	t.SetAllowedRowLength(width)
+	t.AppendHeader(cols)
+	t.SetOutputMirror(write)
+
 	for rows.Next() {
 		err := rows.Scan(pointers...)
 		if err != nil {
 			return err
 		}
 
-		r := make([]string, len(columns))
+		r := make([]interface{}, len(columns))
 		for i, c := range container {
 			if c.Valid {
 				r[i] = c.String
@@ -173,12 +189,12 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 			}
 		}
 
-		table.Append(r)
+		t.AppendRow(r)
 		if err != nil {
 			return err
 		}
 	}
 
-	table.Render()
+	t.Render()
 	return nil
 }
