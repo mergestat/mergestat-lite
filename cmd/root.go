@@ -10,6 +10,7 @@ import (
 	"github.com/augmentable-dev/askgit/pkg/askgit"
 	"github.com/augmentable-dev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
+	"github.com/janeczku/go-spinner"
 	git "github.com/libgit2/git2go/v31"
 	"github.com/spf13/cobra"
 )
@@ -85,9 +86,10 @@ var rootCmd = &cobra.Command{
 			dir, err = ioutil.TempDir("", "repo")
 			handleError(err)
 			cloneOptions := askgit.CreateAuthenticationCallback(remote)
-			_, err = git.Clone(repo, dir, cloneOptions)
+			s := spinner.StartNew("Downloading Repository...")
+			_, err := git.Clone(repo, dir, cloneOptions)
 			handleError(err)
-
+			s.Stop()
 			defer func() {
 				err := os.RemoveAll(dir)
 				handleError(err)
@@ -114,10 +116,10 @@ var rootCmd = &cobra.Command{
 			tui.RunGUI(ag, query)
 			return
 		}
-
+		s := spinner.StartNew("Building Database...\n")
 		rows, err := ag.DB().Query(query)
 		handleError(err)
-
+		s.Stop()
 		err = askgit.DisplayDB(rows, os.Stdout, format)
 		handleError(err)
 	},
