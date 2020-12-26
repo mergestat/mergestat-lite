@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.4
 	github.com/nsf/termbox-go v0.0.0-20201107200903-9b52a5faed9e // indirect
 	github.com/spf13/cobra v1.1.1
-	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4

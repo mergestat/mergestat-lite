@@ -6,12 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
-	"os/exec"
-	"strconv"
-	"strings"
 
 	"github.com/jedib0t/go-pretty/table"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
@@ -164,20 +161,12 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 	for i := range pointers {
 		pointers[i] = &container[i]
 	}
-	cmd := exec.Command("stty", "size")
-	cmd.Stdin = os.Stdin
-	out, err := cmd.Output()
-	if err != nil {
-		println(err.Error)
-		return err
-	}
-	val := strings.TrimSpace(strings.Split(string(out), " ")[1])
 
-	width, err := strconv.Atoi(val)
+	width, _, err := terminal.GetSize(0)
 	if err != nil {
-		println(err.Error())
 		return err
 	}
+
 	t := table.NewWriter()
 	t.Style().Options.SeparateRows = true
 	t.SetAllowedRowLength(width)
