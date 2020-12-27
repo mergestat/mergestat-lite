@@ -98,6 +98,7 @@ type AskGit struct {
 type Options struct {
 	UseGitCLI   bool
 	GitHubToken string
+	DBFilePath  string
 }
 
 // New creates an instance of AskGit
@@ -108,9 +109,16 @@ func New(repoPath string, options *Options) (*AskGit, error) {
 	// This should be reformulated, as it means currently the askgit command requires a local git repo, even if the query
 	// only executes agains the GitHub API
 
+	var dataSource string
+	if options.DBFilePath == "" {
+		dataSource = fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(repoPath)))
+	} else {
+		dataSource = fmt.Sprintf("file:%s?", options.DBFilePath)
+	}
+
 	// see https://github.com/mattn/go-sqlite3/issues/204
 	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
-	db, err := sql.Open("askgit", fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(repoPath))))
+	db, err := sql.Open("askgit", dataSource)
 	if err != nil {
 		return nil, err
 	}
@@ -173,6 +181,39 @@ func (a *AskGit) ensureTables(options *Options) error {
 	}
 
 	return nil
+}
+
+func (a *AskGit) removeTables() error {
+	_, err := a.db.Exec("DROP TABLE IF EXISTS commits")
+	if err != nil {
+		return err
+	}
+
+	_, err = a.db.Exec("DROP TABLE IF EXISTS stats")
+	if err != nil {
+		return err
+	}
+
+	_, err = a.db.Exec("DROP TABLE IF EXISTS files")
+	if err != nil {
+		return err
+	}
+
+	_, err = a.db.Exec("DROP TABLE IF EXISTS tags")
+	if err != nil {
+		return err
+	}
+
+	_, err = a.db.Exec("DROP TABLE IF EXISTS branches")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *AskGit) Close() error {
+	return a.removeTables()
 }
 
 func CreateAuthenticationCallback(remote *vcsurl.VCS) *git.CloneOptions {

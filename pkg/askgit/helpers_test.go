@@ -9,6 +9,7 @@ func TestStrSplit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer ag.Close()
 
 	rows, err := ag.DB().Query("SELECT str_split('hello world', ' ', 0)")
 	if err != nil {

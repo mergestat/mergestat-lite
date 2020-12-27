@@ -30,7 +30,7 @@ func (m *GitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			author_when DATETIME,
 			committer_name TEXT,
 			committer_email TEXT,
-			committer_when DATETIME, 
+			committer_when DATETIME,
 			parent_id TEXT,
 			parent_count INT,
 			tree_id TEXT
