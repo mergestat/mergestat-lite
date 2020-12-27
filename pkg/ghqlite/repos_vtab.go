@@ -149,11 +149,26 @@ func (vc *reposCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 23:
 		c.ResultBool(repo.GetArchived())
 	case 24:
-		c.ResultText(repo.PushedAt.Format(time.RFC3339Nano))
+		t := repo.GetPushedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 25:
-		c.ResultText(repo.CreatedAt.Format(time.RFC3339Nano))
+		t := repo.GetCreatedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 26:
-		c.ResultText(repo.UpdatedAt.Format(time.RFC3339Nano))
+		t := repo.GetUpdatedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 27:
 		str, err := json.Marshal(repo.GetPermissions())
 		if err != nil {
