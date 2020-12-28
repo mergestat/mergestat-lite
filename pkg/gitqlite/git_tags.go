@@ -7,16 +7,24 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitTagsModule struct{}
+type GitTagsModule struct {
+	options *GitTagsModuleOptions
+}
 
-func NewGitTagsModule() *GitTagsModule {
-	return &GitTagsModule{}
+type GitTagsModuleOptions struct {
+	RepoPath string
+}
+
+func NewGitTagsModule(options *GitTagsModuleOptions) *GitTagsModule {
+	return &GitTagsModule{options}
 }
 
 type gitTagsTable struct {
 	repoPath string
 	repo     *git.Repository
 }
+
+func (m *GitTagsModule) EponymousOnlyModule() {}
 
 func (m *GitTagsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
@@ -34,10 +42,7 @@ func (m *GitTagsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VT
 		return nil, err
 	}
 
-	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
-	// we need to pop those off when referring to the actual directory in the fs
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitTagsTable{repoPath: repoPath}, nil
+	return &gitTagsTable{repoPath: m.options.RepoPath}, nil
 }
 
 func (m *GitTagsModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {

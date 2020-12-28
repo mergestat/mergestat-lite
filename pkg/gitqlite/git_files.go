@@ -9,16 +9,24 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitFilesModule struct{}
+type GitFilesModule struct {
+	options *GitFilesModuleOptions
+}
 
-func NewGitFilesModule() *GitFilesModule {
-	return &GitFilesModule{}
+type GitFilesModuleOptions struct {
+	RepoPath string
+}
+
+func NewGitFilesModule(options *GitFilesModuleOptions) *GitFilesModule {
+	return &GitFilesModule{options}
 }
 
 type gitFilesTable struct {
 	repoPath string
 	repo     *git.Repository
 }
+
+func (m *GitFilesModule) EponymousOnlyModule() {}
 
 func (m *GitFilesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
@@ -33,8 +41,8 @@ func (m *GitFilesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 	if err != nil {
 		return nil, err
 	}
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitFilesTable{repoPath: repoPath}, nil
+
+	return &gitFilesTable{repoPath: m.options.RepoPath}, nil
 }
 
 func (m *GitFilesModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {

@@ -50,13 +50,13 @@ var exportCmd = &cobra.Command{
 
 		dir := determineRepo()
 
-		ag, err := askgit.New(dir, &askgit.Options{
+		ag, err := askgit.New(&askgit.Options{
+			RepoPath:    dir,
 			UseGitCLI:   useGitCLI,
 			GitHubToken: os.Getenv("GITHUB_TOKEN"),
 			DBFilePath:  exportFile,
 		})
 		handleError(err)
-		defer ag.Close()
 
 		for _, pair := range pairs {
 			s := fmt.Sprintf("CREATE TABLE %s AS %s", pair.table, pair.query)

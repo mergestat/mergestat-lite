@@ -1,6 +1,7 @@
 package askgit
 
 import (
+	"context"
 	"crypto/md5"
 	"database/sql"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 	"os/exec"
 	"os/user"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/augmentable-dev/askgit/pkg/ghqlite"
@@ -22,64 +22,7 @@ import (
 func init() {
 	sql.Register("askgit", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := conn.CreateModule("git_log", gitqlite.NewGitLogModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_log_cli", gitqlite.NewGitLogCLIModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_tree", gitqlite.NewGitFilesModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_tag", gitqlite.NewGitTagsModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_branch", gitqlite.NewGitBranchesModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_stats", gitqlite.NewGitStatsModule())
-			if err != nil {
-				return err
-			}
-
-			githubToken := os.Getenv("GITHUB_TOKEN")
-			rateLimiter := rate.NewLimiter(rate.Every(2*time.Second), 1)
-
-			err = conn.CreateModule("github_org_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeOrganization, ghqlite.ReposModuleOptions{
-				Token:       githubToken,
-				RateLimiter: rateLimiter,
-			}))
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("github_user_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeUser, ghqlite.ReposModuleOptions{
-				Token:       githubToken,
-				RateLimiter: rateLimiter,
-			}))
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("github_pull_requests", ghqlite.NewPullRequestsModule(ghqlite.PullRequestsModuleOptions{
-				Token:       githubToken,
-				RateLimiter: rateLimiter,
-			}))
-			if err != nil {
-				return err
-			}
-
-			err = loadHelperFuncs(conn)
+			err := loadHelperFuncs(conn)
 			if err != nil {
 				return err
 			}
@@ -90,19 +33,19 @@ func init() {
 }
 
 type AskGit struct {
-	db       *sql.DB
-	repoPath string
-	options  *Options
+	db      *sql.DB
+	options *Options
 }
 
 type Options struct {
+	RepoPath    string
 	UseGitCLI   bool
 	GitHubToken string
 	DBFilePath  string
 }
 
 // New creates an instance of AskGit
-func New(repoPath string, options *Options) (*AskGit, error) {
+func New(options *Options) (*AskGit, error) {
 	// TODO with the addition of the GitHub API virtual tables, repoPath should no longer be required for creating
 	// as *AskGit instance, as the caller may just be interested in querying against the GitHub API (or some other
 	// to be define virtual table that doesn't need a repo on disk).
@@ -111,7 +54,7 @@ func New(repoPath string, options *Options) (*AskGit, error) {
 
 	var dataSource string
 	if options.DBFilePath == "" {
-		dataSource = fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(repoPath)))
+		dataSource = fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(options.RepoPath)))
 	} else {
 		dataSource = fmt.Sprintf("file:%s?", options.DBFilePath)
 	}
@@ -122,18 +65,40 @@ func New(repoPath string, options *Options) (*AskGit, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = git.OpenRepository(repoPath)
+
+	// ensure the repository exists by trying to open it
+	_, err = git.OpenRepository(options.RepoPath)
 	if err != nil {
 		return nil, err
 	}
 
-	g := &AskGit{db: db, repoPath: repoPath, options: options}
+	a := &AskGit{db: db, options: options}
 
-	err = g.ensureTables(options)
+	conn, err := db.Conn(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	return g, nil
+	defer conn.Close()
+
+	err = conn.Raw(func(driverConn interface{}) error {
+		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
+		err := a.loadGitQLiteModules(sqliteConn)
+		if err != nil {
+			return err
+		}
+
+		err = a.loadGitHubModules(sqliteConn)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return a, nil
 }
 
 func (a *AskGit) DB() *sql.DB {
@@ -141,70 +106,41 @@ func (a *AskGit) DB() *sql.DB {
 }
 
 func (a *AskGit) RepoPath() string {
-	return a.repoPath
+	return a.options.RepoPath
 }
 
-// creates the virtual tables inside of the *sql.DB
-func (a *AskGit) ensureTables(options *Options) error {
+func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
 	_, err := exec.LookPath("git")
 	localGitExists := err == nil
-	a.repoPath = strings.ReplaceAll(a.repoPath, "'", "''")
-	if !options.UseGitCLI || !localGitExists {
-		_, err := a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", a.repoPath))
+
+	if !a.options.UseGitCLI || !localGitExists {
+		err = conn.CreateModule("commits", gitqlite.NewGitLogModule(&gitqlite.GitLogModuleOptions{RepoPath: a.RepoPath()}))
 		if err != nil {
 			return err
 		}
-
 	} else {
-		_, err := a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log_cli('%s');", a.repoPath))
+		err = conn.CreateModule("commits", gitqlite.NewGitLogCLIModule(&gitqlite.GitLogCLIModuleOptions{RepoPath: a.RepoPath()}))
 		if err != nil {
 			return err
 		}
-
 	}
-	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats('%s');", a.repoPath))
+
+	err = conn.CreateModule("stats", gitqlite.NewGitStatsModule(&gitqlite.GitStatsModuleOptions{RepoPath: a.RepoPath()}))
 	if err != nil {
 		return err
 	}
 
-	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree('%s');", a.repoPath))
-	if err != nil {
-		return err
-	}
-	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS tags USING git_tag('%s');", a.repoPath))
-	if err != nil {
-		return err
-	}
-	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch('%s');", a.repoPath))
+	err = conn.CreateModule("files", gitqlite.NewGitFilesModule(&gitqlite.GitFilesModuleOptions{RepoPath: a.RepoPath()}))
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (a *AskGit) removeTables() error {
-	_, err := a.db.Exec("DROP TABLE IF EXISTS commits")
+	err = conn.CreateModule("tags", gitqlite.NewGitTagsModule(&gitqlite.GitTagsModuleOptions{RepoPath: a.RepoPath()}))
 	if err != nil {
 		return err
 	}
 
-	_, err = a.db.Exec("DROP TABLE IF EXISTS stats")
-	if err != nil {
-		return err
-	}
-
-	_, err = a.db.Exec("DROP TABLE IF EXISTS files")
-	if err != nil {
-		return err
-	}
-
-	_, err = a.db.Exec("DROP TABLE IF EXISTS tags")
-	if err != nil {
-		return err
-	}
-
-	_, err = a.db.Exec("DROP TABLE IF EXISTS branches")
+	err = conn.CreateModule("branches", gitqlite.NewGitBranchesModule(&gitqlite.GitBranchesModuleOptions{RepoPath: a.RepoPath()}))
 	if err != nil {
 		return err
 	}
@@ -212,8 +148,35 @@ func (a *AskGit) removeTables() error {
 	return nil
 }
 
-func (a *AskGit) Close() error {
-	return a.removeTables()
+func (a *AskGit) loadGitHubModules(conn *sqlite3.SQLiteConn) error {
+	githubToken := os.Getenv("GITHUB_TOKEN")
+	rateLimiter := rate.NewLimiter(rate.Every(2*time.Second), 1)
+
+	err := conn.CreateModule("github_org_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeOrganization, ghqlite.ReposModuleOptions{
+		Token:       githubToken,
+		RateLimiter: rateLimiter,
+	}))
+	if err != nil {
+		return err
+	}
+
+	err = conn.CreateModule("github_user_repos", ghqlite.NewReposModule(ghqlite.OwnerTypeUser, ghqlite.ReposModuleOptions{
+		Token:       githubToken,
+		RateLimiter: rateLimiter,
+	}))
+	if err != nil {
+		return err
+	}
+
+	err = conn.CreateModule("github_pull_requests", ghqlite.NewPullRequestsModule(ghqlite.PullRequestsModuleOptions{
+		Token:       githubToken,
+		RateLimiter: rateLimiter,
+	}))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CreateAuthenticationCallback(remote *vcsurl.VCS) *git.CloneOptions {

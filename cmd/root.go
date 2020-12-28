@@ -113,12 +113,12 @@ var rootCmd = &cobra.Command{
 
 		dir := determineRepo()
 
-		ag, err := askgit.New(dir, &askgit.Options{
+		ag, err := askgit.New(&askgit.Options{
+			RepoPath:    dir,
 			UseGitCLI:   useGitCLI,
 			GitHubToken: os.Getenv("GITHUB_TOKEN"),
 		})
 		handleError(err)
-		defer ag.Close()
 
 		if cui {
 			tui.RunGUI(ag, query)
