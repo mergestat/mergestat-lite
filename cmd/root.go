@@ -44,7 +44,7 @@ func handleError(err error) {
 	}
 }
 
-func determineRepo() string {
+func determineRepo() (string, func()) {
 	// the directory on disk of the repository
 	var dir string
 
@@ -68,12 +68,16 @@ func determineRepo() string {
 		dir, err = filepath.Abs(dir)
 		handleError(err)
 
+		return dir, func() {
+			err := os.RemoveAll(dir)
+			handleError(err)
+		}
 	} else {
 		dir, err = filepath.Abs(repo)
 		handleError(err)
-	}
 
-	return dir
+		return dir, func() {}
+	}
 }
 
 var rootCmd = &cobra.Command{
@@ -107,11 +111,8 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		dir := determineRepo()
-		defer func() {
-			err := os.RemoveAll(dir)
-			handleError(err)
-		}()
+		dir, cleanup := determineRepo()
+		defer cleanup()
 
 		ag, err := askgit.New(&askgit.Options{
 			RepoPath:    dir,

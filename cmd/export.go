@@ -48,7 +48,8 @@ var exportCmd = &cobra.Command{
 		exportFile, err := filepath.Abs(args[0])
 		handleError(err)
 
-		dir := determineRepo()
+		dir, cleanup := determineRepo()
+		defer cleanup()
 
 		ag, err := askgit.New(&askgit.Options{
 			RepoPath:    dir,
