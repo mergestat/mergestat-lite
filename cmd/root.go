@@ -68,10 +68,6 @@ func determineRepo() string {
 		dir, err = filepath.Abs(dir)
 		handleError(err)
 
-		defer func() {
-			err := os.RemoveAll(dir)
-			handleError(err)
-		}()
 	} else {
 		dir, err = filepath.Abs(repo)
 		handleError(err)
@@ -112,6 +108,10 @@ var rootCmd = &cobra.Command{
 		}
 
 		dir := determineRepo()
+		defer func() {
+			err := os.RemoveAll(dir)
+			handleError(err)
+		}()
 
 		ag, err := askgit.New(&askgit.Options{
 			RepoPath:    dir,
