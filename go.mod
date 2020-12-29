@@ -28,4 +28,4 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 )
 
-replace github.com/mattn/go-sqlite3 v1.14.4 => github.com/patrickdevivo/go-sqlite3 v1.14.6-0.20201229155540-f024bb44eb6d
+replace github.com/mattn/go-sqlite3 v1.14.6 => github.com/patrickdevivo/go-sqlite3 v1.14.6-0.20201229155540-f024bb44eb6d
