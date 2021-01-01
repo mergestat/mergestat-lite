@@ -73,7 +73,7 @@ func New(options *Options) (*AskGit, error) {
 		// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
 		dataSource = fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(options.RepoPath)))
 	} else {
-		dataSource = fmt.Sprintf("%s", options.DBFilePath)
+		dataSource = options.DBFilePath
 	}
 
 	a := &AskGit{options: options}
