@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"os"
 	"os/exec"
@@ -19,19 +20,6 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func init() {
-	sql.Register("askgit", &sqlite3.SQLiteDriver{
-		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := loadHelperFuncs(conn)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-	})
-}
-
 type AskGit struct {
 	db      *sql.DB
 	options *Options
@@ -44,6 +32,27 @@ type Options struct {
 	DBFilePath  string
 }
 
+type driverConnector struct {
+	dsn string
+	d   *sqlite3.SQLiteDriver
+}
+
+func newDriverConnector(dsn string, d *sqlite3.SQLiteDriver) (driver.Connector, error) {
+	return &driverConnector{dsn, d}, nil
+}
+
+func (dc *driverConnector) Connect(context.Context) (driver.Conn, error) {
+	conn, err := dc.d.Open(dc.dsn)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
+func (dc *driverConnector) Driver() driver.Driver {
+	return dc.d
+}
+
 // New creates an instance of AskGit
 func New(options *Options) (*AskGit, error) {
 	// TODO with the addition of the GitHub API virtual tables, repoPath should no longer be required for creating
@@ -52,51 +61,50 @@ func New(options *Options) (*AskGit, error) {
 	// This should be reformulated, as it means currently the askgit command requires a local git repo, even if the query
 	// only executes agains the GitHub API
 
+	// ensure the repository exists by trying to open it
+	_, err := git.OpenRepository(options.RepoPath)
+	if err != nil {
+		return nil, err
+	}
+
 	var dataSource string
 	if options.DBFilePath == "" {
+		// see https://github.com/mattn/go-sqlite3/issues/204
+		// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
 		dataSource = fmt.Sprintf("file:%x?mode=memory&cache=shared", md5.Sum([]byte(options.RepoPath)))
 	} else {
-		dataSource = fmt.Sprintf("file:%s?", options.DBFilePath)
+		dataSource = fmt.Sprintf("%s", options.DBFilePath)
 	}
 
-	// see https://github.com/mattn/go-sqlite3/issues/204
-	// also mentioned in the FAQ of the README: https://github.com/mattn/go-sqlite3#faq
-	db, err := sql.Open("askgit", dataSource)
+	a := &AskGit{options: options}
+
+	d := sqlite3.SQLiteDriver{
+		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
+			err := loadHelperFuncs(conn)
+			if err != nil {
+				return err
+			}
+
+			err = a.loadGitQLiteModules(conn)
+			if err != nil {
+				return err
+			}
+
+			err = a.loadGitHubModules(conn)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+
+	dc, err := newDriverConnector(dataSource, &d)
 	if err != nil {
 		return nil, err
 	}
 
-	// ensure the repository exists by trying to open it
-	_, err = git.OpenRepository(options.RepoPath)
-	if err != nil {
-		return nil, err
-	}
-
-	a := &AskGit{db: db, options: options}
-
-	conn, err := db.Conn(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	err = conn.Raw(func(driverConn interface{}) error {
-		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
-		err := a.loadGitQLiteModules(sqliteConn)
-		if err != nil {
-			return err
-		}
-
-		err = a.loadGitHubModules(sqliteConn)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
+	a.db = sql.OpenDB(dc)
 
 	return a, nil
 }
