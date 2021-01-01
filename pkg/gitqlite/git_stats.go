@@ -4,20 +4,28 @@ import (
 	"fmt"
 	"io"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitStatsModule struct{}
+type GitStatsModule struct {
+	options *GitStatsModuleOptions
+}
 
-func NewGitStatsModule() *GitStatsModule {
-	return &GitStatsModule{}
+type GitStatsModuleOptions struct {
+	RepoPath string
+}
+
+func NewGitStatsModule(options *GitStatsModuleOptions) *GitStatsModule {
+	return &GitStatsModule{options}
 }
 
 type gitStatsTable struct {
 	repoPath string
 	repo     *git.Repository
 }
+
+func (m *GitStatsModule) EponymousOnlyModule() {}
 
 func (m *GitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
@@ -31,10 +39,7 @@ func (m *GitStatsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 		return nil, err
 	}
 
-	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
-	// we need to pop those off when referring to the actual directory in the fs
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitStatsTable{repoPath: repoPath}, nil
+	return &gitStatsTable{repoPath: m.options.RepoPath}, nil
 }
 
 func (m *GitStatsModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {

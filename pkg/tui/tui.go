@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	active   = 0
-	query    = ""
-	repoPath = ""
-	usrInpt  = ""
+	active  = 0
+	query   = ""
+	usrInpt = ""
+	ag      *askgit.AskGit
 )
 
 func layout(g *gocui.Gui) error {
@@ -46,11 +46,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Title = "Info"
-		git, err := askgit.New(repoPath, &askgit.Options{})
-		if err != nil {
-			return err
-		}
-		err = DisplayInformation(g, git, 0)
+		err = DisplayInformation(g, ag, 0)
 		if err != nil {
 			return err
 		}
@@ -83,15 +79,14 @@ func test(g *gocui.Gui, v *gocui.View) error {
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
-func RunGUI(repo string, directory string, q string) {
+func RunGUI(askgitInstance *askgit.AskGit, q string) {
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer g.Close()
 	query = q
-	repoPath = directory
-	usrInpt = repo
+	ag = askgitInstance
 	g.Highlight = true
 	g.Cursor = true
 	g.SelFgColor = gocui.ColorGreen

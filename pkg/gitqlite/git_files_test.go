@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 )
 
 func TestFileCounts(t *testing.T) {
@@ -80,7 +80,7 @@ func TestFileColumns(t *testing.T) {
 		t.Fatalf("expected %d columns got : %d", 6, len(columns))
 	}
 
-	_, contents, err := GetContents(columnQuery)
+	_, contents, err := GetRowContents(columnQuery)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +153,7 @@ func TestFileByID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, contents, err := GetContents(rows)
+	_, contents, err := GetRowContents(rows)
 	if err != nil {
 		t.Fatal(err)
 	}

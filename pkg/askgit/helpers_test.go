@@ -5,7 +5,7 @@ import (
 )
 
 func TestStrSplit(t *testing.T) {
-	ag, err := New(fixtureRepoDir, &Options{})
+	ag, err := New(&Options{RepoPath: fixtureRepoDir})
 	if err != nil {
 		t.Fatal(err)
 	}

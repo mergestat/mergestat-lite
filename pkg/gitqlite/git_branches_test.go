@@ -4,7 +4,7 @@ import (
 	"io"
 	"testing"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 )
 
 func TestBranches(t *testing.T) {
@@ -23,8 +23,8 @@ func TestBranches(t *testing.T) {
 			}
 		}
 	}
-
 }
+
 func getAllBranchInfo(t *testing.T) []string {
 	var branchInfo []string
 	branchIter, err := fixtureRepo.NewBranchIterator(git.BranchAll)
@@ -68,7 +68,7 @@ func BenchmarkBranchCount(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		rowNum, _, err := GetContents(rows)
+		rowNum, _, err := GetRowContents(rows)
 		if err != nil {
 			b.Fatalf("err %d at row Number %d", err, rowNum)
 		}

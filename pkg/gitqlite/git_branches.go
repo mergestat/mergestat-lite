@@ -3,19 +3,27 @@ package gitqlite
 import (
 	"fmt"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitBranchesModule struct{}
+type GitBranchesModule struct {
+	options *GitBranchesModuleOptions
+}
 
-func NewGitBranchesModule() *GitBranchesModule {
-	return &GitBranchesModule{}
+type GitBranchesModuleOptions struct {
+	RepoPath string
+}
+
+func NewGitBranchesModule(options *GitBranchesModuleOptions) *GitBranchesModule {
+	return &GitBranchesModule{options}
 }
 
 type gitBranchesTable struct {
 	repoPath string
 }
+
+func (m *GitBranchesModule) EponymousOnlyModule() {}
 
 func (m *GitBranchesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
@@ -29,10 +37,7 @@ func (m *GitBranchesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite
 		return nil, err
 	}
 
-	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
-	// we need to pop those off when referring to the actual directory in the fs
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitBranchesTable{repoPath: repoPath}, nil
+	return &gitBranchesTable{repoPath: m.options.RepoPath}, nil
 }
 
 func (m *GitBranchesModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
