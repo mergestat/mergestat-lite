@@ -5,7 +5,7 @@ import (
 )
 
 func TestIssuesTable(t *testing.T) {
-	rows, err := DB.Query("SELECT * FROM gitthub_issues('augmentable-dev', 'askgit') WHERE state = 'closed' LIMIT 5")
+	rows, err := DB.Query("SELECT * FROM github_issues('augmentable-dev', 'askgit') WHERE state = 'closed' LIMIT 5")
 	if err != nil {
 		t.Fatal(err)
 	}
