@@ -38,9 +38,13 @@ func (issueIter *RepoIssueIterator) fetchRepoIssuePage(githubIter *GitHubIterato
 	}
 
 	issues, res, err := githubIter.options.Client.Issues.ListByRepo(context.Background(), issueIter.repoOwner, issueIter.repoName, &options.IssueListByRepoOptions)
-	items := make([]interface{}, len(issues))
-	for i, r := range issues {
-		items[i] = r
+	items := make([]interface{}, 0)
+
+	for _, r := range issues {
+		if !r.IsPullRequest() {
+			items = append(items, r)
+		}
+
 	}
 
 	return items, res, err

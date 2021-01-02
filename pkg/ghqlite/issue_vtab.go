@@ -306,16 +306,6 @@ func (vc *issuesCursor) Next() error {
 		vc.eof = true
 		return nil
 	}
-	for nextissue.IsPullRequest() {
-		nextissue, err = vc.iter.Next()
-		if err != nil {
-			return err
-		}
-		if nextissue == nil {
-			vc.eof = true
-			return nil
-		}
-	}
 	vc.currentIssue = nextissue
 	return nil
 }
