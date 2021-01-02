@@ -175,6 +175,13 @@ func (a *AskGit) loadGitHubModules(conn *sqlite3.SQLiteConn) error {
 	if err != nil {
 		return err
 	}
+	err = conn.CreateModule("github_issues", ghqlite.NewIssuesModule(ghqlite.IssuesModuleOptions{
+		Token:       githubToken,
+		RateLimiter: rateLimiter,
+	}))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
