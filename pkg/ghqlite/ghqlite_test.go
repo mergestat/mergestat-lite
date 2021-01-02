@@ -35,6 +35,12 @@ func init() {
 			if err != nil {
 				return err
 			}
+			err = conn.CreateModule("github_issues", NewIssuesModule(IssuesModuleOptions{
+				Token: os.Getenv("GITHUB_TOKEN"),
+			}))
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
