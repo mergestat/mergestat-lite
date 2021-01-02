@@ -3,7 +3,6 @@ package gitqlite
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -112,7 +111,8 @@ func initFixtureDB(repoPath string) error {
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", repoPath))
+
+	err = sqliteConn.CreateModule("blame", NewGitBlameModule(&GitBlameModuleOptions{RepoPath: repoPath}))
 	if err != nil {
 		return err
 	}

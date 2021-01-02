@@ -89,10 +89,6 @@ func New(options *Options) (*AskGit, error) {
 			if err != nil {
 				return err
 			}
-			err = conn.CreateModule("git_blame", gitqlite.NewGitBlameModule())
-			if err != nil {
-				return err
-			}
 
 			err = a.loadGitHubModules(conn)
 			if err != nil {
@@ -157,6 +153,11 @@ func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
 		return err
 	}
 
+	err = conn.CreateModule("blame", gitqlite.NewGitBlameModule(&gitqlite.GitBlameModuleOptions{RepoPath: a.RepoPath()}))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -176,10 +177,6 @@ func (a *AskGit) loadGitHubModules(conn *sqlite3.SQLiteConn) error {
 		Token:       githubToken,
 		RateLimiter: rateLimiter,
 	}))
-	if err != nil {
-		return err
-	}
-	_, err = a.db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS blame USING git_blame('%s');", a.repoPath))
 	if err != nil {
 		return err
 	}

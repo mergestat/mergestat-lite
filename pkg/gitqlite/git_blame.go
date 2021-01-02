@@ -4,43 +4,48 @@ import (
 	"bytes"
 	"fmt"
 
-	git "github.com/libgit2/git2go/v30"
+	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
 )
 
-type gitBlameModule struct{}
+type GitBlameModule struct {
+	options *GitBlameModuleOptions
+}
 
-func NewGitBlameModule() *gitBlameModule {
-	return &gitBlameModule{}
+type GitBlameModuleOptions struct {
+	RepoPath string
+}
+
+func NewGitBlameModule(options *GitBlameModuleOptions) *GitBlameModule {
+	return &GitBlameModule{options}
 }
 
 type gitBlameTable struct {
 	repoPath string
 }
 
-func (m *gitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitBlameModule) EponymousOnlyModule() {}
+
+func (m *GitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			line_no TEXT,
 			path TEXT,
 			commit_id TEXT,
-			contents TEXTS
+			contents TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
 	}
 
-	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
-	// we need to pop those off when referring to the actual directory in the fs
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitBlameTable{repoPath: repoPath}, nil
+	return &gitBlameTable{repoPath: m.options.RepoPath}, nil
 }
 
-func (m *gitBlameModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
+func (m *GitBlameModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	return m.Create(c, args)
 }
 
-func (m *gitBlameModule) DestroyModule() {}
+func (m *GitBlameModule) DestroyModule() {}
 
 func (v *gitBlameTable) Open() (sqlite3.VTabCursor, error) {
 	repo, err := git.OpenRepository(v.repoPath)

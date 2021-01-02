@@ -23,7 +23,6 @@ func NewGitFilesModule(options *GitFilesModuleOptions) *GitFilesModule {
 
 type gitFilesTable struct {
 	repoPath string
-	repo     *git.Repository
 }
 
 func (m *GitFilesModule) EponymousOnlyModule() {}
@@ -77,7 +76,6 @@ func (vc *gitFilesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (v *gitFilesTable) Disconnect() error {
-	v.repo = nil
 	return nil
 }
 
@@ -94,9 +92,8 @@ func (v *gitFilesTable) Open() (sqlite3.VTabCursor, error) {
 	if err != nil {
 		return nil, err
 	}
-	v.repo = repo
 
-	return &gitFilesCursor{repo: v.repo}, nil
+	return &gitFilesCursor{repo: repo}, nil
 }
 
 func (v *gitFilesTable) BestIndex(cst []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
