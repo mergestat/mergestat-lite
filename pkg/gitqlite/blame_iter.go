@@ -15,7 +15,7 @@ type BlameIterator struct {
 	lineIter            int
 }
 
-func NewBlameIterator(repo *git.Repository) (*BlameIterator, error) {
+func newBlameIterator(repo *git.Repository) (*BlameIterator, error) {
 	opts, err := git.DefaultBlameOptions()
 	if err != nil {
 		return nil, err
@@ -26,8 +26,9 @@ func NewBlameIterator(repo *git.Repository) (*BlameIterator, error) {
 		return nil, err
 	}
 	defer head.Free()
+
 	// get a new iterator from repo and use the head commit
-	iterator, err := NewCommitFileIter(repo, &commitFileIterOptions{head.Target().String()})
+	iterator, err := newCommitFileIter(repo, &commitFileIterOptions{head.Target().String()})
 	// get the blame by adding the directory (.path) and the filename (.name)
 	if err != nil {
 		return nil, err

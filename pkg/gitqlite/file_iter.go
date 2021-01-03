@@ -30,7 +30,7 @@ type commitFileIterOptions struct {
 	commitID string
 }
 
-func NewCommitFileIter(repo *git.Repository, opt *commitFileIterOptions) (*commitFileIter, error) {
+func newCommitFileIter(repo *git.Repository, opt *commitFileIterOptions) (*commitFileIter, error) {
 	if opt.commitID == "" {
 		revWalk, err := repo.Walk()
 		if err != nil {

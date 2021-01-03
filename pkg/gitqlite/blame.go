@@ -97,7 +97,7 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	iterator, err := NewBlameIterator(vc.repo)
+	iterator, err := newBlameIterator(vc.repo)
 	if err != nil {
 		return err
 	}

@@ -121,7 +121,7 @@ func (vc *gitFilesCursor) Filter(idxNum int, idxStr string, vals []interface{}) 
 		opt = &commitFileIterOptions{commitID: vals[0].(string)}
 	}
 
-	iter, err := NewCommitFileIter(vc.repo, opt)
+	iter, err := newCommitFileIter(vc.repo, opt)
 	if err != nil {
 		return err
 	}

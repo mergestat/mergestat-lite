@@ -29,7 +29,7 @@ func getFilesCount(t *testing.T) int {
 		t.Fatal(err)
 	}
 	defer head.Free()
-	iter, err := NewCommitFileIter(fixtureRepo, &commitFileIterOptions{head.Target().String()})
+	iter, err := newCommitFileIter(fixtureRepo, &commitFileIterOptions{head.Target().String()})
 	if err != nil {
 		t.Fatal(err)
 	}
