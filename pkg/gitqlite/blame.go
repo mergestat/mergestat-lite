@@ -3,6 +3,7 @@ package gitqlite
 import (
 	"bytes"
 	"fmt"
+	"io"
 
 	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
@@ -72,9 +73,8 @@ func (v *gitBlameTable) Destroy() error { return nil }
 type blameCursor struct {
 	repo                *git.Repository
 	current             *git.Blame
-	filenames           []string
-	fileIds             []*git.Oid
 	currentFileContents [][]byte
+	iterator            *commitFileIter
 	fileIter            int
 	lineIter            int
 }
@@ -90,7 +90,7 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//branch name
 		c.ResultText(fmt.Sprint(vc.lineIter))
 	case 1:
-		c.ResultText(vc.filenames[vc.fileIter])
+		c.ResultText(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Name)
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
 	case 3:
@@ -125,25 +125,16 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 		return err
 	}
 	defer tree.Free()
-
-	var entries []string
-	var ids []*git.Oid
-	err = tree.Walk(func(s string, entry *git.TreeEntry) int {
-		if entry.Type.String() == "Blob" {
-			entries = append(entries, s+entry.Name)
-			ids = append(ids, entry.Id)
-		}
-		return 0
-	})
-	if err != nil {
-		return err
+	iterator, err := NewCommitFileIter(vc.repo, &commitFileIterOptions{head.Target().String()})
+	for iterator.treeEntries[iterator.currentTreeEntryIndex].Type.String() != "Blob" {
+		iterator.Next()
 	}
-	blame, err := vc.repo.BlameFile(entries[0], &opts)
+	blame, err := vc.repo.BlameFile(iterator.treeEntries[iterator.currentTreeEntryIndex].path+iterator.treeEntries[iterator.currentTreeEntryIndex].Name, &opts)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	currentFile, err := vc.repo.LookupBlob(ids[0])
+	currentFile, err := vc.repo.LookupBlob(iterator.treeEntries[iterator.currentTreeEntryIndex].Id)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -151,9 +142,7 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	str := bytes.Split(currentFile.Contents(), []byte{'\n'})
 
 	vc.currentFileContents = str
-	//fmt.Println(vc.currentFileContents)
-	vc.fileIds = ids
-	vc.filenames = entries
+	vc.iterator = iterator
 	vc.current = blame
 	vc.lineIter = 1
 	vc.fileIter = 0
@@ -164,20 +153,26 @@ func (vc *blameCursor) Next() error {
 	vc.lineIter++
 	_, err := vc.current.HunkByLine(vc.lineIter)
 	if err != nil {
-		if vc.fileIter < len(vc.filenames)-1 {
+		_, err := vc.iterator.Next()
+		for vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Type.String() != "Blob" {
+			_, err = vc.iterator.Next()
+		}
+		if err != io.EOF {
 			opts, err := git.DefaultBlameOptions()
 			if err != nil {
+				panic(err)
 				return err
 			}
-			vc.fileIter++
-			blame, err := vc.repo.BlameFile(vc.filenames[vc.fileIter], &opts)
+			blame, err := vc.repo.BlameFile(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].path+vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Name, &opts)
 			if err != nil {
 				fmt.Println(err)
+				panic(err)
 				return err
 			}
-			currentFile, err := vc.repo.LookupBlob(vc.fileIds[vc.fileIter])
+			currentFile, err := vc.repo.LookupBlob(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Id)
 			if err != nil {
 				fmt.Println(err)
+				panic(err)
 				return err
 			}
 			str := bytes.Split(currentFile.Contents(), []byte{'\n'})
