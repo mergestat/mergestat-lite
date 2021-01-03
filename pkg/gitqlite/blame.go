@@ -116,6 +116,9 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	// get a new iterator from repo and use the head commit
 	iterator, err := NewCommitFileIter(vc.repo, &commitFileIterOptions{head.Target().String()})
 	// get the blame by adding the directory (.path) and the filename (.name)
+	if err != nil {
+		return err
+	}
 	blame, err := vc.repo.BlameFile(iterator.treeEntries[0].path+iterator.treeEntries[0].Name, &opts)
 	if err != nil {
 		return err
