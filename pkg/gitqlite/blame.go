@@ -1,7 +1,6 @@
 package gitqlite
 
 import (
-	"bytes"
 	"fmt"
 
 	git "github.com/libgit2/git2go/v31"
@@ -70,16 +69,12 @@ func (v *gitBlameTable) Disconnect() error {
 func (v *gitBlameTable) Destroy() error { return nil }
 
 type blameCursor struct {
-	repo                *git.Repository
-	current             *git.Blame
-	currentFileContents [][]byte
-	iterator            *commitFileIter
-	fileIndex           int
-	lineIter            int
+	repo *git.Repository
+	iter *BlameIterator
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	line, err := vc.current.HunkByLine(vc.lineIter)
+	line, err := vc.iter.current.HunkByLine(vc.iter.lineIter)
 	if err != nil {
 		return err
 	}
@@ -87,15 +82,14 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	switch col {
 	case 0:
 		//branch name
-		c.ResultText(fmt.Sprint(vc.lineIter))
+		c.ResultText(fmt.Sprint(vc.iter.lineIter))
 	case 1:
-		c.ResultText(vc.iterator.treeEntries[vc.fileIndex].path + vc.iterator.treeEntries[vc.fileIndex].Name)
+		c.ResultText(vc.iter.iterator.treeEntries[vc.iter.fileIndex].path + vc.iter.iterator.treeEntries[vc.iter.fileIndex].Name)
 
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
 	case 3:
-		c.ResultText(string(vc.currentFileContents[vc.lineIter-1]) + " ")
-
+		c.ResultText(string(vc.iter.currentFileContents[vc.iter.lineIter-1]) + " ")
 	}
 
 	return nil
@@ -103,85 +97,24 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	opts, err := git.DefaultBlameOptions()
+	iterator, err := NewBlameIterator(vc.repo)
 	if err != nil {
 		return err
 	}
-
-	head, err := vc.repo.Head()
-	if err != nil {
-		return err
-	}
-	defer head.Free()
-	// get a new iterator from repo and use the head commit
-	iterator, err := NewCommitFileIter(vc.repo, &commitFileIterOptions{head.Target().String()})
-	// get the blame by adding the directory (.path) and the filename (.name)
-	if err != nil {
-		return err
-	}
-	blame, err := vc.repo.BlameFile(iterator.treeEntries[0].path+iterator.treeEntries[0].Name, &opts)
-	if err != nil {
-		return err
-	}
-	// get the current file to extract its contents
-	currentFile, err := vc.repo.LookupBlob(iterator.treeEntries[0].Id)
-	if err != nil {
-		return err
-	}
-	// break up the file by newlines as one would see in git blame output
-	str := bytes.Split(currentFile.Contents(), []byte{'\n'})
-	// the current contents to be iterated over and outputed
-	vc.currentFileContents = str
-	// the iterator that provides us with the tree entries
-	vc.iterator = iterator
-	// the index for which file we are in in the head commit tree
-	vc.fileIndex = 0
-	// the current blame file
-	vc.current = blame
-	// the current line for output in the table (1 indexed)
-	vc.lineIter = 1
+	vc.iter = iterator
 	return nil
 }
 
 func (vc *blameCursor) Next() error {
-	// increment the lineIterator count to the next line
-	vc.lineIter++
-	// check if the lineIter has overrun the file
-	_, err := vc.current.HunkByLine(vc.lineIter)
-	// if there is an error then go to the next file
+	err := vc.iter.Next()
 	if err != nil {
-		vc.fileIndex++
-		if vc.fileIndex < len(vc.iterator.treeEntries) {
-			opts, err := git.DefaultBlameOptions()
-			if err != nil {
-				return err
-			}
-			// look up blamefile as in filter
-			blame, err := vc.repo.BlameFile(vc.iterator.treeEntries[vc.fileIndex].path+vc.iterator.treeEntries[vc.fileIndex].Name, &opts)
-			if err != nil {
-				return err
-			}
-			// look up blob as in filter
-			currentFile, err := vc.repo.LookupBlob(vc.iterator.treeEntries[vc.fileIndex].Id)
-			if err != nil {
-				return err
-			}
-			// create string array to display as in filter
-			str := bytes.Split(currentFile.Contents(), []byte{'\n'})
-			vc.currentFileContents = str
-			vc.current = blame
-			vc.lineIter = 1
-		} else {
-			vc.current = nil
-			return nil
-		}
-
+		return err
 	}
 	return nil
 }
 
 func (vc *blameCursor) EOF() bool {
-	return vc.current == nil
+	return vc.iter.current == nil
 }
 
 func (vc *blameCursor) Rowid() (int64, error) {
@@ -189,8 +122,8 @@ func (vc *blameCursor) Rowid() (int64, error) {
 }
 
 func (vc *blameCursor) Close() error {
-	if vc.current != nil {
-		err := vc.current.Free()
+	if vc.iter.current != nil {
+		err := vc.iter.current.Free()
 		if err != nil {
 			return nil
 		}
