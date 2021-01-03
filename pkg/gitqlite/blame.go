@@ -138,7 +138,6 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	vc.iterator = iterator
 	vc.current = blame
 	vc.lineIter = 1
-	vc.fileIter = 0
 	return nil
 }
 
