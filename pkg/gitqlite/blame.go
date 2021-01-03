@@ -3,7 +3,6 @@ package gitqlite
 import (
 	"bytes"
 	"fmt"
-	"io"
 
 	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
@@ -90,7 +89,11 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//branch name
 		c.ResultText(fmt.Sprint(vc.lineIter))
 	case 1:
-		c.ResultText(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Name)
+		if len(vc.iterator.treeEntries) > vc.fileIter {
+			c.ResultText(vc.iterator.treeEntries[vc.fileIter].Name)
+		} else {
+			c.ResultText("NULL")
+		}
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
 	case 3:
@@ -115,10 +118,6 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	defer head.Free()
 	// get a new iterator from repo and use the head commit
 	iterator, err := NewCommitFileIter(vc.repo, &commitFileIterOptions{head.Target().String()})
-	// limit the 'search' to blobs as tree entry's will not have blame's
-	for iterator.treeEntries[iterator.currentTreeEntryIndex].Type.String() != "Blob" {
-		iterator.Next()
-	}
 	// get the blame by adding the directory (.path) and the filename (.name)
 	blame, err := vc.repo.BlameFile(iterator.treeEntries[iterator.currentTreeEntryIndex].path+iterator.treeEntries[iterator.currentTreeEntryIndex].Name, &opts)
 	if err != nil {
@@ -134,6 +133,7 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 
 	vc.currentFileContents = str
 	vc.iterator = iterator
+	vc.fileIter = 0
 	vc.current = blame
 	vc.lineIter = 1
 	return nil
@@ -146,25 +146,19 @@ func (vc *blameCursor) Next() error {
 	_, err := vc.current.HunkByLine(vc.lineIter)
 	// if there is an error then go to the next file
 	if err != nil {
-		// iterate to next file
-		_, err := vc.iterator.Next()
-		// make sure that it is a file and not a tree entry
-		for vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Type.String() != "Blob" {
-			_, err = vc.iterator.Next()
-		}
-		// if the error isn't an EOF flag then create the next currentFileContents
-		if err != io.EOF {
+		vc.fileIter++
+		if vc.fileIter < len(vc.iterator.treeEntries) {
 			opts, err := git.DefaultBlameOptions()
 			if err != nil {
 				return err
 			}
 			// look up blamefile as in filter
-			blame, err := vc.repo.BlameFile(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].path+vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Name, &opts)
+			blame, err := vc.repo.BlameFile(vc.iterator.treeEntries[vc.fileIter].path+vc.iterator.treeEntries[vc.fileIter].Name, &opts)
 			if err != nil {
 				return err
 			}
 			// look up blob as in filter
-			currentFile, err := vc.repo.LookupBlob(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Id)
+			currentFile, err := vc.repo.LookupBlob(vc.iterator.treeEntries[vc.fileIter].Id)
 			if err != nil {
 				return err
 			}
