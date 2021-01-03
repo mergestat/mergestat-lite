@@ -3,8 +3,6 @@ package gitqlite
 import (
 	"fmt"
 	"testing"
-
-	git "github.com/libgit2/git2go/v31"
 )
 
 func TestBlameCounts(t *testing.T) {
@@ -31,27 +29,9 @@ func getFilesCount(t *testing.T) int {
 		t.Fatal(err)
 	}
 	defer head.Free()
-
-	commit, err := fixtureRepo.LookupCommit(head.Target())
+	iter, err := NewCommitFileIter(fixtureRepo, &commitFileIterOptions{head.Target().String()})
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := commit.Tree()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var entries []string
-	var ids []*git.Oid
-	err = tree.Walk(func(s string, entry *git.TreeEntry) int {
-		if entry.Type.String() == "Blob" {
-			entries = append(entries, s+entry.Name)
-			ids = append(ids, entry.Id)
-		}
-		return 0
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	return len(entries)
+	return len(iter.treeEntries)
 }
