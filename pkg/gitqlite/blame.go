@@ -122,13 +122,11 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	// get the blame by adding the directory (.path) and the filename (.name)
 	blame, err := vc.repo.BlameFile(iterator.treeEntries[iterator.currentTreeEntryIndex].path+iterator.treeEntries[iterator.currentTreeEntryIndex].Name, &opts)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	// get the current file to extract its contents
 	currentFile, err := vc.repo.LookupBlob(iterator.treeEntries[iterator.currentTreeEntryIndex].Id)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	// break up the file by newlines as one would a blame file
@@ -158,21 +156,16 @@ func (vc *blameCursor) Next() error {
 		if err != io.EOF {
 			opts, err := git.DefaultBlameOptions()
 			if err != nil {
-				panic(err)
 				return err
 			}
 			// look up blamefile as in filter
 			blame, err := vc.repo.BlameFile(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].path+vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Name, &opts)
 			if err != nil {
-				fmt.Println(err)
-				panic(err)
 				return err
 			}
 			// look up blob as in filter
 			currentFile, err := vc.repo.LookupBlob(vc.iterator.treeEntries[vc.iterator.currentTreeEntryIndex].Id)
 			if err != nil {
-				fmt.Println(err)
-				panic(err)
 				return err
 			}
 			// create string array to display as in filter
