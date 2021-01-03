@@ -65,8 +65,6 @@ func (m *IssuesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			reactions INT			
 		) WITHOUT ROWID`, args[0]))
 	if err != nil {
-		print(err.Error())
-		print(err.Error())
 		return nil, err
 	}
 
@@ -125,7 +123,6 @@ func (vc *issuesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 10:
 		str, err := json.Marshal(issue.Labels)
 		if err != nil {
-			print(err.Error())
 			return err
 		}
 		c.ResultText(string(str))
@@ -166,7 +163,6 @@ func (vc *issuesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 18:
 		str, err := json.Marshal(issue.Assignees)
 		if err != nil {
-			print(err.Error())
 			return err
 		}
 		c.ResultText(string(str))
@@ -187,7 +183,6 @@ func (vc *issuesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 26:
 		c.ResultText(issue.GetMilestone().GetDescription())
 	case 27:
-		print(issue.GetPullRequestLinks().GetHTMLURL())
 		c.ResultText(issue.GetPullRequestLinks().GetHTMLURL())
 	case 28:
 		c.ResultInt(issue.GetReactions().GetTotalCount())
