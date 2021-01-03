@@ -61,7 +61,6 @@ func (m *IssuesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			repository_url TEXT,
 			comments INT,
 			milestone TEXT,
-			pull_request_links TEXT,
 			reactions INT			
 		) WITHOUT ROWID`, args[0]))
 	if err != nil {
@@ -183,8 +182,6 @@ func (vc *issuesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 26:
 		c.ResultText(issue.GetMilestone().GetDescription())
 	case 27:
-		c.ResultText(issue.GetPullRequestLinks().GetHTMLURL())
-	case 28:
 		c.ResultInt(issue.GetReactions().GetTotalCount())
 	}
 
