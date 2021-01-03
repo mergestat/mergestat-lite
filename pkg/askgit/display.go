@@ -11,7 +11,6 @@ import (
 )
 
 func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
-
 	switch format {
 	case "single":
 		err := single(rows, w)
@@ -41,8 +40,10 @@ func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
 		}
 
 	}
-	return nil
+
+	return rows.Err()
 }
+
 func single(rows *sql.Rows, write io.Writer) error {
 	columns, err := rows.Columns()
 	if err != nil {
