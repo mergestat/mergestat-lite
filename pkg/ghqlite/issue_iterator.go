@@ -53,7 +53,7 @@ func (issueIter *RepoIssueIterator) fetchRepoIssuePage(githubIter *GitHubIterato
 func (issueIter *RepoIssueIterator) Next() (*github.Issue, error) {
 	issue, err := issueIter.githubIter.Next()
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	if issue == nil {
