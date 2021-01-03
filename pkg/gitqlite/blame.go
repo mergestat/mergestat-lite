@@ -89,7 +89,7 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//branch name
 		c.ResultText(fmt.Sprint(vc.lineIter))
 	case 1:
-		c.ResultText(vc.iterator.treeEntries[vc.fileIndex].Name)
+		c.ResultText(vc.iterator.treeEntries[vc.fileIndex].path + vc.iterator.treeEntries[vc.fileIndex].Name)
 
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
