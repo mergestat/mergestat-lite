@@ -1,7 +1,6 @@
 package gitqlite
 
 import (
-	"bytes"
 	"fmt"
 
 	git "github.com/libgit2/git2go/v31"
@@ -70,17 +69,12 @@ func (v *gitBlameTable) Disconnect() error {
 func (v *gitBlameTable) Destroy() error { return nil }
 
 type blameCursor struct {
-	repo                *git.Repository
-	current             *git.Blame
-	filenames           []string
-	fileIds             []*git.Oid
-	currentFileContents [][]byte
-	fileIter            int
-	lineIter            int
+	repo *git.Repository
+	iter *BlameIterator
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	line, err := vc.current.HunkByLine(vc.lineIter)
+	line, err := vc.iter.current.HunkByLine(vc.iter.lineIter)
 	if err != nil {
 		return err
 	}
@@ -88,14 +82,14 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	switch col {
 	case 0:
 		//branch name
-		c.ResultText(fmt.Sprint(vc.lineIter))
+		c.ResultText(fmt.Sprint(vc.iter.lineIter))
 	case 1:
-		c.ResultText(vc.filenames[vc.fileIter])
+		c.ResultText(vc.iter.iterator.treeEntries[vc.iter.fileIndex].path + vc.iter.iterator.treeEntries[vc.iter.fileIndex].Name)
+
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
 	case 3:
-		c.ResultText(string(vc.currentFileContents[vc.lineIter-1]) + " ")
-
+		c.ResultText(string(vc.iter.currentFileContents[vc.iter.lineIter-1]) + " ")
 	}
 
 	return nil
@@ -103,99 +97,24 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	opts, err := git.DefaultBlameOptions()
+	iterator, err := NewBlameIterator(vc.repo)
 	if err != nil {
 		return err
 	}
-
-	head, err := vc.repo.Head()
-	if err != nil {
-		return err
-	}
-	defer head.Free()
-
-	commit, err := vc.repo.LookupCommit(head.Target())
-	if err != nil {
-		return err
-	}
-	defer commit.Free()
-
-	tree, err := commit.Tree()
-	if err != nil {
-		return err
-	}
-	defer tree.Free()
-
-	var entries []string
-	var ids []*git.Oid
-	err = tree.Walk(func(s string, entry *git.TreeEntry) int {
-		if entry.Type.String() == "Blob" {
-			entries = append(entries, s+entry.Name)
-			ids = append(ids, entry.Id)
-		}
-		return 0
-	})
-	if err != nil {
-		return err
-	}
-	blame, err := vc.repo.BlameFile(entries[0], &opts)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	currentFile, err := vc.repo.LookupBlob(ids[0])
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	str := bytes.Split(currentFile.Contents(), []byte{'\n'})
-
-	vc.currentFileContents = str
-	//fmt.Println(vc.currentFileContents)
-	vc.fileIds = ids
-	vc.filenames = entries
-	vc.current = blame
-	vc.lineIter = 1
-	vc.fileIter = 0
+	vc.iter = iterator
 	return nil
 }
 
 func (vc *blameCursor) Next() error {
-	vc.lineIter++
-	_, err := vc.current.HunkByLine(vc.lineIter)
+	err := vc.iter.Next()
 	if err != nil {
-		if vc.fileIter < len(vc.filenames)-1 {
-			opts, err := git.DefaultBlameOptions()
-			if err != nil {
-				return err
-			}
-			vc.fileIter++
-			blame, err := vc.repo.BlameFile(vc.filenames[vc.fileIter], &opts)
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-			currentFile, err := vc.repo.LookupBlob(vc.fileIds[vc.fileIter])
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-			str := bytes.Split(currentFile.Contents(), []byte{'\n'})
-
-			vc.currentFileContents = str
-			vc.current = blame
-			vc.lineIter = 1
-		} else {
-			vc.current = nil
-			return nil
-		}
-
+		return err
 	}
 	return nil
 }
 
 func (vc *blameCursor) EOF() bool {
-	return vc.current == nil
+	return vc.iter.current == nil
 }
 
 func (vc *blameCursor) Rowid() (int64, error) {
@@ -203,8 +122,8 @@ func (vc *blameCursor) Rowid() (int64, error) {
 }
 
 func (vc *blameCursor) Close() error {
-	if vc.current != nil {
-		err := vc.current.Free()
+	if vc.iter.current != nil {
+		err := vc.iter.current.Free()
 		if err != nil {
 			return nil
 		}
