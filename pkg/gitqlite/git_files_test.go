@@ -83,17 +83,13 @@ func TestFileColumns(t *testing.T) {
 	}
 	defer tree.Free()
 
-	if contents[0][1] != tree.Id().String() {
-		t.Fatalf("expected tree_id %s, got: %s", tree.Id().String(), contents[0][1])
-	}
-
-	entry, err := tree.EntryByPath(contents[0][3])
+	entry, err := tree.EntryByPath(contents[0][1])
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if entry.Name != path.Base(contents[0][3]) {
-		t.Fatalf("expected file_name to be %s got %s", entry.Name, path.Base(contents[0][3]))
+	if entry.Name != path.Base(contents[0][1]) {
+		t.Fatalf("expected file_name to be %s got %s", entry.Name, path.Base(contents[0][1]))
 	}
 }
 
