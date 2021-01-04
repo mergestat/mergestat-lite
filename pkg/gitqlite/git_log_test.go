@@ -40,7 +40,7 @@ func TestCommits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := 12
+	expected := 11
 	if len(columns) != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
 	}

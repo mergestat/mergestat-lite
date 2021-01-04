@@ -40,8 +40,7 @@ func (m *GitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			committer_email TEXT,
 			committer_when DATETIME,
 			parent_id TEXT,
-			parent_count INT,
-			tree_id TEXT
+			parent_count INT
 		)`, args[0]))
 	if err != nil {
 		return nil, err

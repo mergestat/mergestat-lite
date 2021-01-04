@@ -125,7 +125,6 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 | committer_when  | DATETIME |
 | parent_id       | TEXT     |
 | parent_count    | INT      |
-| tree_id         | TEXT     |
 
 ##### `stats`
 
@@ -145,8 +144,6 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 | Column     | Type |
 |------------|------|
 | commit_id  | TEXT |
-| tree_id    | TEXT |
-| file_id    | TEXT |
 | name       | TEXT |
 | contents   | TEXT |
 | executable | BOOL |
