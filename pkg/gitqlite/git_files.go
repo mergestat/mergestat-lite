@@ -32,8 +32,6 @@ func (m *GitFilesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 	err := c.DeclareVTab(fmt.Sprintf(`
 			CREATE TABLE %q(
 				commit_id TEXT,
-				tree_id TEXT,
-				file_id TEXT,
 				name TEXT,
 				contents TEXT,
 				executable BOOL
@@ -59,17 +57,11 @@ func (vc *gitFilesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//commit id
 		c.ResultText(file.commitID)
 	case 1:
-		//tree id
-		c.ResultText(file.treeID)
-	case 2:
-		//file id
-		c.ResultText(file.Blob.Id().String())
-	case 3:
 		//tree name
 		c.ResultText(path.Join(file.path, file.Name))
-	case 4:
+	case 2:
 		c.ResultText(string(file.Contents()))
-	case 5:
+	case 3:
 		c.ResultBool(file.Filemode == git.FilemodeBlobExecutable)
 	}
 

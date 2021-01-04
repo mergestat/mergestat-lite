@@ -57,8 +57,8 @@ func TestFileColumns(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(columns) != 6 {
-		t.Fatalf("expected %d columns got : %d", 6, len(columns))
+	if len(columns) != 4 {
+		t.Fatalf("expected %d columns got : %d", 4, len(columns))
 	}
 
 	_, contents, err := GetRowContents(columnQuery)
