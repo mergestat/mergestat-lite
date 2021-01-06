@@ -84,7 +84,7 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//branch name
 		c.ResultText(fmt.Sprint(vc.iter.lineIter))
 	case 1:
-		c.ResultText(vc.iter.iterator.treeEntries[vc.iter.fileIndex].path + vc.iter.iterator.treeEntries[vc.iter.fileIndex].Name)
+		c.ResultText(vc.iter.file.path + vc.iter.file.Name)
 
 	case 2:
 		c.ResultText(line.FinalCommitId.String())
@@ -108,6 +108,7 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 func (vc *blameCursor) Next() error {
 	err := vc.iter.Next()
 	if err != nil {
+		print(err.Error())
 		return err
 	}
 	return nil
