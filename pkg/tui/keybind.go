@@ -140,7 +140,7 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 			return nil
 		}
 
-		err = askgit.DisplayDB(rows, out, "")
+		err = askgit.DisplayDB(rows, out, "", true)
 		if err != nil {
 			return err
 		}

@@ -23,7 +23,7 @@ func TestDisplayTable(t *testing.T) {
 	rows, _ := db.Query("select")
 
 	var b bytes.Buffer
-	err := DisplayDB(rows, &b, "table")
+	err := DisplayDB(rows, &b, "table", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestDisplayCSV(t *testing.T) {
 	rows, _ := db.Query("select")
 
 	var b bytes.Buffer
-	err := DisplayDB(rows, &b, "csv")
+	err := DisplayDB(rows, &b, "csv", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestDisplayJSON(t *testing.T) {
 	rows, _ := db.Query("select")
 
 	var b bytes.Buffer
-	err := DisplayDB(rows, &b, "json")
+	err := DisplayDB(rows, &b, "json", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func TestDisplaySingle(t *testing.T) {
 	rows, _ := db.Query("select")
 
 	var b bytes.Buffer
-	err := DisplayDB(rows, &b, "single")
+	err := DisplayDB(rows, &b, "single", false)
 	if err != nil {
 		t.Fatal(err)
 	}

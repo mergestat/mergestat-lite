@@ -10,7 +10,7 @@ import (
 	"golang.org/x/term"
 )
 
-func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
+func DisplayDB(rows *sql.Rows, w io.Writer, format string, interactive bool) error {
 	switch format {
 	case "single":
 		err := single(rows, w)
@@ -34,7 +34,7 @@ func DisplayDB(rows *sql.Rows, w io.Writer, format string) error {
 		}
 	//TODO: switch between table and csv dependent on num columns(suggested num for table 5<=
 	default:
-		err := tableDisplay(rows, w)
+		err := tableDisplay(rows, w, interactive)
 		if err != nil {
 			return err
 		}
@@ -147,7 +147,7 @@ func jsonDisplay(rows *sql.Rows, write io.Writer) error {
 
 	return nil
 }
-func tableDisplay(rows *sql.Rows, write io.Writer) error {
+func tableDisplay(rows *sql.Rows, write io.Writer, overflow bool) error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
@@ -162,16 +162,17 @@ func tableDisplay(rows *sql.Rows, write io.Writer) error {
 		pointers[i] = &container[i]
 	}
 
-	width, _, err := term.GetSize(0)
-	if err != nil {
-		// TODO - getting terminal size seems to fail with `operation not supported by device` in tests
-		// as a workaround for now, set a default width instead of returning an error, if one is encountered
-		width = 500
-	}
-
 	t := table.NewWriter()
 	t.Style().Options.SeparateRows = true
-	t.SetAllowedRowLength(width)
+	if !overflow {
+		width, _, err := term.GetSize(0)
+		if err != nil {
+			//  TODO - getting terminal size seems to fail with `operation not supported by device` in tests
+			//  as a workaround for now, set a default width instead of returning an error, if one is encountered
+			width = 500
+		}
+		t.SetAllowedRowLength(width)
+	}
 	t.AppendHeader(cols)
 	t.SetOutputMirror(write)
 
