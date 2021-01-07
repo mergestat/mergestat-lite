@@ -1,6 +1,7 @@
 package ghqlite
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -94,19 +95,45 @@ type pullRequestsTable struct {
 }
 
 func (v *pullRequestsTable) Open() (sqlite3.VTabCursor, error) {
-	return &pullRequestsCursor{v, "", "", nil, nil, false}, nil
+	return &pullRequestsCursor{v, "", "", nil, nil, false, false}, nil
 }
 
 func (v *pullRequestsTable) Disconnect() error { return nil }
 func (v *pullRequestsTable) Destroy() error    { return nil }
 
 type pullRequestsCursor struct {
-	table     *pullRequestsTable
-	repoOwner string
-	repoName  string
-	iter      *RepoPullRequestIterator
-	currentPR *github.PullRequest
-	eof       bool
+	table              *pullRequestsTable
+	repoOwner          string
+	repoName           string
+	iter               *RepoPullRequestIterator
+	currentPR          *github.PullRequest
+	extraFieldsFetched bool
+	eof                bool
+}
+
+// TODO this is a little odd, but some fields of a PR are not available when the PR
+// is retrieved from a .List call (.../pulls), but they're useful to have in the table
+// this retrieves the PR as a single .Get (.../pull/:number), which does return the "extra" fields
+// this is likely a case where using the GraphQL API would benefit, as we wouldn't have to make
+// an additional API call for every row (PR) in the table, when accessing any "extra" fields
+// this should still respect the rate limit of the iterator
+func (vc *pullRequestsCursor) getCurrentPRExtraFields() (*github.PullRequest, error) {
+	if !vc.extraFieldsFetched {
+		err := vc.iter.githubIter.options.RateLimiter.Wait(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
+		pr, _, err := vc.iter.githubIter.options.Client.PullRequests.Get(context.Background(), vc.repoOwner, vc.repoName, vc.currentPR.GetNumber())
+		if err != nil {
+			return nil, err
+		}
+
+		vc.currentPR = pr
+		vc.extraFieldsFetched = true
+	}
+
+	return vc.currentPR, nil
 }
 
 func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
@@ -215,16 +242,36 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 34:
 		c.ResultText(pr.GetMergedBy().GetLogin())
 	case 35:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetComments())
 	case 36:
 		c.ResultBool(pr.GetMaintainerCanModify())
 	case 37:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetCommits())
 	case 38:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetAdditions())
 	case 39:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetDeletions())
 	case 40:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetChangedFiles())
 	}
 
@@ -287,6 +334,7 @@ func (v *pullRequestsTable) BestIndex(constraints []sqlite3.InfoConstraint, ob [
 
 func (vc *pullRequestsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
 	vc.eof = false
+
 	state := "all"
 	for c, cstVal := range strings.Split(idxStr, ",") {
 		switch cstVal {
@@ -341,6 +389,8 @@ func (vc *pullRequestsCursor) Next() error {
 		return nil
 	}
 	vc.currentPR = nextPR
+	vc.extraFieldsFetched = false
+
 	return nil
 }
 
