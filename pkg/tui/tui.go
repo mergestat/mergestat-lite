@@ -38,7 +38,7 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Keybinds"
 		w := tabwriter.NewWriter(v, 0, 0, 1, ' ', 0)
 
-		fmt.Fprint(w, "Ctrl+C\t exit \nCtrl+E\t execute query \nCtrl+Q\t clear query box\nDefault L-click \t select a default to be displayed in the query view\n\n")
+		fmt.Fprint(w, "Ctrl+C\t exit \nCtrl+E\t execute query \nCtrl+Q\t clear query box\nDefault L-click \t select a default to be displayed in the query view\nHome\tjump left\nEnd\tjump right\nPgUp\tjump up\nPgDn\tjump down\n\n")
 
 	}
 	if v, err := g.SetView("Info", maxX/2, maxY*2/10+1, maxX-1, maxY*4/10); err != nil {
