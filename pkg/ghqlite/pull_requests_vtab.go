@@ -111,6 +111,12 @@ type pullRequestsCursor struct {
 	eof                bool
 }
 
+// TODO this is a little odd, but some fields of a PR are not available when the PR
+// is retrieved from a .List call (.../pulls), but they're useful to have in the table
+// this retrieves the PR as a single .Get (.../pull/:number), which does return the "extra" fields
+// this is likely a case where using the GraphQL API would benefit, as we wouldn't have to make
+// an additional API call for every row (PR) in the table, when accessing any "extra" fields
+// this should still respect the rate limit of the iterator
 func (vc *pullRequestsCursor) getCurrentPRExtraFields() (*github.PullRequest, error) {
 	if !vc.extraFieldsFetched {
 		err := vc.iter.githubIter.options.RateLimiter.Wait(context.Background())
