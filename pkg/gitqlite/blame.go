@@ -28,7 +28,7 @@ func (m *GitBlameModule) EponymousOnlyModule() {}
 func (m *GitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
-			line_no TEXT,
+			line_no INT,
 			path TEXT,
 			commit_id TEXT,
 			contents TEXT
@@ -69,27 +69,24 @@ func (v *gitBlameTable) Disconnect() error {
 func (v *gitBlameTable) Destroy() error { return nil }
 
 type blameCursor struct {
-	repo *git.Repository
-	iter *BlameIterator
+	repo    *git.Repository
+	current *BlameHunk
+	iter    *BlameIterator
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	line, err := vc.iter.current.HunkByLine(vc.iter.lineIter)
-	if err != nil {
-		return err
-	}
 
 	switch col {
 	case 0:
 		//branch name
-		c.ResultText(fmt.Sprint(vc.iter.lineIter))
+		c.ResultInt(vc.current.lineNo)
 	case 1:
-		c.ResultText(vc.iter.file.path + vc.iter.file.Name)
+		c.ResultText(vc.current.fileName)
 
 	case 2:
-		c.ResultText(line.FinalCommitId.String())
+		c.ResultText(vc.current.commitID)
 	case 3:
-		c.ResultText(string(vc.iter.currentFileContents[vc.iter.lineIter-1]) + " ")
+		c.ResultText(string(vc.current.lineContents) + " ")
 	}
 
 	return nil
@@ -97,20 +94,22 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	iterator, err := NewBlameIterator(vc.repo)
+	iterator, hunk, err := NewBlameIterator(vc.repo)
 	if err != nil {
 		return err
 	}
 	vc.iter = iterator
+	vc.current = hunk
 	return nil
 }
 
 func (vc *blameCursor) Next() error {
-	err := vc.iter.Next()
+	hunk, err := vc.iter.Next()
 	if err != nil {
 		print(err.Error())
 		return err
 	}
+	vc.current = hunk
 	return nil
 }
 
