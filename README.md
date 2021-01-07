@@ -19,6 +19,28 @@ There's also preliminary support for executing queries against the GitHub API.
 
 More in-depth examples and documentation can be found below.
 
+- [askgit](#askgit)
+  - [Installation](#installation)
+    - [Homebrew](#homebrew)
+    - [Go](#go)
+    - [Using Docker](#using-docker)
+      - [Running commands](#running-commands)
+      - [Running commands from STDIN](#running-commands-from-stdin)
+  - [Usage](#usage)
+    - [Tables](#tables)
+      - [Local Git Repository](#local-git-repository)
+        - [`commits`](#commits)
+        - [`stats`](#stats)
+        - [`files`](#files)
+        - [`branches`](#branches)
+        - [`tags`](#tags)
+      - [GitHub Tables](#github-tables)
+        - [`github_org_repos` and `github_user_repos`](#github_org_repos-and-github_user_repos)
+        - [`github_pull_requests`](#github_pull_requests)
+    - [Example Queries](#example-queries)
+      - [Interactive mode](#interactive-mode)
+      - [Exporting](#exporting)
+
 ## Installation
 
 ### Homebrew
