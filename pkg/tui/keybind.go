@@ -200,3 +200,21 @@ func GoRight(g *gocui.Gui, v *gocui.View) error {
 
 	return nil
 }
+func JumpRight(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	width, _ := v.Size()
+	err := v.SetOrigin(x+width, y)
+	if err != nil {
+		fmt.Print()
+	}
+	return nil
+}
+func JumpLeft(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	width, _ := v.Size()
+	err := v.SetOrigin(x-width, y)
+	if err != nil {
+		fmt.Print()
+	}
+	return nil
+}

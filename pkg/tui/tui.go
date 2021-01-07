@@ -130,6 +130,12 @@ func RunGUI(askgitInstance *askgit.AskGit, q string) {
 	if err := g.SetKeybinding("Output", gocui.KeyArrowLeft, gocui.ModNone, GoLeft); err != nil {
 		log.Panicln(err)
 	}
+	if err := g.SetKeybinding("Output", gocui.KeyEnd, gocui.ModNone, JumpRight); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("Output", gocui.KeyHome, gocui.ModNone, JumpLeft); err != nil {
+		log.Panicln(err)
+	}
 	if err := g.SetKeybinding("", gocui.KeyCtrlT, gocui.ModNone, test); err != nil {
 		log.Panicln(err)
 	}
