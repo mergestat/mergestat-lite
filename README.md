@@ -36,6 +36,7 @@ More in-depth examples and documentation can be found below.
     - [GitHub Tables](#github-tables)
       - [`github_org_repos` and `github_user_repos`](#github_org_repos-and-github_user_repos)
       - [`github_pull_requests`](#github_pull_requests)
+      - [`github_issues`](#github_issues)
   - [Example Queries](#example-queries)
     - [Interactive mode](#interactive-mode)
     - [Exporting](#exporting)
@@ -291,6 +292,44 @@ SELECT count(*) FROM github_pull_requests('augmentable-dev', 'askgit') WHERE sta
 | additions                 | INT      |
 | deletions                 | INT      |
 | changed_files             | INT      |
+
+##### `github_issues`
+
+This table expects 2 parameters, `github_issues('augmentable-dev', 'askgit')`:
+
+```sql
+SELECT count(*) FROM github_issues('augmentable-dev', 'askgit') WHERE state = 'open'
+```
+
+
+| Column                    | Type     |
+|---------------------------|----------|
+| id                        | INT      |
+| node_id                   | TEXT     |
+| number                    | INT      |
+| state                     | TEXT     |
+| locked                    | BOOL     |
+| title                     | TEXT     |
+| user_login                | TEXT     |
+| body                      | TEXT     |
+| labels                    | TEXT     |
+| active_lock_reason        | TEXT     |
+| created_at                | DATETIME |
+| updated_at                | DATETIME |
+| closed_at                 | DATETIME |
+| merged_at                 | DATETIME |
+| merge_commit_sha          | TEXT     |
+| assignee_login            | TEXT     |
+| assignees                 | TEXT     |
+| url                       | TEXT     |
+| html_url                  | TEXT     |
+| comments_url              | TEXT     |
+| events_url                | TEXT     |
+| repository_url            | TEXT     |
+| comments                  | INT      |
+| milestone                 | TEXT     |
+| reactions                 | INT      |
+
 
 ### Example Queries
 
