@@ -36,6 +36,7 @@ More in-depth examples and documentation can be found below.
     - [GitHub Tables](#github-tables)
       - [`github_org_repos` and `github_user_repos`](#github_org_repos-and-github_user_repos)
       - [`github_pull_requests`](#github_pull_requests)
+      - [`github_issues`](#github_issues)
   - [Example Queries](#example-queries)
     - [Interactive mode](#interactive-mode)
     - [Exporting](#exporting)
@@ -292,7 +293,7 @@ SELECT count(*) FROM github_pull_requests('augmentable-dev', 'askgit') WHERE sta
 | deletions                 | INT      |
 | changed_files             | INT      |
 
-### `github_issues`
+##### `github_issues`
 
 This table expects 2 parameters, `github_issues('augmentable-dev', 'askgit')`:
 
