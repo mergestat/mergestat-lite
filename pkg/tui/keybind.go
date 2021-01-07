@@ -218,3 +218,21 @@ func JumpLeft(g *gocui.Gui, v *gocui.View) error {
 	}
 	return nil
 }
+func JumpUp(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	_, height := v.Size()
+	err := v.SetOrigin(x, y-height)
+	if err != nil {
+		fmt.Print()
+	}
+	return nil
+}
+func JumpDown(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	_, height := v.Size()
+	err := v.SetOrigin(x, y+height)
+	if err != nil {
+		fmt.Print()
+	}
+	return nil
+}
