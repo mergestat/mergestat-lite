@@ -234,12 +234,28 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 30:
 		c.ResultText(pr.GetAuthorAssociation())
 	case 31:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultBool(pr.GetMerged())
 	case 32:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultBool(pr.GetMergeable())
 	case 33:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultText(pr.GetMergeableState())
 	case 34:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultText(pr.GetMergedBy().GetLogin())
 	case 35:
 		pr, err := vc.getCurrentPRExtraFields()
