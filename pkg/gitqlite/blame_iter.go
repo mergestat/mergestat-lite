@@ -1,114 +1,129 @@
 package gitqlite
 
 import (
-	"bytes"
-	"io"
+	"strings"
 
 	git "github.com/libgit2/git2go/v31"
 )
 
 type BlameIterator struct {
-	repo                *git.Repository
-	current             *git.Blame
-	currentFileContents [][]byte
-	iterator            *commitFileIter
-	file                *commitFile
-	lineIter            int
-}
-type BlameHunk struct {
-	lineNo       int
-	lineContents []byte
-	fileName     string
-	commitID     string
+	repo                 *git.Repository
+	fileIter             *commitFileIter
+	currentBlamedLines   []*BlamedLine
+	currentBlamedLineIdx int
 }
 
-func NewBlameIterator(repo *git.Repository) (*BlameIterator, *BlameHunk, error) {
-	opts, err := git.DefaultBlameOptions()
-	if err != nil {
-		return nil, nil, err
-	}
+type BlamedLine struct {
+	File     string
+	Line     int
+	CommitID string
+	Content  string
+}
 
+func NewBlameIterator(repo *git.Repository) (*BlameIterator, error) {
 	head, err := repo.Head()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer head.Free()
+
 	// get a new iterator from repo and use the head commit
-	iterator, err := NewCommitFileIter(repo, &commitFileIterOptions{head.Target().String()})
-	// get the blame by adding the directory (.path) and the filename (.name)
+	fileIter, err := NewCommitFileIter(repo, &commitFileIterOptions{head.Target().String()})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	file, err := iterator.Next()
-	if err != nil {
-		return nil, nil, err
-	}
-	blame, err := repo.BlameFile(file.path+file.Name, &opts)
-	if err != nil {
-		return nil, nil, err
-	}
-	// get the current file to extract its contents
-	currentFile, err := file.AsBlob()
-	if err != nil {
-		return nil, nil, err
-	}
-	// break up the file by newlines as one would see in git blame output
-	str := bytes.Split(currentFile.Contents(), []byte{'\n'})
+
 	return &BlameIterator{
-			repo,
-			blame,
-			str,
-			iterator,
-			file,
-			1,
-		}, &BlameHunk{
-			1,
-			str[0],
-			file.path + file.Name,
-			file.commitID,
-		}, nil
+		repo,
+		fileIter,
+		nil,
+		0,
+	}, nil
 }
-func (vc *BlameIterator) Next() (*BlameHunk, error) {
-	// increment the lineIterator count to the next line
-	vc.lineIter++
-	// check if the lineIter has overrun the file
-	_, err := vc.current.HunkByLine(vc.lineIter)
-	// if there is an error then go to the next file
+
+func (iter *BlameIterator) nextFile() error {
+	iter.currentBlamedLines = make([]*BlamedLine, 0)
+
+	// grab the next file
+	file, err := iter.fileIter.Next()
 	if err != nil {
-		file, err := vc.iterator.Next()
+		return err
+	}
+	defer file.Free()
+
+	// blame the file
+	opts, err := git.DefaultBlameOptions()
+	if err != nil {
+		return err
+	}
+	blame, err := iter.repo.BlameFile(file.path+file.Name, &opts)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := blame.Free()
 		if err != nil {
-			if err == io.EOF {
-				vc.current = nil
-				return nil, nil
-			}
-			return nil, err
+			panic(err)
 		}
-		opts, err := git.DefaultBlameOptions()
+	}()
+
+	// store the lines of the file, used as we iterate over hunks
+	fileContents := file.Contents()
+	lines := strings.Split(string(fileContents), "\n")
+
+	// iterate over the blame hunks
+	fileLine := 1
+	for i := 0; i < blame.HunkCount(); i++ {
+		hunk, err := blame.HunkByIndex(i)
 		if err != nil {
-			return nil, nil
+			return err
 		}
 
-		blame, err := vc.repo.BlameFile(file.path+file.Name, &opts)
+		// within a hunk, iterate over every line in the hunk
+		// creating and adding a new BlamedLine for each
+		for hunkLineOffset := 0; hunkLineOffset < int(hunk.LinesInHunk); hunkLineOffset++ {
+			// for every line of the hunk, create a BlamedLine
+			blamedLine := &BlamedLine{
+				File:     file.path + file.Name,
+				CommitID: hunk.OrigCommitId.String(),
+				Line:     fileLine + hunkLineOffset,
+				Content:  lines[i+hunkLineOffset],
+			}
+			// add it to the list for the current file
+			iter.currentBlamedLines = append(iter.currentBlamedLines, blamedLine)
+			// increment the file line by 1
+			fileLine++
+		}
+	}
+	iter.currentBlamedLineIdx = 0
+
+	return nil
+}
+
+func (iter *BlameIterator) Next() (*BlamedLine, error) {
+	// if there's no currently blamed lines, grab the next file
+	if iter.currentBlamedLines == nil {
+		err := iter.nextFile()
 		if err != nil {
 			return nil, err
 		}
-		// get the current file to extract its contents
-		currentFile, err := file.AsBlob()
-		if err != nil {
-			return nil, err
-		}
-		// create string array to display as in filter
-		str := bytes.Split(currentFile.Contents(), []byte{'\n'})
-		vc.currentFileContents = str
-		vc.file = file
-		vc.current = blame
-		vc.lineIter = 1
 	}
 
-	return &BlameHunk{
-		vc.lineIter,
-		vc.currentFileContents[vc.lineIter-1],
-		vc.file.path + vc.file.Name,
-		vc.file.commitID,
-	}, nil
+	// if we've exceeded the
+	if iter.currentBlamedLineIdx >= len(iter.currentBlamedLines) {
+		err := iter.nextFile()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// if there's no blamed lines
+	if len(iter.currentBlamedLines) == 0 {
+		return iter.Next()
+	}
+
+	blamedLine := iter.currentBlamedLines[iter.currentBlamedLineIdx]
+	iter.currentBlamedLineIdx++
+
+	return blamedLine, nil
 }
