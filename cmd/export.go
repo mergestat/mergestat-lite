@@ -20,7 +20,7 @@ type export struct {
 }
 
 func init() {
-	exportCmd.Flags().StringSliceVarP(&exports, "exports", "e", []string{}, "queries to export, supplied as string pairs")
+	exportCmd.Flags().StringArrayVarP(&exports, "exports", "e", []string{}, "queries to export, supplied as string pairs")
 }
 
 var exportCmd = &cobra.Command{
