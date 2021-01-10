@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"fmt"
+	"io"
 
 	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
@@ -70,23 +71,21 @@ func (v *gitBlameTable) Destroy() error { return nil }
 
 type blameCursor struct {
 	repo    *git.Repository
-	current *BlameHunk
+	current *BlamedLine
 	iter    *BlameIterator
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-
+	blamedLine := vc.current
 	switch col {
 	case 0:
-		//branch name
-		c.ResultInt(vc.current.lineNo)
+		c.ResultInt(blamedLine.Line)
 	case 1:
-		c.ResultText(vc.current.fileName)
-
+		c.ResultText(blamedLine.File)
 	case 2:
-		c.ResultText(vc.current.commitID)
+		c.ResultText(blamedLine.CommitID)
 	case 3:
-		c.ResultText(string(vc.current.lineContents) + " ")
+		c.ResultText(blamedLine.Content)
 	}
 
 	return nil
@@ -94,27 +93,40 @@ func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 }
 
 func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
-	iterator, hunk, err := NewBlameIterator(vc.repo)
+	iterator, err := NewBlameIterator(vc.repo)
 	if err != nil {
 		return err
 	}
+
+	blamedLine, err := iterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
+	}
+
 	vc.iter = iterator
-	vc.current = hunk
+	vc.current = blamedLine
 	return nil
 }
 
 func (vc *blameCursor) Next() error {
-	hunk, err := vc.iter.Next()
+	blamedLine, err := vc.iter.Next()
 	if err != nil {
-		print(err.Error())
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
 		return err
 	}
-	vc.current = hunk
+	vc.current = blamedLine
 	return nil
 }
 
 func (vc *blameCursor) EOF() bool {
-	return vc.iter.current == nil
+	return vc.current == nil
 }
 
 func (vc *blameCursor) Rowid() (int64, error) {
@@ -122,12 +134,5 @@ func (vc *blameCursor) Rowid() (int64, error) {
 }
 
 func (vc *blameCursor) Close() error {
-	if vc.iter.current != nil {
-		err := vc.iter.current.Free()
-		if err != nil {
-			return nil
-		}
-	}
-
 	return nil
 }
