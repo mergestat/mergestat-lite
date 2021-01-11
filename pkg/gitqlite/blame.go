@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"fmt"
+	"io"
 
 	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
@@ -28,7 +29,7 @@ func (m *GitBlameModule) EponymousOnlyModule() {}
 func (m *GitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
-			line_no TEXT,
+			line_no INT,
 			path TEXT,
 			commit_id TEXT,
 			contents TEXT
@@ -69,27 +70,22 @@ func (v *gitBlameTable) Disconnect() error {
 func (v *gitBlameTable) Destroy() error { return nil }
 
 type blameCursor struct {
-	repo *git.Repository
-	iter *BlameIterator
+	repo    *git.Repository
+	current *BlamedLine
+	iter    *BlameIterator
 }
 
 func (vc *blameCursor) Column(c *sqlite3.SQLiteContext, col int) error {
-	line, err := vc.iter.current.HunkByLine(vc.iter.lineIter)
-	if err != nil {
-		return err
-	}
-
+	blamedLine := vc.current
 	switch col {
 	case 0:
-		//branch name
-		c.ResultText(fmt.Sprint(vc.iter.lineIter))
+		c.ResultInt(blamedLine.Line)
 	case 1:
-		c.ResultText(vc.iter.iterator.treeEntries[vc.iter.fileIndex].path + vc.iter.iterator.treeEntries[vc.iter.fileIndex].Name)
-
+		c.ResultText(blamedLine.File)
 	case 2:
-		c.ResultText(line.FinalCommitId.String())
+		c.ResultText(blamedLine.CommitID)
 	case 3:
-		c.ResultText(string(vc.iter.currentFileContents[vc.iter.lineIter-1]) + " ")
+		c.ResultText(blamedLine.Content)
 	}
 
 	return nil
@@ -101,20 +97,36 @@ func (vc *blameCursor) Filter(idxNum int, idxStr string, vals []interface{}) err
 	if err != nil {
 		return err
 	}
+
+	blamedLine, err := iterator.Next()
+	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
+		return err
+	}
+
 	vc.iter = iterator
+	vc.current = blamedLine
 	return nil
 }
 
 func (vc *blameCursor) Next() error {
-	err := vc.iter.Next()
+	blamedLine, err := vc.iter.Next()
 	if err != nil {
+		if err == io.EOF {
+			vc.current = nil
+			return nil
+		}
 		return err
 	}
+	vc.current = blamedLine
 	return nil
 }
 
 func (vc *blameCursor) EOF() bool {
-	return vc.iter.current == nil
+	return vc.current == nil
 }
 
 func (vc *blameCursor) Rowid() (int64, error) {
@@ -122,12 +134,5 @@ func (vc *blameCursor) Rowid() (int64, error) {
 }
 
 func (vc *blameCursor) Close() error {
-	if vc.iter.current != nil {
-		err := vc.iter.current.Free()
-		if err != nil {
-			return nil
-		}
-	}
-
 	return nil
 }
