@@ -1,8 +1,8 @@
 package gitqlite
 
 import (
+	"context"
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -18,44 +18,9 @@ var (
 	fixtureDB           *sql.DB
 )
 
-func init() {
-	sql.Register("gitqlite", &sqlite3.SQLiteDriver{
-		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := conn.CreateModule("git_log", NewGitLogModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_log_cli", NewGitLogCLIModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_tree", NewGitFilesModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_tag", NewGitTagsModule())
-			if err != nil {
-				return err
-			}
-
-			err = conn.CreateModule("git_branch", NewGitBranchesModule())
-			if err != nil {
-				return err
-			}
-			err = conn.CreateModule("git_stats", NewGitStatsModule())
-			if err != nil {
-				return err
-			}
-
-			return nil
-		},
-	})
-}
-
 func TestMain(m *testing.M) {
+	sql.Register("gitqlite", &sqlite3.SQLiteDriver{})
+
 	close, err := initFixtureRepo()
 	if err != nil {
 		panic(err)
@@ -82,7 +47,6 @@ func initFixtureRepo() (func() error, error) {
 	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
 
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -103,30 +67,47 @@ func initFixtureDB(repoPath string) error {
 		return err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits USING git_log('%s');", repoPath))
+	conn, err := db.Conn(context.Background())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	var sqliteConn *sqlite3.SQLiteConn
+	err = conn.Raw(func(driverConn interface{}) error {
+		sqliteConn = driverConn.(*sqlite3.SQLiteConn)
+		return nil
+	})
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS commits_cli USING git_log_cli('%s');", repoPath))
+	err = sqliteConn.CreateModule("commits", NewGitLogModule(&GitLogModuleOptions{RepoPath: repoPath}))
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS stats USING git_stats('%s');", repoPath))
+	err = sqliteConn.CreateModule("commits_cli", NewGitLogCLIModule(&GitLogCLIModuleOptions{RepoPath: repoPath}))
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS files USING git_tree('%s');", repoPath))
+	err = sqliteConn.CreateModule("stats", NewGitStatsModule(&GitStatsModuleOptions{RepoPath: repoPath}))
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS tags USING git_tag('%s');", repoPath))
+
+	err = sqliteConn.CreateModule("files", NewGitFilesModule(&GitFilesModuleOptions{RepoPath: repoPath}))
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec(fmt.Sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS branches USING git_branch('%s');", repoPath))
+
+	err = sqliteConn.CreateModule("tags", NewGitTagsModule(&GitTagsModuleOptions{RepoPath: repoPath}))
+	if err != nil {
+		return err
+	}
+
+	err = sqliteConn.CreateModule("branches", NewGitBranchesModule(&GitBranchesModuleOptions{RepoPath: repoPath}))
 	if err != nil {
 		return err
 	}

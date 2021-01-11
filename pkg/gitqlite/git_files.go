@@ -9,10 +9,16 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitFilesModule struct{}
+type GitFilesModule struct {
+	options *GitFilesModuleOptions
+}
 
-func NewGitFilesModule() *GitFilesModule {
-	return &GitFilesModule{}
+type GitFilesModuleOptions struct {
+	RepoPath string
+}
+
+func NewGitFilesModule(options *GitFilesModuleOptions) *GitFilesModule {
+	return &GitFilesModule{options}
 }
 
 type gitFilesTable struct {
@@ -20,12 +26,12 @@ type gitFilesTable struct {
 	repo     *git.Repository
 }
 
+func (m *GitFilesModule) EponymousOnlyModule() {}
+
 func (m *GitFilesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 			CREATE TABLE %q(
 				commit_id TEXT,
-				tree_id TEXT,
-				file_id TEXT,
 				name TEXT,
 				contents TEXT,
 				executable BOOL
@@ -33,8 +39,8 @@ func (m *GitFilesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 	if err != nil {
 		return nil, err
 	}
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitFilesTable{repoPath: repoPath}, nil
+
+	return &gitFilesTable{repoPath: m.options.RepoPath}, nil
 }
 
 func (m *GitFilesModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
@@ -51,17 +57,11 @@ func (vc *gitFilesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		//commit id
 		c.ResultText(file.commitID)
 	case 1:
-		//tree id
-		c.ResultText(file.treeID)
-	case 2:
-		//file id
-		c.ResultText(file.Blob.Id().String())
-	case 3:
 		//tree name
 		c.ResultText(path.Join(file.path, file.Name))
-	case 4:
+	case 2:
 		c.ResultText(string(file.Contents()))
-	case 5:
+	case 3:
 		c.ResultBool(file.Filemode == git.FilemodeBlobExecutable)
 	}
 

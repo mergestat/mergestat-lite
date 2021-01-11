@@ -24,11 +24,17 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&repo, "repo", ".", "path to git repository (defaults to current directory). A remote repo may be specified, it will be cloned to a temporary directory before query execution.")
-	rootCmd.PersistentFlags().StringVar(&format, "format", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' and 'json'")
+	// global flags
+	rootCmd.PersistentFlags().StringVarP(&repo, "repo", "r", ".", "path to git repository (defaults to current directory).\nA remote repo may be specified, it will be cloned to a temporary directory before query execution.")
 	rootCmd.PersistentFlags().BoolVar(&useGitCLI, "use-git-cli", false, "whether to use the locally installed git command (if it's available). Defaults to false.")
-	rootCmd.PersistentFlags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interactive mode, which displays a terminal UI")
-	rootCmd.PersistentFlags().StringVar(&presetQuery, "preset", "", "used to pick a preset query")
+
+	// local (root command only) flags
+	rootCmd.Flags().StringVarP(&format, "format", "f", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' and 'json'")
+	rootCmd.Flags().BoolVarP(&cui, "interactive", "i", false, "whether to run in interactive mode, which displays a terminal UI")
+	rootCmd.Flags().StringVarP(&presetQuery, "preset", "p", "", "used to pick a preset query")
+
+	// add the export sub command
+	rootCmd.AddCommand(exportCmd)
 }
 
 func handleError(err error) {
@@ -38,24 +44,50 @@ func handleError(err error) {
 	}
 }
 
+func determineRepo() (string, func()) {
+	// the directory on disk of the repository
+	var dir string
+
+	cwd, err := os.Getwd()
+	handleError(err)
+
+	// if a repo path is not supplied as a flag, use the current directory
+	if repo == "" {
+		repo = cwd
+	}
+
+	// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
+	if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
+		dir, err = ioutil.TempDir("", "repo")
+		handleError(err)
+
+		cloneOptions := askgit.CreateAuthenticationCallback(remote)
+		_, err = git.Clone(repo, dir, cloneOptions)
+		handleError(err)
+
+		dir, err = filepath.Abs(dir)
+		handleError(err)
+
+		return dir, func() {
+			err := os.RemoveAll(dir)
+			handleError(err)
+		}
+	} else {
+		dir, err = filepath.Abs(repo)
+		handleError(err)
+
+		return dir, func() {}
+	}
+}
+
 var rootCmd = &cobra.Command{
-	Use: `askgit "SELECT * FROM commits"`,
+	Use:  `askgit "SELECT * FROM commits"`,
+	Args: cobra.MaximumNArgs(2),
 	Long: `
   askgit is a CLI for querying git repositories with SQL, using SQLite virtual tables.
   Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/askgit`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cwd, err := os.Getwd()
-		handleError(err)
-
-		// if a repo path is not supplied as a flag, use the current directory
-		if repo == "" {
-			if len(args) > 1 {
-				repo = args[1]
-			} else {
-				repo = cwd
-			}
-		}
 		info, err := os.Stdin.Stat()
 		handleError(err)
 
@@ -78,33 +110,12 @@ var rootCmd = &cobra.Command{
 			handleError(err)
 			os.Exit(0)
 		}
-		var dir string
 
-		// if the repo can be parsed as a remote git url, clone it to a temporary directory and use that as the repo path
-		if remote, err := vcsurl.Parse(repo); err == nil { // if it can be parsed
-			dir, err = ioutil.TempDir("", "repo")
-			handleError(err)
-			cloneOptions := askgit.CreateAuthenticationCallback(remote)
-			_, err = git.Clone(repo, dir, cloneOptions)
-			handleError(err)
+		dir, cleanup := determineRepo()
+		defer cleanup()
 
-			defer func() {
-				err := os.RemoveAll(dir)
-				handleError(err)
-			}()
-		}
-
-		if dir == "" {
-			dir, err = filepath.Abs(repo)
-		} else {
-			dir, err = filepath.Abs(dir)
-		}
-
-		if err != nil {
-			handleError(err)
-		}
-
-		ag, err := askgit.New(dir, &askgit.Options{
+		ag, err := askgit.New(&askgit.Options{
+			RepoPath:    dir,
 			UseGitCLI:   useGitCLI,
 			GitHubToken: os.Getenv("GITHUB_TOKEN"),
 		})

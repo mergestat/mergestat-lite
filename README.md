@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/augmentable-dev/askgit/branch/master/graph/badge.svg)](https://codecov.io/gh/augmentable-dev/askgit)
 
 
-# askgit
+# askgit <!-- omit in toc -->
 
 `askgit` is a command-line tool for running SQL queries on git repositories.
 It's meant for ad-hoc querying of git repositories on disk through a common interface (SQL), as an alternative to patching together various shell commands.
@@ -18,6 +18,28 @@ SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 There's also preliminary support for executing queries against the GitHub API.
 
 More in-depth examples and documentation can be found below.
+
+- [Installation](#installation)
+  - [Homebrew](#homebrew)
+  - [Go](#go)
+  - [Using Docker](#using-docker)
+    - [Running commands](#running-commands)
+    - [Running commands from STDIN](#running-commands-from-stdin)
+- [Usage](#usage)
+  - [Tables](#tables)
+    - [Local Git Repository](#local-git-repository)
+      - [`commits`](#commits)
+      - [`stats`](#stats)
+      - [`files`](#files)
+      - [`branches`](#branches)
+      - [`tags`](#tags)
+    - [GitHub Tables](#github-tables)
+      - [`github_org_repos` and `github_user_repos`](#github_org_repos-and-github_user_repos)
+      - [`github_pull_requests`](#github_pull_requests)
+      - [`github_issues`](#github_issues)
+  - [Example Queries](#example-queries)
+    - [Interactive mode](#interactive-mode)
+    - [Exporting](#exporting)
 
 ## Installation
 
@@ -125,7 +147,6 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 | committer_when  | DATETIME |
 | parent_id       | TEXT     |
 | parent_count    | INT      |
-| tree_id         | TEXT     |
 
 ##### `stats`
 
@@ -145,8 +166,6 @@ Use the `commit_id` column to filter for files that belong to the work tree of a
 | Column     | Type |
 |------------|------|
 | commit_id  | TEXT |
-| tree_id    | TEXT |
-| file_id    | TEXT |
 | name       | TEXT |
 | contents   | TEXT |
 | executable | BOOL |
@@ -274,6 +293,44 @@ SELECT count(*) FROM github_pull_requests('augmentable-dev', 'askgit') WHERE sta
 | deletions                 | INT      |
 | changed_files             | INT      |
 
+##### `github_issues`
+
+This table expects 2 parameters, `github_issues('augmentable-dev', 'askgit')`:
+
+```sql
+SELECT count(*) FROM github_issues('augmentable-dev', 'askgit') WHERE state = 'open'
+```
+
+
+| Column                    | Type     |
+|---------------------------|----------|
+| id                        | INT      |
+| node_id                   | TEXT     |
+| number                    | INT      |
+| state                     | TEXT     |
+| locked                    | BOOL     |
+| title                     | TEXT     |
+| user_login                | TEXT     |
+| body                      | TEXT     |
+| labels                    | TEXT     |
+| active_lock_reason        | TEXT     |
+| created_at                | DATETIME |
+| updated_at                | DATETIME |
+| closed_at                 | DATETIME |
+| merged_at                 | DATETIME |
+| merge_commit_sha          | TEXT     |
+| assignee_login            | TEXT     |
+| assignees                 | TEXT     |
+| url                       | TEXT     |
+| html_url                  | TEXT     |
+| comments_url              | TEXT     |
+| events_url                | TEXT     |
+| repository_url            | TEXT     |
+| comments                  | INT      |
+| milestone                 | TEXT     |
+| reactions                 | INT      |
+
+
 ### Example Queries
 
 This will return all commits in the history of the currently checked out branch/commit of the repo.
@@ -348,3 +405,16 @@ askgit --interactive
 ```
 
 Will display a basic terminal UI for composing and executing queries, powered by [gocui](https://github.com/jroimartin/gocui).
+
+#### Exporting
+
+You can use the `askgit export` sub command to save the output of queries into a sqlite database file.
+The command expects a path to a db file (which will be created if it doesn't already exist) and a variable number of "export pairs," specified by the `-e` flag.
+Each pair represents the name of a table to create and a query to generate its contents.
+
+```
+askgit export my-export-file -e commits,"SELECT * FROM commits" -e files,"SELECT * FROM files"
+```
+
+This can be useful if you're looking to use another tool to examine the data emitted by `askgit`.
+Since the exported file is a plain SQLite database, queries should be much faster (as the original git repository is no longer traversed) and you should be able to use any tool that supports querying SQLite database files.

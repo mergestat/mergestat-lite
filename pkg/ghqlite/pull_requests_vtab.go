@@ -1,8 +1,8 @@
 package ghqlite
 
 import (
+	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -38,7 +38,7 @@ func (m *PullRequestsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlit
 			repo_owner HIDDEN,
 			repo_name HIDDEN,
 			id INT,
-			node_id TEXT,
+			node_id TEXT PRIMARY KEY,
 			number INT,
 			state TEXT,
 			locked BOOL,
@@ -76,7 +76,7 @@ func (m *PullRequestsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlit
 			additions INT,
 			deletions INT,
 			changed_files INT
-		)`, args[0]))
+		) WITHOUT ROWID`, args[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -95,19 +95,45 @@ type pullRequestsTable struct {
 }
 
 func (v *pullRequestsTable) Open() (sqlite3.VTabCursor, error) {
-	return &pullRequestsCursor{v, "", "", nil, nil, false}, nil
+	return &pullRequestsCursor{v, "", "", nil, nil, false, false}, nil
 }
 
 func (v *pullRequestsTable) Disconnect() error { return nil }
 func (v *pullRequestsTable) Destroy() error    { return nil }
 
 type pullRequestsCursor struct {
-	table     *pullRequestsTable
-	repoOwner string
-	repoName  string
-	iter      *RepoPullRequestIterator
-	currentPR *github.PullRequest
-	eof       bool
+	table              *pullRequestsTable
+	repoOwner          string
+	repoName           string
+	iter               *RepoPullRequestIterator
+	currentPR          *github.PullRequest
+	extraFieldsFetched bool
+	eof                bool
+}
+
+// TODO this is a little odd, but some fields of a PR are not available when the PR
+// is retrieved from a .List call (.../pulls), but they're useful to have in the table
+// this retrieves the PR as a single .Get (.../pull/:number), which does return the "extra" fields
+// this is likely a case where using the GraphQL API would benefit, as we wouldn't have to make
+// an additional API call for every row (PR) in the table, when accessing any "extra" fields
+// this should still respect the rate limit of the iterator
+func (vc *pullRequestsCursor) getCurrentPRExtraFields() (*github.PullRequest, error) {
+	if !vc.extraFieldsFetched {
+		err := vc.iter.githubIter.options.RateLimiter.Wait(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
+		pr, _, err := vc.iter.githubIter.options.Client.PullRequests.Get(context.Background(), vc.repoOwner, vc.repoName, vc.currentPR.GetNumber())
+		if err != nil {
+			return nil, err
+		}
+
+		vc.currentPR = pr
+		vc.extraFieldsFetched = true
+	}
+
+	return vc.currentPR, nil
 }
 
 func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
@@ -208,24 +234,60 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 30:
 		c.ResultText(pr.GetAuthorAssociation())
 	case 31:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultBool(pr.GetMerged())
 	case 32:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultBool(pr.GetMergeable())
 	case 33:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultText(pr.GetMergeableState())
 	case 34:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultText(pr.GetMergedBy().GetLogin())
 	case 35:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetComments())
 	case 36:
 		c.ResultBool(pr.GetMaintainerCanModify())
 	case 37:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetCommits())
 	case 38:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetAdditions())
 	case 39:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetDeletions())
 	case 40:
+		pr, err := vc.getCurrentPRExtraFields()
+		if err != nil {
+			return err
+		}
 		c.ResultInt(pr.GetChangedFiles())
 	}
 
@@ -236,42 +298,31 @@ func (v *pullRequestsTable) BestIndex(constraints []sqlite3.InfoConstraint, ob [
 	used := make([]bool, len(constraints))
 	var repoOwnerCstUsed, repoNameCstUsed bool
 	idxNameVals := make([]string, 0)
+	cost := 1000.0
 	for c, cst := range constraints {
+		if !cst.Usable {
+			continue
+		}
+		if cst.Op != sqlite3.OpEQ {
+			continue
+		}
 		switch cst.Column {
 		case 0: // repo_owner
-			if cst.Op != sqlite3.OpEQ { // if there's no equality constraint, fail
-				return nil, sqlite3.ErrConstraint
-			}
-			// if the constraint is usable, use it, otherwise fail
-			if used[c] = cst.Usable; !used[c] {
-				return nil, sqlite3.ErrConstraint
-			}
+			used[c] = true
 			repoOwnerCstUsed = true
 			idxNameVals = append(idxNameVals, "repo_owner")
 		case 1: // repo_name
-			if cst.Op != sqlite3.OpEQ { // if there's no equality constraint, fail
-				return nil, sqlite3.ErrConstraint
-			}
-			// if the constraint is usable, use it, otherwise fail
-			if used[c] = cst.Usable; !used[c] {
-				return nil, sqlite3.ErrConstraint
-			}
+			used[c] = true
 			repoNameCstUsed = true
 			idxNameVals = append(idxNameVals, "repo_name")
 		case 5:
-			if cst.Usable && cst.Op == sqlite3.OpEQ {
-				used[c] = true
-			}
+			used[c] = true
 			idxNameVals = append(idxNameVals, "state")
 		}
 	}
 
-	if !repoOwnerCstUsed {
-		return nil, errors.New("must supply a repo owner")
-	}
-
-	if !repoNameCstUsed {
-		return nil, errors.New("must supply a repo name")
+	if repoOwnerCstUsed && repoNameCstUsed {
+		cost = 0
 	}
 
 	var idxNum int
@@ -286,7 +337,6 @@ func (v *pullRequestsTable) BestIndex(constraints []sqlite3.InfoConstraint, ob [
 				idxNum = ob[0].Column
 			}
 		}
-
 	}
 
 	return &sqlite3.IndexResult{
@@ -294,10 +344,13 @@ func (v *pullRequestsTable) BestIndex(constraints []sqlite3.InfoConstraint, ob [
 		IdxStr:         strings.Join(idxNameVals, ","),
 		Used:           used,
 		AlreadyOrdered: alreadyOrdered,
+		EstimatedCost:  cost,
 	}, nil
 }
 
 func (vc *pullRequestsCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+	vc.eof = false
+
 	state := "all"
 	for c, cstVal := range strings.Split(idxStr, ",") {
 		switch cstVal {
@@ -352,6 +405,8 @@ func (vc *pullRequestsCursor) Next() error {
 		return nil
 	}
 	vc.currentPR = nextPR
+	vc.extraFieldsFetched = false
+
 	return nil
 }
 

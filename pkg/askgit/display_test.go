@@ -1,6 +1,7 @@
 package askgit
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/csv"
 	"strings"
@@ -8,6 +9,36 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
+
+func TestDisplayTable(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+
+	mockRows := sqlmock.NewRows([]string{"id", "name", "value"}).
+		AddRow("1", "name 1", "value 1").
+		AddRow("2", "name 2", "value 2").
+		AddRow("3", "name 3", "value 3")
+
+	mock.ExpectQuery("select").WillReturnRows(mockRows)
+
+	rows, _ := db.Query("select")
+
+	var b bytes.Buffer
+	err := DisplayDB(rows, &b, "table")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	scanner := bufio.NewScanner(&b)
+	lineCount := 0
+	for scanner.Scan() {
+		lineCount++
+	}
+
+	if lineCount < 3 {
+		t.Fatalf("expected at least %d lines of output", lineCount)
+	}
+
+}
 
 func TestDisplayCSV(t *testing.T) {
 	db, mock, _ := sqlmock.New()

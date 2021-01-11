@@ -2,7 +2,6 @@ package ghqlite
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -37,7 +36,7 @@ func (m *ReposModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab
 		CREATE TABLE %s (
 			repo_owner HIDDEN,
 			id INT,
-			node_id TEXT,
+			node_id TEXT PRIMARY KEY,
 			name TEXT,
 			full_name TEXT,
 			owner TEXT,
@@ -63,7 +62,7 @@ func (m *ReposModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab
 			created_at DATETIME,
 			updated_at DATETIME,
 			permissions TEXT
-		)`, args[0]))
+		) WITHOUT ROWID`, args[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -150,11 +149,26 @@ func (vc *reposCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 23:
 		c.ResultBool(repo.GetArchived())
 	case 24:
-		c.ResultText(repo.PushedAt.Format(time.RFC3339Nano))
+		t := repo.GetPushedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 25:
-		c.ResultText(repo.CreatedAt.Format(time.RFC3339Nano))
+		t := repo.GetCreatedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 26:
-		c.ResultText(repo.UpdatedAt.Format(time.RFC3339Nano))
+		t := repo.GetUpdatedAt()
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 27:
 		str, err := json.Marshal(repo.GetPermissions())
 		if err != nil {
@@ -167,33 +181,36 @@ func (vc *reposCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 
 func (v *reposTable) BestIndex(constraints []sqlite3.InfoConstraint, ob []sqlite3.InfoOrderBy) (*sqlite3.IndexResult, error) {
 	used := make([]bool, len(constraints))
+	cost := 1000.0
 	repoOwnerCstUsed := false
 	for c, cst := range constraints {
+		if !cst.Usable {
+			continue
+		}
+		if cst.Op != sqlite3.OpEQ {
+			continue
+		}
 		switch cst.Column {
 		case 0: // repo_owner
-			if cst.Op != sqlite3.OpEQ { // if there's no equality constraint, fail
-				return nil, sqlite3.ErrConstraint
-			}
-			// if the constraint is usable, use it, otherwise fail
-			if used[c] = cst.Usable; !used[c] {
-				return nil, sqlite3.ErrConstraint
-			}
+			used[c] = true
 			repoOwnerCstUsed = true
 		}
 	}
 
-	if !repoOwnerCstUsed {
-		return nil, errors.New("must supply a repo owner")
+	if repoOwnerCstUsed {
+		cost = 0
 	}
 
 	return &sqlite3.IndexResult{
-		IdxNum: 0,
-		IdxStr: "default",
-		Used:   used,
+		IdxNum:        0,
+		IdxStr:        "default",
+		Used:          used,
+		EstimatedCost: cost,
 	}, nil
 }
 
 func (vc *reposCursor) Filter(idxNum int, idxStr string, vals []interface{}) error {
+	vc.eof = false
 	owner := vals[0].(string)
 	iter := NewRepoIterator(owner, vc.table.module.ownerType, GitHubIteratorOptions{
 		Token:        vc.table.module.options.Token,

@@ -10,15 +10,23 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type GitLogCLIModule struct{}
+type GitLogCLIModule struct {
+	options *GitLogCLIModuleOptions
+}
 
-func NewGitLogCLIModule() *GitLogCLIModule {
-	return &GitLogCLIModule{}
+type GitLogCLIModuleOptions struct {
+	RepoPath string
+}
+
+func NewGitLogCLIModule(options *GitLogCLIModuleOptions) *GitLogCLIModule {
+	return &GitLogCLIModule{options}
 }
 
 type gitLogCLITable struct {
 	repoPath string
 }
+
+func (m *GitLogCLIModule) EponymousOnlyModule() {}
 
 func (m *GitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
@@ -33,17 +41,13 @@ func (m *GitLogCLIModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.
 			committer_email TEXT,
 			committer_when DATETIME, 
 			parent_id TEXT,
-			parent_count INT,
-			tree_id TEXT
+			parent_count INT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
 	}
 
-	// the repoPath will be enclosed in double quotes "..." since ensureTables uses %q when setting up the table
-	// we need to pop those off when referring to the actual directory in the fs
-	repoPath := args[3][1 : len(args[3])-1]
-	return &gitLogCLITable{repoPath: repoPath}, nil
+	return &gitLogCLITable{repoPath: m.options.RepoPath}, nil
 }
 
 func (m *GitLogCLIModule) Connect(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
