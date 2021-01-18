@@ -148,6 +148,18 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 | parent_id       | TEXT     |
 | parent_count    | INT      |
 
+##### `blame`
+
+Similar to `git blame`, the `blame` table includes the blame of all files in the current HEAD.
+
+| Column          | Type     |
+|-----------------|----------|
+| line_no         | INT      |
+| path            | TEXT     |
+| commit_id       | TEXT     |
+| contents        | TEXT     |
+
+
 ##### `stats`
 
 | Column    | Type |
