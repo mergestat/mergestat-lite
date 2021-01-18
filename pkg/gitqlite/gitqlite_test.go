@@ -112,6 +112,11 @@ func initFixtureDB(repoPath string) error {
 		return err
 	}
 
+	err = sqliteConn.CreateModule("blame", NewGitBlameModule(&GitBlameModuleOptions{RepoPath: repoPath}))
+	if err != nil {
+		return err
+	}
+
 	fixtureDB = db
 	return nil
 }
