@@ -50,4 +50,74 @@ func TestBlameDistinctFiles(t *testing.T) {
 	if gotFileCount != expectedFileCount {
 		t.Fatalf("expected %d distinct file paths in blame, got %d", expectedFileCount, gotFileCount)
 	}
+
+}
+func TestBlameContents(t *testing.T) {
+	iterator, err := NewBlameIterator(fixtureRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := fixtureDB.Query("SELECT contents from blame limit 100")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, lines, err := GetRowContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range lines {
+		cont, err := iterator.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !(line[0] == cont.Content) {
+			t.Fatalf("expected %s content in blame, got %s", cont.Content, line[0])
+		}
+	}
+}
+func TestBlameCommitID(t *testing.T) {
+	iterator, err := NewBlameIterator(fixtureRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := fixtureDB.Query("SELECT commit_id from blame limit 100")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, lines, err := GetRowContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range lines {
+		cont, err := iterator.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !(line[0] == cont.CommitID) {
+			t.Fatalf("expected %s content in blame, got %s", cont.Content, line[0])
+		}
+	}
+}
+func TestBlameFileNames(t *testing.T) {
+	iterator, err := NewBlameIterator(fixtureRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := fixtureDB.Query("SELECT path from blame limit 100")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, lines, err := GetRowContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range lines {
+		cont, err := iterator.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !(line[0] == cont.File) {
+			t.Fatalf("expected %s content in blame, got %s", cont.Content, line[0])
+		}
+	}
 }
