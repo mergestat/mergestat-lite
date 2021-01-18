@@ -50,11 +50,14 @@ func TestBlameDistinctFiles(t *testing.T) {
 	if gotFileCount != expectedFileCount {
 		t.Fatalf("expected %d distinct file paths in blame, got %d", expectedFileCount, gotFileCount)
 	}
+
+}
+func TestBlameContents(t *testing.T) {
 	iterator, err := NewBlameIterator(fixtureRepo)
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err = fixtureDB.Query("SELECT contents from blame limit 100")
+	rows, err := fixtureDB.Query("SELECT contents from blame limit 100")
 	if err != nil {
 		t.Fatal(err)
 	}
