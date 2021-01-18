@@ -140,7 +140,7 @@ func RunQuery(g *gocui.Gui, v *gocui.View) error {
 			return nil
 		}
 
-		err = askgit.DisplayDB(rows, out, "")
+		err = askgit.DisplayDB(rows, out, "", true)
 		if err != nil {
 			return err
 		}
@@ -181,10 +181,12 @@ func NextLine(g *gocui.Gui, v *gocui.View) error {
 func GoLeft(g *gocui.Gui, v *gocui.View) error {
 
 	x, y := v.Origin()
-	err := v.SetOrigin(x-1, y)
+	var err error
+	if x-1 > 0 {
+		err = v.SetOrigin(x-1, y)
+	}
 	if err != nil {
-		//do nothing print for lint
-		fmt.Print()
+		return err
 	}
 
 	return nil
@@ -194,9 +196,53 @@ func GoRight(g *gocui.Gui, v *gocui.View) error {
 	x, y := v.Origin()
 	err := v.SetOrigin(x+1, y)
 	if err != nil {
-		//do nothing print for lint
-		fmt.Print()
+		return err
 	}
-
+	return nil
+}
+func JumpRight(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	width, _ := v.Size()
+	err := v.SetOrigin(x+width, y)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func JumpLeft(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	width, _ := v.Size()
+	var err error
+	if x-width > 0 {
+		err = v.SetOrigin(x-width, y)
+	} else {
+		err = v.SetOrigin(0, y)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func JumpUp(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	_, height := v.Size()
+	var err error
+	if y-height >= 0 {
+		err = v.SetOrigin(x, y-height)
+	} else {
+		err = v.SetOrigin(x, 0)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func JumpDown(g *gocui.Gui, v *gocui.View) error {
+	x, y := v.Origin()
+	_, height := v.Size()
+	err := v.SetOrigin(x, y+height)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -129,7 +129,7 @@ var rootCmd = &cobra.Command{
 		rows, err := ag.DB().Query(query)
 		handleError(err)
 
-		err = askgit.DisplayDB(rows, os.Stdout, format)
+		err = askgit.DisplayDB(rows, os.Stdout, format, false)
 		handleError(err)
 	},
 }
