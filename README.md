@@ -29,6 +29,7 @@ More in-depth examples and documentation can be found below.
   - [Tables](#tables)
     - [Local Git Repository](#local-git-repository)
       - [`commits`](#commits)
+      - [`blame`](#blame)
       - [`stats`](#stats)
       - [`files`](#files)
       - [`branches`](#branches)
@@ -150,7 +151,7 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 
 ##### `blame`
 
-Similar to `git blame`, the `blame` table includes the blame of all files in the current HEAD.
+Similar to `git blame`, the `blame` table includes blame information for all files in the current HEAD.
 
 | Column          | Type     |
 |-----------------|----------|
