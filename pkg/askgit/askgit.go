@@ -153,6 +153,11 @@ func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
 		return err
 	}
 
+	err = conn.CreateModule("blame", gitqlite.NewGitBlameModule(&gitqlite.GitBlameModuleOptions{RepoPath: a.RepoPath()}))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -177,13 +182,6 @@ func (a *AskGit) loadGitHubModules(conn *sqlite3.SQLiteConn) error {
 	}
 
 	err = conn.CreateModule("github_pull_requests", ghqlite.NewPullRequestsModule(ghqlite.PullRequestsModuleOptions{
-		Token:       githubToken,
-		RateLimiter: rateLimiter,
-	}))
-	if err != nil {
-		return err
-	}
-	err = conn.CreateModule("github_issues", ghqlite.NewIssuesModule(ghqlite.IssuesModuleOptions{
 		Token:       githubToken,
 		RateLimiter: rateLimiter,
 	}))
