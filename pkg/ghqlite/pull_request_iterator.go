@@ -57,20 +57,39 @@ type pullRequest struct {
 	MergeCommit struct {
 		Oid githubv4.GitObjectID
 	}
-	Number    githubv4.Int
-	State     githubv4.PullRequestState
-	Title     githubv4.String
-	UpdatedAt githubv4.DateTime
-	// ReviewRequests struct {
-	// 	Nodes []struct {
-
-	// 	}
-	// } `graphql:"reviewRequests(first:100)"`
+	Number         githubv4.Int
+	State          githubv4.PullRequestState
+	Title          githubv4.String
+	UpdatedAt      githubv4.DateTime
+	ReviewRequests struct {
+		Nodes []struct {
+			RequestedReviewer []interface{}
+		}
+	} `graphql:"reviewRequests(first:100)"`
+	HeadRepository struct {
+		Name  string
+		Owner struct {
+			Login string
+		}
+	}
 	HeadRefOid  githubv4.GitObjectID
 	HeadRefName string
 	HeadRef     struct {
 		Name string
 	}
+
+	BaseRepository struct {
+		Name  string
+		Owner struct {
+			Login string
+		}
+	}
+	Labels struct {
+		Nodes []struct {
+			Name string
+		}
+	} `graphql:"labels(first:100)"`
+
 	BaseRefOid  githubv4.GitObjectID
 	BaseRefName string
 	BaseRef     struct {
@@ -82,11 +101,11 @@ type pullRequest struct {
 	MergedBy          user
 	Comments          struct {
 		TotalCount int
-	} `graphql:"comments(first:1)"`
+	} `graphql:"comments(first:100)"`
 	MaintainerCanModify githubv4.Boolean
 	Commits             struct {
 		TotalCount int
-	} `graphql:"commits(first:1)"`
+	} `graphql:"commits(first:100)"`
 	Deletions    int
 	ChangedFiles int
 }

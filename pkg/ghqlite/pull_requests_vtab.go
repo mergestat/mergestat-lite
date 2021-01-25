@@ -151,7 +151,7 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 5:
 		c.ResultText(string(pr.State))
 	case 6:
-		c.ResultBool(pr.ActiveLockReason != "")
+		c.ResultText(string(pr.ActiveLockReason))
 	case 7:
 		c.ResultText(string(pr.Title))
 	case 8:
@@ -163,7 +163,11 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		// if err != nil {
 		// 	return err
 		// }
-		c.ResultText("holder")
+		text := ""
+		for _, label := range pr.Labels.Nodes {
+			text += label.Name + " "
+		}
+		c.ResultText(text)
 	case 11:
 		c.ResultText(string(pr.ActiveLockReason))
 	case 12:
@@ -197,19 +201,33 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 16:
 		c.ResultText(string(pr.MergeCommit.Oid))
 	case 17:
-		c.ResultText("holder")
+		text := ""
+		for _, user := range pr.Assignees.Nodes {
+			text += user.Login + " "
+		}
+		c.ResultText(text)
 	case 18:
 		// str, err := json.Marshal(pr.Assignees)
 		// if err != nil {
 		// 	return err
 		// }
-		c.ResultText("holder")
+		text := ""
+		for _, user := range pr.Assignees.Nodes {
+			text += user.URL + " "
+		}
+		c.ResultText(text)
 	case 19:
 		// str, err := json.Marshal(pr.RequestedReviewers)
 		// if err != nil {
 		// 	return err
 		// }
-		c.ResultText("holder")
+		text := ""
+		for _, node := range pr.ReviewRequests.Nodes {
+			for _, user := range node.RequestedReviewer {
+				text += fmt.Sprint(user) + " "
+			}
+		}
+		c.ResultText(text)
 	case 20:
 		c.ResultText(pr.HeadRefName)
 	case 21:
@@ -218,9 +236,9 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(string(pr.HeadRefOid))
 	case 23:
 		//c.ResultText(pr.Head.GetRepo().GetOwner().GetLogin())
-		c.ResultText("holder")
+		c.ResultText(pr.HeadRepository.Owner.Login)
 	case 24:
-		c.ResultText("holder")
+		c.ResultText(pr.HeadRepository.Name)
 
 		//c.ResultText(pr.Head.GetRepo().GetName())
 	case 25:
@@ -231,11 +249,11 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 		c.ResultText(string(pr.BaseRefOid))
 	case 28:
 		//c.ResultText(pr.Base.GetRepo().GetOwner().GetLogin())
-		c.ResultText("holder")
+		c.ResultText(pr.BaseRepository.Owner.Login)
 
 	case 29:
 		//c.ResultText(pr.Base.GetRepo().GetName())
-		c.ResultText("holder")
+		c.ResultText(pr.BaseRepository.Name)
 
 	case 30:
 		c.ResultText(string(pr.AuthorAssociation))
