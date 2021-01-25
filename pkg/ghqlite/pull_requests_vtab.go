@@ -1,8 +1,6 @@
 package ghqlite
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -106,7 +104,7 @@ type pullRequestsCursor struct {
 	repoOwner          string
 	repoName           string
 	iter               *RepoPullRequestIterator
-	currentPR          *github.PullRequest
+	currentPR          *pullRequest
 	extraFieldsFetched bool
 	eof                bool
 }
@@ -117,178 +115,171 @@ type pullRequestsCursor struct {
 // this is likely a case where using the GraphQL API would benefit, as we wouldn't have to make
 // an additional API call for every row (PR) in the table, when accessing any "extra" fields
 // this should still respect the rate limit of the iterator
-func (vc *pullRequestsCursor) getCurrentPRExtraFields() (*github.PullRequest, error) {
-	if !vc.extraFieldsFetched {
-		err := vc.iter.githubIter.options.RateLimiter.Wait(context.Background())
-		if err != nil {
-			return nil, err
-		}
+// func (vc *pullRequestsCursor) getCurrentPRExtraFields() (*github.PullRequest, error) {
+// 	if !vc.extraFieldsFetched {
+// 		err := vc.iter.githubIter.options.RateLimiter.Wait(context.Background())
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		pr, _, err := vc.iter.githubIter.options.Client.PullRequests.Get(context.Background(), vc.repoOwner, vc.repoName, vc.currentPR.GetNumber())
-		if err != nil {
-			return nil, err
-		}
+// 		pr, _, err := vc.iter.githubIter.options.Client.PullRequests.Get(context.Background(), vc.repoOwner, vc.repoName, vc.currentPR.GetNumber())
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		vc.currentPR = pr
-		vc.extraFieldsFetched = true
-	}
+// 		vc.currentPR = pr
+// 		vc.extraFieldsFetched = true
+// 	}
 
-	return vc.currentPR, nil
-}
+// 	return vc.currentPR, nil
+// }
 
 func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	pr := vc.currentPR
+	repo := vc.iter.repo
 	switch col {
 	case 0:
 		c.ResultText(vc.repoOwner)
 	case 1:
 		c.ResultText(vc.repoName)
 	case 2:
-		c.ResultInt64(pr.GetID())
+		c.ResultInt64(int64(repo.Repository.DatabaseID))
 	case 3:
-		c.ResultText(pr.GetNodeID())
+		c.ResultText(string(pr.BaseRefOid))
 	case 4:
-		c.ResultInt(pr.GetNumber())
+		c.ResultInt(int(pr.Number))
 	case 5:
-		c.ResultText(pr.GetState())
+		c.ResultText(string(pr.State))
 	case 6:
-		c.ResultBool(pr.GetActiveLockReason() != "")
+		c.ResultBool(pr.ActiveLockReason != "")
 	case 7:
-		c.ResultText(pr.GetTitle())
+		c.ResultText(string(pr.Title))
 	case 8:
-		c.ResultText(pr.GetUser().GetLogin())
+		c.ResultText(pr.Author.Login)
 	case 9:
-		c.ResultText(pr.GetBody())
+		c.ResultText(string(pr.BodyText))
 	case 10:
-		str, err := json.Marshal(pr.Labels)
-		if err != nil {
-			return err
-		}
-		c.ResultText(string(str))
+		// str, err := json.Marshal(pr.)
+		// if err != nil {
+		// 	return err
+		// }
+		c.ResultText("holder")
 	case 11:
-		c.ResultText(pr.GetActiveLockReason())
+		c.ResultText(string(pr.ActiveLockReason))
 	case 12:
-		t := pr.GetCreatedAt()
+		t := pr.CreatedAt.Time
 		if t.IsZero() {
 			c.ResultNull()
 		} else {
 			c.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 13:
-		t := pr.GetUpdatedAt()
+		t := pr.UpdatedAt.Time
 		if t.IsZero() {
 			c.ResultNull()
 		} else {
 			c.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 14:
-		t := pr.GetClosedAt()
+		t := pr.ClosedAt.Time
 		if t.IsZero() {
 			c.ResultNull()
 		} else {
 			c.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 15:
-		t := pr.GetMergedAt()
+		t := pr.MergedAt.Time
 		if t.IsZero() {
 			c.ResultNull()
 		} else {
 			c.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 16:
-		c.ResultText(pr.GetMergeCommitSHA())
+		c.ResultText(string(pr.MergeCommit.Oid))
 	case 17:
-		c.ResultText(pr.GetAssignee().GetLogin())
+		c.ResultText("holder")
 	case 18:
-		str, err := json.Marshal(pr.Assignees)
-		if err != nil {
-			return err
-		}
-		c.ResultText(string(str))
+		// str, err := json.Marshal(pr.Assignees)
+		// if err != nil {
+		// 	return err
+		// }
+		c.ResultText("holder")
 	case 19:
-		str, err := json.Marshal(pr.RequestedReviewers)
-		if err != nil {
-			return err
-		}
-		c.ResultText(string(str))
+		// str, err := json.Marshal(pr.RequestedReviewers)
+		// if err != nil {
+		// 	return err
+		// }
+		c.ResultText("holder")
 	case 20:
-		c.ResultText(pr.GetHead().GetLabel())
+		c.ResultText(pr.HeadRefName)
 	case 21:
-		c.ResultText(pr.GetHead().GetRef())
+		c.ResultText(pr.HeadRef.Name)
 	case 22:
-		c.ResultText(pr.GetHead().GetSHA())
+		c.ResultText(string(pr.HeadRefOid))
 	case 23:
-		c.ResultText(pr.Head.GetRepo().GetOwner().GetLogin())
+		//c.ResultText(pr.Head.GetRepo().GetOwner().GetLogin())
+		c.ResultText("holder")
 	case 24:
-		c.ResultText(pr.Head.GetRepo().GetName())
+		c.ResultText("holder")
+
+		//c.ResultText(pr.Head.GetRepo().GetName())
 	case 25:
-		c.ResultText(pr.GetBase().GetSHA())
+		c.ResultText(string(pr.BaseRefOid))
 	case 26:
-		c.ResultText(pr.GetBase().GetRef())
+		c.ResultText(pr.BaseRefName)
 	case 27:
-		c.ResultText(pr.GetBase().GetSHA())
+		c.ResultText(string(pr.BaseRefOid))
 	case 28:
-		c.ResultText(pr.Base.GetRepo().GetOwner().GetLogin())
+		//c.ResultText(pr.Base.GetRepo().GetOwner().GetLogin())
+		c.ResultText("holder")
+
 	case 29:
-		c.ResultText(pr.Base.GetRepo().GetName())
+		//c.ResultText(pr.Base.GetRepo().GetName())
+		c.ResultText("holder")
+
 	case 30:
-		c.ResultText(pr.GetAuthorAssociation())
+		c.ResultText(string(pr.AuthorAssociation))
 	case 31:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultBool(pr.GetMerged())
+		// pr, err := vc.getCurrentPRExtraFields()
+		// if err != nil {
+		// 	return err
+		// }
+		c.ResultBool(bool(pr.Merged))
 	case 32:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultBool(pr.GetMergeable())
+		// pr, err := vc.getCurrentPRExtraFields()
+		// if err != nil {
+		// 	return err
+		// }
+		c.ResultBool(pr.Mergeable == "MERGEABLE")
 	case 33:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultText(pr.GetMergeableState())
+
+		c.ResultText(string(pr.Mergeable))
 	case 34:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultText(pr.GetMergedBy().GetLogin())
+
+		c.ResultText(pr.MergedBy.Login)
 	case 35:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultInt(pr.GetComments())
+		// pr, err := vc.getCurrentPRExtraFields()
+		// if err != nil {
+		// 	return err
+		// }
+		c.ResultInt(pr.Comments.TotalCount)
 	case 36:
-		c.ResultBool(pr.GetMaintainerCanModify())
+		c.ResultBool(bool(pr.MaintainerCanModify))
 	case 37:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultInt(pr.GetCommits())
+		// pr, err := vc.getCurrentPRExtraFields()
+		// if err != nil {
+		// 	return err
+		// }
+		c.ResultInt(pr.Commits.TotalCount)
 	case 38:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultInt(pr.GetAdditions())
+
+		c.ResultInt(int(pr.Additions))
 	case 39:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultInt(pr.GetDeletions())
+
+		c.ResultInt(pr.Deletions)
 	case 40:
-		pr, err := vc.getCurrentPRExtraFields()
-		if err != nil {
-			return err
-		}
-		c.ResultInt(pr.GetChangedFiles())
+
+		c.ResultInt(pr.ChangedFiles)
 	}
 
 	return nil
@@ -396,17 +387,15 @@ func (vc *pullRequestsCursor) Filter(idxNum int, idxStr string, vals []interface
 }
 
 func (vc *pullRequestsCursor) Next() error {
-	nextPR, err := vc.iter.Next()
+	pr, err := vc.iter.Next()
 	if err != nil {
 		return err
 	}
-	if nextPR == nil {
+	if pr == nil {
 		vc.eof = true
 		return nil
 	}
-	vc.currentPR = nextPR
-	vc.extraFieldsFetched = false
-
+	vc.currentPR = pr
 	return nil
 }
 
@@ -415,7 +404,7 @@ func (vc *pullRequestsCursor) EOF() bool {
 }
 
 func (vc *pullRequestsCursor) Rowid() (int64, error) {
-	return vc.currentPR.GetID(), nil
+	return int64(vc.currentPR.DatabaseID), nil
 }
 
 func (vc *pullRequestsCursor) Close() error {
