@@ -38,7 +38,7 @@ type Repo struct {
 				EndCursor   githubv4.String
 				HasNextPage bool
 			}
-		} `graphql:"pullRequests(first:100, after : $pullRequestCursor)"`
+		} `graphql:"pullRequests(last:100, after : $pullRequestCursor)"`
 	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 type pullRequest struct {
@@ -130,8 +130,10 @@ func NewRepoPullRequestIterator(repoOwner, repoName string, options RepoPullRequ
 }
 
 func (prIter *RepoPullRequestIterator) Next() (*pullRequest, error) {
-	if prIter.index+1 < len(prIter.pr) {
-		return &prIter.pr[prIter.index], nil
+	if prIter.index < len(prIter.pr) {
+		pr := prIter.pr[prIter.index]
+		prIter.index++
+		return &pr, nil
 	} else {
 		return nil, nil
 	}
