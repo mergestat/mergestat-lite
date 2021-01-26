@@ -46,68 +46,106 @@ type pullRequest struct {
 	Assignees        struct {
 		Nodes []user
 	} `graphql:"assignees(first:100)"`
-	Additions   githubv4.Int
-	Author      user
+	Additions         githubv4.Int
+	Author            user
+	AuthorAssociation githubv4.CommentAuthorAssociation
+
 	BodyText    githubv4.String
-	ClosedAt    githubv4.DateTime
-	CreatedAt   githubv4.DateTime
-	DatabaseID  githubv4.Int
-	Locked      githubv4.Boolean
-	MergedAt    githubv4.DateTime
-	MergeCommit struct {
-		Oid githubv4.GitObjectID
-	}
-	Number         githubv4.Int
-	State          githubv4.PullRequestState
-	Title          githubv4.String
-	UpdatedAt      githubv4.DateTime
-	ReviewRequests struct {
-		Nodes []struct {
-			RequestedReviewer []interface{}
-		}
-	} `graphql:"reviewRequests(first:100)"`
-	HeadRepository struct {
-		Name  string
-		Owner struct {
-			Login string
-		}
-	}
-	HeadRefOid  githubv4.GitObjectID
-	HeadRefName string
-	HeadRef     struct {
+	BaseRefOid  githubv4.GitObjectID
+	BaseRefName string
+	BaseRef     struct {
 		Name string
 	}
-
 	BaseRepository struct {
 		Name  string
 		Owner struct {
 			Login string
 		}
 	}
-	Labels struct {
+	Body               string
+	BodyHTML           string
+	CanBeRebased       bool
+	ChecksResourcePath githubv4.URI
+	ChecksURL          githubv4.URI
+
+	Comments struct {
+		TotalCount int
+	} `graphql:"comments(first:100)"`
+	Commits struct {
+		TotalCount int
+	} `graphql:"commits(first:100)"`
+	ChangedFiles    int
+	Closed          bool
+	ClosedAt        githubv4.DateTime
+	CreatedAt       githubv4.DateTime
+	CreatedViaEmail bool
+	Deletions       int
+	DatabaseID      githubv4.Int
+	Editor          struct {
+		login string
+	}
+	Files struct {
+		TotalCount int
+	}
+	HeadRepository struct {
+		Name string
+	}
+	HeadRepositoryOwner struct {
+		Login string
+	}
+	HeadRefOid  githubv4.GitObjectID
+	HeadRefName string
+	HeadRef     struct {
+		Name string
+	}
+	IncludesCreatedEdit bool
+	IsCrossRepository   bool
+	IsDraft             bool
+	isReadByViewer      bool
+	Labels              struct {
 		Nodes []struct {
 			Name string
 		}
 	} `graphql:"labels(first:100)"`
-
-	BaseRefOid  githubv4.GitObjectID
-	BaseRefName string
-	BaseRef     struct {
-		Name string
+	LastEditedAt githubv4.DateTime
+	Locked       githubv4.Boolean
+	MergedAt     githubv4.DateTime
+	MergeCommit  struct {
+		Oid githubv4.GitObjectID
 	}
-	AuthorAssociation githubv4.CommentAuthorAssociation
-	Merged            githubv4.Boolean
-	Mergeable         githubv4.MergeableState
-	MergedBy          user
-	Comments          struct {
-		TotalCount int
-	} `graphql:"comments(first:100)"`
+	Merged              githubv4.Boolean
+	Mergeable           githubv4.MergeableState
+	MergedBy            user
 	MaintainerCanModify githubv4.Boolean
-	Commits             struct {
+	MergeStateStatues   string
+	Milestone           struct {
+		Number int
+	}
+	Number       githubv4.Int
+	Participants struct {
+		Number int
+	}
+	Permalink      githubv4.URI
+	PublishedAt    githubv4.DateTime
+	ReviewDecision githubv4.PullRequestReviewDecision
+	ReviewRequests struct {
+		Nodes []struct {
+			RequestedReviewer []interface{}
+		}
+	} `graphql:"reviewRequests(first:100)"`
+	ReviewThreads struct {
 		TotalCount int
-	} `graphql:"commits(first:100)"`
-	Deletions    int
-	ChangedFiles int
+	}
+	Reviews struct {
+		TotalCount int
+	}
+	State            githubv4.PullRequestState
+	Title            githubv4.String
+	UpdatedAt        githubv4.DateTime
+	Url              githubv4.URI
+	UserContentEdits struct {
+		TotalCount int
+	}
 }
 
 type RepoPullRequestIteratorOptions struct {
