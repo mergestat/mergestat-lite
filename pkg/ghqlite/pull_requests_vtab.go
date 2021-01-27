@@ -52,7 +52,7 @@ func (m *PullRequestsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlit
 			base_repository_name TEXT,
 			base_repository_owner TEXT,
 			can_be_rebased BOOL,
-			checks_rescoursce_path TEXT,
+			checks_rescource_path TEXT,
 			checks_url TEXT,
 			comment_count INT,
 			commits_count INT,
@@ -165,159 +165,159 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 2:
 		c.ResultInt64(int64(repo.Repository.DatabaseID))
 	case 3:
-		c.ResultText(string(pr.BaseRefOid))
+		c.ResultText(string(pr.DatabaseID))
 	case 4:
 		c.ResultInt(int(pr.Number))
 	case 5:
-		c.ResultText(string(pr.State))
-	case 6:
 		c.ResultText(string(pr.ActiveLockReason))
+	case 6:
+		c.ResultText("Assignees")
 	case 7:
-		c.ResultText(string(pr.Title))
+		c.ResultInt(int(pr.Additions))
 	case 8:
 		c.ResultText(pr.Author.Login)
 	case 9:
-		c.ResultText(string(pr.BodyText))
+		c.ResultText(string(pr.AuthorAssociation))
 	case 10:
-		// str, err := json.Marshal(pr.)
-		// if err != nil {
-		// 	return err
-		// }
-		text := ""
-		for _, label := range pr.Labels.Nodes {
-			text += label.Name + " "
-		}
-		c.ResultText(text)
+		c.ResultText(pr.Body)
 	case 11:
-		c.ResultText(string(pr.ActiveLockReason))
+		c.ResultText(string(pr.BodyText))
 	case 12:
-		t := pr.CreatedAt.Time
-		if t.IsZero() {
-			c.ResultNull()
-		} else {
-			c.ResultText(t.Format(time.RFC3339Nano))
-		}
+		c.ResultText("BodyHTML")
 	case 13:
-		t := pr.UpdatedAt.Time
-		if t.IsZero() {
-			c.ResultNull()
-		} else {
-			c.ResultText(t.Format(time.RFC3339Nano))
-		}
+		c.ResultText(string(pr.BaseRefOid))
 	case 14:
+		c.ResultText(pr.BaseRefName)
+	case 15:
+		c.ResultText(pr.BaseRef.Name)
+	case 16:
+		c.ResultText(pr.BaseRepository.Name)
+	case 17:
+		c.ResultText(pr.BaseRepository.Owner.Login)
+	case 18:
+		c.ResultBool(false) //pr.CanBeRebased)
+	case 19:
+		c.ResultText(pr.ChecksResourcePath.String())
+	case 20:
+
+		c.ResultText(pr.ChecksURL.String())
+	case 21:
+
+		c.ResultInt(pr.Comments.TotalCount)
+	case 22:
+		c.ResultInt(pr.Commits.TotalCount)
+	case 23:
+		c.ResultInt(pr.ChangedFiles)
+	case 24:
+		c.ResultBool(pr.Closed)
+	case 25:
 		t := pr.ClosedAt.Time
 		if t.IsZero() {
 			c.ResultNull()
 		} else {
 			c.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 15:
+	case 26:
+		t := pr.CreatedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
+	case 27:
+		c.ResultBool(pr.CreatedViaEmail)
+	case 28:
+		c.ResultInt(pr.Deletions)
+	case 29:
+		c.ResultText(pr.Editor.Login)
+	case 30:
+		c.ResultInt(pr.Files.TotalCount)
+	case 31:
+		c.ResultText(pr.HeadRepository.Name)
+
+	case 32:
+		c.ResultText(pr.HeadRepositoryOwner.Login)
+	case 33:
+
+		c.ResultText(string(pr.HeadRefOid))
+	case 34:
+		c.ResultText(pr.HeadRefName)
+	case 35:
+
+		c.ResultBool(pr.IncludesCreatedEdit)
+	case 36:
+
+		c.ResultBool(pr.IsCrossRepository)
+	case 37:
+
+		c.ResultBool(pr.IsDraft)
+	case 38:
+		c.ResultInt(pr.Labels.TotalCount)
+	case 39:
+		t := pr.LastEditedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
+	case 40:
+
+		c.ResultBool(bool(pr.Locked))
+	case 41:
 		t := pr.MergedAt.Time
 		if t.IsZero() {
 			c.ResultNull()
 		} else {
 			c.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 16:
+	case 42:
 		c.ResultText(string(pr.MergeCommit.Oid))
-	case 17:
-		text := ""
-		for _, user := range pr.Assignees.Nodes {
-			text += user.Login + " "
-		}
-		c.ResultText(text)
-	case 18:
-		// str, err := json.Marshal(pr.Assignees)
-		// if err != nil {
-		// 	return err
-		// }
-		text := ""
-		for _, user := range pr.Assignees.Nodes {
-			text += user.URL + " "
-		}
-		c.ResultText(text)
-	case 19:
-		// str, err := json.Marshal(pr.RequestedReviewers)
-		// if err != nil {
-		// 	return err
-		// }
-		text := ""
-		for _, node := range pr.ReviewRequests.Nodes {
-			for _, user := range node.RequestedReviewer {
-				text += fmt.Sprint(user) + " "
-			}
-		}
-		c.ResultText(text)
-	case 20:
-		c.ResultText(pr.HeadRefName)
-	case 21:
-		c.ResultText(pr.HeadRef.Name)
-	case 22:
-		c.ResultText(string(pr.HeadRefOid))
-	case 23:
-		//c.ResultText(pr.Head.GetRepo().GetOwner().GetLogin())
-		c.ResultText(pr.HeadRepository.Owner.Login)
-	case 24:
-		c.ResultText(pr.HeadRepository.Name)
-
-		//c.ResultText(pr.Head.GetRepo().GetName())
-	case 25:
-		c.ResultText(string(pr.BaseRefOid))
-	case 26:
-		c.ResultText(pr.BaseRefName)
-	case 27:
-		c.ResultText(string(pr.BaseRefOid))
-	case 28:
-		//c.ResultText(pr.Base.GetRepo().GetOwner().GetLogin())
-		c.ResultText(pr.BaseRepository.Owner.Login)
-
-	case 29:
-		//c.ResultText(pr.Base.GetRepo().GetName())
-		c.ResultText(pr.BaseRepository.Name)
-
-	case 30:
-		c.ResultText(string(pr.AuthorAssociation))
-	case 31:
-		// pr, err := vc.getCurrentPRExtraFields()
-		// if err != nil {
-		// 	return err
-		// }
+	case 43:
 		c.ResultBool(bool(pr.Merged))
-	case 32:
-		// pr, err := vc.getCurrentPRExtraFields()
-		// if err != nil {
-		// 	return err
-		// }
-		c.ResultBool(pr.Mergeable == "MERGEABLE")
-	case 33:
-
+	case 44:
 		c.ResultText(string(pr.Mergeable))
-	case 34:
-
+	case 45:
 		c.ResultText(pr.MergedBy.Login)
-	case 35:
-		// pr, err := vc.getCurrentPRExtraFields()
-		// if err != nil {
-		// 	return err
-		// }
-		c.ResultInt(pr.Comments.TotalCount)
-	case 36:
+	case 46:
 		c.ResultBool(bool(pr.MaintainerCanModify))
-	case 37:
-		// pr, err := vc.getCurrentPRExtraFields()
-		// if err != nil {
-		// 	return err
-		// }
-		c.ResultInt(pr.Commits.TotalCount)
-	case 38:
-
-		c.ResultInt(int(pr.Additions))
-	case 39:
-
-		c.ResultInt(pr.Deletions)
-	case 40:
-
-		c.ResultInt(pr.ChangedFiles)
+	case 47:
+		c.ResultText("MergeStateStatuses") //pr.MergeStateStatuses)
+	case 48:
+		c.ResultInt(pr.Milestone.Number)
+	case 49:
+		c.ResultInt(pr.Participants.TotalCount)
+	case 50:
+		c.ResultText(pr.Permalink.RawPath)
+	case 51:
+		t := pr.PublishedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
+	case 52:
+		c.ResultText(string(pr.ReviewDecision))
+	case 53:
+		c.ResultText("Review Requests")
+	case 54:
+		c.ResultInt(pr.ReviewThreads.TotalCount)
+	case 55:
+		c.ResultInt(pr.Reviews.TotalCount)
+	case 56:
+		c.ResultText(string(pr.State))
+	case 57:
+		c.ResultText(string(pr.Title))
+	case 58:
+		t := pr.UpdatedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
+	case 59:
+		c.ResultText(pr.Url.String())
+	case 60:
+		c.ResultInt(pr.UserContentEdits.TotalCount)
 	}
 
 	return nil

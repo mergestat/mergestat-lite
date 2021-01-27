@@ -62,9 +62,9 @@ type pullRequest struct {
 			Login string
 		}
 	}
-	Body               string
-	BodyHTML           string
-	CanBeRebased       bool
+	Body string
+	//BodyHTML           string
+	//CanBeRebased       bool
 	ChecksResourcePath githubv4.URI
 	ChecksURL          githubv4.URI
 
@@ -82,7 +82,7 @@ type pullRequest struct {
 	Deletions       int
 	DatabaseID      githubv4.Int
 	Editor          struct {
-		login string
+		Login string
 	}
 	Files struct {
 		TotalCount int
@@ -101,11 +101,11 @@ type pullRequest struct {
 	IncludesCreatedEdit bool
 	IsCrossRepository   bool
 	IsDraft             bool
-	isReadByViewer      bool
 	Labels              struct {
-		Nodes []struct {
-			Name string
-		}
+		// Nodes []struct {
+		// 	Name string
+		// }
+		TotalCount int
 	} `graphql:"labels(first:100)"`
 	LastEditedAt githubv4.DateTime
 	Locked       githubv4.Boolean
@@ -117,13 +117,13 @@ type pullRequest struct {
 	Mergeable           githubv4.MergeableState
 	MergedBy            user
 	MaintainerCanModify githubv4.Boolean
-	MergeStateStatues   string
-	Milestone           struct {
+	//MergeStateStatuses  string
+	Milestone struct {
 		Number int
 	}
 	Number       githubv4.Int
 	Participants struct {
-		Number int
+		TotalCount int
 	}
 	Permalink      githubv4.URI
 	PublishedAt    githubv4.DateTime
