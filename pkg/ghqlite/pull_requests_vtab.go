@@ -36,7 +36,7 @@ func (m *PullRequestsModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlit
 			repo_owner HIDDEN,
 			repo_name HIDDEN,
 			id INT,
-			node_id TEXT PRIMARY KEY,
+			node_id INT PRIMARY KEY,
 			number INT,
 			active_lock_reason TEXT,
 			assignees TEXT,
@@ -165,7 +165,7 @@ func (vc *pullRequestsCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	case 2:
 		c.ResultInt64(int64(repo.Repository.DatabaseID))
 	case 3:
-		c.ResultText(string(pr.DatabaseID))
+		c.ResultInt64(int64(pr.DatabaseID))
 	case 4:
 		c.ResultInt(int(pr.Number))
 	case 5:
