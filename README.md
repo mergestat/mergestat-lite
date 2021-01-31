@@ -178,7 +178,7 @@ The `files` table iterates over _ALL_ the files in a commit history, by default 
 The full table is every file in every tree of a commit history.
 Use the `commit_id` column to filter for files that belong to the work tree of a specific commit.
 
-| Column        | Type |
+| Column     | Type |
 |------------|------|
 | commit_id  | TEXT |
 | path       | TEXT |
