@@ -30,7 +30,7 @@ func (m *GitLogModule) EponymousOnlyModule() {}
 func (m *GitLogModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTab, error) {
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %s (
-			id TEXT,
+			commit_id TEXT,
 			message TEXT,
 			summary TEXT,
 			author_name TEXT,
