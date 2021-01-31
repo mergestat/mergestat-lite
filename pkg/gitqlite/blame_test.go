@@ -57,7 +57,7 @@ func TestBlameContents(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err := fixtureDB.Query("SELECT file_content from blame limit 100")
+	rows, err := fixtureDB.Query("SELECT line_content from blame limit 100")
 	if err != nil {
 		t.Fatal(err)
 	}
