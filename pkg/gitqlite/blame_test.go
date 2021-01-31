@@ -8,7 +8,7 @@ import (
 
 func TestBlameDistinctFiles(t *testing.T) {
 
-	rows, err := fixtureDB.Query("SELECT count(distinct path) from blame")
+	rows, err := fixtureDB.Query("SELECT count(distinct file_path) from blame")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestBlameContents(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err := fixtureDB.Query("SELECT contents from blame limit 100")
+	rows, err := fixtureDB.Query("SELECT file_content from blame limit 100")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +103,7 @@ func TestBlameFileNames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err := fixtureDB.Query("SELECT path from blame limit 100")
+	rows, err := fixtureDB.Query("SELECT file_path from blame limit 100")
 	if err != nil {
 		t.Fatal(err)
 	}
