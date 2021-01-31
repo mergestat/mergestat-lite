@@ -15,6 +15,8 @@ It can execute queries that look like:
 SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 ```
 
+You can try queries on public git repositories without installing anything at [https://try.askgit.com/](https://try.askgit.com/)
+
 There's also preliminary support for executing queries against the GitHub API.
 
 More in-depth examples and documentation can be found below.
