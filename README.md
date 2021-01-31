@@ -155,12 +155,12 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 
 Similar to `git blame`, the `blame` table includes blame information for all files in the current HEAD.
 
-| Column          | Type     |
-|-----------------|----------|
-| line_no         | INT      |
-| file_path       | TEXT     |
-| commit_id       | TEXT     |
-| line_content    | TEXT     |
+| Column       | Type     |
+|--------------|----------|
+| line_no      | INT      |
+| file_path    | TEXT     |
+| commit_id    | TEXT     |
+| line_content | TEXT     |
 
 
 ##### `stats`
@@ -179,11 +179,11 @@ The full table is every file in every tree of a commit history.
 Use the `commit_id` column to filter for files that belong to the work tree of a specific commit.
 
 | Column        | Type |
-|---------------|------|
-| commit_id     | TEXT |
-| path          | TEXT |
-| contents      | TEXT |
-| executable    | BOOL |
+|------------|------|
+| commit_id  | TEXT |
+| path       | TEXT |
+| contents   | TEXT |
+| executable | BOOL |
 
 
 ##### `branches`
