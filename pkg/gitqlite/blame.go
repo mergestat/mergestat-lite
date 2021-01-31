@@ -32,7 +32,7 @@ func (m *GitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 			line_no INT,
 			file_path TEXT,
 			commit_id TEXT,
-			line_contents TEXT
+			line_content TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
