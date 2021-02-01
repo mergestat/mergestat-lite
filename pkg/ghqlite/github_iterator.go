@@ -58,6 +58,13 @@ type Repo struct {
 				HasNextPage bool
 			}
 		} `graphql:"pullRequests(last:100, after : $pullRequestCursor)"`
+		Issues struct {
+			Nodes    []issue
+			PageInfo struct {
+				EndCursor   githubv4.String
+				HasNextPage bool
+			}
+		} `graphql:"issues(last:100, after : $issueCursor)"`
 	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 type pullRequest struct {
@@ -165,6 +172,54 @@ type pullRequest struct {
 	UserContentEdits struct {
 		TotalCount int
 	}
+}
+type issue struct {
+	ActiveLockReason githubv4.LockReason
+	//Assignees
+	Author   user
+	Body     string
+	BodyText string
+	Closed   bool
+	ClosedAt githubv4.DateTime
+	Comments struct {
+		TotalCount int
+	}
+	CreatedAt           githubv4.DateTime
+	CreatedViaEmail     bool
+	DatabaseId          int
+	Editor              user
+	IncludesCreatedEdit bool
+	IsReadByViewer      bool
+	Labels              struct {
+		TotalCount int
+	}
+	LastEditedAt githubv4.DateTime
+	Locked       bool
+	Milestone    struct {
+		Number             int
+		ProgressPercentage githubv4.Float
+	}
+	Number       int
+	Participants struct {
+		TotalCount int
+	}
+	PublishedAt githubv4.DateTime
+	//reactionGroups
+	Reactions struct {
+		TotalCount int
+	}
+	State            githubv4.IssueState
+	Title            string
+	UpdatedAt        githubv4.DateTime
+	Url              githubv4.URI
+	UserContentEdits struct {
+		TotalCount int
+	}
+	ViewerCanReact     bool
+	ViewerCanSubscribe bool
+	ViewerCanUpdate    bool
+	ViewerDidAuthor    bool
+	ViewerSubscription githubv4.SubscriptionState
 }
 
 func (t *noAcceptTransport) RoundTrip(r *http.Request) (*http.Response, error) {

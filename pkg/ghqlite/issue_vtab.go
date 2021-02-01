@@ -1,7 +1,6 @@
 package ghqlite
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -39,29 +38,34 @@ func (m *IssuesModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.VTa
 			id INT,
 			node_id TEXT PRIMARY KEY,
 			number INT,
-			state TEXT,
-			locked BOOL,
-			title TEXT,
-			user_login TEXT,
+			author TEXT,
 			body TEXT,
-			labels TEXT,
-			active_lock_reason TEXT,
-			created_at DATETIME,
-			updated_at DATETIME,
+			body_text TEXT,
+			closed BOOL,
 			closed_at DATETIME,
-			merged_at DATETIME,
-			merge_commit_sha TEXT,
-			assignee_login TEXT,
-			assignees TEXT,
-			url TEXT,
-			html_url TEXT,
-			comments_url TEXT,
-			events_url TEXT,
-			labels_url TEXT,
-			repository_url TEXT,
 			comments INT,
-			milestone TEXT,
-			reactions INT			
+			created_at DATETIME,
+			created_via_email BOOL,
+			editor_login TEXT,
+			includes_created_edit BOOL,
+			is_read_by_viewer BOOL,
+			labels INT,
+			last_edited_at DATETIME,
+			locked BOOL,
+			milestone_number INT,
+			milestone_progress REAL,
+			participants_count INT,
+			published_at DATETIME,
+			reactions_count INT,
+			state TEXT,
+			title TEXT,
+			updated_at DATETIME,
+			url TEXT,
+			user_content_edits_count INT,
+			viewer_can_subscribe BOOL,
+			viewer_can_update BOOL,
+			viewer_did_author BOOL,
+			viewer_subscription TEXT		
 		) WITHOUT ROWID`, args[0]))
 	if err != nil {
 		return nil, err
@@ -92,97 +96,106 @@ type issuesCursor struct {
 	repoOwner    string
 	repoName     string
 	iter         *RepoIssueIterator
-	currentIssue *github.Issue
+	currentIssue *issue
 	eof          bool
 }
 
 func (vc *issuesCursor) Column(c *sqlite3.SQLiteContext, col int) error {
 	issue := vc.currentIssue
+	repo := vc.iter.repo
 	switch col {
 	case 0:
 		c.ResultText(vc.repoOwner)
 	case 1:
 		c.ResultText(vc.repoName)
 	case 2:
-		c.ResultInt64(issue.GetID())
+		c.ResultInt64(int64(repo.Repository.DatabaseID))
 	case 3:
-		c.ResultText(issue.GetNodeID())
+		c.ResultInt64(int64(issue.DatabaseId))
 	case 4:
-		c.ResultInt(issue.GetNumber())
+		c.ResultInt(issue.Number)
 	case 5:
-		c.ResultText(issue.GetState())
+		c.ResultText(issue.Author.Login)
 	case 6:
-		c.ResultBool(issue.GetActiveLockReason() != "")
+		c.ResultText(issue.Body)
 	case 7:
-		c.ResultText(issue.GetTitle())
+		c.ResultText(issue.BodyText)
 	case 8:
-		c.ResultText(issue.GetUser().GetLogin())
+		c.ResultBool(issue.Closed)
 	case 9:
-		c.ResultText(issue.GetBody())
+		t := issue.ClosedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 10:
-		str, err := json.Marshal(issue.Labels)
-		if err != nil {
-			return err
-		}
-		c.ResultText(string(str))
+
+		c.ResultInt(issue.Comments.TotalCount)
 	case 11:
-		c.ResultText(issue.GetActiveLockReason())
+		t := issue.CreatedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 12:
-		t := issue.GetCreatedAt()
-		if t.IsZero() {
-			c.ResultNull()
-		} else {
-			c.ResultText(t.Format(time.RFC3339Nano))
-		}
+		c.ResultBool(issue.CreatedViaEmail)
 	case 13:
-		t := issue.GetUpdatedAt()
-		if t.IsZero() {
-			c.ResultNull()
-		} else {
-			c.ResultText(t.Format(time.RFC3339Nano))
-		}
+		c.ResultText(issue.Editor.Login)
 	case 14:
-		t := issue.GetClosedAt()
-		if t.IsZero() {
-			c.ResultNull()
-		} else {
-			c.ResultText(t.Format(time.RFC3339Nano))
-		}
+		c.ResultBool(issue.IncludesCreatedEdit)
 	case 15:
-		t := issue.GetUpdatedAt()
+		c.ResultBool(issue.IsReadByViewer)
+	case 16:
+		c.ResultInt(issue.Labels.TotalCount)
+	case 17:
+		t := issue.LastEditedAt.Time
 		if t.IsZero() {
 			c.ResultNull()
 		} else {
 			c.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 16:
-		c.ResultText(issue.GetClosedBy().GetLogin())
-	case 17:
-		c.ResultText(issue.GetAssignee().GetLogin())
 	case 18:
-		str, err := json.Marshal(issue.Assignees)
-		if err != nil {
-			return err
-		}
-		c.ResultText(string(str))
+		c.ResultBool(issue.Locked)
 	case 19:
-		c.ResultText(issue.GetURL())
+		c.ResultInt(issue.Milestone.Number)
 	case 20:
-		c.ResultText(issue.GetHTMLURL())
+		c.ResultDouble(float64(issue.Milestone.ProgressPercentage))
 	case 21:
-		c.ResultText(issue.GetCommentsURL())
+		c.ResultInt(issue.Participants.TotalCount)
 	case 22:
-		c.ResultText(issue.GetEventsURL())
+		t := issue.PublishedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 23:
-		c.ResultText(issue.GetLabelsURL())
+		c.ResultInt(issue.Reactions.TotalCount)
 	case 24:
-		c.ResultText(issue.GetRepositoryURL())
+		c.ResultText(string(issue.State))
 	case 25:
-		c.ResultInt(issue.GetComments())
+		c.ResultText(issue.Title)
 	case 26:
-		c.ResultText(issue.GetMilestone().GetDescription())
+		t := issue.UpdatedAt.Time
+		if t.IsZero() {
+			c.ResultNull()
+		} else {
+			c.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 27:
-		c.ResultInt(issue.GetReactions().GetTotalCount())
+		c.ResultText(issue.Url.RawPath)
+	case 28:
+		c.ResultInt(issue.UserContentEdits.TotalCount)
+	case 29:
+		c.ResultBool(issue.ViewerCanSubscribe)
+	case 30:
+		c.ResultBool(issue.ViewerCanUpdate)
+	case 31:
+		c.ResultBool(issue.ViewerDidAuthor)
+	case 32:
+		c.ResultText(string(issue.ViewerSubscription))
 	}
 
 	return nil
@@ -307,7 +320,7 @@ func (vc *issuesCursor) EOF() bool {
 }
 
 func (vc *issuesCursor) Rowid() (int64, error) {
-	return vc.currentIssue.GetID(), nil
+	return int64(vc.currentIssue.DatabaseId), nil
 }
 
 func (vc *issuesCursor) Close() error {
