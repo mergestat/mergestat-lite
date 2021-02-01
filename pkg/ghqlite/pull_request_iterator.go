@@ -31,6 +31,7 @@ func NewRepoPullRequestIterator(repoOwner, repoName string, options RepoPullRequ
 		"owner":             githubv4.String(repoOwner),
 		"name":              githubv4.String(repoName),
 		"pullRequestCursor": (*githubv4.String)(nil),
+		"issueCursor":       (*githubv4.String)(nil),
 	}
 	prIter.prVariables = variables
 	err := getPullRequests(githubIter, prIter)
