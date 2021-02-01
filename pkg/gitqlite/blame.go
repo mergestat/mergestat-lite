@@ -30,9 +30,9 @@ func (m *GitBlameModule) Create(c *sqlite3.SQLiteConn, args []string) (sqlite3.V
 	err := c.DeclareVTab(fmt.Sprintf(`
 		CREATE TABLE %q (
 			line_no INT,
-			path TEXT,
+			file_path TEXT,
 			commit_id TEXT,
-			contents TEXT
+			line_content TEXT
 		)`, args[0]))
 	if err != nil {
 		return nil, err
