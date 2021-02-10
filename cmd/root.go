@@ -118,6 +118,7 @@ var rootCmd = &cobra.Command{
 			RepoPath:    dir,
 			UseGitCLI:   useGitCLI,
 			GitHubToken: os.Getenv("GITHUB_TOKEN"),
+			QueryOnly:   true,
 		})
 		handleError(err)
 

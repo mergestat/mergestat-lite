@@ -31,7 +31,6 @@ func initFixtureRepo() (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	fixtureRepo, err = git.Clone(fixtureRepoCloneURL, dir, &git.CloneOptions{})
 
 	if err != nil {
@@ -82,5 +81,34 @@ func GetContents(rows *sql.Rows) (int, [][]string, error) {
 		ret = append(ret, r)
 	}
 	return count, ret, err
+
+}
+func TestDB(t *testing.T) {
+	ag, err := New(&Options{
+		RepoPath:    fixtureRepoDir,
+		UseGitCLI:   false,
+		GitHubToken: os.Getenv("GITHUB_TOKEN"),
+		QueryOnly:   true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = ag.db.Exec("CREATE TABLE test (one TEXT, two TEXT)")
+	if err.Error() != "attempt to write a readonly database" {
+		t.Fatal(err)
+	}
+	ag, err = New(&Options{
+		RepoPath:    fixtureRepoDir,
+		UseGitCLI:   false,
+		GitHubToken: os.Getenv("GITHUB_TOKEN"),
+		QueryOnly:   false,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = ag.db.Exec("CREATE TABLE test (one TEXT, two TEXT)")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 }
