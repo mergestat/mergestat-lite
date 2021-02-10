@@ -26,10 +26,13 @@ type AskGit struct {
 }
 
 type Options struct {
-	RepoPath    string
-	UseGitCLI   bool
-	GitHubToken string
-	DBFilePath  string
+	RepoPath      string
+	UseGitCLI     bool
+	GitHubToken   string
+	DBFilePath    string
+	QueryOnly     bool
+	HardHeapLimit int64
+	SoftHeapLimit int64
 }
 
 type driverConnector struct {
@@ -105,6 +108,26 @@ func New(options *Options) (*AskGit, error) {
 	}
 
 	a.db = sql.OpenDB(dc)
+	if a.options.QueryOnly {
+		_, err = a.db.Exec("PRAGMA query_only=true")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if a.options.SoftHeapLimit > 0 {
+		_, err = a.db.Exec(fmt.Sprintf("PRAGMA soft_heap_limit=%d", a.options.SoftHeapLimit))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if a.options.HardHeapLimit > 0 {
+		_, err = a.db.Exec(fmt.Sprintf("PRAGMA hard_heap_limit=%d", a.options.HardHeapLimit))
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return a, nil
 }
