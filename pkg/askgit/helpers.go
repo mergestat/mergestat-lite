@@ -1,8 +1,11 @@
 package askgit
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/ghodss/yaml"
 	"github.com/mattn/go-sqlite3"
 )
@@ -20,10 +23,39 @@ func loadHelperFuncs(conn *sqlite3.SQLiteConn) error {
 		json, err := yaml.YAMLToJSON([]byte(s))
 		return string(json), err
 	}
+	toml2json := func(s string) (string, error) {
+		var x interface{}
+		print(s)
+		if _, err := toml.Decode(s, &x); err != nil {
+			return "", err
+		}
+		jsonFromToml, err := json.Marshal(x)
+		if err != nil {
+			return "", err
+		}
+		return string(jsonFromToml), nil
+	}
+	xml2json := func(s string) (string, error) {
+		var x interface{}
+		if err := xml.Unmarshal([]byte(s), &x); err != nil {
+			return "", err
+		}
+		jsonFromXml, err := json.Marshal(x)
+		if err != nil {
+			return "", err
+		}
+		return string(jsonFromXml), nil
+	}
 	if err := conn.RegisterFunc("str_split", split, true); err != nil {
 		return err
 	}
 	if err := conn.RegisterFunc("yaml_to_json", yaml2json, true); err != nil {
+		return err
+	}
+	if err := conn.RegisterFunc("toml_to_json", toml2json, true); err != nil {
+		return err
+	}
+	if err := conn.RegisterFunc("xml_to_json", xml2json, true); err != nil {
 		return err
 	}
 
