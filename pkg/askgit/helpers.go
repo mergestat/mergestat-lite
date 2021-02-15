@@ -2,10 +2,10 @@ package askgit
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	xml_parser "github.com/clbanning/mxj/v2"
 	"github.com/ghodss/yaml"
 	"github.com/mattn/go-sqlite3"
 )
@@ -35,11 +35,11 @@ func loadHelperFuncs(conn *sqlite3.SQLiteConn) error {
 		return string(jsonFromToml), nil
 	}
 	xml2json := func(s string) (string, error) {
-		var x interface{}
-		if err := xml.Unmarshal([]byte(s), &x); err != nil {
+		mv, err := xml_parser.NewMapXml([]byte(s))
+		if err != nil {
 			return "", err
 		}
-		jsonFromXml, err := json.Marshal(x)
+		jsonFromXml, err := mv.Json()
 		if err != nil {
 			return "", err
 		}
