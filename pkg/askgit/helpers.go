@@ -25,7 +25,6 @@ func loadHelperFuncs(conn *sqlite3.SQLiteConn) error {
 	}
 	toml2json := func(s string) (string, error) {
 		var x interface{}
-		print(s)
 		if _, err := toml.Decode(s, &x); err != nil {
 			return "", err
 		}
