@@ -19,7 +19,7 @@ func loadHelperFuncs(conn *sqlite3.SQLiteConn) error {
 		}
 		return ""
 	}
-	yaml2json := func(s string) (string, error) {
+	yml2json := func(s string) (string, error) {
 		json, err := yaml.YAMLToJSON([]byte(s))
 		return string(json), err
 	}
@@ -48,7 +48,7 @@ func loadHelperFuncs(conn *sqlite3.SQLiteConn) error {
 	if err := conn.RegisterFunc("str_split", split, true); err != nil {
 		return err
 	}
-	if err := conn.RegisterFunc("yaml_to_json", yaml2json, true); err != nil {
+	if err := conn.RegisterFunc("yml_to_json", yml2json, true); err != nil {
 		return err
 	}
 	if err := conn.RegisterFunc("toml_to_json", toml2json, true); err != nil {
