@@ -42,7 +42,7 @@ func TestTomlToJson(t *testing.T) {
 		t.Fatal(err)
 	}
 	rows, err := ag.DB().Query(`SELECT toml_to_json('[package] 
-	name = \"hog\"')`)
+	name = "hog"')`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,10 +59,7 @@ func TestYmlToJson(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err := ag.DB().Query(`SELECT yml_to_json('
-	---
-	doe: "a deer, a female deer"'
-	)`)
+	rows, err := ag.DB().Query(`SELECT yml_to_json('doe: "a deer, a female deer"')`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +67,7 @@ func TestYmlToJson(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
-	if contents[0][0] != `"doe":"a deer, a female deer"` {
+	if contents[0][0] != `{"doe":"a deer, a female deer"}` {
 		t.Fatalf("expected string: %s, got %s", "", contents[0][0])
 	}
 

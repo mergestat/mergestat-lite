@@ -21,6 +21,9 @@ func loadHelperFuncs(conn *sqlite3.SQLiteConn) error {
 	}
 	yml2json := func(s string) (string, error) {
 		json, err := yaml.YAMLToJSON([]byte(s))
+		if err != nil {
+			return "", err
+		}
 		return string(json), err
 	}
 	toml2json := func(s string) (string, error) {
