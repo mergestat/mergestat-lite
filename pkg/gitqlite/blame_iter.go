@@ -114,10 +114,9 @@ func (iter *BlameIterator) Next() (*BlamedLine, error) {
 	}
 
 	// if there's no blamed lines
-	// if len(iter.currentBlamedLines) == 0 {
-	// 	iter.currentBlamedLineIdx--
-	// 	return iter.Next()
-	// }
+	if len(iter.currentBlamedLines) == 0 {
+		return iter.Next()
+	}
 
 	blamedLine := iter.currentBlamedLines[iter.currentBlamedLineIdx]
 	iter.currentBlamedLineIdx++
