@@ -3,7 +3,10 @@ module github.com/augmentable-dev/askgit
 go 1.13
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/clbanning/mxj/v2 v2.5.2
+	github.com/ghodss/yaml v1.0.0
 	github.com/gitsight/go-vcsurl v1.0.0
 	github.com/go-openapi/errors v0.19.9 // indirect
 	github.com/go-openapi/strfmt v0.19.11 // indirect
