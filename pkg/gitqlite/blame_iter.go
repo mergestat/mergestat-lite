@@ -73,27 +73,23 @@ func (iter *BlameIterator) nextFile() error {
 
 	// iterate over the blame hunks
 	fileLine := 1
-	for i := 0; i < blame.HunkCount(); i++ {
-		hunk, err := blame.HunkByIndex(i)
-		if err != nil {
-			return err
-		}
 
-		// within a hunk, iterate over every line in the hunk
-		// creating and adding a new BlamedLine for each
-		for hunkLineOffset := 0; hunkLineOffset < int(hunk.LinesInHunk); hunkLineOffset++ {
-			// for every line of the hunk, create a BlamedLine
-			blamedLine := &BlamedLine{
-				File:     file.path + file.Name,
-				CommitID: hunk.OrigCommitId.String(),
-				Line:     fileLine + hunkLineOffset,
-				Content:  lines[i+hunkLineOffset],
-			}
-			// add it to the list for the current file
-			iter.currentBlamedLines = append(iter.currentBlamedLines, blamedLine)
-			// increment the file line by 1
-			fileLine++
+	for {
+		hunk, err := blame.HunkByLine(fileLine)
+		if err != nil {
+			break
 		}
+		blamedLine := &BlamedLine{
+			File:     file.path + file.Name,
+			CommitID: hunk.OrigCommitId.String(),
+			Line:     fileLine,
+			Content:  lines[fileLine-1],
+		}
+		// add it to the list for the current file
+		iter.currentBlamedLines = append(iter.currentBlamedLines, blamedLine)
+		// increment the file line by 1
+		fileLine++
+
 	}
 	iter.currentBlamedLineIdx = 0
 
@@ -118,9 +114,10 @@ func (iter *BlameIterator) Next() (*BlamedLine, error) {
 	}
 
 	// if there's no blamed lines
-	if len(iter.currentBlamedLines) == 0 {
-		return iter.Next()
-	}
+	// if len(iter.currentBlamedLines) == 0 {
+	// 	iter.currentBlamedLineIdx--
+	// 	return iter.Next()
+	// }
 
 	blamedLine := iter.currentBlamedLines[iter.currentBlamedLineIdx]
 	iter.currentBlamedLineIdx++
