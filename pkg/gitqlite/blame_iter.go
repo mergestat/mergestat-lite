@@ -1,6 +1,7 @@
 package gitqlite
 
 import (
+	"io"
 	"strings"
 
 	git "github.com/libgit2/git2go/v31"
@@ -77,7 +78,11 @@ func (iter *BlameIterator) nextFile() error {
 	for {
 		hunk, err := blame.HunkByLine(fileLine)
 		if err != nil {
-			break
+			if err == io.EOF {
+				break
+			} else {
+				return err
+			}
 		}
 		blamedLine := &BlamedLine{
 			File:     file.path + file.Name,
@@ -105,7 +110,7 @@ func (iter *BlameIterator) Next() (*BlamedLine, error) {
 		}
 	}
 
-	// if we've exceeded the
+	// if we've exceeded the number of lines then go to next file
 	if iter.currentBlamedLineIdx >= len(iter.currentBlamedLines) {
 		err := iter.nextFile()
 		if err != nil {
