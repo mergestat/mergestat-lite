@@ -1,7 +1,6 @@
 package gitqlite
 
 import (
-	"io"
 	"strings"
 
 	git "github.com/libgit2/git2go/v31"
@@ -78,7 +77,7 @@ func (iter *BlameIterator) nextFile() error {
 	for {
 		hunk, err := blame.HunkByLine(fileLine)
 		if err != nil {
-			if err == io.EOF {
+			if err.Error() == "Invalid state for operation" {
 				break
 			} else {
 				return err
