@@ -4,9 +4,8 @@ import (
 	"context"
 	"io"
 	"strconv"
+	"strings"
 	"testing"
-
-	"github.com/augmentable-dev/tickgit/pkg/blame"
 )
 
 func TestBlameDistinctFiles(t *testing.T) {
@@ -59,7 +58,7 @@ func TestBlameCommitID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err := fixtureDB.Query("SELECT commit_id from blame limit 100")
+	rows, err := fixtureDB.Query("SELECT line_no,commit_id from blame limit 100")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,12 +71,21 @@ func TestBlameCommitID(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		results, err := blame.Exec(context.Background(), cont.File, &blame.Options{})
+		results, err := Exec(context.Background(), cont.File, &Options{Directory: fixtureRepoDir})
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !(line[0] == results[i].SHA) {
-			t.Fatalf("expected %s content in blame, got %s", cont.Content, line[0])
+		lineNo, err := strconv.Atoi(line[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Compare(line[1], results[lineNo].SHA) != 0 {
+			t.Fatalf("expected %s SHA in blame at line %d, got %s", results[i+1].SHA, i+1, line[0])
 		}
 	}
+}
+
+// TODO implement this with a join on commits
+func TestBlameAuthorEmail(t *testing.T) {
+
 }
