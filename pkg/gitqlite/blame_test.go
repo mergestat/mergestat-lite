@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/augmentable-dev/tickgit/pkg/blame"
 )
 
 func TestBlameDistinctFiles(t *testing.T) {
@@ -71,7 +73,7 @@ func TestBlameCommitID(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		results, err := Exec(context.Background(), cont.File, &Options{Directory: fixtureRepoDir})
+		results, err := blame.Exec(context.Background(), cont.File, &blame.Options{Directory: fixtureRepoDir})
 		if err != nil {
 			t.Fatal(err)
 		}
