@@ -89,5 +89,33 @@ func TestBlameCommitID(t *testing.T) {
 
 // TODO implement this with a join on commits
 func TestBlameAuthorEmail(t *testing.T) {
-
+	iterator, err := NewBlameIterator(fixtureRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := fixtureDB.Query("SELECT b.line_no,c.author_email, b.commit_id FROM commits as c INNER JOIN blame as b on b.commit_id = c.id")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, lines, err := GetRowContents(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, line := range lines {
+		cont, err := iterator.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+		results, err := blame.Exec(context.Background(), cont.File, &blame.Options{Directory: fixtureRepoDir})
+		if err != nil {
+			t.Fatal(err)
+		}
+		lineNo, err := strconv.Atoi(line[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Compare(line[1], results[lineNo].Author.Email) != 0 {
+			t.Fatalf("expected %s SHA in blame at line %d, got %s", results[lineNo].Author.Email, i+1, line[1])
+		}
+	}
 }
