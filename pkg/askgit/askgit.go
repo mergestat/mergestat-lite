@@ -12,6 +12,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/augmentable-dev/askgit/pkg/mailmap"
+
 	"github.com/augmentable-dev/askgit/pkg/ghqlite"
 	"github.com/augmentable-dev/askgit/pkg/gitqlite"
 	"github.com/gitsight/go-vcsurl"
@@ -143,7 +145,6 @@ func (a *AskGit) RepoPath() string {
 func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
 	_, err := exec.LookPath("git")
 	localGitExists := err == nil
-
 	if !a.options.UseGitCLI || !localGitExists {
 		err = conn.CreateModule("commits", gitqlite.NewGitLogModule(&gitqlite.GitLogModuleOptions{RepoPath: a.RepoPath()}))
 		if err != nil {
@@ -178,6 +179,9 @@ func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
 
 	err = conn.CreateModule("blame", gitqlite.NewGitBlameModule(&gitqlite.GitBlameModuleOptions{RepoPath: a.RepoPath()}))
 	if err != nil {
+		return err
+	}
+	if err := conn.RegisterFunc("mailmap", mailmap.NewMailmap(a.RepoPath()).UseMailmap, true); err != nil {
 		return err
 	}
 
