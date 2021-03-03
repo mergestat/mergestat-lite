@@ -2,6 +2,7 @@ package mailmap
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -16,8 +17,8 @@ func NewMailmap(filepath string) *mailmap {
 	filepath += "/.mailmap"
 	file, err := os.Open(filepath)
 	if err != nil {
-		//idk what to do here rn
-		//return "", err
+		fmt.Printf("repo does not contain mailmap at %s\n", filepath)
+		return &mailmap{filepath: filepath, userMap: users}
 	}
 	buff := bufio.NewReader(file)
 	for {
