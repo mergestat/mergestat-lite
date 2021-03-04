@@ -1,10 +1,10 @@
 package mailmap
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strings"
+
+	git "github.com/libgit2/git2go/v31"
 )
 
 type mailmap struct {
@@ -14,18 +14,41 @@ type mailmap struct {
 
 func NewMailmap(filepath string) *mailmap {
 	users := make(map[string]string)
-	filepath += "/.mailmap"
-	file, err := os.Open(filepath)
+	repo, err := git.OpenRepository(filepath)
 	if err != nil {
-		fmt.Printf("repo does not contain mailmap at %s\n", filepath)
+		fmt.Printf("repo does cannot be opened at %s\n", filepath)
 		return &mailmap{filepath: filepath, userMap: users}
 	}
-	buff := bufio.NewReader(file)
-	for {
-		line, _, err := buff.ReadLine()
-		if err != nil {
-			break
+	head, err := repo.Head()
+	if err != nil {
+		panic(err)
+	}
+	commit, err := repo.LookupCommit(head.Target())
+	if err != nil {
+		fmt.Printf("getting head from repo generated error: %s\n", err.Error())
+		return &mailmap{filepath: filepath, userMap: users}
+	}
+	tree, err := commit.Tree()
+	if err != nil {
+		fmt.Printf("getting tree from head generated error: %s", err.Error())
+		return &mailmap{filepath: filepath, userMap: users}
+	}
+	var mlmpblob *git.Blob
+	for i := 0; i < int(tree.EntryCount()); i++ {
+		if strings.Contains(tree.EntryByIndex(uint64(i)).Name, ".mailmap") {
+			mlmp := tree.EntryByIndex(uint64(i))
+			mlmpobj, err := repo.Lookup(mlmp.Id)
+			if err != nil {
+				panic(err)
+			}
+			mlmpblob, err = mlmpobj.AsBlob()
+			if err != nil {
+				panic(err)
+			}
 		}
+	}
+	for _, c := range mlmpblob.Contents() {
+		line := c
 
 		sects := strings.Split(string(line), "> ")
 		if len(sects) > 1 {
