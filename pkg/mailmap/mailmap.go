@@ -45,6 +45,8 @@ func NewMailmap(filepath string) *mailmap {
 			if err != nil {
 				panic(err)
 			}
+			// break out of loop as soon as mailmap is found to avoid iterating over entire tree
+			break
 		}
 	}
 	for _, c := range mlmpblob.Contents() {
