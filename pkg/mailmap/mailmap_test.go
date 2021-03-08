@@ -56,9 +56,9 @@ func TestMailmap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	m, err := NewMailmap(dir)
+	_, err = NewMailmap(dir)
 	if err != nil {
-		t.Fatal(err) 
+		t.Fatal(err)
 	}
 	// for i, v := range m.userMap {
 	// 	fmt.Println(i, v)
