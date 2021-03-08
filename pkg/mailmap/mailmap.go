@@ -12,12 +12,12 @@ type mailmap struct {
 	userMap  map[string]string
 }
 
-func NewMailmap(filepath string) *mailmap {
+func NewMailmap(filepath string) (*mailmap, error) {
 	users := make(map[string]string)
 	repo, err := git.OpenRepository(filepath)
 	if err != nil {
 		fmt.Printf("repo does cannot be opened at %s\n", filepath)
-		return &mailmap{filepath: filepath, userMap: users}
+		return &mailmap{filepath: filepath, userMap: users}, err
 	}
 	head, err := repo.Head()
 	if err != nil {
@@ -26,12 +26,12 @@ func NewMailmap(filepath string) *mailmap {
 	commit, err := repo.LookupCommit(head.Target())
 	if err != nil {
 		fmt.Printf("getting head from repo generated error: %s\n", err.Error())
-		return &mailmap{filepath: filepath, userMap: users}
+		return &mailmap{filepath: filepath, userMap: users}, err
 	}
 	tree, err := commit.Tree()
 	if err != nil {
 		fmt.Printf("getting tree from head generated error: %s", err.Error())
-		return &mailmap{filepath: filepath, userMap: users}
+		return &mailmap{filepath: filepath, userMap: users}, err
 	}
 	var mlmpblob *git.Blob
 	for i := 0; i < int(tree.EntryCount()); i++ {
@@ -39,39 +39,57 @@ func NewMailmap(filepath string) *mailmap {
 			mlmp := tree.EntryByIndex(uint64(i))
 			mlmpobj, err := repo.Lookup(mlmp.Id)
 			if err != nil {
-				panic(err)
+				return nil, err
 			}
 			mlmpblob, err = mlmpobj.AsBlob()
 			if err != nil {
-				panic(err)
+				return nil, err
 			}
 			// break out of loop as soon as mailmap is found to avoid iterating over entire tree
 			break
 		}
 	}
-	for _, c := range mlmpblob.Contents() {
-		line := c
+	s := string(mlmpblob.Contents())
+	contents := strings.Split(s, "\n")
+	for _, c := range contents {
+		if !(strings.HasPrefix(c, "#")) {
+			line := c
+			//println(c)
+			sects := strings.Split(line, "> ")
+			//println(strings.Join(sects, " : "))
+			if len(sects) > 1 {
+				// if this is email only for the first
+				// if sects[0][0] == '<' {
 
-		sects := strings.Split(string(line), "> ")
-		if len(sects) > 1 {
-			desired := strings.Split(sects[0], " <")
-			desiredName := strings.TrimSpace(desired[0])
-			desiredEmail := strings.Trim(desired[1], "<>")
-			for x := 1; x < len(sects); x++ {
-				new := strings.Split(sects[x], " <")
-				if len(new) == 1 {
-					email := strings.Trim(new[0], "<>")
-					users[email] = desiredEmail
+				// }
+				desired := strings.Split(sects[0], " <")
+				println(strings.Join(desired, " : "))
+				var (
+					desiredName  string
+					desiredEmail string
+				)
+				if len(desired) > 1 {
+					desiredName = strings.TrimSpace(desired[0])
+					desiredEmail = strings.Trim(desired[1], "<>")
 				} else {
-					name := strings.TrimSpace(new[0])
-					users[name] = desiredName
-					email := strings.Trim(new[1], "<>")
-					users[email] = desiredEmail
+					desiredEmail = strings.Trim(desired[0], "<>")
+				}
+				for x := 1; x < len(sects); x++ {
+					new := strings.Split(sects[x], " <")
+					if len(new) == 1 {
+						email := strings.Trim(new[0], "<>")
+						users[email] = desiredEmail
+					} else {
+						name := strings.TrimSpace(new[0])
+						users[name] = desiredName
+						email := strings.Trim(new[1], "<>")
+						users[email] = desiredEmail
+					}
 				}
 			}
 		}
 	}
-	return &mailmap{filepath: filepath, userMap: users}
+	return &mailmap{filepath: filepath, userMap: users}, nil
 }
 func (m *mailmap) UseMailmap(user string) string {
 	//println(filepath, user)

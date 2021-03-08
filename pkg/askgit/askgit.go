@@ -181,7 +181,10 @@ func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
 	if err != nil {
 		return err
 	}
-	if err := conn.RegisterFunc("mailmap", mailmap.NewMailmap(a.RepoPath()).UseMailmap, true); err != nil {
+	// err is only used for testing b/c this will return an error on repo's w/o a mailmap
+	mail, _ := mailmap.NewMailmap(a.RepoPath())
+
+	if err := conn.RegisterFunc("mailmap", mail.UseMailmap, true); err != nil {
 		return err
 	}
 
