@@ -63,7 +63,7 @@ func NewMailmap(filepath string) (*mailmap, error) {
 
 				// }
 				desired := strings.Split(sects[0], " <")
-				println(strings.Join(desired, " : "))
+				//println(strings.Join(desired, " : "))
 				var (
 					desiredName  string
 					desiredEmail string
