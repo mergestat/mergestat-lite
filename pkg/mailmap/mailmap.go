@@ -49,6 +49,9 @@ func NewMailmap(filepath string) (*mailmap, error) {
 			break
 		}
 	}
+	if mlmpblob == nil {
+		return &mailmap{filepath: filepath, userMap: users}, nil
+	}
 	s := string(mlmpblob.Contents())
 	contents := strings.Split(s, "\n")
 	for _, c := range contents {
