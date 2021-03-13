@@ -428,7 +428,7 @@ The command expects a path to a db file (which will be created if it doesn't alr
 Each pair represents the name of a table to create and a query to generate its contents.
 
 ```
-askgit export my-export-file -e commits,"SELECT * FROM commits" -e files,"SELECT * FROM files"
+askgit export my-export-file -e commits -e "SELECT * FROM commits" -e files -e "SELECT * FROM files"
 ```
 
 This can be useful if you're looking to use another tool to examine the data emitted by `askgit`.
