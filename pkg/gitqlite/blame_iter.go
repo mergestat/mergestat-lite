@@ -1,6 +1,7 @@
 package gitqlite
 
 import (
+	"errors"
 	"strings"
 
 	git "github.com/libgit2/git2go/v31"
@@ -73,27 +74,26 @@ func (iter *BlameIterator) nextFile() error {
 
 	// iterate over the blame hunks
 	fileLine := 1
-	for i := 0; i < blame.HunkCount(); i++ {
-		hunk, err := blame.HunkByIndex(i)
+
+	for {
+		hunk, err := blame.HunkByLine(fileLine)
 		if err != nil {
+			if errors.Is(err, git.ErrInvalid) {
+				break
+			}
 			return err
 		}
-
-		// within a hunk, iterate over every line in the hunk
-		// creating and adding a new BlamedLine for each
-		for hunkLineOffset := 0; hunkLineOffset < int(hunk.LinesInHunk); hunkLineOffset++ {
-			// for every line of the hunk, create a BlamedLine
-			blamedLine := &BlamedLine{
-				File:     file.path + file.Name,
-				CommitID: hunk.OrigCommitId.String(),
-				Line:     fileLine + hunkLineOffset,
-				Content:  lines[i+hunkLineOffset],
-			}
-			// add it to the list for the current file
-			iter.currentBlamedLines = append(iter.currentBlamedLines, blamedLine)
-			// increment the file line by 1
-			fileLine++
+		blamedLine := &BlamedLine{
+			File:     file.path + file.Name,
+			CommitID: hunk.OrigCommitId.String(),
+			Line:     fileLine,
+			Content:  lines[fileLine-1],
 		}
+		// add it to the list for the current file
+		iter.currentBlamedLines = append(iter.currentBlamedLines, blamedLine)
+		// increment the file line by 1
+		fileLine++
+
 	}
 	iter.currentBlamedLineIdx = 0
 
@@ -109,7 +109,7 @@ func (iter *BlameIterator) Next() (*BlamedLine, error) {
 		}
 	}
 
-	// if we've exceeded the
+	// if we've exceeded the number of lines then go to next file
 	if iter.currentBlamedLineIdx >= len(iter.currentBlamedLines) {
 		err := iter.nextFile()
 		if err != nil {
