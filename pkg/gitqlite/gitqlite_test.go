@@ -30,7 +30,12 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 	code := m.Run()
-	close()
+	
+	err = close()
+	if err != nil {
+		panic(err)
+	}
+
 	err = fixtureDB.Close()
 	if err != nil {
 		panic(err)
