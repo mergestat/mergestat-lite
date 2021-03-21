@@ -226,7 +226,11 @@ func (vc *commitCursor) Rowid() (int64, error) {
 }
 
 func (vc *commitCursor) Close() error {
-	vc.commitIter.Free()
-	vc.repo.Free()
+	if vc.commitIter != nil {
+		vc.commitIter.Free()
+	}
+	if vc.repo != nil {
+		vc.repo.Free()
+	}
 	return nil
 }
