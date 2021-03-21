@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
 	git "github.com/libgit2/git2go/v31"
@@ -15,31 +16,32 @@ type BlameIterator struct {
 }
 
 type BlamedLine struct {
-	File     string
 	Line     int
+	File     string
 	CommitID string
 	Content  string
 }
 
-func NewBlameIterator(repo *git.Repository) (*BlameIterator, error) {
+func NewBlameIterator(repo *git.Repository) (*BlameIterator, []interface{}, error) {
 	head, err := repo.Head()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer head.Free()
 
 	// get a new iterator from repo and use the head commit
 	fileIter, err := NewCommitFileIter(repo, &commitFileIterOptions{head.Target().String()})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+	//	return &NumberIterator{CurrentInt: 0}, []interface{}{"number"}
 
 	return &BlameIterator{
 		repo,
 		fileIter,
 		nil,
 		0,
-	}, nil
+	}, []interface{}{"line_no", "file_path", "commit_id", "line_contents"}, nil
 }
 
 func (iter *BlameIterator) nextFile() error {
@@ -100,7 +102,7 @@ func (iter *BlameIterator) nextFile() error {
 	return nil
 }
 
-func (iter *BlameIterator) Next() (*BlamedLine, error) {
+func (iter *BlameIterator) Next() ([]interface{}, error) {
 	// if there's no currently blamed lines, grab the next file
 	if iter.currentBlamedLines == nil {
 		err := iter.nextFile()
@@ -124,6 +126,14 @@ func (iter *BlameIterator) Next() (*BlamedLine, error) {
 
 	blamedLine := iter.currentBlamedLines[iter.currentBlamedLineIdx]
 	iter.currentBlamedLineIdx++
+	//fmt.Println(fmt.Sprint(blamedLine))
+	vals := reflect.ValueOf(*blamedLine)
+	ret := make([]interface{}, vals.NumField())
+	for x := 0; x < vals.NumField(); x++ {
+		//fmt.Printf("%v\n", vals.Field(x).Interface())
+		ret[x] = vals.Field(x)
+	}
 
-	return blamedLine, nil
+	return ret, nil
+	//return blamedLine, nil
 }
