@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 	code := m.Run()
-	
+
 	err = close()
 	if err != nil {
 		panic(err)
@@ -116,8 +116,11 @@ func initFixtureDB(repoPath string) error {
 	if err != nil {
 		return err
 	}
-
-	err = sqliteConn.CreateModule("blame", NewGitBlameModule(&GitBlameModuleOptions{RepoPath: repoPath}))
+	iter, row, err := NewBlameIterator(fixtureRepo)
+	if err != nil {
+		return err
+	}
+	err = sqliteConn.CreateModule("blame", NewModule(&ModuleOptions{Iterator: iter, Row: row}))
 	if err != nil {
 		return err
 	}
