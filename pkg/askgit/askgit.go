@@ -175,8 +175,15 @@ func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
 	if err != nil {
 		return err
 	}
-
-	err = conn.CreateModule("blame", gitqlite.NewGitBlameModule(&gitqlite.GitBlameModuleOptions{RepoPath: a.RepoPath()}))
+	repo, err := git.OpenRepository(a.RepoPath())
+	if err != nil {
+		return err
+	}
+	iter, row, err := gitqlite.NewBlameIterator(repo)
+	if err != nil {
+		panic(err)
+	}
+	err = conn.CreateModule("blame", gitqlite.NewModule(&gitqlite.ModuleOptions{Iterator: iter, Row: row}))
 	if err != nil {
 		return err
 	}
