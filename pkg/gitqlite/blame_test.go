@@ -2,6 +2,7 @@ package gitqlite
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -56,7 +57,7 @@ func TestBlameDistinctFiles(t *testing.T) {
 
 }
 func TestBlameCommitID(t *testing.T) {
-	iterator, err := NewBlameIterator(fixtureRepo)
+	iterator, _, err := NewBlameIterator(fixtureRepo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +74,7 @@ func TestBlameCommitID(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		results, err := blame.Exec(context.Background(), cont.File, &blame.Options{Directory: fixtureRepoDir})
+		results, err := blame.Exec(context.Background(), fmt.Sprint(cont[1]), &blame.Options{Directory: fixtureRepoDir})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -89,7 +90,7 @@ func TestBlameCommitID(t *testing.T) {
 
 // TODO implement this with a join on commits
 func TestBlameAuthorEmail(t *testing.T) {
-	iterator, err := NewBlameIterator(fixtureRepo)
+	iterator, _, err := NewBlameIterator(fixtureRepo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +107,7 @@ func TestBlameAuthorEmail(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		results, err := blame.Exec(context.Background(), cont.File, &blame.Options{Directory: fixtureRepoDir})
+		results, err := blame.Exec(context.Background(), fmt.Sprint(cont[1]), &blame.Options{Directory: fixtureRepoDir})
 		if err != nil {
 			t.Fatal(err)
 		}
