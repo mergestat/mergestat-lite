@@ -3,6 +3,8 @@ package git
 import (
 	"fmt"
 	"go.riyazali.net/sqlite"
+	"strconv"
+	"strings"
 	"time"
 
 	git "github.com/libgit2/git2go/v31"
@@ -12,7 +14,7 @@ type LogModule struct{}
 
 func (l LogModule) Connect(_ *sqlite.Conn, args []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	// TODO(@riyaz): parse args to extract repo
-	var repo = "."
+	var repo, _ = strconv.Unquote(strings.SplitN(args[3], "=", 2)[1])
 
 	var schema = fmt.Sprintf(`CREATE TABLE %s (id TEXT, message TEXT, summary TEXT, 
 			author_name TEXT, author_email TEXT, author_when DATETIME, 

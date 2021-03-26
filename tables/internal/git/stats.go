@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go.riyazali.net/sqlite"
 	"io"
+	"strconv"
+	"strings"
 
 	git "github.com/libgit2/git2go/v31"
 )
@@ -13,7 +15,7 @@ type StatsModule struct{}
 
 func (m *StatsModule) Connect(_ *sqlite.Conn, args []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	// TODO(@riyaz): parse args to extract repo
-	var repo = "."
+	var repo, _ = strconv.Unquote(strings.SplitN(args[3], "=", 2)[1])
 
 	var schema = fmt.Sprintf(`CREATE TABLE %q (commit_id TEXT, file_path TEXT, additions INT, deletions INT)`, args[0])
 	return &gitStatsTable{path: repo}, declare(schema)

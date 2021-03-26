@@ -5,6 +5,8 @@ import (
 	"go.riyazali.net/sqlite"
 	"io"
 	"path"
+	"strconv"
+	"strings"
 
 	git "github.com/libgit2/git2go/v31"
 )
@@ -13,7 +15,7 @@ type FilesModule struct{}
 
 func (m *FilesModule) Connect(_ *sqlite.Conn, args []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	// TODO(@riyaz): parse args to extract repo
-	var repo = "."
+	var repo, _ = strconv.Unquote(strings.SplitN(args[3], "=", 2)[1])
 
 	var schema = fmt.Sprintf(`CREATE TABLE %q(commit_id TEXT, path TEXT, contents TEXT, executable BOOL)`, args[0])
 	return &gitFilesTable{repoPath: repo}, declare(schema)

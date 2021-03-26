@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go.riyazali.net/sqlite"
 	"io"
+	"strconv"
+	"strings"
 
 	git "github.com/libgit2/git2go/v31"
 )
@@ -12,8 +14,7 @@ import (
 type BlameModule struct{}
 
 func (m *BlameModule) Connect(_ *sqlite.Conn, args []string, declare func(string) error) (sqlite.VirtualTable, error) {
-	// TODO(@riyaz): parse args to extract repo
-	var repo = "."
+	var repo, _ = strconv.Unquote(strings.SplitN(args[3], "=", 2)[1])
 
 	var schema = fmt.Sprintf(`CREATE TABLE %q (line_no INT, file_path TEXT, commit_id TEXT, line_content TEXT)`, args[0])
 	return &gitBlameTable{repoPath: repo}, declare(schema)
