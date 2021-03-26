@@ -20,8 +20,10 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/mapstructure v1.4.0 // indirect
 	github.com/nsf/termbox-go v0.0.0-20201124104050-ed494de23a00 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.1.1
 	go.mongodb.org/mongo-driver v1.4.4 // indirect
+	go.riyazali.net/sqlite v0.0.0-20210227084556-55d5251c154c
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
