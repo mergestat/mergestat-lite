@@ -10,9 +10,9 @@ all: clean .build/libaskgit.so .build/askgit
 	$(call log, $(GREEN), "built $@")
 
 # pass these flags to linker to suppress missing symbol errors in intermediate artifacts
-CGO_LDFLAGS = -Wl,--unresolved-symbols=ignore-in-object-files
+export CGO_LDFLAGS = -Wl,--unresolved-symbols=ignore-in-object-files
 ifeq ($(shell uname -s),Darwin)
-	CGO_LDFLAGS = -Wl,-undefined,dynamic_lookup
+	export CGO_LDFLAGS = -Wl,-undefined,dynamic_lookup
 endif
 
 # target to compile askgit executable
@@ -40,6 +40,9 @@ clean:
 
 # ========================================
 # target for common golang tasks
+
+# go build tags used by test, vet and more
+TAGS = "libsqlite3,sqlite_vtable,vtable,sqlite_json1,static,system_libgit2"
 
 vet:
 	go vet -v -tags=$(TAGS) ./...
