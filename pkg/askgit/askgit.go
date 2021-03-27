@@ -83,16 +83,10 @@ func New(options *Options) (*AskGit, error) {
 
 	d := sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) (err error) {
-			if err = loadHelperFuncs(conn); err != nil {
-				return err
-			}
 			if err = a.loadGitModules(conn); err != nil {
 				return err
 			}
-			if err = a.loadGitHubModules(conn); err != nil {
-				return err
-			}
-			return nil
+			return a.loadGitHubModules(conn)
 		},
 	}
 
