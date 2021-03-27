@@ -26,7 +26,7 @@ package sqlite
 // #cgo CFLAGS: -DSQLITE_ENABLE_FTS3_PARENTHESIS
 // #cgo CFLAGS: -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT
 //
-// #include "../../.build/sqlite3/sqlite3.c"
+// #include "sqlite3.h"
 //
 // // extension function defined in the archive from go.riyazali.net/sqlite
 // // the symbol is only available during the final linkage when compiling the binary
