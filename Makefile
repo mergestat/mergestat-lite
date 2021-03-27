@@ -6,7 +6,8 @@ all: clean .build/libaskgit.so .build/askgit
 # target to build a dynamic extension that can be loaded at runtime
 .build/libaskgit.so: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
-	@go build -buildmode=c-shared -o $@ -tags="static,system_libgit2,shared" shared.go
+	@CGO_CFLAGS="-DUSE_LIBSQLITE3" CPATH="${PWD}/pkg/sqlite" \
+		go build -buildmode=c-shared -o $@ -tags="static,system_libgit2,shared" shared.go
 	$(call log, $(GREEN), "built $@")
 
 # pass these flags to linker to suppress missing symbol errors in intermediate artifacts
@@ -16,23 +17,23 @@ ifeq ($(shell uname -s),Darwin)
 endif
 
 # target to compile askgit executable
-.build/askgit: $(shell find . -type f -name '*.go' -o -name '*.c') .build/sqlite3/sqlite3.c
+.build/askgit: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
-	@CGO_LDFLAGS="${CGO_LDFLAGS}" go build -o $@ -tags="libsqlite3,sqlite_vtable,vtable,sqlite_json1,static,system_libgit2" askgit.go
+	@CGO_LDFLAGS="${CGO_LDFLAGS}" CGO_CFLAGS="-DUSE_LIBSQLITE3" CPATH="${PWD}/pkg/sqlite" \
+		go build -o $@ -tags="sqlite_vtable,vtable,sqlite_json1,static,system_libgit2" askgit.go
 	$(call log, $(GREEN), "built $@")
 
-# target to download sqlite3 amalgamation code
-.build/sqlite3/sqlite3.c:
-	$(call log, $(CYAN), "downloading sqlite3 amalgamation source v3.33.0")
+# target to download latest sqlite3 amalgamation code
+pkg/sqlite/sqlite3.c:
+	$(call log, $(CYAN), "downloading sqlite3 amalgamation source v3.35.0")
 	$(eval SQLITE_DOWNLOAD_DIR = $(shell mktemp -d))
-	@curl -sSLo $(SQLITE_DOWNLOAD_DIR)/sqlite3.zip https://www.sqlite.org/2020/sqlite-amalgamation-3330000.zip
-	$(call log, $(GREEN), "downloaded sqlite3 amalgamation source v3.33.0")
+	@curl -sSLo $(SQLITE_DOWNLOAD_DIR)/sqlite3.zip https://www.sqlite.org/2021/sqlite-amalgamation-3350000.zip
+	$(call log, $(GREEN), "downloaded sqlite3 amalgamation source v3.35.0")
 	$(call log, $(CYAN), "unzipping to $(SQLITE_DOWNLOAD_DIR)")
 	@(cd $(SQLITE_DOWNLOAD_DIR) && unzip sqlite3.zip > /dev/null)
-	$(call log, $(CYAN), "moving to .build/sqlite3")
-	@rm -rf .build/sqlite3 > /dev/null
-	@mkdir -p .build/sqlite3
-	@mv $(SQLITE_DOWNLOAD_DIR)/sqlite-amalgamation-3330000/* .build/sqlite3
+	@-rm $(SQLITE_DOWNLOAD_DIR)/sqlite-amalgamation-3350000/shell.c
+	$(call log, $(CYAN), "moving to pkg/sqlite")
+	@mv $(SQLITE_DOWNLOAD_DIR)/sqlite-amalgamation-3350000/* pkg/sqlite
 
 clean:
 	$(call log, $(YELLOW), "nuking .build/")
