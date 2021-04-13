@@ -3,24 +3,24 @@
 # default task invoked while running make
 all: clean .build/libaskgit.so .build/askgit
 
-# target to build a dynamic extension that can be loaded at runtime
-.build/libaskgit.so: $(shell find . -type f -name '*.go' -o -name '*.c')
-	$(call log, $(CYAN), "building $@")
-	@CGO_CFLAGS="-DUSE_LIBSQLITE3" CPATH="${PWD}/pkg/sqlite" \
-		go build -buildmode=c-shared -o $@ -tags="static,system_libgit2,shared" shared.go
-	$(call log, $(GREEN), "built $@")
-
 # pass these flags to linker to suppress missing symbol errors in intermediate artifacts
+export CGO_CFLAGS = -DUSE_LIBSQLITE3
+export CPATH = "${PWD}/pkg/sqlite"
 export CGO_LDFLAGS = -Wl,--unresolved-symbols=ignore-in-object-files
 ifeq ($(shell uname -s),Darwin)
 	export CGO_LDFLAGS = -Wl,-undefined,dynamic_lookup
 endif
 
+# target to build a dynamic extension that can be loaded at runtime
+.build/libaskgit.so: $(shell find . -type f -name '*.go' -o -name '*.c')
+	$(call log, $(CYAN), "building $@")
+	go build -buildmode=c-shared -o $@ -tags="static,system_libgit2,shared" shared.go
+	$(call log, $(GREEN), "built $@")
+
 # target to compile askgit executable
 .build/askgit: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
-	@CGO_LDFLAGS="${CGO_LDFLAGS}" CGO_CFLAGS="-DUSE_LIBSQLITE3" CPATH="${PWD}/pkg/sqlite" \
-		go build -o $@ -tags="sqlite_vtable,vtable,sqlite_json1,static,system_libgit2" askgit.go
+	go build -o $@ -tags="sqlite_vtable,vtable,sqlite_json1,static,system_libgit2" askgit.go
 	$(call log, $(GREEN), "built $@")
 
 # target to download latest sqlite3 amalgamation code
@@ -43,7 +43,7 @@ clean:
 # target for common golang tasks
 
 # go build tags used by test, vet and more
-TAGS = "libsqlite3,sqlite_vtable,vtable,sqlite_json1,static,system_libgit2"
+TAGS = "sqlite_vtable,vtable,sqlite_json1,static,system_libgit2"
 
 vet:
 	go vet -v -tags=$(TAGS) ./...
