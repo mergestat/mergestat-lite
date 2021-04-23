@@ -23,7 +23,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.1.1
 	go.mongodb.org/mongo-driver v1.4.4 // indirect
-	go.riyazali.net/sqlite v0.0.0-20210227084556-55d5251c154c
+	go.riyazali.net/sqlite v0.0.0-20210413174544-3cf76b5afbdc
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
