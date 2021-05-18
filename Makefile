@@ -1,4 +1,4 @@
-.PHONY: clean vet test lint test-cover bench
+.PHONY: clean vet test lint lint-ci test-cover bench
 
 # default task invoked while running make
 all: clean .build/libaskgit.so .build/askgit
@@ -53,6 +53,9 @@ build:
 
 lint:
 	golangci-lint run --build-tags $(TAGS)
+
+lint-ci:
+	./bin/golangci-lint run --build-tags $(TAGS) --out-format github-actions
 
 test:
 	go test -v -tags=$(TAGS) ./...

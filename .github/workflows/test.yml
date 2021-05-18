@@ -19,6 +19,11 @@ jobs:
 
     - name: Vet
       run: make vet
+
+    - name: Lint
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.40.1
+        make lint-ci
     
     - name: Test
       run: make test-cover
@@ -26,23 +31,24 @@ jobs:
     - name: Upload coverage
       uses: codecov/codecov-action@v1
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+  # TODO(patrickdevivo)
+  # lint:
+  #   name: Lint
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Install libgit2
-        run: |
-          git clone https://github.com/libgit2/libgit2.git ~/libgit2
-          cd ~/libgit2
-          git checkout v1.1.0
-          mkdir build && cd build
-          sudo cmake .. -DBUILD_CLAR=0
-          sudo cmake --build . --target install
+  #     - name: Install libgit2
+  #       run: |
+  #         git clone https://github.com/libgit2/libgit2.git ~/libgit2
+  #         cd ~/libgit2
+  #         git checkout v1.1.0
+  #         mkdir build && cd build
+  #         sudo cmake .. -DBUILD_CLAR=0
+  #         sudo cmake --build . --target install
 
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.29
-          args: --build-tags sqlite_vtable,static,system_libgit2
+  #     - name: golangci-lint
+  #       uses: golangci/golangci-lint-action@v2
+  #       with:
+  #         version: v1.29
+  #         args: --build-tags sqlite_vtable,static,system_libgit2

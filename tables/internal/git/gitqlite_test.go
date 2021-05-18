@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/pkg/errors"
-	"go.riyazali.net/sqlite"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/pkg/errors"
+	"go.riyazali.net/sqlite"
 
 	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
 	git "github.com/libgit2/git2go/v31"
@@ -27,12 +28,12 @@ func init() {
 	// register sqlite extension when this package is loaded
 	sqlite.Register(func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
 		var modules = map[string]sqlite.Module{
-			"git_blame": &BlameModule{},
+			"git_blame":    &BlameModule{},
 			"git_branches": &BranchesModule{},
-			"git_files": &FilesModule{},
-			"git_log": &LogModule{},
-			"git_stats": &StatsModule{},
-			"git_tags": &TagsModule{},
+			"git_files":    &FilesModule{},
+			"git_log":      &LogModule{},
+			"git_stats":    &StatsModule{},
+			"git_tags":     &TagsModule{},
 		}
 
 		for name, mod := range modules {
@@ -52,7 +53,10 @@ func TestMain(m *testing.M) {
 	if done, err = initFixtureRepo(); err != nil {
 		log.Fatalf("failed to initialize fixture repository: %v", err)
 	}
-	defer done()
+	defer func() {
+		err := done()
+		log.Fatal(err)
+	}()
 
 	if err = initFixtureDB(fixtureRepoDir); err != nil {
 		log.Fatalf("failed to initialize fixture database: %v", err)
