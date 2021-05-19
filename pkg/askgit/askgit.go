@@ -6,18 +6,18 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"os"
-	"os/exec"
-	"os/user"
-	"path"
-	"time"
-
 	"github.com/augmentable-dev/askgit/pkg/ghqlite"
-	"github.com/augmentable-dev/askgit/pkg/gitqlite"
+	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
+	_ "github.com/augmentable-dev/askgit/tables"
 	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
+	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
+	"os"
+	"os/user"
+	"path"
+	"time"
 )
 
 type AskGit struct {
@@ -82,23 +82,11 @@ func New(options *Options) (*AskGit, error) {
 	a := &AskGit{options: options}
 
 	d := sqlite3.SQLiteDriver{
-		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			err := loadHelperFuncs(conn)
-			if err != nil {
+		ConnectHook: func(conn *sqlite3.SQLiteConn) (err error) {
+			if err = a.loadGitModules(conn); err != nil {
 				return err
 			}
-
-			err = a.loadGitQLiteModules(conn)
-			if err != nil {
-				return err
-			}
-
-			err = a.loadGitHubModules(conn)
-			if err != nil {
-				return err
-			}
-
-			return nil
+			return a.loadGitHubModules(conn)
 		},
 	}
 
@@ -140,45 +128,21 @@ func (a *AskGit) RepoPath() string {
 	return a.options.RepoPath
 }
 
-func (a *AskGit) loadGitQLiteModules(conn *sqlite3.SQLiteConn) error {
-	_, err := exec.LookPath("git")
-	localGitExists := err == nil
+func (a *AskGit) loadGitModules(conn *sqlite3.SQLiteConn) error {
+	var sp = fmt.Sprintf
+	var stmts = []string{
+		sp("CREATE VIRTUAL TABLE commits  USING git_log(path=%q)", a.RepoPath()),
+		sp("CREATE VIRTUAL TABLE branches USING git_branches(path=%q)", a.RepoPath()),
+		sp("CREATE VIRTUAL TABLE blame    USING git_blame(path=%q)", a.RepoPath()),
+		sp("CREATE VIRTUAL TABLE files    USING git_files(path=%q)", a.RepoPath()),
+		sp("CREATE VIRTUAL TABLE stats    USING git_stats(path=%q)", a.RepoPath()),
+		sp("CREATE VIRTUAL TABLE tags     USING git_tags(path=%q)", a.RepoPath()),
+	}
 
-	if !a.options.UseGitCLI || !localGitExists {
-		err = conn.CreateModule("commits", gitqlite.NewGitLogModule(&gitqlite.GitLogModuleOptions{RepoPath: a.RepoPath()}))
-		if err != nil {
-			return err
+	for _, stmt := range stmts {
+		if _, err := conn.Exec(stmt, nil); err != nil {
+			return errors.Wrap(err, "failed to create virtual table")
 		}
-	} else {
-		err = conn.CreateModule("commits", gitqlite.NewGitLogCLIModule(&gitqlite.GitLogCLIModuleOptions{RepoPath: a.RepoPath()}))
-		if err != nil {
-			return err
-		}
-	}
-
-	err = conn.CreateModule("stats", gitqlite.NewGitStatsModule(&gitqlite.GitStatsModuleOptions{RepoPath: a.RepoPath()}))
-	if err != nil {
-		return err
-	}
-
-	err = conn.CreateModule("files", gitqlite.NewGitFilesModule(&gitqlite.GitFilesModuleOptions{RepoPath: a.RepoPath()}))
-	if err != nil {
-		return err
-	}
-
-	err = conn.CreateModule("tags", gitqlite.NewGitTagsModule(&gitqlite.GitTagsModuleOptions{RepoPath: a.RepoPath()}))
-	if err != nil {
-		return err
-	}
-
-	err = conn.CreateModule("branches", gitqlite.NewGitBranchesModule(&gitqlite.GitBranchesModuleOptions{RepoPath: a.RepoPath()}))
-	if err != nil {
-		return err
-	}
-
-	err = conn.CreateModule("blame", gitqlite.NewGitBlameModule(&gitqlite.GitBlameModuleOptions{RepoPath: a.RepoPath()}))
-	if err != nil {
-		return err
 	}
 
 	return nil

@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"os"
 	"testing"
-
+	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
 	"github.com/mattn/go-sqlite3"
+	"go.riyazali.net/sqlite"
 )
 
 var (
@@ -13,6 +14,7 @@ var (
 )
 
 func init() {
+	sqlite.Register(func(_ *sqlite.ExtensionApi) (sqlite.ErrorCode, error) { return sqlite.SQLITE_OK, nil })
 	sql.Register("ghqlite", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
 			err := conn.CreateModule("github_org_repos", NewReposModule(OwnerTypeOrganization, ReposModuleOptions{

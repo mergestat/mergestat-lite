@@ -1,0 +1,2 @@
+# mark sqlite3 amalgamation as vendored so as not to skew repository stats
+pkg/sqlite/*.{c,h} linguist-vendored
