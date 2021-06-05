@@ -17,6 +17,7 @@ func init() {
 	sqlite.Register(func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
 		var modules = map[string]sqlite.Module{
 			"commits": &LogModule{Locator: locator.CachedLocator(locator.MultiLocator())},
+			"refs": &RefModule{Locator: locator.CachedLocator(locator.MultiLocator())},
 		}
 
 		for name, mod := range modules {
