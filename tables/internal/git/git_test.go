@@ -17,12 +17,22 @@ func init() {
 	sqlite.Register(func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
 		var modules = map[string]sqlite.Module{
 			"commits": &LogModule{Locator: locator.CachedLocator(locator.MultiLocator())},
-			"refs": &RefModule{Locator: locator.CachedLocator(locator.MultiLocator())},
+			"refs":    &RefModule{Locator: locator.CachedLocator(locator.MultiLocator())},
 		}
 
 		for name, mod := range modules {
 			if err = ext.CreateModule(name, mod); err != nil {
 				return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register %q module", name)
+			}
+		}
+
+		var funcs = map[string]sqlite.Function{
+			"commit_from_tag": &CommitFromTagFn{},
+		}
+
+		for name, fn := range funcs {
+			if err = ext.CreateFunction(name, fn); err != nil {
+				return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register %q function", name)
 			}
 		}
 

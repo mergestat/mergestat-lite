@@ -27,6 +27,7 @@ func (mod *RefModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) e
 			target		TEXT,
 			
 			repository	HIDDEN,
+			tag			HIDDEN,
 			PRIMARY KEY ( name )
 		) WITHOUT ROWID`
 
@@ -129,6 +130,14 @@ func (cur *gitRefCursor) Column(c *sqlite.Context, col int) error {
 		}
 	case 5:
 		c.ResultText(ref.Target().String())
+	case 7:
+		if ref.Name().IsTag() {
+			if tag, err := cur.repo.TagObject(ref.Hash()); err != nil && err != plumbing.ErrObjectNotFound {
+				return errors.Wrap(err, "failed to fetch tag object")
+			} else if tag != nil && tag.TargetType == plumbing.CommitObject {
+				c.ResultPointer(tag)
+			}
+		}
 	}
 
 	return nil

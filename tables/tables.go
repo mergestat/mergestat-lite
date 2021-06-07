@@ -30,6 +30,16 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 			}
 		}
 
+		var fns = map[string]sqlite.Function{
+			"commit_from_tag": &git.CommitFromTagFn{},
+		}
+
+		for name, fn := range fns {
+			if err = ext.CreateFunction(name, fn); err != nil {
+				return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register %q function", name)
+			}
+		}
+
 		// only conditionally register the utility functions
 		if opt.ExtraFunctions {
 			// register sql functions
