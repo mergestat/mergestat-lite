@@ -81,8 +81,14 @@ func (tab *gitLogTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 
 	for i, constraint := range input.Constraints {
 		idx := constraint.ColumnIndex
+
+		// if hash is provided, it must be usable
+		if idx == 0 && !constraint.Usable {
+			return nil, sqlite.SQLITE_CONSTRAINT
+		}
+
 		if !constraint.Usable {
-			continue // we do not support unusable constraint at all
+			continue
 		}
 
 		argv += 1 // increment pro-actively .. if unused we decrement it later
@@ -257,7 +263,9 @@ func (cur *gitLogCursor) Column(c *sqlite.Context, col int) error {
 
 func (cur *gitLogCursor) Next() (err error) {
 	if cur.commit, err = cur.commits.Next(); err != nil {
-		if !eof(err) {
+		// check for ErrObjectNotFound to ensure we don't crash
+		// if the user provided hash did not point to a commit
+		if !eof(err) && err != plumbing.ErrObjectNotFound {
 			return err
 		}
 	}
