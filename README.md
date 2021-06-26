@@ -49,7 +49,7 @@ More in-depth examples and documentation can be found below.
 ### Homebrew
 
 ```
-brew tap augmentable-dev/askgit
+brew tap askgitdev/askgit
 brew install askgit
 ```
 
