@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/augmentable-dev/askgit/pkg/gitlog"
+	"github.com/askgitdev/askgit/pkg/gitlog"
 	"github.com/mattn/go-sqlite3"
 )
 

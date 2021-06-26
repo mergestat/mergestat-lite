@@ -2,7 +2,7 @@ package funcs
 
 import (
 	"database/sql"
-	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
+	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 	"log"

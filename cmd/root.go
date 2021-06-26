@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/augmentable-dev/askgit/pkg/askgit"
-	"github.com/augmentable-dev/askgit/pkg/tui"
+	"github.com/askgitdev/askgit/pkg/askgit"
+	"github.com/askgitdev/askgit/pkg/tui"
 	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v31"
 	"github.com/spf13/cobra"
@@ -85,7 +85,7 @@ var rootCmd = &cobra.Command{
 	Args: cobra.MaximumNArgs(2),
 	Long: `
   askgit is a CLI for querying git repositories with SQL, using SQLite virtual tables.
-  Example queries can be found in the GitHub repo: https://github.com/augmentable-dev/askgit`,
+  Example queries can be found in the GitHub repo: https://github.com/askgitdev/askgit`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
 		info, err := os.Stdin.Stat()

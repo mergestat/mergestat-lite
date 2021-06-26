@@ -5,7 +5,7 @@ import (
 	"log"
 	"text/tabwriter"
 
-	"github.com/augmentable-dev/askgit/pkg/askgit"
+	"github.com/askgitdev/askgit/pkg/askgit"
 	"github.com/jroimartin/gocui"
 )
 

@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"os"
 	"testing"
-	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
+
+	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	"github.com/mattn/go-sqlite3"
 	"go.riyazali.net/sqlite"
 )

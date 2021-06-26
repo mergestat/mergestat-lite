@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	fixtureRepoCloneURL = "https://github.com/augmentable-dev/gitqlite"
+	fixtureRepoCloneURL = "https://github.com/askgitdev/askgit"
 	fixtureRepo         *git.Repository
 	fixtureRepoDir      string
 )

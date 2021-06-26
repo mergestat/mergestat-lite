@@ -6,7 +6,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/augmentable-dev/askgit/pkg/askgit"
+	"github.com/askgitdev/askgit/pkg/askgit"
 	"github.com/jroimartin/gocui"
 )
 
