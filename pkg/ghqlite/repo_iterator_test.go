@@ -23,7 +23,7 @@ func TestRepoIterator(t *testing.T) {
 
 	minRepos := 10
 	for i, options := range testCases {
-		iter := NewRepoIterator("askgitdev", OwnerTypeOrganization, options)
+		iter := NewRepoIterator("augmentable-dev", OwnerTypeOrganization, options)
 
 		t.Run(fmt.Sprintf("Case#%d", i), func(t *testing.T) {
 			for k := 0; k < minRepos; k++ {
