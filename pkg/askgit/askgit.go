@@ -6,18 +6,19 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/augmentable-dev/askgit/pkg/ghqlite"
-	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
-	_ "github.com/augmentable-dev/askgit/tables"
+	"os"
+	"os/user"
+	"path"
+	"time"
+
+	"github.com/askgitdev/askgit/pkg/ghqlite"
+	_ "github.com/askgitdev/askgit/pkg/sqlite"
+	_ "github.com/askgitdev/askgit/tables"
 	"github.com/gitsight/go-vcsurl"
 	git "github.com/libgit2/git2go/v31"
 	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
-	"os"
-	"os/user"
-	"path"
-	"time"
 )
 
 type AskGit struct {

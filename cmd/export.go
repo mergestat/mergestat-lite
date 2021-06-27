@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/augmentable-dev/askgit/pkg/askgit"
+	"github.com/askgitdev/askgit/pkg/askgit"
 	"github.com/spf13/cobra"
 )
 

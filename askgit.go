@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/augmentable-dev/askgit/cmd"
+	"github.com/askgitdev/askgit/cmd"
 )
 
 func main() {

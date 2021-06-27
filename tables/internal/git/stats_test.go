@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/augmentable-dev/askgit/pkg/gitlog"
+	"github.com/askgitdev/askgit/pkg/gitlog"
 )
 
 func TestStatsIterator(t *testing.T) {

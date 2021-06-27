@@ -2,15 +2,15 @@
     "go.buildFlags": [
         "-tags='sqlite_vtable'"
     ],
-    "go.testFlags": [
-        "-v"
-    ],
-    "go.vetFlags": [
-        "-tags='sqlite_vtable'"
-    ],
+    "go.testFlags":  ["-v", "-tags=libsqlite3,sqlite_json1"],
+    "go.vetFlags": ["-tags=libsqlite3,sqlite_json1"],
     "go.toolsEnvVars": {
-        "GOFLAGS": "-tags='sqlite_vtable'"
+        "GOFLAGS": "-tags='sqlite_vtable'",
+        "CGO_LDFLAGS": "-Wl,-undefined,dynamic_lookup"
     },
     "go.testTimeout": "120s",
-    "go.testEnvFile": "${workspaceFolder}/.env"
+    "go.testEnvFile": "${workspaceFolder}/.env",
+    "go.testEnvVars": {
+        "CGO_LDFLAGS": "-Wl,-undefined,dynamic_lookup",
+    },
 }

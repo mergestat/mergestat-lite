@@ -4,7 +4,7 @@ package tools
 
 import (
 	"database/sql"
-	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
+	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	git "github.com/libgit2/git2go/v31"
 	_ "github.com/mattn/go-sqlite3"
 	"io/ioutil"

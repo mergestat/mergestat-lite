@@ -1,4 +1,4 @@
-module github.com/augmentable-dev/askgit
+module github.com/askgitdev/askgit
 
 go 1.13
 
