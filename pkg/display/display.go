@@ -1,4 +1,4 @@
-package askgit
+package display
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ import (
 	"golang.org/x/term"
 )
 
-func DisplayDB(rows *sql.Rows, w io.Writer, format string, interactive bool) error {
+func WriteTo(rows *sql.Rows, w io.Writer, format string, interactive bool) error {
 	switch format {
 	case "single":
 		err := single(rows, w)

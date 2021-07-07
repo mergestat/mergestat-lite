@@ -1,23 +1,24 @@
-package tui
+package query
 
-var (
-	Queries = map[string]string{
+var queries = map[string]string{
+	// show all commit information from repository, in the current directory
+	"commit-info": "SELECT * FROM commits",
 
-		"commit-info": "SELECT * FROM commits",
+	// list all distinct author information from commits in current directory
+	"distinct-authors": "SELECT author_name, DISTINCT( author_email ) FROM commits",
 
-		"distinct-authors": "SELECT DISTINCT author_email FROM commits",
-
-		"commits-per-author": `SELECT 
+	// list all count of commits, grouping by authors, in descending author
+	"commits-per-author": `SELECT 
 		author_email, count(*) 
 		FROM commits GROUP BY author_email 
 		ORDER BY count(*) DESC`,
 
-		"author-stats": `SELECT count(DISTINCT commits.id) AS commits, SUM(additions) AS additions, SUM(deletions) AS deletions, author_email
+	"author-stats": `SELECT count(DISTINCT commits.id) AS commits, SUM(additions) AS additions, SUM(deletions) AS deletions, author_email
 		FROM commits LEFT JOIN stats ON commits.id = stats.commit_id
 		WHERE commits.parent_count < 2
 		GROUP BY author_email ORDER BY commits`,
 
-		"author-commits-dow": `SELECT
+	"author-commits-dow": `SELECT
 			count(*) AS commits,
 			count(CASE WHEN strftime('%w',author_when)='0' THEN 1 END) AS sunday,
 			count(CASE WHEN strftime('%w',author_when)='1' THEN 1 END) AS monday,
@@ -28,12 +29,7 @@ var (
 			count(CASE WHEN strftime('%w',author_when)='6' THEN 1 END) AS saturday,
 			author_email
 		FROM commits GROUP BY author_email ORDER BY commits`,
+}
 
-		"tables": `
-		SELECT name FROM sqlite_master
-		WHERE
-			type IN ('table','view') AND
-			name NOT LIKE 'sqlite_%'
-		`,
-	}
-)
+// Find finds and return the named query
+func Find(name string) (string, bool) { q, ok := queries[name]; return q, ok }

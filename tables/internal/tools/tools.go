@@ -5,33 +5,8 @@ package tools
 import (
 	"database/sql"
 	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
-	git "github.com/libgit2/git2go/v31"
 	_ "github.com/mattn/go-sqlite3"
-	"io/ioutil"
-	"os"
 )
-
-func Clone(url string) (_ *git.Repository, _ func() error, err error) {
-	var dir string
-	if dir, err = ioutil.TempDir("", "repo"); err != nil {
-		return nil, nil, err
-	}
-
-	var repo *git.Repository
-	if repo, err = git.Clone(url, dir, &git.CloneOptions{}); err != nil {
-		return nil, nil, err
-	}
-
-	return repo, func() error { return os.RemoveAll(dir) }, nil
-}
-
-func RowCount(rows *sql.Rows) int {
-	var count = 0
-	for rows.Next() {
-		count++
-	}
-	return count
-}
 
 func RowContent(rows *sql.Rows) (colCount int, contents [][]string, err error) {
 	columns, err := rows.Columns()
