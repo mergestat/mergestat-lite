@@ -2,6 +2,7 @@ package git_test
 
 import (
 	"database/sql"
+	"os"
 	"testing"
 	"time"
 )
@@ -85,6 +86,10 @@ func TestDefaultCases(t *testing.T) {
 	}
 
 	t.Run("should use current working directory as default repository", func(t *testing.T) {
+		if ci, ok := os.LookupEnv("CI"); ok && ci == "true" {
+			t.Skip("skipping test as current working directory cannot be set in ci environment")
+		}
+
 		_, _, _, err := q(db.QueryRow("SELECT hash, committer_email, committer_when FROM commits LIMIT 1"))
 		if err != nil {
 			t.Error(err)
