@@ -27,4 +27,3 @@ func TestCommitFromTagFn(t *testing.T) {
 		t.Fatalf("failed to fetch results: %v", err.Error())
 	}
 }
-
