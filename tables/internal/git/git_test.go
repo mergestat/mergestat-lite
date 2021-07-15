@@ -2,9 +2,9 @@ package git_test
 
 import (
 	"database/sql"
-	"github.com/augmentable-dev/askgit/pkg/locator"
-	_ "github.com/augmentable-dev/askgit/pkg/sqlite"
-	"github.com/augmentable-dev/askgit/tables"
+	"github.com/askgitdev/askgit/pkg/locator"
+	_ "github.com/askgitdev/askgit/pkg/sqlite"
+	"github.com/askgitdev/askgit/tables"
 	_ "github.com/mattn/go-sqlite3"
 	"go.riyazali.net/sqlite"
 	"os"

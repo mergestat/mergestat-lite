@@ -1,7 +1,7 @@
 package funcs
 
 import (
-	"github.com/augmentable-dev/askgit/tables/internal/tools"
+	"github.com/askgitdev/askgit/tables/internal/tools"
 	"testing"
 )
 

@@ -4,8 +4,8 @@
 package tables
 
 import (
-	"github.com/augmentable-dev/askgit/tables/internal/funcs"
-	"github.com/augmentable-dev/askgit/tables/internal/git"
+	"github.com/askgitdev/askgit/tables/internal/funcs"
+	"github.com/askgitdev/askgit/tables/internal/git"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )

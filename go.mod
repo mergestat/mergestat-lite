@@ -1,4 +1,4 @@
-module github.com/augmentable-dev/askgit
+module github.com/askgitdev/askgit
 
 go 1.13
 
@@ -17,11 +17,10 @@ require (
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
-	github.com/jroimartin/gocui v0.4.0
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
+	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/mapstructure v1.4.0 // indirect
-	github.com/nsf/termbox-go v0.0.0-20201124104050-ed494de23a00 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/cobra v1.1.1

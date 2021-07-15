@@ -1,8 +1,8 @@
-[![GoDev](https://img.shields.io/static/v1?label=godev&message=reference&color=00add8)](https://pkg.go.dev/github.com/augmentable-dev/askgit)
-[![BuildStatus](https://github.com/augmentable-dev/askgit/workflows/tests/badge.svg)](https://github.com/augmentable-dev/askgit/actions?workflow=tests)
-[![Go Report Card](https://goreportcard.com/badge/github.com/augmentable-dev/askgit)](https://goreportcard.com/report/github.com/augmentable-dev/askgit)
-[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/augmentable-dev/askgit)](https://www.tickgit.com/browse?repo=github.com/augmentable-dev/askgit)
-[![codecov](https://codecov.io/gh/augmentable-dev/askgit/branch/master/graph/badge.svg)](https://codecov.io/gh/augmentable-dev/askgit)
+[![GoDev](https://img.shields.io/static/v1?label=godev&message=reference&color=00add8)](https://pkg.go.dev/github.com/askgitdev/askgit)
+[![BuildStatus](https://github.com/askgitdev/askgit/workflows/tests/badge.svg)](https://github.com/askgitdev/askgit/actions?workflow=tests)
+[![Go Report Card](https://goreportcard.com/badge/github.com/askgitdev/askgit)](https://goreportcard.com/report/github.com/askgitdev/askgit)
+[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/askgitdev/askgit/main)](https://www.tickgit.com/browse?repo=github.com/askgitdev/askgit&branch=main)
+[![codecov](https://codecov.io/gh/askgitdev/askgit/branch/main/graph/badge.svg)](https://codecov.io/gh/askgitdev/askgit)
 
 
 # askgit <!-- omit in toc -->
@@ -49,20 +49,20 @@ More in-depth examples and documentation can be found below.
 ### Homebrew
 
 ```
-brew tap augmentable-dev/askgit
+brew tap askgitdev/askgit
 brew install askgit
 ```
 
 ### Go
 
 ```
-go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit
+go get -v -tags=sqlite_vtable github.com/askgitdev/askgit
 ```
 
 Will use the go tool chain to install a binary to `$GOBIN`.
 
 ```
-GOBIN=$(pwd) go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit
+GOBIN=$(pwd) go get -v -tags=sqlite_vtable github.com/askgitdev/askgit
 ```
 
 Will produce a binary in your current directory.
@@ -222,10 +222,10 @@ These tables can be queried as table-valued functions expecting a single paramet
 
 ```sql
 -- return all repos from a github *org*
-SELECT * FROM github_org_repos('augmentable-dev')
+SELECT * FROM github_org_repos('askgitdev')
 
 -- return all repos from a github *user*
-SELECT * FROM github_user_repos('augmentable-dev')
+SELECT * FROM github_user_repos('askgitdev')
 ```
 
 | Column            | Type     |
@@ -260,10 +260,10 @@ SELECT * FROM github_user_repos('augmentable-dev')
 
 ##### `github_pull_requests`
 
-This table expects 2 parameters, `github_pull_requests('augmentable-dev', 'askgit')`:
+This table expects 2 parameters, `github_pull_requests('askgitdev', 'askgit')`:
 
 ```sql
-SELECT count(*) FROM github_pull_requests('augmentable-dev', 'askgit') WHERE state = 'open'
+SELECT count(*) FROM github_pull_requests('askgitdev', 'askgit') WHERE state = 'open'
 ```
 
 | Column                    | Type     |
@@ -310,10 +310,10 @@ SELECT count(*) FROM github_pull_requests('augmentable-dev', 'askgit') WHERE sta
 
 ##### `github_issues`
 
-This table expects 2 parameters, `github_issues('augmentable-dev', 'askgit')`:
+This table expects 2 parameters, `github_issues('askgitdev', 'askgit')`:
 
 ```sql
-SELECT count(*) FROM github_issues('augmentable-dev', 'askgit') WHERE state = 'open'
+SELECT count(*) FROM github_issues('askgitdev', 'askgit') WHERE state = 'open'
 ```
 
 

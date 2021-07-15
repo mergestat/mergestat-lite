@@ -5,7 +5,7 @@ import (
 )
 
 func TestPullRequestsTable(t *testing.T) {
-	rows, err := DB.Query("SELECT * FROM github_pull_requests('augmentable-dev', 'askgit') WHERE state = 'closed' LIMIT 5")
+	rows, err := DB.Query("SELECT * FROM github_pull_requests('askgitdev', 'askgit') WHERE state = 'closed' LIMIT 5")
 	if err != nil {
 		t.Fatal(err)
 	}

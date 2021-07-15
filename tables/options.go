@@ -2,7 +2,7 @@ package tables
 
 import (
 	"context"
-	"github.com/augmentable-dev/askgit/tables/services"
+	"github.com/askgitdev/askgit/tables/services"
 	"github.com/go-git/go-git/v5"
 )
 

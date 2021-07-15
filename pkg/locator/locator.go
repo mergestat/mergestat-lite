@@ -9,8 +9,8 @@ package locator
 
 import (
 	"context"
-	"github.com/augmentable-dev/askgit/tables"
-	"github.com/augmentable-dev/askgit/tables/services"
+	"github.com/askgitdev/askgit/tables"
+	"github.com/askgitdev/askgit/tables/services"
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
