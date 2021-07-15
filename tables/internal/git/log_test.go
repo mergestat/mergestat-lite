@@ -90,7 +90,12 @@ func TestDefaultCases(t *testing.T) {
 			t.Skip("skipping test as current working directory cannot be set in ci environment")
 		}
 
-		_, _, _, err := q(db.QueryRow("SELECT hash, committer_email, committer_when FROM commits LIMIT 1"))
+		err := os.Chdir("../../../")
+		if err != nil {
+			t.Fatalf("failed to change working directory: %v", err)
+		}
+
+		_, _, _, err = q(db.QueryRow("SELECT hash, committer_email, committer_when FROM commits LIMIT 1"))
 		if err != nil {
 			t.Error(err)
 			t.Fail()
