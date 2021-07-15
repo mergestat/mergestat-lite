@@ -7,7 +7,7 @@ import (
 
 func TestCommitFromTagFn(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/augmentable-dev/askgit"
+	repo := "https://github.com/askgitdev/askgit"
 
 	rows, err := db.Query("SELECT name, full_name, COMMIT_FROM_TAG(tag) FROM refs(?) WHERE type = 'tag'", repo)
 	if err != nil {

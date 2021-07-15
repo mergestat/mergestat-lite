@@ -7,7 +7,7 @@ import (
 
 func TestSelectAllRefs(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/augmentable-dev/askgit"
+	repo := "https://github.com/askgitdev/askgit"
 
 	rows, err := db.Query("SELECT * FROM refs(?)", repo)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 
 func TestSelectAllCommits(t *testing.T) {
 	db := Connect(t, Memory)
-	repo, ref := "https://github.com/augmentable-dev/askgit", "HEAD"
+	repo, ref := "https://github.com/askgitdev/askgit", "HEAD"
 
 	rows, err := db.Query("SELECT * FROM commits(?, ?) LIMIT 5", repo, ref)
 	if err != nil {
@@ -36,7 +36,7 @@ func TestSelectAllCommits(t *testing.T) {
 
 func TestSelectCommitByHash(t *testing.T) {
 	db := Connect(t, Memory)
-	repo, ref := "https://github.com/augmentable-dev/askgit", "HEAD"
+	repo, ref := "https://github.com/askgitdev/askgit", "HEAD"
 	hash := "5ce802c851d3bedb5bb4a0f749093cae9a34818b"
 
 	var message, email string
@@ -52,7 +52,7 @@ func TestSelectCommitByHash(t *testing.T) {
 
 func TestDateFilterOnCommit(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/augmentable-dev/askgit"
+	repo := "https://github.com/askgitdev/askgit"
 
 	rows, err := db.Query("SELECT hash, committer_email, committer_when FROM commits(?)"+
 		"	WHERE committer_when > DATE(?) AND committer_when < DATE(?) ORDER BY committer_when DESC",
@@ -78,7 +78,7 @@ func TestDateFilterOnCommit(t *testing.T) {
 
 func TestDefaultCases(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/augmentable-dev/askgit"
+	repo := "https://github.com/askgitdev/askgit"
 
 	var q = func(row *sql.Row) (hash, email string, when time.Time, err error) {
 		err = row.Scan(&hash, &email, &when)
