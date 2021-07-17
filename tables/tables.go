@@ -24,6 +24,7 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 			"refs":    &git.RefModule{Locator: opt.Locator},
 			"stats":   git.NewStatsModule(opt.Locator),
 			"files":   git.NewFilesModule(opt.Locator),
+			"blame":   git.NewBlameModule(opt.Locator),
 		}
 
 		for name, mod := range modules {

@@ -55,7 +55,7 @@ func newFilesIter(locator services.RepoLocator, repoPath, ref string) (*filesIte
 
 	fsStorer, ok := r.Storer.(*filesystem.Storage)
 	if !ok {
-		return nil, fmt.Errorf("stats table only supported on filesystem backed git repos")
+		return nil, fmt.Errorf("file table only supported on filesystem backed git repos")
 	}
 
 	repo, err := libgit2.OpenRepository(fsStorer.Filesystem().Root())
