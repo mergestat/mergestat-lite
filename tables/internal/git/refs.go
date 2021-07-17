@@ -2,14 +2,15 @@ package git
 
 import (
 	"context"
+	"os"
+	"regexp"
+
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
-	"os"
-	"regexp"
 )
 
 var remoteName = regexp.MustCompile(`(?m)refs\/remotes\/([^\/]*)\/.+`)

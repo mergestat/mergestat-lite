@@ -9,6 +9,11 @@ package locator
 
 import (
 	"context"
+	"io/ioutil"
+	"net/url"
+	"os"
+	"strings"
+
 	"github.com/askgitdev/askgit/tables"
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/go-git/go-billy/v5/osfs"
@@ -16,10 +21,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"net/url"
-	"os"
-	"strings"
 )
 
 // DiskLocator is a repo locator implementation that opens on-disk repository at the specified path.

@@ -7,6 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210512092938-c05353c2d58c // indirect
+	github.com/augmentable-dev/vtab v0.0.0-20210717200339-0c8dcfe2033b
 	github.com/clbanning/mxj/v2 v2.5.2
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.3.1
@@ -18,6 +19,7 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
+	github.com/libgit2/git2go/v31 v31.4.14
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/mapstructure v1.4.0 // indirect

@@ -2,6 +2,9 @@ package git
 
 import (
 	"context"
+	"os"
+	"time"
+
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -9,8 +12,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
-	"os"
-	"time"
 )
 
 type LogModule struct{ Locator services.RepoLocator }
