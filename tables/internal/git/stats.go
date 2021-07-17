@@ -16,23 +16,25 @@ import (
 // NewStatsModule returns the implementation of a table-valued-function for git stats
 func NewStatsModule(locator services.RepoLocator) sqlite.Module {
 	return vtab.NewTableFunc("stats", cols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var repoPath, ref string
+		var repoPath, ref, toRef string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
-				case 4:
+				case 3:
 					repoPath = constraint.Value.Text()
-				case 5:
+				case 4:
 					ref = constraint.Value.Text()
+				case 5:
+					toRef = constraint.Value.Text()
 				}
 			}
 		}
 
-		return newStatsIter(locator, repoPath, ref)
+		return newStatsIter(locator, repoPath, ref, toRef)
 	})
 }
 
-func newStatsIter(locator services.RepoLocator, repoPath, ref string) (*statsIter, error) {
+func newStatsIter(locator services.RepoLocator, repoPath, ref, toRef string) (*statsIter, error) {
 	iter := &statsIter{
 		repoPath: repoPath,
 		ref:      ref,
@@ -93,8 +95,22 @@ func newStatsIter(locator services.RepoLocator, repoPath, ref string) (*statsIte
 	}
 	defer tree.Free()
 
+	var toCommit *libgit2.Commit
+	if toRef == "" {
+		toCommit = fromCommit.Parent(0)
+	} else {
+		id, err := libgit2.NewOid(toRef)
+		if err != nil {
+			return nil, fmt.Errorf("invalid to_ref: %v", err)
+		}
+
+		toCommit, err = repo.LookupCommit(id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	var toTree *libgit2.Tree
-	toCommit := fromCommit.Parent(0)
 	if toCommit == nil {
 		toTree = &libgit2.Tree{}
 	} else {
@@ -135,10 +151,7 @@ func newStatsIter(locator services.RepoLocator, repoPath, ref string) (*statsIte
 
 	iter.stats = make([]*stat, 0)
 	err = diff.ForEach(func(delta libgit2.DiffDelta, progress float64) (libgit2.DiffForEachHunkCallback, error) {
-		stat := &stat{
-			commitHash: fromCommit.Id().String(),
-			filePath:   delta.NewFile.Path,
-		}
+		stat := &stat{filePath: delta.NewFile.Path}
 		iter.stats = append(iter.stats, stat)
 		return func(hunk libgit2.DiffHunk) (libgit2.DiffForEachLineCallback, error) {
 			return func(line libgit2.DiffLine) error {
@@ -160,20 +173,19 @@ func newStatsIter(locator services.RepoLocator, repoPath, ref string) (*statsIte
 }
 
 var cols = []vtab.Column{
-	{Name: "commit_hash", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "file_path", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "additions", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "deletions", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
 	{Name: "repository", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "to_ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 type stat struct {
-	commitHash string
-	filePath   string
-	additions  int
-	deletions  int
+	filePath  string
+	additions int
+	deletions int
 }
 
 type statsIter struct {
@@ -187,15 +199,11 @@ func (i *statsIter) Column(ctx *sqlite.Context, c int) error {
 	currentStat := i.stats[i.index]
 	switch c {
 	case 0:
-		ctx.ResultText(currentStat.commitHash)
-	case 1:
 		ctx.ResultText(currentStat.filePath)
-	case 2:
+	case 1:
 		ctx.ResultInt(currentStat.additions)
-	case 3:
+	case 2:
 		ctx.ResultInt(currentStat.deletions)
-	case 4:
-		ctx.ResultNull()
 	}
 	return nil
 }
