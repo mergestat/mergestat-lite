@@ -21,7 +21,7 @@ func TestSelectLast5CommitStats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to scan resultset: %v", err)
 		}
-		t.Logf("commit: hash=%q file_path=%s additions=%d deletions=%d", hash, file_path, additions, deletions)
+		t.Logf("stat: hash=%q file_path=%s additions=%d deletions=%d", hash, file_path, additions, deletions)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -46,7 +46,7 @@ func TestSummarizeLast5CommitStats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to scan resultset: %v", err)
 		}
-		t.Logf("commit: hash=%q, files_changed=%d additions=%d deletions=%d", hash, filesChanged, additions, deletions)
+		t.Logf("stat: hash=%q, files_changed=%d additions=%d deletions=%d", hash, filesChanged, additions, deletions)
 	}
 
 	if err = rows.Err(); err != nil {
