@@ -23,8 +23,6 @@ More in-depth examples and documentation can be found below.
 
 ## Installation
 
-
-
 ### Homebrew
 
 ```
@@ -34,18 +32,25 @@ brew install askgit
 
 ### Go
 
+[`libgit2`](https://libgit2.org/) is a build dependency (used via [`git2go`](https://github.com/libgit2/git2go)) and must be available on your system for linking.
+
+The following (long 😬) `go install` commands can be used to install a binary via the go toolchain.
+
+On Mac:
 ```
-go get -v -tags=sqlite_vtable github.com/askgitdev/askgit
+CGO_CFLAGS=-DUSE_LIBSQLITE3 CGO_LDFLAGS=-Wl,-undefined,dynamic_lookup go install -tags="sqlite_vtable,vtable,sqlite_json1,static,system_libgit2" github.com/askgitdev/askgit
 ```
 
-Will use the go tool chain to install a binary to `$GOBIN`.
-
+On Linux:
 ```
-GOBIN=$(pwd) go get -v -tags=sqlite_vtable github.com/askgitdev/askgit
+CGO_CFLAGS=-DUSE_LIBSQLITE3 CGO_LDFLAGS=-Wl,--unresolved-symbols=ignore-in-object-files go install -tags="sqlite_vtable,vtable,sqlite_json1,static,system_libgit2" github.com/askgitdev/askgit
 ```
 
-Will produce a binary in your current directory.
+See the [`Makefile`](https://github.com/askgitdev/askgit/blob/main/Makefile) for more context.
+Checking out this repository and running `make` in the root will produce two files in the `.build` directory:
 
+  1. `askgit` - the CLI binary (which can then be moved into your `$PATH` for use)
+  2. `libaskgit.so` - a shared object file [SQLite extension](https://www.sqlite.org/loadext.html) that can be used by SQLite directly
 
 ### Using Docker
 
