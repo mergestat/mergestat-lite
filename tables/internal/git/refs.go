@@ -2,7 +2,6 @@ package git
 
 import (
 	"context"
-	"os"
 	"regexp"
 
 	"github.com/askgitdev/askgit/tables/services"
@@ -15,7 +14,10 @@ import (
 
 var remoteName = regexp.MustCompile(`(?m)refs\/remotes\/([^\/]*)\/.+`)
 
-type RefModule struct{ Locator services.RepoLocator }
+type RefModule struct {
+	Locator services.RepoLocator
+	Context services.Context
+}
 
 func (mod *RefModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	const schema = `
@@ -32,15 +34,18 @@ func (mod *RefModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) e
 			PRIMARY KEY ( name )
 		) WITHOUT ROWID`
 
-	return &gitRefTable{Locator: mod.Locator}, declare(schema)
+	return &gitRefTable{Locator: mod.Locator, Context: mod.Context}, declare(schema)
 }
 
-type gitRefTable struct{ Locator services.RepoLocator }
+type gitRefTable struct {
+	Locator services.RepoLocator
+	Context services.Context
+}
 
 func (tab *gitRefTable) Disconnect() error { return nil }
 func (tab *gitRefTable) Destroy() error    { return nil }
 func (tab *gitRefTable) Open() (sqlite.VirtualCursor, error) {
-	return &gitRefCursor{Locator: tab.Locator}, nil
+	return &gitRefCursor{Locator: tab.Locator, Context: tab.Context}, nil
 }
 
 func (tab *gitRefTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexInfoOutput, error) {
@@ -66,6 +71,7 @@ func (tab *gitRefTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 
 type gitRefCursor struct {
 	Locator services.RepoLocator
+	Context services.Context
 
 	repo *git.Repository
 
@@ -88,7 +94,10 @@ func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	var repo *git.Repository
 	{ // open the git repository
 		if path == "" {
-			path, _ = os.Getwd()
+			path, err = getDefaultRepoFromCtx(cur.Context)
+			if err != nil {
+				return err
+			}
 		}
 
 		if repo, err = cur.Locator.Open(context.Background(), path); err != nil {

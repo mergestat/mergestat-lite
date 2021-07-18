@@ -16,6 +16,9 @@ type Options struct {
 	// whether or not to register the extra utility functions
 	// bundled with this extension
 	ExtraFunctions bool
+
+	// Context is a key-value store to pass along values to the underlying extensions
+	Context services.Context
 }
 
 // OptionFn represents any function capable of customising or providing options
@@ -39,4 +42,15 @@ func (fn RepoLocatorFn) Open(ctx context.Context, path string) (*git.Repository,
 // for locating and opening git repositories.
 func WithRepoLocator(loc services.RepoLocator) OptionFn {
 	return func(o *Options) { o.Locator = loc }
+}
+
+// WithContextValue sets a value on the options context.
+// It will override any existing value set with the same key
+func WithContextValue(key, value string) OptionFn {
+	return func(o *Options) {
+		if o.Context == nil {
+			o.Context = make(map[string]string)
+		}
+		o.Context[key] = value
+	}
 }

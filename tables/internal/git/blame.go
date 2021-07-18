@@ -25,7 +25,7 @@ var blameCols = []vtab.Column{
 }
 
 // NewBlameModule returns the implementation of a table-valued-function for accessing git blame
-func NewBlameModule(locator services.RepoLocator) sqlite.Module {
+func NewBlameModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
 	return vtab.NewTableFunc("blame", blameCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var repoPath, ref, filePath string
 		for _, constraint := range constraints {
@@ -43,6 +43,14 @@ func NewBlameModule(locator services.RepoLocator) sqlite.Module {
 
 		if filePath == "" {
 			return nil, fmt.Errorf("blame table requires a file path")
+		}
+
+		if repoPath == "" {
+			var err error
+			repoPath, err = getDefaultRepoFromCtx(ctx)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		return newBlameIter(locator, repoPath, ref, filePath)

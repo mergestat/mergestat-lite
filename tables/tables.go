@@ -20,11 +20,11 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 	return func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
 		// register virtual table modules
 		var modules = map[string]sqlite.Module{
-			"commits": &git.LogModule{Locator: opt.Locator},
-			"refs":    &git.RefModule{Locator: opt.Locator},
-			"stats":   git.NewStatsModule(opt.Locator),
-			"files":   git.NewFilesModule(opt.Locator),
-			"blame":   git.NewBlameModule(opt.Locator),
+			"commits": &git.LogModule{Locator: opt.Locator, Context: opt.Context},
+			"refs":    &git.RefModule{Locator: opt.Locator, Context: opt.Context},
+			"stats":   git.NewStatsModule(opt.Locator, opt.Context),
+			"files":   git.NewFilesModule(opt.Locator, opt.Context),
+			"blame":   git.NewBlameModule(opt.Locator, opt.Context),
 		}
 
 		for name, mod := range modules {

@@ -2,21 +2,29 @@ package cmd
 
 import (
 	"database/sql"
-	"github.com/askgitdev/askgit/pkg/display"
-	. "github.com/askgitdev/askgit/pkg/query"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/askgitdev/askgit/pkg/display"
+	. "github.com/askgitdev/askgit/pkg/query"
+	"github.com/spf13/cobra"
 )
 
 var format string      // output format flag
 var presetQuery string // named / preset query flag
+var repo string        // path to repo on disk
 
 func init() {
 	// local (root command only) flags
 	rootCmd.Flags().StringVarP(&format, "format", "f", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' and 'json'")
 	rootCmd.Flags().StringVarP(&presetQuery, "preset", "p", "", "used to pick a preset query")
+	rootCmd.Flags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
+
+	// register the sqlite extension ahead of any command
+	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		registerExt()
+	}
 
 	// add the export sub command
 	rootCmd.AddCommand(exportCmd)

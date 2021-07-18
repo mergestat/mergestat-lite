@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/augmentable-dev/vtab"
@@ -24,7 +23,7 @@ var statsCols = []vtab.Column{
 }
 
 // NewStatsModule returns the implementation of a table-valued-function for git stats
-func NewStatsModule(locator services.RepoLocator) sqlite.Module {
+func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
 	return vtab.NewTableFunc("stats", statsCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var repoPath, ref, toRef string
 		for _, constraint := range constraints {
@@ -40,6 +39,14 @@ func NewStatsModule(locator services.RepoLocator) sqlite.Module {
 			}
 		}
 
+		if repoPath == "" {
+			var err error
+			repoPath, err = getDefaultRepoFromCtx(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		return newStatsIter(locator, repoPath, ref, toRef)
 	})
 }
@@ -49,14 +56,6 @@ func newStatsIter(locator services.RepoLocator, repoPath, ref, toRef string) (*s
 		repoPath: repoPath,
 		ref:      ref,
 		index:    -1,
-	}
-
-	if repoPath == "" {
-		if wd, err := os.Getwd(); err != nil {
-			return nil, err
-		} else {
-			repoPath = wd
-		}
 	}
 
 	r, err := locator.Open(context.Background(), repoPath)

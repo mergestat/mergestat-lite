@@ -3,9 +3,10 @@ package cmd
 import (
 	"database/sql"
 	"fmt"
-	"github.com/spf13/cobra"
 	"log"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 var (

@@ -2,7 +2,6 @@ package git
 
 import (
 	"context"
-	"os"
 	"time"
 
 	"github.com/askgitdev/askgit/tables/services"
@@ -14,7 +13,10 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
-type LogModule struct{ Locator services.RepoLocator }
+type LogModule struct {
+	Locator services.RepoLocator
+	Context services.Context
+}
 
 func (mod *LogModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	const schema = `
@@ -34,15 +36,18 @@ func (mod *LogModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) e
 			PRIMARY KEY ( hash )
 		) WITHOUT ROWID`
 
-	return &gitLogTable{repoLocator: mod.Locator}, declare(schema)
+	return &gitLogTable{repoLocator: mod.Locator, ctx: mod.Context}, declare(schema)
 }
 
-type gitLogTable struct{ repoLocator services.RepoLocator }
+type gitLogTable struct {
+	repoLocator services.RepoLocator
+	ctx         services.Context
+}
 
 func (tab *gitLogTable) Disconnect() error { return nil }
 func (tab *gitLogTable) Destroy() error    { return nil }
 func (tab *gitLogTable) Open() (sqlite.VirtualCursor, error) {
-	return &gitLogCursor{locator: tab.repoLocator}, nil
+	return &gitLogCursor{locator: tab.repoLocator, ctx: tab.ctx}, nil
 }
 
 // BestIndex analyses the input constraint and generates the best possible query plan for sqlite3.
@@ -141,6 +146,7 @@ func (tab *gitLogTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 }
 
 type gitLogCursor struct {
+	ctx     services.Context
 	locator services.RepoLocator
 
 	repo *git.Repository
@@ -174,7 +180,10 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	var repo *git.Repository
 	{ // open the git repository
 		if path == "" {
-			path, _ = os.Getwd()
+			path, err = getDefaultRepoFromCtx(cur.ctx)
+			if err != nil {
+				return err
+			}
 		}
 
 		if repo, err = cur.locator.Open(context.Background(), path); err != nil {
