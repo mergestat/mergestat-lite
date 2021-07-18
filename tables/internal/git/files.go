@@ -14,6 +14,15 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
+var filesCols = []vtab.Column{
+	{Name: "path", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "executable", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "contents", Type: sqlite.SQLITE_BLOB, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+
+	{Name: "repository", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+}
+
 // NewFilesModule returns the implementation of a table-valued-function for accessing the content of files in git
 func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
 	return vtab.NewTableFunc("files", filesCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
@@ -115,15 +124,6 @@ func newFilesIter(locator services.RepoLocator, repoPath, ref string) (*filesIte
 	}
 
 	return iter, nil
-}
-
-var filesCols = []vtab.Column{
-	{Name: "path", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "executable", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "contents", Type: sqlite.SQLITE_BLOB, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-
-	{Name: "repository", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 type file struct {

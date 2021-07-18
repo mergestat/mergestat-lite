@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/askgitdev/askgit/branch/main/graph/badge.svg)](https://codecov.io/gh/askgitdev/askgit)
 
 
-# askgit <!-- omit in toc -->
+# askgit
 
 `askgit` is a command-line tool for running SQL queries on git repositories.
 It's meant for ad-hoc querying of git repositories on disk through a common interface (SQL), as an alternative to patching together various shell commands.
@@ -21,30 +21,9 @@ There's also preliminary support for executing queries against the GitHub API.
 
 More in-depth examples and documentation can be found below.
 
-- [Installation](#installation)
-  - [Homebrew](#homebrew)
-  - [Go](#go)
-  - [Using Docker](#using-docker)
-    - [Running commands](#running-commands)
-    - [Running commands from STDIN](#running-commands-from-stdin)
-- [Usage](#usage)
-  - [Tables](#tables)
-    - [Local Git Repository](#local-git-repository)
-      - [`commits`](#commits)
-      - [`blame`](#blame)
-      - [`stats`](#stats)
-      - [`files`](#files)
-      - [`branches`](#branches)
-      - [`tags`](#tags)
-    - [GitHub Tables](#github-tables)
-      - [`github_org_repos` and `github_user_repos`](#github_org_repos-and-github_user_repos)
-      - [`github_pull_requests`](#github_pull_requests)
-      - [`github_issues`](#github_issues)
-  - [Example Queries](#example-queries)
-    - [Interactive mode](#interactive-mode)
-    - [Exporting](#exporting)
-
 ## Installation
+
+
 
 ### Homebrew
 
@@ -127,11 +106,14 @@ By default, output will be an ASCII table.
 Use `--format json` or `--format csv` for alternatives.
 See `-h` for all the options.
 
-### Tables
+### Tables and Functions
 
 #### Local Git Repository
 
-When a repo is specified (either by the `--repo` flag or from the current directory), the following tables are available to query.
+The following tables access a git repository in the current directory by default.
+If the `--repo` flag is specified, they will use the path provided there instead.
+A parameter (usually the first) can also be provided to any of the tables below to override the default repo path.
+For instance, `SELECT * FROM commits('https://github.com/askgitdev/askgit')` will clone this repo to a temporary directory on disk and return its commits.
 
 ##### `commits`
 
@@ -139,211 +121,97 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 
 | Column          | Type     |
 |-----------------|----------|
-| id              | TEXT     |
+| hash            | TEXT     |
 | message         | TEXT     |
-| summary         | TEXT     |
 | author_name     | TEXT     |
 | author_email    | TEXT     |
 | author_when     | DATETIME |
 | committer_name  | TEXT     |
 | committer_email | TEXT     |
 | committer_when  | DATETIME |
-| parent_id       | TEXT     |
-| parent_count    | INT      |
+| parents         | INT      |
 
-##### `blame`
+Params:
+  1. `repository` - path to a local (on disk) or remote (http(s)) repository
+  2. `ref` - return commits starting at this ref (i.e. branch name or SHA), defaults to `HEAD`
 
-Similar to `git blame`, the `blame` table includes blame information for all files in the current HEAD.
+```sql
+-- return all commits starting at HEAD
+SELECT * FROM commits
 
-| Column       | Type     |
-|--------------|----------|
-| line_no      | INT      |
-| file_path    | TEXT     |
-| commit_id    | TEXT     |
-| line_content | TEXT     |
+-- specify an alternative repo on disk
+SELECT * FROM commits('/some/path/to/repo')
 
+-- clone a remote repo and use it
+SELECT * FROM commits('https://github.com/askgitdev/askgit')
+
+-- use the default repo, but provide an alternate branch
+SELECT * FROM commits('', 'some-ref')
+```
+
+##### `refs`
+
+| Column    | Type |
+|-----------|------|
+| name      | TEXT |
+| type      | TEXT |
+| remote    | TEXT |
+| full_name | TEXT |
+| hash      | TEXT |
+| target    | TEXT |
+
+Params:
+  1. `repository` - path to a local (on disk) or remote (http(s)) repository
 
 ##### `stats`
 
 | Column    | Type |
 |-----------|------|
-| commit_id | TEXT |
 | file_path | TEXT |
 | additions | INT  |
 | deletions | INT  |
 
-##### `files`
+Params:
+  1. `repository` - path to a local (on disk) or remote (http(s)) repository
+  2. `ref` - commit hash to use for retrieving stats, defaults to `HEAD`
+  3. `to_ref` - commit hash to calculate stats relative to
 
-The `files` table iterates over _ALL_ the files in a commit history, by default from what's checked out in the repository.
-The full table is every file in every tree of a commit history.
-Use the `commit_id` column to filter for files that belong to the work tree of a specific commit.
+```sql
+-- return stats of HEAD
+SELECT * FROM stats
+
+-- return stats of a specific commit
+SELECT * FROM stats('', 'COMMIT_HASH')
+
+-- return stats for every commit in the current history
+SELECT commits.hash, stats.* FROM commits, stats('', commits.hash)
+```
+
+##### `files`
 
 | Column     | Type |
 |------------|------|
-| commit_id  | TEXT |
 | path       | TEXT |
-| contents   | TEXT |
 | executable | BOOL |
+| contents   | TEXT |
 
+Params:
+  1. `repository` - path to a local (on disk) or remote (http(s)) repository
+  2. `ref` - commit hash to use for retrieving files, defaults to `HEAD`
 
-##### `branches`
+##### `blame`
 
-| Column | Type |
-|--------|------|
-| name   | TEXT |
-| remote | BOOL |
-| target | TEXT |
-| head   | BOOL |
+Similar to `git blame`, the `blame` table includes blame information for all files in the current HEAD.
 
-##### `tags`
+| Column      | Type     |
+|-------------|----------|
+| line_no     | INT      |
+| commit_hash | TEXT     |
 
-| Column       | Type |
-|--------------|------|
-| full_name    | TEXT |
-| name         | TEXT |
-| lightweight  | BOOL |
-| target       | TEXT |
-| tagger_name  | TEXT |
-| tagger_email | TEXT |
-| message      | TEXT |
-| target_type  | TEXT |
-
-#### GitHub Tables
-
-**This functionality is under development and likely to change**
-
-The following tables make GitHub API requests to retrieve data during query execution.
-As such, you should ensure the `GITHUB_TOKEN` environment variable is set so that API requests are authenticated.
-Unauthenticated API requests (no `GITHUB_TOKEN`) are subject to a stricter rate limit by GitHub, and may take longer to execute (query execution will try to respect the applicable rate limit).
-
-##### `github_org_repos` and `github_user_repos`
-
-These tables can be queried as table-valued functions expecting a single parameter, like so:
-
-```sql
--- return all repos from a github *org*
-SELECT * FROM github_org_repos('askgitdev')
-
--- return all repos from a github *user*
-SELECT * FROM github_user_repos('askgitdev')
-```
-
-| Column            | Type     |
-|-------------------|----------|
-| id                | INT      |
-| node_id           | TEXT     |
-| name              | TEXT     |
-| full_name         | TEXT     |
-| owner             | TEXT     |
-| private           | BOOL     |
-| description       | TEXT     |
-| fork              | BOOL     |
-| homepage          | TEXT     |
-| language          | TEXT     |
-| forks_count       | INT      |
-| stargazers_count  | INT      |
-| watchers_count    | INT      |
-| size              | INT      |
-| default_branch    | TEXT     |
-| open_issues_count | INT      |
-| topics            | TEXT     |
-| has_issues        | BOOL     |
-| has_projects      | BOOL     |
-| has_wiki          | BOOL     |
-| has_pages         | BOOL     |
-| has_downloads     | BOOL     |
-| archived          | BOOL     |
-| pushed_at         | DATETIME |
-| created_at        | DATETIME |
-| updated_at        | DATETIME |
-| permissions       | TEXT     |
-
-##### `github_pull_requests`
-
-This table expects 2 parameters, `github_pull_requests('askgitdev', 'askgit')`:
-
-```sql
-SELECT count(*) FROM github_pull_requests('askgitdev', 'askgit') WHERE state = 'open'
-```
-
-| Column                    | Type     |
-|---------------------------|----------|
-| id                        | INT      |
-| node_id                   | TEXT     |
-| number                    | INT      |
-| state                     | TEXT     |
-| locked                    | BOOL     |
-| title                     | TEXT     |
-| user_login                | TEXT     |
-| body                      | TEXT     |
-| labels                    | TEXT     |
-| active_lock_reason        | TEXT     |
-| created_at                | DATETIME |
-| updated_at                | DATETIME |
-| closed_at                 | DATETIME |
-| merged_at                 | DATETIME |
-| merge_commit_sha          | TEXT     |
-| assignee_login            | TEXT     |
-| assignees                 | TEXT     |
-| requested_reviewer_logins | TEXT     |
-| head_label                | TEXT     |
-| head_ref                  | TEXT     |
-| head_sha                  | TEXT     |
-| head_repo_owner           | TEXT     |
-| head_repo_name            | TEXT     |
-| base_label                | TEXT     |
-| base_ref                  | TEXT     |
-| base_sha                  | TEXT     |
-| base_repo_owner           | TEXT     |
-| base_repo_name            | TEXT     |
-| author_association        | TEXT     |
-| merged                    | BOOL     |
-| mergeable                 | BOOL     |
-| mergeable_state           | BOOL     |
-| merged_by_login           | TEXT     |
-| comments                  | INT      |
-| maintainer_can_modify     | BOOL     |
-| commits                   | INT      |
-| additions                 | INT      |
-| deletions                 | INT      |
-| changed_files             | INT      |
-
-##### `github_issues`
-
-This table expects 2 parameters, `github_issues('askgitdev', 'askgit')`:
-
-```sql
-SELECT count(*) FROM github_issues('askgitdev', 'askgit') WHERE state = 'open'
-```
-
-
-| Column                    | Type     |
-|---------------------------|----------|
-| id                        | INT      |
-| node_id                   | TEXT     |
-| number                    | INT      |
-| state                     | TEXT     |
-| locked                    | BOOL     |
-| title                     | TEXT     |
-| user_login                | TEXT     |
-| body                      | TEXT     |
-| labels                    | TEXT     |
-| active_lock_reason        | TEXT     |
-| created_at                | DATETIME |
-| updated_at                | DATETIME |
-| closed_at                 | DATETIME |
-| merged_at                 | DATETIME |
-| merge_commit_sha          | TEXT     |
-| assignee_login            | TEXT     |
-| assignees                 | TEXT     |
-| url                       | TEXT     |
-| html_url                  | TEXT     |
-| comments_url              | TEXT     |
-| events_url                | TEXT     |
-| repository_url            | TEXT     |
-| comments                  | INT      |
-| milestone                 | TEXT     |
-| reactions                 | INT      |
+Params:
+  1. `repository` - path to a local (on disk) or remote (http(s)) repository
+  2. `ref` - commit hash to use for retrieving files, defaults to `HEAD`
+  3. `file_path` - path of file to blame
 
 
 ### Example Queries
@@ -365,36 +233,22 @@ SELECT author_email, count(*) FROM commits GROUP BY author_email ORDER BY count(
 
 Same as above, but excluding merge commits:
 ```sql
-SELECT author_email, count(*) FROM commits WHERE parent_count < 2 GROUP BY author_email ORDER BY count(*) DESC
+SELECT author_email, count(*) FROM commits WHERE parents < 2 GROUP BY author_email ORDER BY count(*) DESC
 ```
 
-This is an expensive query.
-It will iterate over every file in every tree of every commit in the current history:
+Outputs the set of files in the current tree:
 ```sql
 SELECT * FROM files
 ```
 
 
-Outputs the set of files in the tree of a certain commit:
-```sql
-SELECT * FROM files WHERE commit_id='some_commit_id'
-```
-
-
-Same as above if you just have the commit short id:
-```sql
-SELECT * FROM files WHERE commit_id LIKE 'shortened_commit_id%'
-```
-
-
 Returns author emails with lines added/removed, ordered by total number of commits in the history (excluding merges):
 ```sql
-SELECT count(DISTINCT commits.id) AS commits, SUM(additions) AS additions, SUM(deletions) AS deletions, author_email
-FROM commits LEFT JOIN stats ON commits.id = stats.commit_id
-WHERE commits.parent_count < 2
+SELECT count(DISTINCT commits.hash) AS commits, SUM(additions) AS additions, SUM(deletions) AS deletions, author_email
+FROM commits LEFT JOIN stats('', commits.hash)
+WHERE commits.parents < 2
 GROUP BY author_email ORDER BY commits
 ```
-
 
 
 Returns commit counts by author, broken out by day of the week:
@@ -413,13 +267,6 @@ SELECT
 FROM commits GROUP BY author_email ORDER BY commits
 ```
 
-
-#### Interactive mode
-```
-askgit --interactive
-```
-
-Will display a basic terminal UI for composing and executing queries, powered by [gocui](https://github.com/jroimartin/gocui).
 
 #### Exporting
 

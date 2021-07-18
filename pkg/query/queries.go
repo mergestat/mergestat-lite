@@ -5,7 +5,7 @@ var queries = map[string]string{
 	"commit-info": "SELECT * FROM commits",
 
 	// list all distinct author information from commits in current directory
-	"distinct-authors": "SELECT author_name, DISTINCT( author_email ) FROM commits",
+	"distinct-author-emails": "SELECT DISTINCT( author_email ) FROM commits",
 
 	// list all count of commits, grouping by authors, in descending author
 	"commits-per-author": `SELECT 
@@ -13,9 +13,9 @@ var queries = map[string]string{
 		FROM commits GROUP BY author_email 
 		ORDER BY count(*) DESC`,
 
-	"author-stats": `SELECT count(DISTINCT commits.id) AS commits, SUM(additions) AS additions, SUM(deletions) AS deletions, author_email
-		FROM commits LEFT JOIN stats ON commits.id = stats.commit_id
-		WHERE commits.parent_count < 2
+	"author-stats": `SELECT count(DISTINCT commits.hash) AS commits, SUM(additions) AS additions, SUM(deletions) AS deletions, author_email
+		FROM commits, stats('', commits.hash)
+		WHERE commits.parents < 2
 		GROUP BY author_email ORDER BY commits`,
 
 	"author-commits-dow": `SELECT
