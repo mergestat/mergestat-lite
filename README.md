@@ -4,7 +4,6 @@
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/askgitdev/askgit/main)](https://www.tickgit.com/browse?repo=github.com/askgitdev/askgit&branch=main)
 [![codecov](https://codecov.io/gh/askgitdev/askgit/branch/main/graph/badge.svg)](https://codecov.io/gh/askgitdev/askgit)
 
-
 # askgit
 
 `askgit` is a command-line tool for running SQL queries on git repositories.
@@ -16,8 +15,6 @@ SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 ```
 
 You can try queries on public git repositories without installing anything at [https://try.askgit.com/](https://try.askgit.com/)
-
-There's also preliminary support for executing queries against the GitHub API.
 
 More in-depth examples and documentation can be found below.
 
@@ -218,6 +215,78 @@ Params:
   2. `ref` - commit hash to use for retrieving files, defaults to `HEAD`
   3. `file_path` - path of file to blame
 
+#### Utilities
+
+##### JSON
+
+The [SQLite JSON1 extension](https://www.sqlite.org/json1.html) is included for working with JSON data.
+
+##### `toml_json`
+
+Scalar function that converts `toml` to `json`.
+
+```SQL
+SELECT toml_to_json('[some-toml]')
+
+-- +-----------------------------+
+-- | TOML_TO_JSON('[SOME-TOML]') |
+-- +-----------------------------+
+-- | {"some-toml":{}}            |
+-- +-----------------------------+
+```
+
+##### `xml_to_json`
+
+Scalar function that converts `xml` to `json`.
+
+```SQL
+SELECT xml_to_json('<some-xml>hello</some-xml>')
+
+-- +-------------------------------------------+
+-- | XML_TO_JSON('<SOME-XML>HELLO</SOME-XML>') |
+-- +-------------------------------------------+
+-- | {"some-xml":"hello"}                      |
+-- +-------------------------------------------+
+```
+
+##### `yaml_to_json` and `yml_to_json`
+
+Scalar function that converts `yaml` to `json`.
+
+```SQL
+SELECT yaml_to_json('hello: world')
+
+-- +------------------------------+
+-- | YAML_TO_JSON('HELLO: WORLD') |
+-- +------------------------------+
+-- | {"hello":"world"}            |
+-- +------------------------------+
+```
+
+##### `str_split`
+
+Helper for splitting strings on some separator.
+
+```sql
+SELECT str_split('hello,world', ',', 0)
+
+-- +----------------------------------+
+-- | STR_SPLIT('HELLO,WORLD', ',', 0) |
+-- +----------------------------------+
+-- | hello                            |
+-- +----------------------------------+
+```
+
+```sql
+SELECT str_split('hello,world', ',', 1)
+
+-- +----------------------------------+
+-- | STR_SPLIT('HELLO,WORLD', ',', 1) |
+-- +----------------------------------+
+-- | world                            |
+-- +----------------------------------+
+```
+
 
 ### Example Queries
 
@@ -271,7 +340,6 @@ SELECT
     author_email
 FROM commits GROUP BY author_email ORDER BY commits
 ```
-
 
 #### Exporting
 
