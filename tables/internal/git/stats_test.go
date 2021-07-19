@@ -29,27 +29,28 @@ func TestSelectLast5CommitStats(t *testing.T) {
 	}
 }
 
-func TestSummarizeLast5CommitStats(t *testing.T) {
+func TestInitialCommitStats(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/askgitdev/askgit"
+	repo, initialCommit := "https://github.com/askgitdev/askgit", "a4562d2d5a35536771745b0aa19d705eb47234e7"
 
-	rows, err := db.Query("SELECT hash, count(DISTINCT file_path), sum(additions), sum(deletions) FROM commits($1), stats($1, commits.hash) GROUP BY hash ORDER BY commits.committer_when DESC LIMIT 5", repo)
+	var filesChanged, additions, deletions int
+	err := db.QueryRow("SELECT count(DISTINCT file_path), sum(additions), sum(deletions) FROM stats(?, ?)", repo, initialCommit).
+		Scan(&filesChanged, &additions, &deletions)
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var hash string
-		var filesChanged, additions, deletions int
-		err = rows.Scan(&hash, &filesChanged, &additions, &deletions)
-		if err != nil {
-			t.Fatalf("failed to scan resultset: %v", err)
-		}
-		t.Logf("stat: hash=%q, files_changed=%d additions=%d deletions=%d", hash, filesChanged, additions, deletions)
+	expectedFilesChanged, expectedAdditions, expectedDeletions := 13, 1612, 0
+
+	if filesChanged != expectedFilesChanged {
+		t.Fatalf("expected %d files changed, got %d", expectedFilesChanged, filesChanged)
 	}
 
-	if err = rows.Err(); err != nil {
-		t.Fatalf("failed to fetch results: %v", err.Error())
+	if additions != expectedAdditions {
+		t.Fatalf("expected %d additions, got %d", expectedAdditions, additions)
+	}
+
+	if deletions != expectedDeletions {
+		t.Fatalf("expected %d deletions, got %d", expectedDeletions, deletions)
 	}
 }
