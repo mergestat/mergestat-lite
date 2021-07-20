@@ -135,7 +135,7 @@ Similar to `git log`, the `commits` table includes all commits in the history of
 
 Params:
   1. `repository` - path to a local (on disk) or remote (http(s)) repository
-  2. `ref` - return commits starting at this ref (i.e. branch name or SHA), defaults to `HEAD`
+  2. `rev` - return commits starting at this revision (i.e. branch name or SHA), defaults to `HEAD`
 
 ```sql
 -- return all commits starting at HEAD
@@ -175,8 +175,8 @@ Params:
 
 Params:
   1. `repository` - path to a local (on disk) or remote (http(s)) repository
-  2. `ref` - commit hash to use for retrieving stats, defaults to `HEAD`
-  3. `to_ref` - commit hash to calculate stats relative to
+  2. `rev` - commit hash (or branch/tag name) to use for retrieving stats, defaults to `HEAD`
+  3. `to_rev` - commit hash to calculate stats relative to
 
 ```sql
 -- return stats of HEAD
@@ -199,7 +199,7 @@ SELECT commits.hash, stats.* FROM commits, stats('', commits.hash)
 
 Params:
   1. `repository` - path to a local (on disk) or remote (http(s)) repository
-  2. `ref` - commit hash to use for retrieving files, defaults to `HEAD`
+  2. `rev` - commit hash (or branch/tag name) to use for retrieving files in, defaults to `HEAD`
 
 ##### `blame`
 
@@ -212,7 +212,7 @@ Similar to `git blame`, the `blame` table includes blame information for all fil
 
 Params:
   1. `repository` - path to a local (on disk) or remote (http(s)) repository
-  2. `ref` - commit hash to use for retrieving files, defaults to `HEAD`
+  2. `rev` - commit hash (or branch/tag name) to use for retrieving blame information from, defaults to `HEAD`
   3. `file_path` - path of file to blame
 
 #### Utilities
