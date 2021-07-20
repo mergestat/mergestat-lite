@@ -2,6 +2,7 @@ package funcs
 
 import (
 	"encoding/json"
+
 	"github.com/BurntSushi/toml"
 	"go.riyazali.net/sqlite"
 )

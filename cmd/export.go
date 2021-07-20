@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"errors"
+	"database/sql"
 	"fmt"
-	"os"
+	"log"
 	"path/filepath"
 
-	"github.com/askgitdev/askgit/pkg/askgit"
 	"github.com/spf13/cobra"
 )
 
@@ -28,12 +27,14 @@ var exportCmd = &cobra.Command{
 	Long: `Use this command to export queries into a SQLite database file on disk`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
+
 		if len(exports) == 0 {
-			handleError(errors.New("please supply at least one export pair"))
+			log.Fatal("please supply at least one export pair")
 		}
 
 		if len(exports)%2 != 0 {
-			handleError(fmt.Errorf("expected even number of export pairs, got %d", len(exports)))
+			log.Fatalf("expected even number of export pairs, got %d", len(exports))
 		}
 
 		pairs := make([]export, len(exports)/2)
@@ -45,25 +46,21 @@ var exportCmd = &cobra.Command{
 			}
 		}
 
-		exportFile, err := filepath.Abs(args[0])
-		handleError(err)
+		var fileName string
+		if fileName, err = filepath.Abs(args[0]); err != nil {
+			log.Fatalf("failed to resolve file path: %v", err)
+		}
 
-		dir, cleanup := determineRepo()
-		defer cleanup()
-
-		ag, err := askgit.New(&askgit.Options{
-			RepoPath:    dir,
-			UseGitCLI:   useGitCLI,
-			GitHubToken: os.Getenv("GITHUB_TOKEN"),
-			DBFilePath:  exportFile,
-		})
-		handleError(err)
+		var db *sql.DB
+		if db, err = sql.Open("sqlite3", fileName); err != nil {
+			log.Fatalf("failed to open sqlite database: %v", err)
+		}
 
 		for _, pair := range pairs {
-			s := fmt.Sprintf("CREATE TABLE %s AS %s", pair.table, pair.query)
-
-			_, err := ag.DB().Exec(s)
-			handleError(err)
+			var query = fmt.Sprintf("CREATE TABLE %s AS %s", pair.table, pair.query)
+			if _, err = db.Exec(query); err != nil {
+				log.Fatalf("failed to execute query: %v", err)
+			}
 		}
 
 	},

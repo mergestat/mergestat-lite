@@ -1,128 +1,112 @@
-package git
+package git_test
 
 import (
-	"fmt"
+	"database/sql"
+	"os"
 	"testing"
-
-	git "github.com/libgit2/git2go/v31"
+	"time"
 )
 
-func TestCommits(t *testing.T) {
-	revWalk, err := fixtureRepo.Walk()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer revWalk.Free()
+func TestSelectAllCommits(t *testing.T) {
+	db := Connect(t, Memory)
+	repo, ref := "https://github.com/askgitdev/askgit", "HEAD"
 
-	err = revWalk.PushHead()
+	rows, err := db.Query("SELECT * FROM commits(?, ?) LIMIT 5", repo, ref)
 	if err != nil {
-		t.Fatal(err)
-	}
-
-	commitCount := 0
-	err = revWalk.Iterate(func(c *git.Commit) bool {
-		commitCount++
-		return true
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	//checks commits
-	rows, err := fixtureDB.Query("SELECT * FROM commits")
-	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to execute query: %v", err.Error())
 	}
 	defer rows.Close()
 
-	columns, err := rows.Columns()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expected := 11
-	if len(columns) != expected {
-		t.Fatalf("expected %d columns, got: %d", expected, len(columns))
-	}
-	numRows := GetRowsCount(rows)
-
-	expected = commitCount
-	if numRows != expected {
-		t.Fatalf("expected %d rows got: %d", expected, numRows)
-	}
-
-	rows, err = fixtureDB.Query("SELECT id, author_name FROM commits")
-	if err != nil {
-		t.Fatal(err)
-	}
-	rowNum, contents, err := GetRowContents(rows)
-	if err != nil {
-		t.Fatalf("err %d at row Number %d", err, rowNum)
-	}
-
-	i := 0
-	err = revWalk.Iterate(func(commit *git.Commit) bool {
-		c := contents[i]
-		if commit.Id().String() != c[0] {
-			t.Fatalf("expected %s at row %d got %s", commit.Id().String(), i, c[0])
+	for rows.Next() {
+		var hash, message string
+		var authorName, authorEmail, authorWhen string
+		var committerName, committerEmail, committerWhen string
+		var parents int
+		err = rows.Scan(&hash, &message, &authorName, &authorEmail, &authorWhen, &committerName, &committerEmail, &committerWhen, &parents)
+		if err != nil {
+			t.Fatalf("failed to scan resultset: %v", err)
 		}
+		t.Logf("commit: hash=%q author=\"%s <%s>\" committer=\"%s <%s>\" parents=%d", hash, authorName, authorEmail, committerName, committerEmail, parents)
+	}
 
-		if commit.Author().Name != c[1] {
-			t.Fatalf("expected %s at row %d got %s", commit.Author().Name, i, c[1])
-		}
-
-		i++
-		return true
-	})
-	if err != nil {
-		t.Fatal(err)
+	if err = rows.Err(); err != nil {
+		t.Fatalf("failed to fetch results: %v", err.Error())
 	}
 }
 
-func TestCommitByID(t *testing.T) {
-	o, err := fixtureRepo.RevparseSingle("HEAD~3")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer o.Free()
+func TestSelectCommitByHash(t *testing.T) {
+	db := Connect(t, Memory)
+	repo, ref := "https://github.com/askgitdev/askgit", "HEAD"
+	hash := "5ce802c851d3bedb5bb4a0f749093cae9a34818b"
 
-	commit, err := o.AsCommit()
+	var message, email string
+	var when time.Time
+	err := db.QueryRow("SELECT message, committer_email, committer_when FROM commits(?, ?) WHERE hash = ?",
+		repo, ref, hash).Scan(&message, &email, &when)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to execute query: %v", err.Error())
 	}
-	defer commit.Free()
 
-	rows, err := fixtureDB.Query(fmt.Sprintf("SELECT * FROM commits WHERE id = '%s'", commit.Id().String()))
+	t.Logf("commit: %q by %q on %q", hash, email, when.Format(time.RFC3339))
+}
+
+func TestDateFilterOnCommit(t *testing.T) {
+	db := Connect(t, Memory)
+	repo := "https://github.com/askgitdev/askgit"
+
+	rows, err := db.Query("SELECT hash, committer_email, committer_when FROM commits(?)"+
+		"	WHERE committer_when > DATE(?) AND committer_when < DATE(?) ORDER BY committer_when DESC",
+		repo, time.Date(2021, 01, 01, 00, 00, 00, 00, time.UTC), time.Date(2021, 04, 30, 00, 00, 00, 00, time.UTC))
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to execute query: %v", err.Error())
 	}
 	defer rows.Close()
 
-	_, contents, err := GetRowContents(rows)
-	if err != nil {
-		t.Fatal(err)
+	for rows.Next() {
+		var hash, email string
+		var when time.Time
+		if err = rows.Scan(&hash, &email, &when); err != nil {
+			t.Fatalf("failed to scan resultset: %v", err)
+		}
+		t.Logf("commit: %q by %q on %q", hash, email, when.Format(time.RFC3339))
 	}
 
-	count := len(contents)
-
-	if count != 1 {
-		t.Fatalf("expected 1 commit, got %d", count)
-	}
-
-	if contents[0][0] != commit.Id().String() {
-		t.Fatalf("expected commit ID: %s, got %s", commit.Id().String(), contents[0][0])
+	if err = rows.Err(); err != nil {
+		t.Fatalf("failed to fetch results: %v", err.Error())
 	}
 }
 
-func BenchmarkCommitCounts(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		rows, err := fixtureDB.Query("SELECT * FROM commits")
-		if err != nil {
-			b.Fatal(err)
-		}
-		rowNum, _, err := GetRowContents(rows)
-		if err != nil {
-			b.Fatalf("err %d at row Number %d", err, rowNum)
-		}
+func TestDefaultCases(t *testing.T) {
+	db := Connect(t, Memory)
+	repo := "https://github.com/askgitdev/askgit"
+
+	var q = func(row *sql.Row) (hash, email string, when time.Time, err error) {
+		err = row.Scan(&hash, &email, &when)
+		return
 	}
+
+	t.Run("should use current working directory as default repository", func(t *testing.T) {
+		if ci, ok := os.LookupEnv("CI"); ok && ci == "true" {
+			t.Skip("skipping test as current working directory cannot be set in ci environment")
+		}
+
+		err := os.Chdir("../../../")
+		if err != nil {
+			t.Fatalf("failed to change working directory: %v", err)
+		}
+
+		_, _, _, err = q(db.QueryRow("SELECT hash, committer_email, committer_when FROM commits LIMIT 1"))
+		if err != nil {
+			t.Error(err)
+			t.Fail()
+		}
+	})
+
+	t.Run("should use head as the default reference", func(t *testing.T) {
+		_, _, _, err := q(db.QueryRow("SELECT hash, committer_email, committer_when FROM commits(?) LIMIT 1", repo))
+		if err != nil {
+			t.Error(err)
+			t.Fail()
+		}
+	})
 }
