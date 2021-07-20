@@ -1,4 +1,4 @@
-.PHONY: clean vet test lint lint-ci test-cover bench
+.PHONY: clean update vet test lint lint-ci test-cover bench
 
 # default task invoked while running make
 all: clean .build/libaskgit.so .build/askgit
@@ -44,6 +44,9 @@ clean:
 
 # go build tags used by test, vet and more
 TAGS = "sqlite_vtable,vtable,sqlite_json1,static,system_libgit2"
+
+update:
+	go get -tags=$(TAGS) -u ./...
 
 vet:
 	go vet -v -tags=$(TAGS) ./...
