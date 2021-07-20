@@ -150,7 +150,7 @@ type gitLogCursor struct {
 	locator services.RepoLocator
 
 	repo *git.Repository
-	ref  *plumbing.Reference
+	rev  *plumbing.Revision
 
 	commit  *object.Commit // the current commit
 	commits object.CommitIter
@@ -201,26 +201,20 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 
 	var opts = &git.LogOptions{Order: git.LogOrderCommitterTime}
 
+	rev := plumbing.Revision(refName)
+	cur.rev = &rev
 	if refName != "" {
-		var name = plumbing.ReferenceName(refName)
-		if name != plumbing.HEAD && (!name.IsBranch() && !name.IsTag()) {
-			return errors.Errorf("%q is not a branch or tag", name)
+		rev, err := repo.ResolveRevision(rev)
+		if err != nil {
+			return errors.Errorf("failed to resolve %q", refName)
 		}
-
-		var ref *plumbing.Reference
-		if ref, err = repo.Reference(name, true); err != nil {
-			return errors.Wrapf(err, "failed to resolve %q", name)
-		}
-
-		opts.From = ref.Hash()
-		cur.ref = ref
+		opts.From = *rev
 	} else {
 		var ref *plumbing.Reference
 		if ref, err = repo.Head(); err != nil {
 			return errors.Wrapf(err, "failed to resolve head")
 		}
 		opts.From = ref.Hash()
-		cur.ref = ref
 	}
 
 	if start != "" {
