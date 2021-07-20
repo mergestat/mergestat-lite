@@ -18,23 +18,23 @@ var statsCols = []vtab.Column{
 	{Name: "deletions", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
 	{Name: "repository", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "to_ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "rev", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "to_rev", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 // NewStatsModule returns the implementation of a table-valued-function for git stats
 func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
 	return vtab.NewTableFunc("stats", statsCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var repoPath, ref, toRef string
+		var repoPath, rev, toRev string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
 				case 3:
 					repoPath = constraint.Value.Text()
 				case 4:
-					ref = constraint.Value.Text()
+					rev = constraint.Value.Text()
 				case 5:
-					toRef = constraint.Value.Text()
+					toRev = constraint.Value.Text()
 				}
 			}
 		}
@@ -47,14 +47,14 @@ func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 			}
 		}
 
-		return newStatsIter(locator, repoPath, ref, toRef)
+		return newStatsIter(locator, repoPath, rev, toRev)
 	})
 }
 
-func newStatsIter(locator services.RepoLocator, repoPath, ref, toRef string) (*statsIter, error) {
+func newStatsIter(locator services.RepoLocator, repoPath, rev, toRev string) (*statsIter, error) {
 	iter := &statsIter{
 		repoPath: repoPath,
-		ref:      ref,
+		rev:      rev,
 		index:    -1,
 	}
 
@@ -75,8 +75,8 @@ func newStatsIter(locator services.RepoLocator, repoPath, ref, toRef string) (*s
 	defer repo.Free()
 
 	var fromCommit *libgit2.Commit
-	// if no ref is supplied, use HEAD
-	if ref == "" {
+	// if no rev is supplied, use HEAD
+	if rev == "" {
 		head, err := repo.Head()
 		if err != nil {
 			return nil, err
@@ -86,9 +86,9 @@ func newStatsIter(locator services.RepoLocator, repoPath, ref, toRef string) (*s
 			return nil, err
 		}
 	} else {
-		id, err := libgit2.NewOid(ref)
+		id, err := libgit2.NewOid(rev)
 		if err != nil {
-			return nil, fmt.Errorf("invalid ref: %v", err)
+			return nil, fmt.Errorf("invalid rev: %v", err)
 		}
 
 		fromCommit, err = repo.LookupCommit(id)
@@ -105,12 +105,12 @@ func newStatsIter(locator services.RepoLocator, repoPath, ref, toRef string) (*s
 	defer tree.Free()
 
 	var toCommit *libgit2.Commit
-	if toRef == "" {
+	if toRev == "" {
 		toCommit = fromCommit.Parent(0)
 	} else {
-		id, err := libgit2.NewOid(toRef)
+		id, err := libgit2.NewOid(toRev)
 		if err != nil {
-			return nil, fmt.Errorf("invalid to_ref: %v", err)
+			return nil, fmt.Errorf("invalid to_rev: %v", err)
 		}
 
 		toCommit, err = repo.LookupCommit(id)
@@ -189,7 +189,7 @@ type stat struct {
 
 type statsIter struct {
 	repoPath string
-	ref      string
+	rev      string
 	stats    []*stat
 	index    int
 }

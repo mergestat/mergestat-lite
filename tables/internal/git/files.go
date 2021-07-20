@@ -20,20 +20,20 @@ var filesCols = []vtab.Column{
 	{Name: "contents", Type: sqlite.SQLITE_BLOB, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
 	{Name: "repository", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "rev", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 // NewFilesModule returns the implementation of a table-valued-function for accessing the content of files in git
 func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
 	return vtab.NewTableFunc("files", filesCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var repoPath, ref string
+		var repoPath, rev string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
 				case 3:
 					repoPath = constraint.Value.Text()
 				case 4:
-					ref = constraint.Value.Text()
+					rev = constraint.Value.Text()
 				}
 			}
 		}
@@ -46,14 +46,14 @@ func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 			}
 		}
 
-		return newFilesIter(locator, repoPath, ref)
+		return newFilesIter(locator, repoPath, rev)
 	})
 }
 
-func newFilesIter(locator services.RepoLocator, repoPath, ref string) (*filesIter, error) {
+func newFilesIter(locator services.RepoLocator, repoPath, rev string) (*filesIter, error) {
 	iter := &filesIter{
 		repoPath: repoPath,
-		ref:      ref,
+		rev:      rev,
 		index:    -1,
 	}
 
@@ -83,17 +83,17 @@ func newFilesIter(locator services.RepoLocator, repoPath, ref string) (*filesIte
 
 	var commitID *libgit2.Oid
 	var commit *libgit2.Commit
-	// if no ref is supplied, use HEAD
-	if ref == "" {
+	// if no rev is supplied, use HEAD
+	if rev == "" {
 		head, err := repo.Head()
 		if err != nil {
 			return nil, err
 		}
 		commitID = head.Target()
 	} else {
-		commitID, err = libgit2.NewOid(ref)
+		commitID, err = libgit2.NewOid(rev)
 		if err != nil {
-			return nil, fmt.Errorf("invalid ref: %v", err)
+			return nil, fmt.Errorf("invalid rev: %v", err)
 		}
 	}
 	commit, err = repo.LookupCommit(commitID)
@@ -134,7 +134,7 @@ type file struct {
 
 type filesIter struct {
 	repoPath string
-	ref      string
+	rev      string
 	files    []*file
 	index    int
 	repo     *libgit2.Repository

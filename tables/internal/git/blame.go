@@ -20,21 +20,21 @@ var blameCols = []vtab.Column{
 	{Name: "commit_hash", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
 	{Name: "repository", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "ref", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "rev", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "file_path", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 // NewBlameModule returns the implementation of a table-valued-function for accessing git blame
 func NewBlameModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
 	return vtab.NewTableFunc("blame", blameCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var repoPath, ref, filePath string
+		var repoPath, rev, filePath string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
 				case 2:
 					repoPath = constraint.Value.Text()
 				case 3:
-					ref = constraint.Value.Text()
+					rev = constraint.Value.Text()
 				case 4:
 					filePath = constraint.Value.Text()
 				}
@@ -53,14 +53,14 @@ func NewBlameModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 			}
 		}
 
-		return newBlameIter(locator, repoPath, ref, filePath)
+		return newBlameIter(locator, repoPath, rev, filePath)
 	})
 }
 
-func newBlameIter(locator services.RepoLocator, repoPath, ref, filePath string) (*blameIter, error) {
+func newBlameIter(locator services.RepoLocator, repoPath, rev, filePath string) (*blameIter, error) {
 	iter := &blameIter{
 		repoPath: repoPath,
-		ref:      ref,
+		rev:      rev,
 		filePath: filePath,
 		index:    -1,
 	}
@@ -90,17 +90,17 @@ func newBlameIter(locator services.RepoLocator, repoPath, ref, filePath string) 
 	defer repo.Free()
 
 	var commitID *libgit2.Oid
-	// if no ref is supplied, use HEAD
-	if ref == "" {
+	// if no rev is supplied, use HEAD
+	if rev == "" {
 		head, err := repo.Head()
 		if err != nil {
 			return nil, err
 		}
 		commitID = head.Target()
 	} else {
-		commitID, err = libgit2.NewOid(ref)
+		commitID, err = libgit2.NewOid(rev)
 		if err != nil {
-			return nil, fmt.Errorf("invalid ref: %v", err)
+			return nil, fmt.Errorf("invalid rev: %v", err)
 		}
 	}
 
@@ -149,7 +149,7 @@ type blamedLine struct {
 
 type blameIter struct {
 	repoPath string
-	ref      string
+	rev      string
 	filePath string
 	lines    []*blamedLine
 	index    int
