@@ -98,10 +98,17 @@ func newBlameIter(locator services.RepoLocator, repoPath, rev, filePath string) 
 		}
 		commitID = head.Target()
 	} else {
-		commitID, err = libgit2.NewOid(rev)
+		obj, err := repo.RevparseSingle(rev)
 		if err != nil {
-			return nil, fmt.Errorf("invalid rev: %v", err)
+			return nil, err
 		}
+		defer obj.Free()
+
+		if obj.Type() != libgit2.ObjectCommit {
+			return nil, fmt.Errorf("invalid rev, could not resolve to a commit")
+		}
+
+		commitID = obj.Id()
 	}
 
 	opts, err := libgit2.DefaultBlameOptions()

@@ -54,7 +54,6 @@ func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 func newStatsIter(locator services.RepoLocator, repoPath, rev, toRev string) (*statsIter, error) {
 	iter := &statsIter{
 		repoPath: repoPath,
-		rev:      rev,
 		index:    -1,
 	}
 
@@ -86,12 +85,17 @@ func newStatsIter(locator services.RepoLocator, repoPath, rev, toRev string) (*s
 			return nil, err
 		}
 	} else {
-		id, err := libgit2.NewOid(rev)
+		obj, err := repo.RevparseSingle(rev)
 		if err != nil {
-			return nil, fmt.Errorf("invalid rev: %v", err)
+			return nil, err
+		}
+		defer obj.Free()
+
+		if obj.Type() != libgit2.ObjectCommit {
+			return nil, fmt.Errorf("invalid rev, could not resolve to a commit")
 		}
 
-		fromCommit, err = repo.LookupCommit(id)
+		fromCommit, err = repo.LookupCommit(obj.Id())
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +193,6 @@ type stat struct {
 
 type statsIter struct {
 	repoPath string
-	rev      string
 	stats    []*stat
 	index    int
 }
