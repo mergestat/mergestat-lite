@@ -9,9 +9,9 @@ import (
 // CommitFromTagFn implements the COMMIT_FROM_TAG(...) sql function
 type CommitFromTagFn struct{}
 
-func (_ *CommitFromTagFn) Deterministic() bool { return true }
-func (_ *CommitFromTagFn) Args() int           { return 1 }
-func (_ *CommitFromTagFn) Apply(c *sqlite.Context, values ...sqlite.Value) {
+func (*CommitFromTagFn) Deterministic() bool { return true }
+func (*CommitFromTagFn) Args() int           { return 1 }
+func (*CommitFromTagFn) Apply(c *sqlite.Context, values ...sqlite.Value) {
 	tag, ok := values[0].Pointer().(*object.Tag)
 	if !ok {
 		return
