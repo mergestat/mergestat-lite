@@ -78,6 +78,45 @@ func TestDisplayCSV(t *testing.T) {
 	// TODO perhaps test the actual content of the lines?
 }
 
+func TestDisplayTSV(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+
+	mockRows := sqlmock.NewRows([]string{"id", "name", "value"}).
+		AddRow("1", "name 1", "value 1").
+		AddRow("2", "name 2", "value 2").
+		AddRow("3", "name 3", "value 3")
+
+	mock.ExpectQuery("select").WillReturnRows(mockRows)
+
+	rows, _ := db.Query("select")
+
+	var b bytes.Buffer
+	err := WriteTo(rows, &b, "tsv", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := csv.NewReader(strings.NewReader(b.String()))
+	r.Comma = '\t'
+
+	records, err := r.ReadAll()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lineCount := len(records)
+
+	if lineCount != 4 {
+		t.Fatalf("expected 4 lines of output, got: %d", lineCount)
+	}
+
+	if len(records[0]) != 3 {
+		t.Fatalf("expected 3 columns of output, got: %d", len(records[0]))
+	}
+
+	// TODO perhaps test the actual content of the lines?
+}
+
 func TestDisplayJSON(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 
