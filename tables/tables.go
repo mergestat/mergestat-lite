@@ -6,6 +6,7 @@ package tables
 import (
 	"github.com/askgitdev/askgit/tables/internal/funcs"
 	"github.com/askgitdev/askgit/tables/internal/git"
+	"github.com/askgitdev/askgit/tables/internal/git/native"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )
@@ -22,9 +23,9 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 		var modules = map[string]sqlite.Module{
 			"commits": &git.LogModule{Locator: opt.Locator, Context: opt.Context},
 			"refs":    &git.RefModule{Locator: opt.Locator, Context: opt.Context},
-			"stats":   git.NewStatsModule(opt.Locator, opt.Context),
-			"files":   git.NewFilesModule(opt.Locator, opt.Context),
-			"blame":   git.NewBlameModule(opt.Locator, opt.Context),
+			"stats":   native.NewStatsModule(opt.Locator, opt.Context),
+			"files":   native.NewFilesModule(opt.Locator, opt.Context),
+			"blame":   native.NewBlameModule(opt.Locator, opt.Context),
 		}
 
 		for name, mod := range modules {

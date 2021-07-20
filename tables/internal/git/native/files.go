@@ -1,4 +1,4 @@
-package git
+package native
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/askgitdev/askgit/tables/internal/git"
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
@@ -40,7 +41,7 @@ func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 
 		if repoPath == "" {
 			var err error
-			repoPath, err = getDefaultRepoFromCtx(ctx)
+			repoPath, err = git.GetDefaultRepoFromCtx(ctx)
 			if err != nil {
 				return nil, err
 			}

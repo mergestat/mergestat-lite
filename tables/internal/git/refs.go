@@ -94,7 +94,7 @@ func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	var repo *git.Repository
 	{ // open the git repository
 		if path == "" {
-			path, err = getDefaultRepoFromCtx(cur.Context)
+			path, err = GetDefaultRepoFromCtx(cur.Context)
 			if err != nil {
 				return err
 			}

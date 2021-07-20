@@ -1,4 +1,4 @@
-package git_test
+package native_test
 
 import (
 	"fmt"

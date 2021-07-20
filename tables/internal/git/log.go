@@ -180,7 +180,7 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	var repo *git.Repository
 	{ // open the git repository
 		if path == "" {
-			path, err = getDefaultRepoFromCtx(cur.ctx)
+			path, err = GetDefaultRepoFromCtx(cur.ctx)
 			if err != nil {
 				return err
 			}
