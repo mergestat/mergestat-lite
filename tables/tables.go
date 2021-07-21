@@ -5,6 +5,7 @@ package tables
 
 import (
 	"github.com/askgitdev/askgit/tables/internal/funcs"
+	"github.com/askgitdev/askgit/tables/internal/funcs/enry"
 	"github.com/askgitdev/askgit/tables/internal/git"
 	"github.com/askgitdev/askgit/tables/internal/git/native"
 	"github.com/pkg/errors"
@@ -48,10 +49,11 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 		if opt.ExtraFunctions {
 			// register sql functions
 			var fns = map[string]sqlite.Function{
-				"str_split":    &funcs.StringSplit{},
-				"toml_to_json": &funcs.TomlToJson{},
-				"yaml_to_json": &funcs.YamlToJson{},
-				"xml_to_json":  &funcs.XmlToJson{},
+				"str_split":            &funcs.StringSplit{},
+				"toml_to_json":         &funcs.TomlToJson{},
+				"yaml_to_json":         &funcs.YamlToJson{},
+				"xml_to_json":          &funcs.XmlToJson{},
+				"enry_detect_language": &enry.EnryDetectLanguage{},
 			}
 
 			// alias yaml_to_json => yml_to_json
