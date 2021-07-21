@@ -20,7 +20,7 @@ endif
 # target to compile askgit executable
 .build/askgit: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
-	@go build -o $@ -tags="sqlite_vtable,vtable,sqlite_json1,static,system_libgit2" askgit.go
+	@go build -o $@ -tags="static,system_libgit2" askgit.go
 	$(call log, $(GREEN), "built $@")
 
 # target to download latest sqlite3 amalgamation code
@@ -43,7 +43,7 @@ clean:
 # target for common golang tasks
 
 # go build tags used by test, vet and more
-TAGS = "sqlite_vtable,vtable,sqlite_json1,static,system_libgit2"
+TAGS = "static,system_libgit2"
 
 update:
 	go get -tags=$(TAGS) -u ./...

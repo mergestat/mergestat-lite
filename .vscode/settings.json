@@ -1,11 +1,11 @@
 {
     "go.buildFlags": [
-        "-tags='sqlite_vtable'"
+        "-tags='libsqlite3'"
     ],
-    "go.testFlags":  ["-v", "-tags=libsqlite3,sqlite_json1"],
-    "go.vetFlags": ["-tags=libsqlite3,sqlite_json1"],
+    "go.testFlags":  ["-v", "-tags=libsqlite3"],
+    "go.vetFlags": ["-tags=libsqlite3"],
     "go.toolsEnvVars": {
-        "GOFLAGS": "-tags='sqlite_vtable'",
+        "GOFLAGS": "-tags='libsqlite3'",
         "CGO_LDFLAGS": "-Wl,-undefined,dynamic_lookup"
     },
     "go.testTimeout": "120s",
