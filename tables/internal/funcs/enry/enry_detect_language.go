@@ -1,8 +1,6 @@
 package enry
 
 import (
-	"errors"
-
 	"github.com/go-enry/go-enry/v2"
 	"go.riyazali.net/sqlite"
 )
@@ -19,7 +17,7 @@ func (y *EnryDetectLanguage) Apply(context *sqlite.Context, value ...sqlite.Valu
 
 	lang := enry.GetLanguage(path, contents)
 	if lang == "" {
-		context.ResultError(errors.New("could not detect language"))
+		context.ResultNull()
 	}
 	context.ResultText(lang)
 }
