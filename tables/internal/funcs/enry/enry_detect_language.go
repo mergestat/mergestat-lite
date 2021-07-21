@@ -18,6 +18,7 @@ func (y *EnryDetectLanguage) Apply(context *sqlite.Context, value ...sqlite.Valu
 	lang := enry.GetLanguage(path, contents)
 	if lang == "" {
 		context.ResultNull()
+		return
 	}
 	context.ResultText(lang)
 }
