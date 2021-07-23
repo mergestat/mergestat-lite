@@ -1,4 +1,4 @@
-package enry
+package funcs
 
 import (
 	"github.com/go-enry/go-enry/v2"
@@ -14,8 +14,7 @@ func (f *EnryIsConfiguration) Apply(context *sqlite.Context, value ...sqlite.Val
 
 	path := value[0].Text()
 
-	config := enry.IsConfiguration(path)
-	if config {
+	if enry.IsConfiguration(path) {
 		context.ResultInt(1)
 	} else {
 		context.ResultInt(0)

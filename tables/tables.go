@@ -5,7 +5,6 @@ package tables
 
 import (
 	"github.com/askgitdev/askgit/tables/internal/funcs"
-	"github.com/askgitdev/askgit/tables/internal/funcs/enry"
 	"github.com/askgitdev/askgit/tables/internal/git"
 	"github.com/askgitdev/askgit/tables/internal/git/native"
 	"github.com/pkg/errors"
@@ -53,15 +52,15 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 				"toml_to_json":          &funcs.TomlToJson{},
 				"yaml_to_json":          &funcs.YamlToJson{},
 				"xml_to_json":           &funcs.XmlToJson{},
-				"enry_detect_language":  &enry.EnryDetectLanguage{},
-				"enry_is_binary":        &enry.EnryIsBinary{},
-				"enry_is_configuration": &enry.EnryIsConfiguration{},
-				"enry_is_documentation": &enry.EnryIsDocumentation{},
-				"enry_is_dot_file":      &enry.EnryIsDotFile{},
-				"enry_is_generated":     &enry.EnryIsGenerated{},
-				"enry_is_image":         &enry.EnryIsImage{},
-				//"enry_is_test":          &enry.EnryIsTest{},
-				"enry_is_vendor": &enry.EnryIsVendor{},
+				"enry_detect_language":  &funcs.EnryDetectLanguage{},
+				"enry_is_binary":        &funcs.EnryIsBinary{},
+				"enry_is_configuration": &funcs.EnryIsConfiguration{},
+				"enry_is_documentation": &funcs.EnryIsDocumentation{},
+				"enry_is_dot_file":      &funcs.EnryIsDotFile{},
+				"enry_is_generated":     &funcs.EnryIsGenerated{},
+				"enry_is_image":         &funcs.EnryIsImage{},
+				"enry_is_test":          &funcs.EnryIsTest{},
+				"enry_is_vendor":        &funcs.EnryIsVendor{},
 			}
 
 			// alias yaml_to_json => yml_to_json

@@ -1,4 +1,4 @@
-package enry
+package funcs
 
 import (
 	"github.com/go-enry/go-enry/v2"
@@ -15,8 +15,7 @@ func (f *EnryIsGenerated) Apply(context *sqlite.Context, value ...sqlite.Value) 
 	path := value[0].Text()
 	contents := []byte(value[1].Text())
 
-	generated := enry.IsGenerated(path, contents)
-	if generated {
+	if enry.IsGenerated(path, contents) {
 		context.ResultInt(1)
 	} else {
 		context.ResultInt(0)

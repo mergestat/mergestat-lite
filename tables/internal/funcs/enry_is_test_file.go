@@ -1,4 +1,4 @@
-package enry
+package funcs
 
 import (
 	"github.com/go-enry/go-enry/v2"
@@ -14,8 +14,7 @@ func (f *EnryIsTest) Apply(context *sqlite.Context, value ...sqlite.Value) {
 
 	path := value[0].Text()
 
-	isTest := enry.IsTest(path)
-	if isTest {
+	if enry.IsTest(path) {
 		context.ResultInt(1)
 	} else {
 		context.ResultInt(0)

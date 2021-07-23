@@ -1,4 +1,4 @@
-package enry
+package funcs
 
 import (
 	"github.com/go-enry/go-enry/v2"
@@ -14,8 +14,7 @@ func (f *EnryIsBinary) Apply(context *sqlite.Context, value ...sqlite.Value) {
 
 	contents := []byte(value[0].Text())
 
-	binary := enry.IsBinary(contents)
-	if binary {
+	if enry.IsBinary(contents) {
 		context.ResultInt(1)
 	} else {
 		context.ResultInt(0)

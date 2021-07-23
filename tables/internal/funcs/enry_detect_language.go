@@ -1,4 +1,4 @@
-package enry
+package funcs
 
 import (
 	"github.com/go-enry/go-enry/v2"
