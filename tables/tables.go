@@ -60,8 +60,8 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 				"enry_is_dot_file":      &enry.EnryIsDotFile{},
 				"enry_is_generated":     &enry.EnryIsGenerated{},
 				"enry_is_image":         &enry.EnryIsImage{},
-				"enry_is_test":          &enry.EnryIsTest{},
-				"enry_is_vendor":        &enry.EnryIsVendor{},
+				//"enry_is_test":          &enry.EnryIsTest{},
+				"enry_is_vendor": &enry.EnryIsVendor{},
 			}
 
 			// alias yaml_to_json => yml_to_json
