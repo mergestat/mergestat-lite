@@ -154,7 +154,7 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 	return i, nil
 }
 
-var cols_repos = []vtab.Column{
+var starredReposCols = []vtab.Column{
 	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
@@ -173,7 +173,7 @@ func NewStarredReposModule(githubToken string, rateLimiter *rate.Limiter) sqlite
 	))
 	client := githubv4.NewClient(httpClient)
 
-	return vtab.NewTableFunc("github_starred_repos", cols_repos, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("github_starred_repos", starredReposCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var login string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {

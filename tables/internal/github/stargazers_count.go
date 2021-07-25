@@ -11,7 +11,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type starCount struct { //change to starCount
+type starCount struct {
 	rateLimiter *rate.Limiter
 	client      *githubv4.Client
 }
