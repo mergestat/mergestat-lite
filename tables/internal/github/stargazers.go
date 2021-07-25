@@ -39,12 +39,12 @@ type fetchStarsOptions struct {
 }
 
 type fetchStarsResults struct {
-	Edges       []edge //why not []*Edge
+	Edges       []*stargazerEdge
 	HasNextPage bool
 	EndCursor   *githubv4.String
 }
 
-type edge struct { //change to a more informative name.
+type stargazerEdge struct {
 	StarredAt string    //StarredAt insists on being a string whereas createdAt and updatedAt are time.Time.
 	Node      stargazer //change to a more informative name
 }
@@ -57,7 +57,7 @@ func fetchStars(ctx context.Context, input *fetchStarsOptions) (*fetchStarsResul
 			}
 			Name       string
 			Stargazers struct {
-				Edges    []edge
+				Edges    []*stargazerEdge
 				PageInfo struct {
 					EndCursor   githubv4.String
 					HasNextPage bool
@@ -192,7 +192,7 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 	return i, nil
 }
 
-var cols_stargazers = []vtab.Column{
+var stargazersCols = []vtab.Column{
 	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}, OrderBy: vtab.NONE},
 	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
@@ -215,7 +215,7 @@ func NewStargazersModule(githubToken string, rateLimiter *rate.Limiter) sqlite.M
 	))
 	client := githubv4.NewClient(httpClient)
 
-	return vtab.NewTableFunc("github_stargazers", cols_stargazers, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("github_stargazers", stargazersCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
