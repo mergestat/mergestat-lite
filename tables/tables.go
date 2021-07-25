@@ -4,11 +4,16 @@
 package tables
 
 import (
+	"os"
+	"time"
+
 	"github.com/askgitdev/askgit/tables/internal/funcs"
 	"github.com/askgitdev/askgit/tables/internal/git"
 	"github.com/askgitdev/askgit/tables/internal/git/native"
+	"github.com/askgitdev/askgit/tables/internal/github"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
+	"golang.org/x/time/rate"
 )
 
 func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
@@ -19,13 +24,17 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 
 	// return an extension function that register modules with sqlite when this package is loaded
 	return func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
+		githubToken := os.Getenv("GITHUB_TOKEN")
+		rateLimiter := rate.NewLimiter(rate.Every(1*time.Second), 5)
 		// register virtual table modules
 		var modules = map[string]sqlite.Module{
-			"commits": &git.LogModule{Locator: opt.Locator, Context: opt.Context},
-			"refs":    &git.RefModule{Locator: opt.Locator, Context: opt.Context},
-			"stats":   native.NewStatsModule(opt.Locator, opt.Context),
-			"files":   native.NewFilesModule(opt.Locator, opt.Context),
-			"blame":   native.NewBlameModule(opt.Locator, opt.Context),
+			"commits":              &git.LogModule{Locator: opt.Locator, Context: opt.Context},
+			"refs":                 &git.RefModule{Locator: opt.Locator, Context: opt.Context},
+			"github_stargazers":    github.NewStargazersModule(githubToken, rateLimiter),
+			"github_starred_repos": github.NewStarredReposModule(githubToken, rateLimiter),
+			"stats":                native.NewStatsModule(opt.Locator, opt.Context),
+			"files":                native.NewFilesModule(opt.Locator, opt.Context),
+			"blame":                native.NewBlameModule(opt.Locator, opt.Context),
 		}
 
 		for name, mod := range modules {
@@ -35,7 +44,8 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 		}
 
 		var fns = map[string]sqlite.Function{
-			"commit_from_tag": &git.CommitFromTagFn{},
+			"commit_from_tag":        &git.CommitFromTagFn{},
+			"github_stargazer_count": github.NewStarredReposFunc(githubToken, rateLimiter),
 		}
 
 		for name, fn := range fns {
