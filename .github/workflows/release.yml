@@ -1,0 +1,47 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: Publish for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name: askgit-linux-amd64
+          # - os: windows-latest
+          #   asset_name: askgit-windows-amd64
+          - os: macos-latest
+            asset_name: askgit-macos-amd64
+
+    steps:
+    - name: Set up Go 1.15
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.15.5
+      id: go
+
+    - name: Check out source
+      uses: actions/checkout@v1
+
+    - name: Install libgit2
+      run: sudo ./scripts/install_libgit2.sh
+
+    - name: Build
+      run: make
+
+    - name: Compress
+      run: tar -czvf askgit.tar.gz -C .build/ .
+
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: askgit.tar.gz
+        asset_name: ${{ matrix.asset_name }}.tar.gz
+        tag: ${{ github.ref }}
