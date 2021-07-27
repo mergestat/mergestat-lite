@@ -287,6 +287,82 @@ SELECT str_split('hello,world', ',', 1)
 -- +----------------------------------+
 ```
 
+#### Enry Functions
+
+Functions from the [`enry` project](https://github.com/go-enry/go-enry) are also available as SQL scalar functions
+
+##### `enry_detect_language`
+
+Supply a file path and some source code to detect the language.
+
+```sql
+SELECT enry_detect_language('some/path/to/file.go', '<contents of file>')
+```
+
+##### `enry_is_binary`
+
+Given a blob, determine if it's a binary file or not (returns 1 or 0).
+
+```sql
+SELECT enry_is_binary('<contents of file>')
+```
+
+##### `enry_is_configuration`
+
+Detect whether a file path is to a configuration file (returns 1 or 0).
+
+```sql
+SELECT enry_is_configuration('some/path/to/file/config.json')
+```
+
+##### `enry_is_documentation`
+
+Detect whether a file path is to a documentation file (returns 1 or 0).
+
+```sql
+SELECT enry_is_documentation('some/path/to/file/README.md')
+```
+
+##### `enry_is_dot_file`
+
+Detect whether a file path is to a dot file (returns 1 or 0).
+
+```sql
+SELECT enry_is_dot_file('some/path/to/file/.gitignore')
+```
+
+##### `enry_is_generated`
+
+Detect whether a file path is generated (returns 1 or 0).
+
+```sql
+SELECT enry_is_generated('some/path/to/file/generated.go', '<contents of file>')
+```
+
+##### `enry_is_image`
+
+Detect whether a file path is to an image (returns 1 or 0).
+
+```sql
+SELECT enry_is_image('some/path/to/file/image.png')
+```
+
+##### `enry_is_test`
+
+Detect whether a file path is to a test file (returns 1 or 0).
+
+```sql
+SELECT enry_is_test('some/path/to/file/image.png')
+```
+
+##### `enry_is_vendor`
+
+Detect whether a file path is to a vendored file (returns 1 or 0).
+
+```sql
+SELECT enry_is_vendor('vendor/file.go')
+```
+
 
 ### Example Queries
 

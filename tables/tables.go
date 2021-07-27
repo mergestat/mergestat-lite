@@ -58,10 +58,19 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 		if opt.ExtraFunctions {
 			// register sql functions
 			var fns = map[string]sqlite.Function{
-				"str_split":    &funcs.StringSplit{},
-				"toml_to_json": &funcs.TomlToJson{},
-				"yaml_to_json": &funcs.YamlToJson{},
-				"xml_to_json":  &funcs.XmlToJson{},
+				"str_split":             &funcs.StringSplit{},
+				"toml_to_json":          &funcs.TomlToJson{},
+				"yaml_to_json":          &funcs.YamlToJson{},
+				"xml_to_json":           &funcs.XmlToJson{},
+				"enry_detect_language":  &funcs.EnryDetectLanguage{},
+				"enry_is_binary":        &funcs.EnryIsBinary{},
+				"enry_is_configuration": &funcs.EnryIsConfiguration{},
+				"enry_is_documentation": &funcs.EnryIsDocumentation{},
+				"enry_is_dot_file":      &funcs.EnryIsDotFile{},
+				"enry_is_generated":     &funcs.EnryIsGenerated{},
+				"enry_is_image":         &funcs.EnryIsImage{},
+				"enry_is_test":          &funcs.EnryIsTest{},
+				"enry_is_vendor":        &funcs.EnryIsVendor{},
 			}
 
 			// alias yaml_to_json => yml_to_json
