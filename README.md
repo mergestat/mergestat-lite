@@ -27,6 +27,12 @@ brew tap askgitdev/askgit
 brew install askgit
 ```
 
+### Pre-Built Binaries
+
+The [latest releases](https://github.com/askgitdev/askgit/releases) should have pre-built binaries for Mac and Linux.
+You can download and add the `askgit` binary somewhere on your `$PATH` to use.
+`libaskgit.so` is also available to be loaded as a SQLite run-time extension.
+
 ### Go
 
 [`libgit2`](https://libgit2.org/) is a build dependency (used via [`git2go`](https://github.com/libgit2/git2go)) and must be available on your system for linking.
