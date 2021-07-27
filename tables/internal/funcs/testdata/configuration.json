@@ -1,0 +1,42 @@
+{
+  "name": "askgit-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@blueprintjs/core": "^3.41.0",
+    "@blueprintjs/popover2": "^0.10.1",
+    "@monaco-editor/react": "^4.0.11",
+    "@types/react-dom": "^17.0.2",
+    "autoprefixer": "^10.2.5",
+    "axios": "^0.21.1",
+    "github-markdown-css": "^4.0.0",
+    "next": "^10.2.3",
+    "oboe": "^2.1.5",
+    "postcss": "^8.3.0",
+    "react": "^17.0.1",
+    "react-copy-to-clipboard": "^5.0.3",
+    "react-dom": "^17.0.1",
+    "react-markdown": "^5.0.3",
+    "react-syntax-highlighter": "^15.4.3",
+    "remark-gfm": "^1.0.0",
+    "swr": "^0.5.3",
+    "tailwindcss": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.34",
+    "@types/react": "^17.0.3",
+    "@types/react-syntax-highlighter": "^13.5.0",
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "@typescript-eslint/parser": "^4.17.0",
+    "eslint": "^7.22.0",
+    "eslint-plugin-react": "^7.22.0",
+    "prettier": "2.2.1",
+    "typescript": "^4.2.3"
+  }
+}
