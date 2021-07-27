@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestEneryIsVendor(t *testing.T) {
+func TestEnryIsVendor(t *testing.T) {
 	path := "./testdata/node_modules/data"
 	rows, err := FixtureDatabase.Query("SELECT enry_is_vendor(?)", path)
 	if err != nil {

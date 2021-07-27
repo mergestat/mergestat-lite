@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestEneryIsDocumentation(t *testing.T) {
+func TestEnryIsDocumentation(t *testing.T) {
 	path := "./README.md"
 	rows, err := FixtureDatabase.Query("SELECT enry_is_documentation(?)", path)
 	if err != nil {

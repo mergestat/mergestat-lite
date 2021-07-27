@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestEneryIsImage(t *testing.T) {
+func TestEnryIsImage(t *testing.T) {
 	path := "./testdata/logo.png"
 	rows, err := FixtureDatabase.Query("SELECT enry_is_image(?)", path)
 	if err != nil {

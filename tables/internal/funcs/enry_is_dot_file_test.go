@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestEneryIsDotFile(t *testing.T) {
+func TestEnryIsDotFile(t *testing.T) {
 	path := "./testdata/.hidden"
 	rows, err := FixtureDatabase.Query("SELECT enry_is_dot_file(?)", path)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestEneryDetectLanguage(t *testing.T) {
+func TestEnryDetectLanguage(t *testing.T) {
 	path := "./testdata/configuration.json"
 	fileContents, err := ioutil.ReadFile(path)
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestEneryIsGenerated(t *testing.T) {
+func TestEnryIsGenerated(t *testing.T) {
 	path := ".xcworkspacedata"
 	fileContents := ""
 	rows, err := FixtureDatabase.Query("SELECT enry_is_generated(?,?)", path, fileContents)

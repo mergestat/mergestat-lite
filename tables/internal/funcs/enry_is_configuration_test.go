@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestEneryIsConfiguration(t *testing.T) {
+func TestEnryIsConfiguration(t *testing.T) {
 	path := "./testdata/configuration.json"
 	//TODO: isGenerated from here -> https://github.com/go-enry/go-enry/tree/master/_testdata
 	rows, err := FixtureDatabase.Query("SELECT enry_is_configuration(?)", path)
