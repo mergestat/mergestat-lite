@@ -17,6 +17,7 @@ SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 You can try queries on public git repositories without installing anything at [https://try.askgit.com/](https://try.askgit.com/)
 
 More in-depth examples and documentation can be found below.
+Also checkout [our newsletter](https://askgit.substack.com) to stay up to date with feature releases and interesting queries and use cases.
 
 ## Installation
 
