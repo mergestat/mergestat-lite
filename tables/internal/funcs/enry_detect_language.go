@@ -7,18 +7,13 @@ import (
 
 type EnryDetectLanguage struct{}
 
-func (y *EnryDetectLanguage) Args() int           { return 2 }
-func (y *EnryDetectLanguage) Deterministic() bool { return true }
-
-func (y *EnryDetectLanguage) Apply(context *sqlite.Context, value ...sqlite.Value) {
-
-	path := value[0].Text()
-	contents := []byte(value[1].Text())
-
-	lang := enry.GetLanguage(path, contents)
-	if lang == "" {
+func (f *EnryDetectLanguage) Args() int           { return 2 }
+func (f *EnryDetectLanguage) Deterministic() bool { return true }
+func (f *EnryDetectLanguage) Apply(context *sqlite.Context, value ...sqlite.Value) {
+	if lang := enry.GetLanguage(value[0].Text(), value[1].Blob()); lang == "" {
 		context.ResultNull()
 		return
+	} else {
+		context.ResultText(lang)
 	}
-	context.ResultText(lang)
 }

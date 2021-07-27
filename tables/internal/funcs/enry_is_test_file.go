@@ -9,12 +9,8 @@ type EnryIsTest struct{}
 
 func (f *EnryIsTest) Args() int           { return 1 }
 func (f *EnryIsTest) Deterministic() bool { return true }
-
 func (f *EnryIsTest) Apply(context *sqlite.Context, value ...sqlite.Value) {
-
-	path := value[0].Text()
-
-	if enry.IsTest(path) {
+	if enry.IsTest(value[0].Text()) {
 		context.ResultInt(1)
 	} else {
 		context.ResultInt(0)

@@ -15,7 +15,7 @@ func TestEnryIsTest(t *testing.T) {
 
 	rowNum, contents, err := tools.RowContent(rows)
 	if err != nil {
-		t.Fatalf("err %d at row Number %d", err, rowNum)
+		t.Fatalf("err %d at row %d", err, rowNum)
 	}
 
 	if contents[0][0] != "1" {

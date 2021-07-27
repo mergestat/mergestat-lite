@@ -8,15 +8,14 @@ import (
 
 func TestEnryIsGenerated(t *testing.T) {
 	path := ".xcworkspacedata"
-	fileContents := ""
-	rows, err := FixtureDatabase.Query("SELECT enry_is_generated(?,?)", path, fileContents)
+	rows, err := FixtureDatabase.Query("SELECT enry_is_generated(?, ?)", path, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	rowNum, contents, err := tools.RowContent(rows)
 	if err != nil {
-		t.Fatalf("err %d at row Number %d", err, rowNum)
+		t.Fatalf("err %d at row %d", err, rowNum)
 	}
 
 	if contents[0][0] != "1" {

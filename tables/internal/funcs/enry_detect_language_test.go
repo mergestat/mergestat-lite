@@ -8,7 +8,7 @@ import (
 )
 
 func TestEnryDetectLanguage(t *testing.T) {
-	path := "./testdata/configuration.json"
+	path := "./testdata/main.go"
 	fileContents, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
@@ -20,10 +20,10 @@ func TestEnryDetectLanguage(t *testing.T) {
 
 	rowNum, contents, err := tools.RowContent(rows)
 	if err != nil {
-		t.Fatalf("err %d at row Number %d", err, rowNum)
+		t.Fatalf("err %d at row %d", err, rowNum)
 	}
 
-	if contents[0][0] != "JSON" {
-		t.Fatalf("expected string: %s, got %s", "JSON", contents[0][0])
+	if contents[0][0] != "Go" {
+		t.Fatalf("expected string: %s, got %s", "Go", contents[0][0])
 	}
 }

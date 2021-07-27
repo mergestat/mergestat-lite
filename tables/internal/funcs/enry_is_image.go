@@ -9,12 +9,8 @@ type EnryIsImage struct{}
 
 func (f *EnryIsImage) Args() int           { return 1 }
 func (f *EnryIsImage) Deterministic() bool { return true }
-
 func (f *EnryIsImage) Apply(context *sqlite.Context, value ...sqlite.Value) {
-
-	path := value[0].Text()
-
-	if enry.IsImage(path) {
+	if enry.IsImage(value[0].Text()) {
 		context.ResultInt(1)
 	} else {
 		context.ResultInt(0)

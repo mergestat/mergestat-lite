@@ -7,8 +7,7 @@ import (
 )
 
 func TestEnryIsConfiguration(t *testing.T) {
-	path := "./testdata/configuration.json"
-	//TODO: isGenerated from here -> https://github.com/go-enry/go-enry/tree/master/_testdata
+	path := "./testdata/configuration.json" // from here -> https://github.com/go-enry/go-enry/tree/master/_testdata
 	rows, err := FixtureDatabase.Query("SELECT enry_is_configuration(?)", path)
 	if err != nil {
 		t.Fatal(err)
@@ -16,7 +15,7 @@ func TestEnryIsConfiguration(t *testing.T) {
 
 	rowNum, contents, err := tools.RowContent(rows)
 	if err != nil {
-		t.Fatalf("err %d at row Number %d", err, rowNum)
+		t.Fatalf("err %d at row %d", err, rowNum)
 	}
 
 	if contents[0][0] != "1" {

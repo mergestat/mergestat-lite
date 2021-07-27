@@ -9,12 +9,8 @@ type EnryIsVendor struct{}
 
 func (f *EnryIsVendor) Args() int           { return 1 }
 func (f *EnryIsVendor) Deterministic() bool { return true }
-
 func (f *EnryIsVendor) Apply(context *sqlite.Context, value ...sqlite.Value) {
-
-	path := value[0].Text()
-
-	if enry.IsVendor(path) {
+	if enry.IsVendor(value[0].Text()) {
 		context.ResultInt(1)
 	} else {
 		context.ResultInt(0)
