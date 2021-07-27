@@ -1,6 +1,7 @@
 package funcs
 
 import (
+	"io/ioutil"
 	"testing"
 
 	"github.com/askgitdev/askgit/tables/internal/tools"
@@ -8,7 +9,11 @@ import (
 
 func TestEnryIsBinary(t *testing.T) {
 	path := "./testdata/binary"
-	rows, err := FixtureDatabase.Query("SELECT enry_is_binary(?)", path)
+	fileContents, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := FixtureDatabase.Query("SELECT enry_is_binary(?)", fileContents)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -18,7 +23,7 @@ func TestEnryIsBinary(t *testing.T) {
 		t.Fatalf("err %d at row Number %d", err, rowNum)
 	}
 
-	if contents[0][0] != "`1`" {
+	if contents[0][0] != "1" {
 		t.Fatalf("expected string: %s, got %s", "1", contents[0][0])
 	}
 }
