@@ -228,7 +228,7 @@ Params:
 
 The [SQLite JSON1 extension](https://www.sqlite.org/json1.html) is included for working with JSON data.
 
-##### `toml_json`
+##### `toml_to_json`
 
 Scalar function that converts `toml` to `json`.
 
