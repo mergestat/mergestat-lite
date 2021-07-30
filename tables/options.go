@@ -14,14 +14,14 @@ import (
 type Options struct {
 	Locator services.RepoLocator
 
-	// whether or not to register the extra utility functions
+	// ExtraFunctions is used to determine whether or not to register the extra utility functions
 	// bundled with this extension
 	ExtraFunctions bool
 
-	// whether or not to register the GitHub tables/funcs
+	// GitHub set to true to register the GitHub tables/funcs
 	GitHub bool
 
-	//
+	// GitHubClientGetter overrides the default GitHub v4 client
 	GitHubClientGetter func() *githubv4.Client
 
 	// Context is a key-value store to pass along values to the underlying extensions
