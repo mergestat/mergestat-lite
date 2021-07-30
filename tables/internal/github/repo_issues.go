@@ -160,7 +160,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 2:
 		ctx.ResultText(i.results.Edges[i.current].Node.Author.Login)
 	case 3:
-		ctx.ResultText(i.results.Edges[i.current].Node.Author.Login)
+		ctx.ResultText(i.results.Edges[i.current].Node.Author.URL)
 	case 4:
 		ctx.ResultText(i.results.Edges[i.current].Node.Body)
 	case 5:
@@ -175,69 +175,78 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 8:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.CreatedViaEmail))
+		ctx.ResultInt(i.results.Edges[i.current].Node.Comments.TotalCount)
 	case 9:
-		ctx.ResultInt(i.results.Edges[i.current].Node.DatabaseId)
+		t := i.results.Edges[i.current].Node.CreatedAt
+		if t.IsZero() {
+			ctx.ResultText(" ")
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 10:
-		ctx.ResultText(i.results.Edges[i.current].Node.Editor.Login)
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.CreatedViaEmail))
 	case 11:
-		ctx.ResultText(i.results.Edges[i.current].Node.Editor.URL)
+		ctx.ResultInt(i.results.Edges[i.current].Node.DatabaseId)
 	case 12:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.IncludesCreatedEdit))
+		ctx.ResultText(i.results.Edges[i.current].Node.Editor.Login)
 	case 13:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.IsReadByViewer))
+		ctx.ResultText(i.results.Edges[i.current].Node.Editor.URL)
 	case 14:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Labels.TotalCount)
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.IncludesCreatedEdit))
 	case 15:
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.IsReadByViewer))
+	case 16:
+		ctx.ResultInt(i.results.Edges[i.current].Node.Labels.TotalCount)
+	case 17:
 		t := i.results.Edges[i.current].Node.LastEditedAt
 		if t.IsZero() {
 			ctx.ResultText("")
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 16:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.Locked))
-	case 17:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Milestone.Number)
 	case 18:
-		ctx.ResultFloat(float64(i.results.Edges[i.current].Node.Milestone.ProgressPercentage))
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.Locked))
 	case 19:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Number)
+		ctx.ResultInt(i.results.Edges[i.current].Node.Milestone.Number)
 	case 20:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Participants.TotalCount)
+		ctx.ResultFloat(float64(i.results.Edges[i.current].Node.Milestone.ProgressPercentage))
 	case 21:
+		ctx.ResultInt(i.results.Edges[i.current].Node.Number)
+	case 22:
+		ctx.ResultInt(i.results.Edges[i.current].Node.Participants.TotalCount)
+	case 23:
 		t := i.results.Edges[i.current].Node.PublishedAt
 		if t.IsZero() {
 			ctx.ResultText("")
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 22:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Reactions.TotalCount)
-	case 23:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.State))
 	case 24:
-		ctx.ResultText(i.results.Edges[i.current].Node.Title)
+		ctx.ResultInt(i.results.Edges[i.current].Node.Reactions.TotalCount)
 	case 25:
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.State))
+	case 26:
+		ctx.ResultText(i.results.Edges[i.current].Node.Title)
+	case 27:
 		t := i.results.Edges[i.current].Node.UpdatedAt
 		if t.IsZero() {
 			ctx.ResultText("")
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 26:
-		ctx.ResultText(i.results.Edges[i.current].Node.Url.String())
-	case 27:
-		ctx.ResultInt(i.results.Edges[i.current].Node.UserContentEdits.TotalCount)
 	case 28:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanReact))
+		ctx.ResultText(i.results.Edges[i.current].Node.Url.String())
 	case 29:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanSubscribe))
+		ctx.ResultInt(i.results.Edges[i.current].Node.UserContentEdits.TotalCount)
 	case 30:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanUpdate))
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanReact))
 	case 31:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerDidAuthor))
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanSubscribe))
 	case 32:
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanUpdate))
+	case 33:
+		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerDidAuthor))
+	case 34:
 		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerSubscription))
 	}
 	return nil
@@ -336,14 +345,13 @@ func NewIssuesModule(githubToken string, rateLimiter *rate.Limiter) sqlite.Modul
 				}
 			}
 		}
-
 		issueOrder := &githubv4.IssueOrder{
 			Field:     githubv4.IssueOrderFieldCreatedAt,
 			Direction: githubv4.OrderDirectionDesc,
 		}
 		for _, order := range orders { //adding this for loop for scalability. might need to order the data by more columns in the future.
 			switch order.ColumnIndex {
-			case 13:
+			case 21:
 				if !order.Desc {
 					issueOrder.Direction = githubv4.OrderDirectionAsc
 				}
