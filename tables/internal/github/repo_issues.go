@@ -166,7 +166,11 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 5:
 		ctx.ResultText(i.results.Edges[i.current].Node.BodyText)
 	case 6:
-		ctx.ResultText(fmt.Sprint((i.results.Edges[i.current].Node.Closed)))
+		if i.results.Edges[i.current].Node.Closed {
+			ctx.ResultInt(1)
+		} else {
+			ctx.ResultInt(0)
+		}
 	case 7:
 		t := i.results.Edges[i.current].Node.ClosedAt
 		if t.IsZero() {
@@ -184,7 +188,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 10:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.CreatedViaEmail))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.CreatedViaEmail))
 	case 11:
 		ctx.ResultInt(i.results.Edges[i.current].Node.DatabaseId)
 	case 12:
@@ -192,9 +196,9 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 13:
 		ctx.ResultText(i.results.Edges[i.current].Node.Editor.URL)
 	case 14:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.IncludesCreatedEdit))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.IncludesCreatedEdit))
 	case 15:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.IsReadByViewer))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.IsReadByViewer))
 	case 16:
 		ctx.ResultInt(i.results.Edges[i.current].Node.Labels.TotalCount)
 	case 17:
@@ -205,7 +209,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 18:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.Locked))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.Locked))
 	case 19:
 		ctx.ResultInt(i.results.Edges[i.current].Node.Milestone.Number)
 	case 20:
@@ -239,13 +243,15 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 29:
 		ctx.ResultInt(i.results.Edges[i.current].Node.UserContentEdits.TotalCount)
 	case 30:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanReact))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerCanReact))
 	case 31:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanSubscribe))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerCanSubscribe))
 	case 32:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerCanUpdate))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerCanUpdate))
+
 	case 33:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerDidAuthor))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerDidAuthor))
+
 	case 34:
 		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerSubscription))
 	}
@@ -253,6 +259,13 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 
 }
 
+// true returns 1 false 0
+func t1f0(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
 func (i *iterIssues) Next() (vtab.Row, error) {
 	i.current += 1
 
@@ -296,19 +309,19 @@ var issuesCols = []vtab.Column{
 	{Name: "author_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "body", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "body_text", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "closed", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "closed", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "closed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "comment_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_via_email", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "database_id", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "editor_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "editor_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "includes_created_edit", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "is_read_by_viewer", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "includes_created_edit", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "is_read_by_viewer", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "label_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "locked", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "locked", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "milestone_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "milestone_progress", Type: sqlite.SQLITE_FLOAT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "issue_number", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
@@ -320,10 +333,10 @@ var issuesCols = []vtab.Column{
 	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "user_edits_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_can_react", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_can_subscripe", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_can_update", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_did_author", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "viewer_can_react", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "viewer_can_subscripe", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "viewer_can_update", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "viewer_did_author", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "viewerSubscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 }
 
