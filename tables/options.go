@@ -5,6 +5,7 @@ import (
 
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/go-git/go-git/v5"
+	"github.com/shurcooL/githubv4"
 )
 
 // Options is the container for various different options
@@ -17,6 +18,12 @@ type Options struct {
 	// bundled with this extension
 	ExtraFunctions bool
 
+	// whether or not to register the GitHub tables/funcs
+	GitHub bool
+
+	//
+	GitHubClientGetter func() *githubv4.Client
+
 	// Context is a key-value store to pass along values to the underlying extensions
 	Context services.Context
 }
@@ -28,6 +35,16 @@ type OptionFn func(*Options)
 // utility sql routines.
 func WithExtraFunctions() OptionFn {
 	return func(o *Options) { o.ExtraFunctions = true }
+}
+
+// WithGitHub configures the extension to also register the GitHub related tables and funcs
+func WithGitHub() OptionFn {
+	return func(o *Options) { o.GitHub = true }
+}
+
+// WithGitHubClientGetter configures a way to use a custom GitHubv4 client
+func WithGitHubClientGetter(getter func() *githubv4.Client) OptionFn {
+	return func(o *Options) { o.GitHubClientGetter = getter }
 }
 
 // RepoLocatorFn is an adapter type that adapts any function with compatible

@@ -7,19 +7,16 @@ import (
 
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/oauth2"
-	"golang.org/x/time/rate"
 )
 
 type starCount struct {
-	rateLimiter *rate.Limiter
-	client      *githubv4.Client
+	opts *Options
 }
 
 func (s *starCount) Args() int           { return -1 }
 func (s *starCount) Deterministic() bool { return false }
 func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
-	err := s.rateLimiter.Wait(context.Background())
+	err := s.opts.RateLimiter.Wait(context.Background())
 	if err != nil {
 		ctx.ResultError(err)
 		return
@@ -53,7 +50,7 @@ func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		"owner": githubv4.String(owner),
 		"name":  githubv4.String(name),
 	}
-	err = s.client.Query(context.Background(), &starsCountQuery, variables)
+	err = s.opts.Client().Query(context.Background(), &starsCountQuery, variables)
 	if err != nil {
 		ctx.ResultError(err)
 		return
@@ -61,10 +58,6 @@ func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	ctx.ResultInt(starsCountQuery.Repository.StargazerCount)
 }
 
-func NewStarredReposFunc(githubToken string, rateLimiter *rate.Limiter) sqlite.Function {
-	httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: githubToken},
-	))
-	client := githubv4.NewClient(httpClient)
-	return &starCount{rateLimiter: rateLimiter, client: client}
+func NewStarredReposFunc(opts *Options) sqlite.Function {
+	return &starCount{opts}
 }

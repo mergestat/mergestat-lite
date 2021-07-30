@@ -10,7 +10,6 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/oauth2"
 	"golang.org/x/time/rate"
 )
 
@@ -209,12 +208,7 @@ var stargazersCols = []vtab.Column{
 	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 }
 
-func NewStargazersModule(githubToken string, rateLimiter *rate.Limiter) sqlite.Module {
-	httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: githubToken},
-	))
-	client := githubv4.NewClient(httpClient)
-
+func NewStargazersModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_stargazers", stargazersCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name string
 		for _, constraint := range constraints {
@@ -242,6 +236,6 @@ func NewStargazersModule(githubToken string, rateLimiter *rate.Limiter) sqlite.M
 			}
 		}
 
-		return &iterStargazers{fullNameOrOwner, name, client, -1, nil, rateLimiter, starOrder}, nil
+		return &iterStargazers{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, starOrder}, nil
 	})
 }

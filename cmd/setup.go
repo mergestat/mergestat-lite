@@ -16,6 +16,7 @@ func registerExt() {
 			tables.WithExtraFunctions(),
 			tables.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
 			tables.WithContextValue("defaultRepoPath", repo),
+			tables.WithGitHub(),
 			tables.WithContextValue("githubToken", githubToken),
 		),
 	)

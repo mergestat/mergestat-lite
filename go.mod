@@ -10,6 +10,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/augmentable-dev/vtab v0.0.0-20210717200339-0c8dcfe2033b
 	github.com/clbanning/mxj/v2 v2.5.5
+	github.com/dnaeon/go-vcr/v2 v2.0.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-enry/go-enry/v2 v2.7.1
 	github.com/go-git/go-billy/v5 v5.3.1
