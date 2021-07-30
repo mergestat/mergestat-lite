@@ -166,11 +166,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 5:
 		ctx.ResultText(i.results.Edges[i.current].Node.BodyText)
 	case 6:
-		if i.results.Edges[i.current].Node.Closed {
-			ctx.ResultInt(1)
-		} else {
-			ctx.ResultInt(0)
-		}
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.Closed))
 	case 7:
 		t := i.results.Edges[i.current].Node.ClosedAt
 		if t.IsZero() {
