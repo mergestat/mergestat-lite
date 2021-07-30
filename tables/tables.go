@@ -35,7 +35,7 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 			"blame":                native.NewBlameModule(opt.Locator, opt.Context),
 			"github_stargazers":    github.NewStargazersModule(githubToken, rateLimiter),
 			"github_starred_repos": github.NewStarredReposModule(githubToken, rateLimiter),
-			"github_repos_issue":   github.NewIssuesModule(githubToken, rateLimiter),
+			"github_repo_issues":   github.NewIssuesModule(githubToken, rateLimiter),
 		}
 
 		for name, mod := range modules {
