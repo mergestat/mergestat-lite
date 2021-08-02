@@ -2,9 +2,7 @@ package github
 
 import (
 	"context"
-	"errors"
 	"io"
-	"strings"
 	"time"
 
 	"github.com/augmentable-dev/vtab"
@@ -95,22 +93,6 @@ type iterStargazers struct {
 	starOrder       *githubv4.StarOrder
 }
 
-// repoOwnerAndName returns the "owner" and "name" (respective return values) or an error
-// given the inputs to the iterator. This allows for both `SELECT * FROM github_stargazers('askgitdev/starq')`
-// and `SELECT * FROM github_stargazers('askgitdev', 'starq')
-func (i *iterStargazers) repoOwnerAndName() (string, string, error) {
-	if i.name == "" {
-
-		split_string := strings.Split(i.fullNameOrOwner, "/")
-		if len(split_string) != 2 {
-			return "", "", errors.New("invalid repo name, must be of format owner/name")
-		}
-		return split_string[0], split_string[1], nil
-	} else {
-		return i.fullNameOrOwner, i.name, nil
-	}
-}
-
 func (i *iterStargazers) Column(ctx *sqlite.Context, c int) error {
 	switch c {
 	case 0:
@@ -165,7 +147,7 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 				return nil, err
 			}
 
-			owner, name, err := i.repoOwnerAndName()
+			owner, name, err := repoOwnerAndName(i.name, i.fullNameOrOwner)
 			if err != nil {
 				return nil, err
 			}

@@ -1,7 +1,9 @@
 package github
 
 import (
+	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/shurcooL/githubv4"
@@ -39,4 +41,19 @@ func t1f0(b bool) int {
 		return 1
 	}
 	return 0
+}
+
+// repoOwnerAndName returns the "owner" and "name" (respective return values) or an error
+// given the inputs to the iterator. This allows for both `SELECT * FROM github_table('askgitdev/askgit')`
+// and `SELECT * FROM github_table('askgitdev', 'askgit')
+func repoOwnerAndName(name, fullNameOrOwner string) (string, string, error) {
+	if name == "" {
+		split_string := strings.Split(fullNameOrOwner, "/")
+		if len(split_string) != 2 {
+			return "", "", errors.New("invalid repo name, must be of format owner/name")
+		}
+		return split_string[0], split_string[1], nil
+	} else {
+		return fullNameOrOwner, name, nil
+	}
 }
