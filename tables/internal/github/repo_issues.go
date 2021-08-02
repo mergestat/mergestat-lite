@@ -360,9 +360,27 @@ func NewIssuesModule(githubToken string, rateLimiter *rate.Limiter) sqlite.Modul
 		}
 		for _, order := range orders { //adding this for loop for scalability. might need to order the data by more columns in the future.
 			switch order.ColumnIndex {
-			case 21:
+			case 8:
 				if !order.Desc {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
 					issueOrder.Direction = githubv4.OrderDirectionAsc
+
+				} else {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
+				}
+			case 9:
+				if !order.Desc {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
+					issueOrder.Direction = githubv4.OrderDirectionAsc
+				} else {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
+				}
+			case 27:
+				if !order.Desc {
+					issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
+					issueOrder.Direction = githubv4.OrderDirectionAsc
+				} else {
+					issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
 				}
 			}
 		}
