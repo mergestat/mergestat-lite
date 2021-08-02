@@ -8,7 +8,6 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/oauth2"
 	"golang.org/x/time/rate"
 )
 
@@ -167,12 +166,7 @@ var starredReposCols = []vtab.Column{
 	//{Name: "projects_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 }
 
-func NewStarredReposModule(githubToken string, rateLimiter *rate.Limiter) sqlite.Module {
-	httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: githubToken},
-	))
-	client := githubv4.NewClient(httpClient)
-
+func NewStarredReposModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_starred_repos", starredReposCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var login string
 		for _, constraint := range constraints {
@@ -184,6 +178,6 @@ func NewStarredReposModule(githubToken string, rateLimiter *rate.Limiter) sqlite
 			}
 		}
 
-		return &iterStarredRepos{login, client, -1, nil, rateLimiter}, nil
+		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter}, nil
 	})
 }

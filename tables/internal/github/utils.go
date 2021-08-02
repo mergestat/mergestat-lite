@@ -4,7 +4,14 @@ import (
 	"strconv"
 
 	"github.com/askgitdev/askgit/tables/services"
+	"github.com/shurcooL/githubv4"
+	"golang.org/x/time/rate"
 )
+
+type Options struct {
+	Client      func() *githubv4.Client
+	RateLimiter *rate.Limiter
+}
 
 // GetGitHubTokenFromCtx looks up the githubToken key in the supplied context and returns it if set
 func GetGitHubTokenFromCtx(ctx services.Context) string {
