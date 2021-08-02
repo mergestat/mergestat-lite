@@ -324,7 +324,7 @@ var issuesCols = []vtab.Column{
 	{Name: "viewer_can_subscribe", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "viewer_can_update", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "viewer_did_author", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewerSubscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "viewer_subscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 }
 
 func NewIssuesModule(opts *Options) sqlite.Module {
