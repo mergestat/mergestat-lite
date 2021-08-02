@@ -376,7 +376,7 @@ SELECT enry_is_vendor('vendor/file.go')
 
 You can use `askgit` to query the [GitHub API (v4)](https://docs.github.com/en/graphql).
 Constraints in your SQL query are pushed to the GitHub API as much as possible.
-For instance, if your query includes an `ORDER BY` clause and if items can be ordered in the GitHub API repose (on the specified column), your query can avoid doing a full table scan and rely on the ordering returned by the API.
+For instance, if your query includes an `ORDER BY` clause and if items can be ordered in the GitHub API response (on the specified column), your query can avoid doing a full table scan and rely on the ordering returned by the API.
 
 ##### Authenticating
 
