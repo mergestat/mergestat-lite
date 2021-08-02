@@ -11,7 +11,6 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/oauth2"
 	"golang.org/x/time/rate"
 )
 
@@ -327,12 +326,7 @@ var issuesCols = []vtab.Column{
 	{Name: "viewerSubscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 }
 
-func NewIssuesModule(githubToken string, rateLimiter *rate.Limiter) sqlite.Module {
-	httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: githubToken},
-	))
-	client := githubv4.NewClient(httpClient)
-
+func NewIssuesModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_repo_issues", issuesCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name string
 		for _, constraint := range constraints {
@@ -349,15 +343,33 @@ func NewIssuesModule(githubToken string, rateLimiter *rate.Limiter) sqlite.Modul
 			Field:     githubv4.IssueOrderFieldCreatedAt,
 			Direction: githubv4.OrderDirectionDesc,
 		}
-		for _, order := range orders { //adding this for loop for scalability. might need to order the data by more columns in the future.
+		for _, order := range orders {
 			switch order.ColumnIndex {
-			case 21:
+			case 8:
 				if !order.Desc {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
 					issueOrder.Direction = githubv4.OrderDirectionAsc
+
+				} else {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
+				}
+			case 9:
+				if !order.Desc {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
+					issueOrder.Direction = githubv4.OrderDirectionAsc
+				} else {
+					issueOrder.Field = githubv4.IssueOrderFieldComments
+				}
+			case 27:
+				if !order.Desc {
+					issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
+					issueOrder.Direction = githubv4.OrderDirectionAsc
+				} else {
+					issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
 				}
 			}
 		}
 
-		return &iterIssues{fullNameOrOwner, name, client, -1, nil, rateLimiter, issueOrder}, nil
+		return &iterIssues{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, issueOrder}, nil
 	})
 }
