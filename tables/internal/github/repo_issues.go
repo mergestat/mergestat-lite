@@ -261,6 +261,7 @@ func t1f0(b bool) int {
 	}
 	return 0
 }
+
 func (i *iterIssues) Next() (vtab.Row, error) {
 	i.current += 1
 
