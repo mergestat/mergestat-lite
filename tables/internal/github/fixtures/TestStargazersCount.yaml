@@ -1,0 +1,65 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($name:String!$owner:String!){repository(owner: $owner, name: $name){stargazerCount}}","variables":{"name":"askgit","owner":"askgitdev"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"stargazerCount":2403}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Cache-Control:
+      - no-cache
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 30 Jul 2021 03:26:23 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - FD9E:7F59:1372A8B:2A4BCB8:6103715F
+      X-Oauth-Scopes:
+      - repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4903"
+      X-Ratelimit-Reset:
+      - "1627616382"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "97"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 333.695986ms

@@ -16,6 +16,7 @@ func init() {
 	sqlite.Register(tables.RegisterFn(
 		tables.WithExtraFunctions(),
 		tables.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
+		tables.WithGitHub(),
 		tables.WithContextValue("githubToken", os.Getenv("GITHUB_TOKEN")),
 	))
 }

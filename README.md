@@ -17,6 +17,7 @@ SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 You can try queries on public git repositories without installing anything at [https://try.askgit.com/](https://try.askgit.com/)
 
 More in-depth examples and documentation can be found below.
+Also checkout [our newsletter](https://askgit.substack.com) to stay up to date with feature releases and interesting queries and use cases.
 
 ## Installation
 
@@ -26,6 +27,12 @@ More in-depth examples and documentation can be found below.
 brew tap askgitdev/askgit
 brew install askgit
 ```
+
+### Pre-Built Binaries
+
+The [latest releases](https://github.com/askgitdev/askgit/releases) should have pre-built binaries for Mac and Linux.
+You can download and add the `askgit` binary somewhere on your `$PATH` to use.
+`libaskgit.so` is also available to be loaded as a SQLite run-time extension.
 
 ### Go
 
@@ -221,7 +228,7 @@ Params:
 
 The [SQLite JSON1 extension](https://www.sqlite.org/json1.html) is included for working with JSON data.
 
-##### `toml_json`
+##### `toml_to_json`
 
 Scalar function that converts `toml` to `json`.
 
@@ -285,6 +292,82 @@ SELECT str_split('hello,world', ',', 1)
 -- +----------------------------------+
 -- | world                            |
 -- +----------------------------------+
+```
+
+#### Enry Functions
+
+Functions from the [`enry` project](https://github.com/go-enry/go-enry) are also available as SQL scalar functions
+
+##### `enry_detect_language`
+
+Supply a file path and some source code to detect the language.
+
+```sql
+SELECT enry_detect_language('some/path/to/file.go', '<contents of file>')
+```
+
+##### `enry_is_binary`
+
+Given a blob, determine if it's a binary file or not (returns 1 or 0).
+
+```sql
+SELECT enry_is_binary('<contents of file>')
+```
+
+##### `enry_is_configuration`
+
+Detect whether a file path is to a configuration file (returns 1 or 0).
+
+```sql
+SELECT enry_is_configuration('some/path/to/file/config.json')
+```
+
+##### `enry_is_documentation`
+
+Detect whether a file path is to a documentation file (returns 1 or 0).
+
+```sql
+SELECT enry_is_documentation('some/path/to/file/README.md')
+```
+
+##### `enry_is_dot_file`
+
+Detect whether a file path is to a dot file (returns 1 or 0).
+
+```sql
+SELECT enry_is_dot_file('some/path/to/file/.gitignore')
+```
+
+##### `enry_is_generated`
+
+Detect whether a file path is generated (returns 1 or 0).
+
+```sql
+SELECT enry_is_generated('some/path/to/file/generated.go', '<contents of file>')
+```
+
+##### `enry_is_image`
+
+Detect whether a file path is to an image (returns 1 or 0).
+
+```sql
+SELECT enry_is_image('some/path/to/file/image.png')
+```
+
+##### `enry_is_test`
+
+Detect whether a file path is to a test file (returns 1 or 0).
+
+```sql
+SELECT enry_is_test('some/path/to/file/image.png')
+```
+
+##### `enry_is_vendor`
+
+Detect whether a file path is to a vendored file (returns 1 or 0).
+
+```sql
+SELECT enry_is_vendor('vendor/file.go')
 ```
 
 

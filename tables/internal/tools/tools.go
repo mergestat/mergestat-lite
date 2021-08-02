@@ -4,6 +4,7 @@ package tools
 
 import (
 	"database/sql"
+
 	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -13,6 +14,8 @@ func RowContent(rows *sql.Rows) (colCount int, contents [][]string, err error) {
 	if err != nil {
 		return colCount, nil, err
 	}
+
+	colCount = len(columns)
 
 	pointers := make([]interface{}, len(columns))
 	container := make([]sql.NullString, len(columns))
