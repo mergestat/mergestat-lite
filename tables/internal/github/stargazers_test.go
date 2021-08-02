@@ -2,6 +2,8 @@ package github_test
 
 import (
 	"testing"
+
+	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
 func TestStargazers(t *testing.T) {
@@ -10,25 +12,22 @@ func TestStargazers(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT login FROM github_stargazers('askgitdev/askgit') LIMIT 500")
+	rows, err := db.Query("SELECT * FROM github_stargazers('askgitdev/askgit') LIMIT 500")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var login string
-		if err = rows.Scan(&login); err != nil {
-			t.Fatalf("failed to scan resultset: %v", err)
-		}
-		t.Logf("ref: login=%s", login)
-
-		if login == "" {
-			t.Fatalf("expected a login")
-		}
+	colCount, content, err := tools.RowContent(rows)
+	if err != nil {
+		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if err = rows.Err(); err != nil {
-		t.Fatalf("failed to fetch results: %v", err.Error())
+	if colCount != 12 {
+		t.Fatalf("expected 12 columns, got: %d", colCount)
+	}
+
+	if len(content) != 500 {
+		t.Fatalf("expected 500 rows, got: %d", len(content))
 	}
 }

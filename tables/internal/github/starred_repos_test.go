@@ -2,6 +2,8 @@ package github_test
 
 import (
 	"testing"
+
+	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
 func TestStarredRepos(t *testing.T) {
@@ -10,25 +12,22 @@ func TestStarredRepos(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT name FROM github_starred_repos('patrickdevivo') LIMIT 50")
+	rows, err := db.Query("SELECT * FROM github_starred_repos('patrickdevivo') LIMIT 10")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var name string
-		if err = rows.Scan(&name); err != nil {
-			t.Fatalf("failed to scan resultset: %v", err)
-		}
-		t.Logf("ref: name=%s", name)
-
-		if name == "" {
-			t.Fatalf("expected a name")
-		}
+	colCount, content, err := tools.RowContent(rows)
+	if err != nil {
+		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if err = rows.Err(); err != nil {
-		t.Fatalf("failed to fetch results: %v", err.Error())
+	if colCount != 8 {
+		t.Fatalf("expected 8 columns, got: %d", colCount)
+	}
+
+	if len(content) != 10 {
+		t.Fatalf("expected 10 rows, got: %d", len(content))
 	}
 }
