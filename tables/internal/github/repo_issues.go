@@ -140,7 +140,6 @@ type iterIssues struct {
 // and `SELECT * FROM github_stargazers('askgitdev', 'starq')
 func (i *iterIssues) repoOwnerAndName() (string, string, error) {
 	if i.name == "" {
-
 		split_string := strings.Split(i.fullNameOrOwner, "/")
 		if len(split_string) != 2 {
 			return "", "", errors.New("invalid repo name, must be of format owner/name")
@@ -254,14 +253,6 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	return nil
 }
 
-// true returns 1 false 0
-func t1f0(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
-}
-
 func (i *iterIssues) Next() (vtab.Row, error) {
 	i.current += 1
 
@@ -330,7 +321,7 @@ var issuesCols = []vtab.Column{
 	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "user_edits_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "viewer_can_react", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_can_subscripe", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "viewer_can_subscribe", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "viewer_can_update", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "viewer_did_author", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "viewerSubscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},

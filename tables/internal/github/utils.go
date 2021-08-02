@@ -32,3 +32,11 @@ func GetGithubReqPerSecondFromCtx(ctx services.Context) int {
 		return defaultValue
 	}
 }
+
+// t1f0 converts a bool to an int
+func t1f0(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
