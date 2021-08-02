@@ -374,9 +374,11 @@ SELECT enry_is_vendor('vendor/file.go')
 
 #### GitHub API
 
-You can use `askgit` to query the GitHub API (v4).
-Constraints in your SQL are pushed out to the GitHub API as much as possible.
-For instance, if your query includes an `ORDER BY` and if items can be ordered by the GitHub API on the specified column, your query can avoid doing a full table scan and rely on the ordering done by the GitHub API.
+You can use `askgit` to query the [GitHub API (v4)](https://docs.github.com/en/graphql).
+Constraints in your SQL query are pushed to the GitHub API as much as possible.
+For instance, if your query includes an `ORDER BY` clause and if items can be ordered in the GitHub API repose (on the specified column), your query can avoid doing a full table scan and rely on the ordering returned by the API.
+
+##### Authenticating
 
 You must provide an authentication token in order to use the GitHub API tables.
 You can create a personal access token [following these instructions](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token).
