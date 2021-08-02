@@ -262,6 +262,13 @@ func t1f0(b bool) int {
 	return 0
 }
 
+// true returns 1 false 0
+func t1f0(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
 func (i *iterIssues) Next() (vtab.Row, error) {
 	i.current += 1
 
