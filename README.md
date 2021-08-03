@@ -4,6 +4,8 @@
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/askgitdev/askgit/main)](https://www.tickgit.com/browse?repo=github.com/askgitdev/askgit&branch=main)
 [![codecov](https://codecov.io/gh/askgitdev/askgit/branch/main/graph/badge.svg)](https://codecov.io/gh/askgitdev/askgit)
 
+![AskGit Logo](docs/logo.png)
+
 # askgit
 
 `askgit` is a command-line tool for running SQL queries on git repositories.
