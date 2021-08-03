@@ -80,7 +80,6 @@ type iterUserRepos struct {
 }
 
 func (i *iterUserRepos) Column(ctx *sqlite.Context, c int) error {
-
 	switch c {
 	case 0:
 		ctx.ResultText(i.login)
@@ -91,27 +90,26 @@ func (i *iterUserRepos) Column(ctx *sqlite.Context, c int) error {
 	case 3:
 		t := i.results.UserRepos[i.current].CreatedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 4:
 		t := i.results.UserRepos[i.current].UpdatedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 5:
 		t := i.results.UserRepos[i.current].PushedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 6:
 		ctx.ResultInt(i.results.UserRepos[i.current].StargazerCount)
-
 	}
 	return nil
 }
@@ -147,7 +145,7 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 }
 
 var userReposCols = []vtab.Column{
-	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
 	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "description", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
@@ -168,30 +166,24 @@ func NewUserReposModule(opts *Options) sqlite.Module {
 			}
 		}
 
-		repoOrder := &githubv4.RepositoryOrder{
-			Field:     githubv4.RepositoryOrderFieldCreatedAt, //Turns out leaving this struct blank does not assign default values to its fields. So I assigned the default values that are followed in graphQL
-			Direction: githubv4.OrderDirectionAsc,
-		}
-
+		var repoOrder *githubv4.RepositoryOrder
+		// for now we can only support single field order bys
 		if len(orders) == 1 {
-			for _, order := range orders {
-				if order.Desc {
-					repoOrder.Direction = githubv4.OrderDirectionDesc
-				}
-				switch order.ColumnIndex {
-				case 1:
-					repoOrder.Field = githubv4.RepositoryOrderFieldName
-				case 2:
-					repoOrder.Field = githubv4.RepositoryOrderFieldCreatedAt
-				case 3:
-					repoOrder.Field = githubv4.RepositoryOrderFieldUpdatedAt
-				case 4:
-					repoOrder.Field = githubv4.RepositoryOrderFieldPushedAt
-				case 5:
-					repoOrder.Field = githubv4.RepositoryOrderFieldStargazers
-
-				}
+			repoOrder = &githubv4.RepositoryOrder{}
+			order := orders[0]
+			switch order.ColumnIndex {
+			case 1:
+				repoOrder.Field = githubv4.RepositoryOrderFieldName
+			case 3:
+				repoOrder.Field = githubv4.RepositoryOrderFieldCreatedAt
+			case 4:
+				repoOrder.Field = githubv4.RepositoryOrderFieldUpdatedAt
+			case 5:
+				repoOrder.Field = githubv4.RepositoryOrderFieldPushedAt
+			case 6:
+				repoOrder.Field = githubv4.RepositoryOrderFieldStargazers
 			}
+			repoOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
 		return &iterUserRepos{login, opts.Client(), -1, nil, opts.RateLimiter, repoOrder}, nil
