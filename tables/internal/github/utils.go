@@ -43,6 +43,16 @@ func t1f0(b bool) int {
 	return 0
 }
 
+// orderByToGitHubOrder is a helper that takes a boolean indicating whether DESC or ASC and returns
+// a corresponding OrderDirection from the githubv4 library
+func orderByToGitHubOrder(desc bool) githubv4.OrderDirection {
+	if desc {
+		return githubv4.OrderDirectionDesc
+	} else {
+		return githubv4.OrderDirectionAsc
+	}
+}
+
 // repoOwnerAndName returns the "owner" and "name" (respective return values) or an error
 // given the inputs to the iterator. This allows for both `SELECT * FROM github_table('askgitdev/askgit')`
 // and `SELECT * FROM github_table('askgitdev', 'askgit')

@@ -23,8 +23,8 @@ func TestStarredRepos(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if colCount != 8 {
-		t.Fatalf("expected 8 columns, got: %d", colCount)
+	if colCount != 9 {
+		t.Fatalf("expected 9 columns, got: %d", colCount)
 	}
 
 	if len(content) != 10 {
