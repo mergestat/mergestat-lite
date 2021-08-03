@@ -11,23 +11,26 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type fetchReposOptions struct {
+type fetchStarredReposOptions struct {
 	Client      *githubv4.Client
 	Login       string
 	PerPage     int
 	StartCursor *githubv4.String
+	Order       *githubv4.StarOrder
 }
 
-type fetchReposResults struct {
-	StarredRepos []*starredRepo
-	HasNextPage  bool
-	EndCursor    *githubv4.String
+type fetchStarredReposResults struct {
+	Edges       []*starredRepoEdge
+	HasNextPage bool
+	EndCursor   *githubv4.String
 }
 
-//TODO: Add more fields
-//TODO: Resolve error from StargazerCount and ProjectsUrl
+type starredRepoEdge struct {
+	StarredAt string
+	Node      *starredRepoNode
+}
 
-type starredRepo struct {
+type starredRepoNode struct {
 	Name           string
 	Url            string
 	Description    string
@@ -36,20 +39,19 @@ type starredRepo struct {
 	UpdatedAt      time.Time
 	StargazerCount int
 	NameWithOwner  string
-	// ProjectsUrl    *githubv4.URI
 }
 
-func fetchRepos(ctx context.Context, input *fetchReposOptions) (*fetchReposResults, error) {
+func fetchStarredRepos(ctx context.Context, input *fetchStarredReposOptions) (*fetchStarredReposResults, error) {
 	var reposQuery struct {
 		User struct {
 			Login               string
 			StarredRepositories struct {
-				Nodes    []*starredRepo
+				Edges    []*starredRepoEdge
 				PageInfo struct {
 					EndCursor   githubv4.String
 					HasNextPage bool
 				}
-			} `graphql:"starredRepositories(first: $perpage, after: $startcursor)"`
+			} `graphql:"starredRepositories(first: $perpage, after: $startcursor, orderBy: $orderBy)"`
 		} `graphql:"user(login: $login)"`
 	}
 
@@ -57,6 +59,7 @@ func fetchRepos(ctx context.Context, input *fetchReposOptions) (*fetchReposResul
 		"perpage":     githubv4.Int(input.PerPage),
 		"startcursor": input.StartCursor,
 		"login":       githubv4.String(input.Login),
+		"orderBy":     input.Order,
 	}
 
 	err := input.Client.Query(ctx, &reposQuery, variables)
@@ -65,8 +68,8 @@ func fetchRepos(ctx context.Context, input *fetchReposOptions) (*fetchReposResul
 		return nil, err
 	}
 
-	return &fetchReposResults{
-		reposQuery.User.StarredRepositories.Nodes,
+	return &fetchStarredReposResults{
+		reposQuery.User.StarredRepositories.Edges,
 		reposQuery.User.StarredRepositories.PageInfo.HasNextPage,
 		&reposQuery.User.StarredRepositories.PageInfo.EndCursor,
 	}, nil
@@ -77,48 +80,49 @@ type iterStarredRepos struct {
 	login       string
 	client      *githubv4.Client
 	current     int
-	results     *fetchReposResults
+	results     *fetchStarredReposResults
 	rateLimiter *rate.Limiter
+	starOrder   *githubv4.StarOrder
 }
 
 func (i *iterStarredRepos) Column(ctx *sqlite.Context, c int) error {
-
+	current := i.results.Edges[i.current]
 	switch c {
 	case 0:
 		ctx.ResultText(i.login)
 	case 1:
-		ctx.ResultText(i.results.StarredRepos[i.current].Name)
+		ctx.ResultText(current.Node.Name)
 	case 2:
-		ctx.ResultText(i.results.StarredRepos[i.current].Url)
+		ctx.ResultText(current.Node.Url)
 	case 3:
-		ctx.ResultText(i.results.StarredRepos[i.current].Description)
+		ctx.ResultText(current.Node.Description)
 	case 4:
-		t := i.results.StarredRepos[i.current].CreatedAt
+		t := current.Node.CreatedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 5:
-		t := i.results.StarredRepos[i.current].PushedAt
+		t := current.Node.PushedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 6:
-		t := i.results.StarredRepos[i.current].UpdatedAt
+		t := current.Node.UpdatedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 7:
-		ctx.ResultInt(i.results.StarredRepos[i.current].StargazerCount)
+		ctx.ResultInt(current.Node.StargazerCount)
 	case 8:
-		ctx.ResultText(i.results.StarredRepos[i.current].NameWithOwner)
-		// 	// case 7:
-		// 	return i.results.StarredRepos[i.current].ProjectsUrl, nil
+		ctx.ResultText(current.Node.NameWithOwner)
+	case 9:
+		ctx.ResultText(current.StarredAt)
 	}
 	return nil
 }
@@ -126,7 +130,7 @@ func (i *iterStarredRepos) Column(ctx *sqlite.Context, c int) error {
 func (i *iterStarredRepos) Next() (vtab.Row, error) {
 	i.current += 1
 
-	if i.results == nil || i.current >= len(i.results.StarredRepos) {
+	if i.results == nil || i.current >= len(i.results.Edges) {
 		if i.results == nil || i.results.HasNextPage {
 			err := i.rateLimiter.Wait(context.Background())
 			if err != nil {
@@ -137,7 +141,7 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 			if i.results != nil {
 				cursor = i.results.EndCursor
 			}
-			results, err := fetchRepos(context.Background(), &fetchReposOptions{i.client, i.login, 100, cursor})
+			results, err := fetchStarredRepos(context.Background(), &fetchStarredReposOptions{i.client, i.login, 100, cursor, i.starOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -154,20 +158,20 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 }
 
 var starredReposCols = []vtab.Column{
-	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "description", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "pushed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "stargazer_count", Type: sqlite.SQLITE_INTEGER, NotNull: true, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "name_with_owner", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	//{Name: "projects_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "description", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "pushed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "stargazer_count", Type: sqlite.SQLITE_INTEGER, NotNull: true, Hidden: false, Filters: nil},
+	{Name: "name_with_owner", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewStarredReposModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_starred_repos", starredReposCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("github_starred_repos", starredReposCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var login string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
@@ -178,6 +182,18 @@ func NewStarredReposModule(opts *Options) sqlite.Module {
 			}
 		}
 
-		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter}, nil
+		var starOrder *githubv4.StarOrder
+		// for now we can only support single field order bys
+		if len(orders) == 1 {
+			starOrder = &githubv4.StarOrder{}
+			order := orders[0]
+			switch order.ColumnIndex {
+			case 9:
+				starOrder.Field = githubv4.StarOrderFieldStarredAt
+			}
+			starOrder.Direction = orderByToGitHubOrder(order.Desc)
+		}
+
+		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter, starOrder}, nil
 	})
 }
