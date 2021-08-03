@@ -4,9 +4,8 @@
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/askgitdev/askgit/main)](https://www.tickgit.com/browse?repo=github.com/askgitdev/askgit&branch=main)
 [![codecov](https://codecov.io/gh/askgitdev/askgit/branch/main/graph/badge.svg)](https://codecov.io/gh/askgitdev/askgit)
 
-![AskGit Logo](docs/logo.png)
 
-# askgit
+# askgit <a href="https://try.askgit.com/"><img align="right" src="docs/logo.png" alt="AskGit Logo" height="100"></a>
 
 `askgit` is a command-line tool for running SQL queries on git repositories.
 It's meant for ad-hoc querying of git repositories on disk through a common interface (SQL), as an alternative to patching together various shell commands.
