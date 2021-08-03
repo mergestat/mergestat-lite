@@ -427,6 +427,7 @@ Table-valued-function that returns a list of repositories a user has starred.
 | updated_at      | TEXT |
 | stargazer_count | INT  |
 | name_with_owner | TEXT |
+| starred_at      | TEXT |
 
 Params:
   1. `login` - the `login` of a GitHub user
