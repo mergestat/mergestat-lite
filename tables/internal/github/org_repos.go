@@ -11,21 +11,21 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type fetchUserReposOptions struct {
+type fetchOrgReposOptions struct {
 	Client          *githubv4.Client
 	Login           string
 	PerPage         int
-	UserReposCursor *githubv4.String
+	OrgReposCursor  *githubv4.String
 	RepositoryOrder *githubv4.RepositoryOrder
 }
 
-type fetchUserReposResults struct {
-	UserRepos   []*userRepo
+type fetchOrgReposResults struct {
+	OrgRepos    []*orgRepo
 	HasNextPage bool
 	EndCursor   *githubv4.String
 }
 
-type userRepo struct {
+type orgRepo struct {
 	Name           string
 	Description    string
 	CreatedAt      time.Time
@@ -36,24 +36,24 @@ type userRepo struct {
 	//PrimaryLanguage string
 }
 
-func fetchUserRepos(ctx context.Context, input *fetchUserReposOptions) (*fetchUserReposResults, error) {
+func fetchOrgRepos(ctx context.Context, input *fetchOrgReposOptions) (*fetchOrgReposResults, error) {
 	var reposQuery struct {
-		User struct {
+		Organization struct {
 			Login        string
 			Repositories struct {
-				Nodes    []*userRepo
+				Nodes    []*orgRepo
 				PageInfo struct {
 					EndCursor   githubv4.String
 					HasNextPage bool
 				}
-			} `graphql:"repositories(first: $perpage, after: $userReposCursor, orderBy: $repositoryOrder)"`
-		} `graphql:"user(login: $login)"`
+			} `graphql:"repositories(first: $perpage, after: $orgReposCursor, orderBy: $repositoryOrder)"`
+		} `graphql:"organization(login: $login)"`
 	}
 
 	variables := map[string]interface{}{
 		"login":           githubv4.String(input.Login),
 		"perpage":         githubv4.Int(input.PerPage),
-		"userReposCursor": (*githubv4.String)(input.UserReposCursor),
+		"orgReposCursor":  (*githubv4.String)(input.OrgReposCursor),
 		"repositoryOrder": input.RepositoryOrder,
 	}
 
@@ -63,63 +63,63 @@ func fetchUserRepos(ctx context.Context, input *fetchUserReposOptions) (*fetchUs
 		return nil, err
 	}
 
-	return &fetchUserReposResults{
-		reposQuery.User.Repositories.Nodes,
-		reposQuery.User.Repositories.PageInfo.HasNextPage,
-		&reposQuery.User.Repositories.PageInfo.EndCursor,
+	return &fetchOrgReposResults{
+		reposQuery.Organization.Repositories.Nodes,
+		reposQuery.Organization.Repositories.PageInfo.HasNextPage,
+		&reposQuery.Organization.Repositories.PageInfo.EndCursor,
 	}, nil
 }
 
-type iterUserRepos struct {
+type iterOrgRepos struct {
 	login       string
 	client      *githubv4.Client
 	current     int
-	results     *fetchUserReposResults
+	results     *fetchOrgReposResults
 	rateLimiter *rate.Limiter
 	repoOrder   *githubv4.RepositoryOrder
 }
 
-func (i *iterUserRepos) Column(ctx *sqlite.Context, c int) error {
+func (i *iterOrgRepos) Column(ctx *sqlite.Context, c int) error {
 
 	switch c {
 	case 0:
 		ctx.ResultText(i.login)
 	case 1:
-		ctx.ResultText(i.results.UserRepos[i.current].Name)
+		ctx.ResultText(i.results.OrgRepos[i.current].Name)
 	case 2:
-		ctx.ResultText(i.results.UserRepos[i.current].Description)
+		ctx.ResultText(i.results.OrgRepos[i.current].Description)
 	case 3:
-		t := i.results.UserRepos[i.current].CreatedAt
+		t := i.results.OrgRepos[i.current].CreatedAt
 		if t.IsZero() {
 			ctx.ResultText(" ")
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 4:
-		t := i.results.UserRepos[i.current].UpdatedAt
+		t := i.results.OrgRepos[i.current].UpdatedAt
 		if t.IsZero() {
 			ctx.ResultText(" ")
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 5:
-		t := i.results.UserRepos[i.current].PushedAt
+		t := i.results.OrgRepos[i.current].PushedAt
 		if t.IsZero() {
 			ctx.ResultText(" ")
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 6:
-		ctx.ResultInt(i.results.UserRepos[i.current].StargazerCount)
+		ctx.ResultInt(i.results.OrgRepos[i.current].StargazerCount)
 
 	}
 	return nil
 }
 
-func (i *iterUserRepos) Next() (vtab.Row, error) {
+func (i *iterOrgRepos) Next() (vtab.Row, error) {
 	i.current += 1
 
-	if i.results == nil || i.current >= len(i.results.UserRepos) {
+	if i.results == nil || i.current >= len(i.results.OrgRepos) {
 		if i.results == nil || i.results.HasNextPage {
 			err := i.rateLimiter.Wait(context.Background())
 			if err != nil {
@@ -130,7 +130,7 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 			if i.results != nil {
 				cursor = i.results.EndCursor
 			}
-			results, err := fetchUserRepos(context.Background(), &fetchUserReposOptions{i.client, i.login, 100, cursor, i.repoOrder})
+			results, err := fetchOrgRepos(context.Background(), &fetchOrgReposOptions{i.client, i.login, 100, cursor, i.repoOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -146,7 +146,7 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 	return i, nil
 }
 
-var userReposCols = []vtab.Column{
+var orgReposCols = []vtab.Column{
 	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "description", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
@@ -156,8 +156,8 @@ var userReposCols = []vtab.Column{
 	{Name: "stargazers", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 }
 
-func NewUserReposModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_user_repos", userReposCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+func NewOrgReposModule(opts *Options) sqlite.Module {
+	return vtab.NewTableFunc("github_org_repos", orgReposCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var login string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
@@ -194,6 +194,6 @@ func NewUserReposModule(opts *Options) sqlite.Module {
 			}
 		}
 
-		return &iterUserRepos{login, opts.Client(), -1, nil, opts.RateLimiter, repoOrder}, nil
+		return &iterOrgRepos{login, opts.Client(), -1, nil, opts.RateLimiter, repoOrder}, nil
 	})
 }
