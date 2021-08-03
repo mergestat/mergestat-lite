@@ -1,0 +1,90 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($login:String!$perpage:Int!$repositoryOrder:RepositoryOrder$userReposCursor:String){user(login: $login){login,repositories(first: $perpage, after: $userReposCursor, orderBy: $repositoryOrder){nodes{name,description,createdAt,updatedAt,pushedAt,stargazerCount},pageInfo{endCursor,hasNextPage}}}}","variables":{"login":"josephjacks","perpage":100,"repositoryOrder":null,"userReposCursor":null}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: "{\"data\":{\"user\":{\"login\":\"josephjacks\",\"repositories\":{\"nodes\":[{\"name\":\"kubernetes\",\"description\":\"Container
+      Cluster Manager from Google\",\"createdAt\":\"2015-03-14T22:31:12Z\",\"updatedAt\":\"2019-01-06T07:34:35Z\",\"pushedAt\":\"2015-03-14T00:20:17Z\",\"stargazerCount\":0},{\"name\":\"palladium\",\"description\":\"Framework
+      for setting up predictive analytics services\",\"createdAt\":\"2015-03-31T20:33:00Z\",\"updatedAt\":\"2015-03-31T20:33:05Z\",\"pushedAt\":\"2015-03-31T15:53:31Z\",\"stargazerCount\":1},{\"name\":\"tonika\",\"description\":\"Automatically
+      exported from code.google.com/p/tonika\",\"createdAt\":\"2015-04-24T05:35:15Z\",\"updatedAt\":\"2015-04-24T05:35:58Z\",\"pushedAt\":\"2015-04-24T05:37:47Z\",\"stargazerCount\":0},{\"name\":\"community\",\"description\":\"Kubernetes
+      community content\",\"createdAt\":\"2016-09-02T16:06:11Z\",\"updatedAt\":\"2016-09-01T19:43:05Z\",\"pushedAt\":\"2016-09-02T16:08:21Z\",\"stargazerCount\":0},{\"name\":\"kubernetes.github.io\",\"description\":\"Website/documentation
+      repo\",\"createdAt\":\"2016-09-09T20:34:02Z\",\"updatedAt\":\"2016-09-09T20:34:05Z\",\"pushedAt\":\"2016-09-09T19:25:41Z\",\"stargazerCount\":0},{\"name\":\"apprkatestest\",\"description\":\"My
+      test environ\",\"createdAt\":\"2016-10-06T17:26:56Z\",\"updatedAt\":\"2016-10-05T18:57:05Z\",\"pushedAt\":\"2016-10-06T17:27:04Z\",\"stargazerCount\":0},{\"name\":\"swarmkit\",\"description\":\"A
+      toolkit for orchestrating distributed systems at any scale. It includes primitives
+      for node discovery, raft-based consensus, task scheduling and more.\",\"createdAt\":\"2016-10-26T18:11:58Z\",\"updatedAt\":\"2016-10-26T18:12:00Z\",\"pushedAt\":\"2016-10-26T17:36:36Z\",\"stargazerCount\":0},{\"name\":\"software-circus-ket-demo\",\"description\":\"A
+      repo for demoing Kismatic Enterprise Toolkit with Packet.net\",\"createdAt\":\"2016-12-16T17:16:00Z\",\"updatedAt\":\"2017-03-19T14:27:52Z\",\"pushedAt\":\"2017-01-10T16:14:03Z\",\"stargazerCount\":0},{\"name\":\"awesome-go-storage\",\"description\":\"A
+      curated list of awesome Go storage projects and libraries\",\"createdAt\":\"2017-02-06T00:02:16Z\",\"updatedAt\":\"2017-02-06T00:00:37Z\",\"pushedAt\":\"2017-02-05T13:41:24Z\",\"stargazerCount\":0},{\"name\":\"openletter\",\"description\":null,\"createdAt\":\"2017-05-02T04:06:17Z\",\"updatedAt\":\"2017-05-02T04:06:19Z\",\"pushedAt\":\"2017-05-02T04:07:27Z\",\"stargazerCount\":0},{\"name\":\"envoy\",\"description\":\"C++
+      front/service proxy\",\"createdAt\":\"2017-05-12T23:50:08Z\",\"updatedAt\":\"2017-05-12T23:50:11Z\",\"pushedAt\":\"2017-05-12T23:52:09Z\",\"stargazerCount\":0},{\"name\":\"etcd\",\"description\":\"Distributed
+      reliable key-value store for the most critical data of a distributed system\",\"createdAt\":\"2017-07-18T04:21:20Z\",\"updatedAt\":\"2018-08-28T01:26:24Z\",\"pushedAt\":\"2017-07-18T04:24:41Z\",\"stargazerCount\":0},{\"name\":\"aci-connector-k8s\",\"description\":\"Azure
+      Container Instances Connector for Kubernetes\",\"createdAt\":\"2017-07-26T19:40:28Z\",\"updatedAt\":\"2020-03-04T14:28:48Z\",\"pushedAt\":\"2017-07-26T19:47:13Z\",\"stargazerCount\":1},{\"name\":\"os-projects\",\"description\":null,\"createdAt\":\"2018-01-18T06:28:05Z\",\"updatedAt\":\"2018-01-18T05:48:52Z\",\"pushedAt\":\"2018-01-18T19:47:22Z\",\"stargazerCount\":0},{\"name\":\"awesome-kubernetes-extensions\",\"description\":\"A
+      resource tracking a number of Kubernetes extensions built on TPRs, CRDs, and
+      API Aggregation\",\"createdAt\":\"2018-04-23T21:52:12Z\",\"updatedAt\":\"2018-04-23T21:52:14Z\",\"pushedAt\":\"2018-04-24T01:58:58Z\",\"stargazerCount\":0},{\"name\":\"glossary\",\"description\":\"A
+      set of definitions of commonly used terms in the open source technology world\",\"createdAt\":\"2019-11-15T20:41:03Z\",\"updatedAt\":\"2019-11-15T20:41:06Z\",\"pushedAt\":\"2019-11-15T20:27:33Z\",\"stargazerCount\":0},{\"name\":\"dagger\",\"description\":null,\"createdAt\":\"2019-11-20T01:31:51Z\",\"updatedAt\":\"2021-08-03T20:53:43Z\",\"pushedAt\":\"2021-08-03T19:14:51Z\",\"stargazerCount\":129},{\"name\":\"awesome-kubernetes\",\"description\":\"A
+      curated list for awesome kubernetes sources :ship::tada:\",\"createdAt\":\"2020-05-07T22:42:57Z\",\"updatedAt\":\"2020-05-07T22:42:59Z\",\"pushedAt\":\"2020-05-07T22:44:05Z\",\"stargazerCount\":0},{\"name\":\"ChinaCOSS\",\"description\":\"China's
+      Commercial Open-Source Software Companies\",\"createdAt\":\"2020-05-12T21:35:04Z\",\"updatedAt\":\"2020-05-12T21:35:06Z\",\"pushedAt\":\"2020-05-12T22:26:33Z\",\"stargazerCount\":0},{\"name\":\"Closed-vs-Open-Core\",\"description\":\"Comparing
+      fundamental differences across Closed Core vs. Open Core oriented companies
+      \",\"createdAt\":\"2020-07-29T04:56:12Z\",\"updatedAt\":\"2021-05-23T05:45:17Z\",\"pushedAt\":\"2020-07-29T05:14:38Z\",\"stargazerCount\":10},{\"name\":\"memorials\",\"description\":\"\U0001F56F️\U0001F490CNCF
+      Community Memorials\",\"createdAt\":\"2020-11-05T19:55:55Z\",\"updatedAt\":\"2020-11-05T19:55:57Z\",\"pushedAt\":\"2020-11-07T16:39:14Z\",\"stargazerCount\":0},{\"name\":\"Signal-Server\",\"description\":\"Server
+      supporting the Signal Private Messenger applications on Android, Desktop, and
+      iOS\",\"createdAt\":\"2021-01-13T19:14:32Z\",\"updatedAt\":\"2021-01-13T19:14:33Z\",\"pushedAt\":\"2021-01-13T19:15:25Z\",\"stargazerCount\":0},{\"name\":\"replicache\",\"description\":\"Realtime
+      Sync for Any Backend Stack\",\"createdAt\":\"2021-05-09T01:00:18Z\",\"updatedAt\":\"2021-05-09T01:00:19Z\",\"pushedAt\":\"2021-05-09T01:07:04Z\",\"stargazerCount\":0},{\"name\":\"nocodb\",\"description\":\"\U0001F525
+      \U0001F525  The Open Source Airtable alternative\",\"createdAt\":\"2021-06-01T18:17:54Z\",\"updatedAt\":\"2021-06-01T18:17:55Z\",\"pushedAt\":\"2021-06-01T18:19:46Z\",\"stargazerCount\":0}],\"pageInfo\":{\"endCursor\":\"Y3Vyc29yOnYyOpHOFjpdqA==\",\"hasNextPage\":false}}}}}"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Cache-Control:
+      - no-cache
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 03 Aug 2021 20:57:14 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - EDE6:7BB6:7D8084:FBB916:6109ADAA
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4948"
+      X-Ratelimit-Reset:
+      - "1628026926"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "52"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 476.58189ms
