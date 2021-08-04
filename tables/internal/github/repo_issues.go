@@ -152,7 +152,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 7:
 		t := i.results.Edges[i.current].Node.ClosedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
@@ -161,7 +161,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 9:
 		t := i.results.Edges[i.current].Node.CreatedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
@@ -182,7 +182,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 17:
 		t := i.results.Edges[i.current].Node.LastEditedAt
 		if t.IsZero() {
-			ctx.ResultText("")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
@@ -199,7 +199,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 23:
 		t := i.results.Edges[i.current].Node.PublishedAt
 		if t.IsZero() {
-			ctx.ResultText("")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
@@ -212,7 +212,7 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	case 27:
 		t := i.results.Edges[i.current].Node.UpdatedAt
 		if t.IsZero() {
-			ctx.ResultText("")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
@@ -273,41 +273,41 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 }
 
 var issuesCols = []vtab.Column{
-	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}, OrderBy: vtab.NONE},
-	{Name: "author_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "author_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "body", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "body_text", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "closed", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "closed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "author_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "author_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "body", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "body_text", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "closed", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "closed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
 	{Name: "comment_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "database_id", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "editor_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "editor_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "includes_created_edit", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "is_read_by_viewer", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "label_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "locked", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "milestone_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "milestone_progress", Type: sqlite.SQLITE_FLOAT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "issue_number", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "published_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "reaction_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "state", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "title", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "database_id", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "editor_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "editor_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "includes_created_edit", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "is_read_by_viewer", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "label_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "locked", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "milestone_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "milestone_progress", Type: sqlite.SQLITE_FLOAT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "issue_number", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "published_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "reaction_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "state", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "title", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
 	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "user_edits_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_can_react", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_can_subscribe", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_can_update", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_did_author", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "viewer_subscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "user_edits_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "viewer_can_react", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "viewer_can_subscribe", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "viewer_can_update", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "viewer_did_author", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "viewer_subscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
 }
 
 func NewIssuesModule(opts *Options) sqlite.Module {
@@ -323,35 +323,20 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 				}
 			}
 		}
-		issueOrder := &githubv4.IssueOrder{
-			Field:     githubv4.IssueOrderFieldCreatedAt,
-			Direction: githubv4.OrderDirectionDesc,
-		}
-		for _, order := range orders {
+
+		var issueOrder *githubv4.IssueOrder
+		if len(orders) == 1 {
+			order := orders[0]
+			issueOrder = &githubv4.IssueOrder{}
 			switch order.ColumnIndex {
 			case 8:
-				if !order.Desc {
-					issueOrder.Field = githubv4.IssueOrderFieldComments
-					issueOrder.Direction = githubv4.OrderDirectionAsc
-
-				} else {
-					issueOrder.Field = githubv4.IssueOrderFieldComments
-				}
+				issueOrder.Field = githubv4.IssueOrderFieldComments
 			case 9:
-				if !order.Desc {
-					issueOrder.Field = githubv4.IssueOrderFieldComments
-					issueOrder.Direction = githubv4.OrderDirectionAsc
-				} else {
-					issueOrder.Field = githubv4.IssueOrderFieldComments
-				}
+				issueOrder.Field = githubv4.IssueOrderFieldCreatedAt
 			case 27:
-				if !order.Desc {
-					issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
-					issueOrder.Direction = githubv4.OrderDirectionAsc
-				} else {
-					issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
-				}
+				issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
 			}
+			issueOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
 		return &iterIssues{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, issueOrder}, nil

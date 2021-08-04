@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"query":"query($issuecursor:String$issueorder:IssueOrder$name:String!$owner:String!$perpage:Int!){repository(owner: $owner, name: $name){owner{login},name,issues(first: $perpage, after: $issuecursor, orderBy: $issueorder){edges{cursor,node{activeLockReason,author{login,url},body,bodyText,closed,closedAt,comments{totalCount},createdAt,createdViaEmail,databaseId,editor{login,url},includesCreatedEdit,isReadByViewer,labels{totalCount},lastEditedAt,locked,milestone{number,progressPercentage},number,participants{totalCount},publishedAt,reactions{totalCount},state,title,updatedAt,url,userContentEdits{totalCount},viewerCanReact,viewerCanSubscribe,viewerCanUpdate,viewerDidAuthor,viewerSubscription}},pageInfo{endCursor,hasNextPage}}}}","variables":{"issuecursor":null,"issueorder":{"field":"CREATED_AT","direction":"DESC"},"name":"askgit","owner":"askgitdev","perpage":100}}
+      {"query":"query($issuecursor:String$issueorder:IssueOrder$name:String!$owner:String!$perpage:Int!){repository(owner: $owner, name: $name){owner{login},name,issues(first: $perpage, after: $issuecursor, orderBy: $issueorder){edges{cursor,node{activeLockReason,author{login,url},body,bodyText,closed,closedAt,comments{totalCount},createdAt,createdViaEmail,databaseId,editor{login,url},includesCreatedEdit,isReadByViewer,labels{totalCount},lastEditedAt,locked,milestone{number,progressPercentage},number,participants{totalCount},publishedAt,reactions{totalCount},state,title,updatedAt,url,userContentEdits{totalCount},viewerCanReact,viewerCanSubscribe,viewerCanUpdate,viewerDidAuthor,viewerSubscription}},pageInfo{endCursor,hasNextPage}}}}","variables":{"issuecursor":null,"issueorder":null,"name":"askgit","owner":"askgitdev","perpage":100}}
     form: {}
     headers:
       Content-Type:
@@ -11,197 +11,44 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","issues":{"edges":[{"cursor":"Y3Vyc29yOnYyOpK5MjAyMS0wNy0yNlQwMzoyNDowNC0wNDowMM44x2Tp","node":{"activeLockReason":null,"author":{"login":"wi1dcard","url":"https://github.com/wi1dcard"},"body":"Hey
-      team, thank you for providing this awesome tool which helps me a lot traversing
-      the data in git repos. I''m wondering that do we have any plan to add binaries
-      in the GitHub releases (for example, on GitHub Actions)? It seems not so friendly
-      to the new users who have to build from source to install and try.","bodyText":"Hey
-      team, thank you for providing this awesome tool which helps me a lot traversing
-      the data in git repos. I''m wondering that do we have any plan to add binaries
-      in the GitHub releases (for example, on GitHub Actions)? It seems not so friendly
-      to the new users who have to build from source to install and try.","closed":true,"closedAt":"2021-07-26T18:45:18Z","comments":{"totalCount":1},"createdAt":"2021-07-26T07:24:04Z","createdViaEmail":false,"databaseId":952591593,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":138,"participants":{"totalCount":2},"publishedAt":"2021-07-26T07:24:04Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Binary
-      release?","updatedAt":"2021-07-26T18:45:18Z","url":"https://github.com/askgitdev/askgit/issues/138","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMS0wNy0yNVQyMDoxNzowMy0wNDowMM44xEbl","node":{"activeLockReason":null,"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"body":"#136
-      re-adds support for GitHub tables again. We should add some tests to validate
-      the behavior in these tables, ideally ones that don''t make actual calls to
-      the GitHub API as was done before (let''s mock the responses as we should)","bodyText":"#136
-      re-adds support for GitHub tables again. We should add some tests to validate
-      the behavior in these tables, ideally ones that don''t make actual calls to
-      the GitHub API as was done before (let''s mock the responses as we should)","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2021-07-26T00:17:03Z","createdViaEmail":false,"databaseId":952387301,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":137,"participants":{"totalCount":1},"publishedAt":"2021-07-26T00:17:03Z","reactions":{"totalCount":0},"state":"OPEN","title":"Add
-      tests for new GitHub tables","updatedAt":"2021-07-26T00:17:03Z","url":"https://github.com/askgitdev/askgit/issues/137","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":true,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMS0wNy0xN1QwMjo0NToxMC0wNDowMM44bhEJ","node":{"activeLockReason":null,"author":{"login":"nordicdyno","url":"https://github.com/nordicdyno"},"body":"it
-      would be nice to mention libgit2 requirement in README\r\n\r\nMy environment:
-      macOS Big Sur, go1.16.5 darwin/amd64","bodyText":"it would be nice to mention
-      libgit2 requirement in README\nMy environment: macOS Big Sur, go1.16.5 darwin/amd64","closed":true,"closedAt":"2021-07-20T23:04:09Z","comments":{"totalCount":1},"createdAt":"2021-07-17T06:45:10Z","createdViaEmail":false,"databaseId":946737417,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":131,"participants":{"totalCount":2},"publishedAt":"2021-07-17T06:45:10Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Go
-      get doesn''t work without libgit2 dependency","updatedAt":"2021-07-20T23:04:09Z","url":"https://github.com/askgitdev/askgit/issues/131","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMS0wNy0xN1QwMjo0MjoyOS0wNDowMM44bg-I","node":{"activeLockReason":null,"author":{"login":"nordicdyno","url":"https://github.com/nordicdyno"},"body":"`go
-      get` becomes a deprecated way to install binaries https://golang.org/doc/go-get-install-deprecation,
-      but go install fails with error:\r\n```\r\ngo install github.com/augmentable-dev/askgit@latest:
-      github.com/augmentable-dev/askgit@v0.3.7\r\n\tThe go.mod file for the module
-      providing named packages contains one or\r\n\tmore replace directives. It must
-      not contain directives that would cause\r\n\tit to be interpreted differently
-      than if it were the main module.\r\n```\r\n\r\n","bodyText":"go get becomes
-      a deprecated way to install binaries https://golang.org/doc/go-get-install-deprecation,
-      but go install fails with error:\ngo install github.com/augmentable-dev/askgit@latest:
-      github.com/augmentable-dev/askgit@v0.3.7\n\tThe go.mod file for the module providing
-      named packages contains one or\n\tmore replace directives. It must not contain
-      directives that would cause\n\tit to be interpreted differently than if it were
-      the main module.","closed":false,"closedAt":null,"comments":{"totalCount":1},"createdAt":"2021-07-17T06:42:29Z","createdViaEmail":false,"databaseId":946737032,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":130,"participants":{"totalCount":2},"publishedAt":"2021-07-17T06:42:29Z","reactions":{"totalCount":0},"state":"OPEN","title":"Go
-      install doesn''t work","updatedAt":"2021-07-20T23:23:52Z","url":"https://github.com/askgitdev/askgit/issues/130","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMS0wMi0wM1QxNTo1NjowNy0wNTowMM4vuZjJ","node":{"activeLockReason":null,"author":{"login":"mikermcneil","url":"https://github.com/mikermcneil"},"body":"would
-      be neat!\r\n\r\nLike \r\n![image](https://user-images.githubusercontent.com/618009/106808199-b3bdf980-662f-11eb-8e2c-f065a25366f1.png)\r\n\r\n…but
-      for GitLab","bodyText":"would be neat!\nLike\n\n…but for GitLab","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2021-02-03T20:56:07Z","createdViaEmail":false,"databaseId":800692425,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":118,"participants":{"totalCount":1},"publishedAt":"2021-02-03T20:56:07Z","reactions":{"totalCount":0},"state":"OPEN","title":"GitLab
-      tables","updatedAt":"2021-02-03T20:56:07Z","url":"https://github.com/askgitdev/askgit/issues/118","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0xMi0yOFQxODoxNzozNi0wNTowMM4uOxPt","node":{"activeLockReason":null,"author":{"login":"pjebs","url":"https://github.com/pjebs"},"body":"Is
-      there someway to update for example to committer email address etc or a commit
-      message using SQL.","bodyText":"Is there someway to update for example to committer
-      email address etc or a commit message using SQL.","closed":false,"closedAt":null,"comments":{"totalCount":5},"createdAt":"2020-12-28T23:17:36Z","createdViaEmail":false,"databaseId":775623661,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":95,"participants":{"totalCount":3},"publishedAt":"2020-12-28T23:17:36Z","reactions":{"totalCount":1},"state":"OPEN","title":"UPDATE
-      functionality","updatedAt":"2021-04-17T14:30:18Z","url":"https://github.com/askgitdev/askgit/issues/95","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0xMi0xN1QyMjo0Njo0Ny0wNTowMM4t7ZAK","node":{"activeLockReason":null,"author":{"login":"jingkai1","url":"https://github.com/jingkai1"},"body":"askgit:
-      error while loading shared libraries: libgit2.so.1.1","bodyText":"askgit: error
-      while loading shared libraries: libgit2.so.1.1","closed":false,"closedAt":null,"comments":{"totalCount":1},"createdAt":"2020-12-18T03:46:47Z","createdViaEmail":false,"databaseId":770543626,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":85,"participants":{"totalCount":1},"publishedAt":"2020-12-18T03:46:47Z","reactions":{"totalCount":0},"state":"OPEN","title":"can''t
-      loading libgit2.so","updatedAt":"2020-12-18T03:47:38Z","url":"https://github.com/askgitdev/askgit/issues/85","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0xMi0wNFQxNTowMzozNy0wNTowMM4tJIlL","node":{"activeLockReason":null,"author":{"login":"kevin-cantwell","url":"https://github.com/kevin-cantwell"},"body":"I''m
-      running OSX Catalina with libgit2 v1.1.0:\r\n```\r\n$ brew info --installed
-      --json | jq ''.[] | select(.name == \"libgit2\") | .versions''\r\n{\r\n  \"stable\":
-      \"1.1.0\",\r\n  \"head\": \"HEAD\",\r\n  \"bottle\": true\r\n}\r\n```\r\n\r\nI
-      cannot build askgit due to a git2go version incompatibility with my libgit2
-      version:\r\n```\r\n$ make build\r\ngo build -v -tags=\"sqlite_vtable,static,system_libgit2\"
-      askgit.go\r\ngithub.com/augmentable-dev/askgit/pkg/gitlog\r\ngithub.com/libgit2/git2go/v30\r\n#
-      github.com/libgit2/git2go/v30\r\n../../../../go/pkg/mod/github.com/libgit2/git2go/v30@v30.2.2/git_system_static.go:11:3:
-      error: \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\r\n# error
-      \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\r\n  ^\r\n1 error
-      generated.\r\nmake: *** [build] Error 1\r\n```\r\n\r\nThe git2go module has
-      very strict libgit2 version dependencies: https://github.com/libgit2/git2go#which-go-version-to-use\r\n\r\nI
-      was able to successfully build askgit by replacing `github.com/libgit2/git2go/v30`
-      with `github.com/libgit2/git2go/v31`, but I imagine this would break things
-      for those with older libgit2 versions.","bodyText":"I''m running OSX Catalina
-      with libgit2 v1.1.0:\n$ brew info --installed --json | jq ''.[] | select(.name
-      == \"libgit2\") | .versions''\n{\n  \"stable\": \"1.1.0\",\n  \"head\": \"HEAD\",\n  \"bottle\":
-      true\n}\n\nI cannot build askgit due to a git2go version incompatibility with
-      my libgit2 version:\n$ make build\ngo build -v -tags=\"sqlite_vtable,static,system_libgit2\"
-      askgit.go\ngithub.com/augmentable-dev/askgit/pkg/gitlog\ngithub.com/libgit2/git2go/v30\n#
-      github.com/libgit2/git2go/v30\n../../../../go/pkg/mod/github.com/libgit2/git2go/v30@v30.2.2/git_system_static.go:11:3:
-      error: \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\n# error
-      \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\n  ^\n1 error
-      generated.\nmake: *** [build] Error 1\n\nThe git2go module has very strict libgit2
-      version dependencies: https://github.com/libgit2/git2go#which-go-version-to-use\nI
-      was able to successfully build askgit by replacing github.com/libgit2/git2go/v30
-      with github.com/libgit2/git2go/v31, but I imagine this would break things for
-      those with older libgit2 versions.","closed":true,"closedAt":"2020-12-13T00:58:37Z","comments":{"totalCount":1},"createdAt":"2020-12-04T20:03:37Z","createdViaEmail":false,"databaseId":757369163,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":81,"participants":{"totalCount":2},"publishedAt":"2020-12-04T20:03:37Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Build
-      fails with any libgit2 version other than v1.0","updatedAt":"2020-12-13T00:58:37Z","url":"https://github.com/askgitdev/askgit/issues/81","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0xMS0xOVQxODoyNDozNy0wNTowMM4shl33","node":{"activeLockReason":null,"author":{"login":"iwasherefirst2","url":"https://github.com/iwasherefirst2"},"body":"I
-      don''t get that query:\r\n\r\n`SELECT count(*) AS commits, SUM(additions) AS
-      additions, SUM(deletions) AS  deletions, author_email FROM commits GROUP BY
-      author_email ORDER BY commits` \r\n\r\nAccording to the docs there is no  `additions`
-      and `deletions` column for the `commits` table.\r\nAre they missing in the docs?\r\n\r\n![image](https://user-images.githubusercontent.com/1765602/99736489-c01dc600-2ac6-11eb-9000-65a50ee1f709.png)\r\n\r\n\r\n","bodyText":"I
-      don''t get that query:\nSELECT count(*) AS commits, SUM(additions) AS additions,
-      SUM(deletions) AS  deletions, author_email FROM commits GROUP BY author_email
-      ORDER BY commits\nAccording to the docs there is no  additions and deletions
-      column for the commits table.\nAre they missing in the docs?","closed":true,"closedAt":"2020-11-22T17:17:28Z","comments":{"totalCount":1},"createdAt":"2020-11-19T23:24:37Z","createdViaEmail":false,"databaseId":747003383,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":73,"participants":{"totalCount":2},"publishedAt":"2020-11-19T23:24:37Z","reactions":{"totalCount":0},"state":"CLOSED","title":"commits
-      has no `additions` column?","updatedAt":"2020-11-22T17:17:28Z","url":"https://github.com/askgitdev/askgit/issues/73","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0xMS0xN1QxNDo0ODo1OS0wNTowMM4saGK-","node":{"activeLockReason":null,"author":{"login":"dflock","url":"https://github.com/dflock"},"body":"When
-      trying to install by running this:\r\n\r\n```\r\ngo get -v -tags=sqlite_vtable
-      github.com/augmentable-dev/askgit\r\n```\r\n\r\nI get this:\r\n\r\n```\r\n➜
-      go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\r\n\r\ngithub.com/libgit2/git2go
-      (download)\r\ncannot find package \"github.com/libgit2/git2go/v30\" in any of:\r\n\t/usr/local/go/src/github.com/libgit2/git2go/v30
-      (from $GOROOT)\r\n\t/home/duncan/.go/src/github.com/libgit2/git2go/v30 (from
-      $GOPATH)\r\n```\r\n\r\nMy environment is as follows:\r\n\r\n```\r\n ➜ go version\r\ngo
-      version go1.15.5 linux/amd64\r\n\r\n➜ go env\r\nGO111MODULE=\"\"\r\nGOARCH=\"amd64\"\r\nGOBIN=\"\"\r\nGOCACHE=\"/home/duncan/.cache/go-build\"\r\nGOENV=\"/home/duncan/.config/go/env\"\r\nGOEXE=\"\"\r\nGOFLAGS=\"\"\r\nGOHOSTARCH=\"amd64\"\r\nGOHOSTOS=\"linux\"\r\nGOINSECURE=\"\"\r\nGOMODCACHE=\"/home/duncan/.go/pkg/mod\"\r\nGONOPROXY=\"\"\r\nGONOSUMDB=\"\"\r\nGOOS=\"linux\"\r\nGOPATH=\"/home/duncan/.go\"\r\nGOPRIVATE=\"\"\r\nGOPROXY=\"https://proxy.golang.org,direct\"\r\nGOROOT=\"/usr/local/go\"\r\nGOSUMDB=\"sum.golang.org\"\r\nGOTMPDIR=\"\"\r\nGOTOOLDIR=\"/usr/local/go/pkg/tool/linux_amd64\"\r\nGCCGO=\"gccgo\"\r\nAR=\"ar\"\r\nCC=\"gcc\"\r\nCXX=\"g++\"\r\nCGO_ENABLED=\"1\"\r\nGOMOD=\"\"\r\nCGO_CFLAGS=\"-g
-      -O2\"\r\nCGO_CPPFLAGS=\"\"\r\nCGO_CXXFLAGS=\"-g -O2\"\r\nCGO_FFLAGS=\"-g -O2\"\r\nCGO_LDFLAGS=\"-g
-      -O2\"\r\nPKG_CONFIG=\"pkg-config\"\r\nGOGCCFLAGS=\"-fPIC -m64 -pthread -fmessage-length=0
-      -fdebug-prefix-map=/tmp/go-build228718343=/tmp/go-build -gno-record-gcc-switches\"\r\n\r\n
-      ➜ neofetch --backend off\r\n\r\nOS: Ubuntu 20.04.1 LTS x86_64 \r\nKernel: 5.4.0-52-generic
-      \r\nShell: bash 5.0.17 \r\nDE: Xfce \r\nMemory: 38419MiB / 64206MiB \r\n```\r\n","bodyText":"When
-      trying to install by running this:\ngo get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\n\nI
-      get this:\n➜ go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\n\ngithub.com/libgit2/git2go
-      (download)\ncannot find package \"github.com/libgit2/git2go/v30\" in any of:\n\t/usr/local/go/src/github.com/libgit2/git2go/v30
-      (from $GOROOT)\n\t/home/duncan/.go/src/github.com/libgit2/git2go/v30 (from $GOPATH)\n\nMy
-      environment is as follows:\n ➜ go version\ngo version go1.15.5 linux/amd64\n\n➜
-      go env\nGO111MODULE=\"\"\nGOARCH=\"amd64\"\nGOBIN=\"\"\nGOCACHE=\"/home/duncan/.cache/go-build\"\nGOENV=\"/home/duncan/.config/go/env\"\nGOEXE=\"\"\nGOFLAGS=\"\"\nGOHOSTARCH=\"amd64\"\nGOHOSTOS=\"linux\"\nGOINSECURE=\"\"\nGOMODCACHE=\"/home/duncan/.go/pkg/mod\"\nGONOPROXY=\"\"\nGONOSUMDB=\"\"\nGOOS=\"linux\"\nGOPATH=\"/home/duncan/.go\"\nGOPRIVATE=\"\"\nGOPROXY=\"https://proxy.golang.org,direct\"\nGOROOT=\"/usr/local/go\"\nGOSUMDB=\"sum.golang.org\"\nGOTMPDIR=\"\"\nGOTOOLDIR=\"/usr/local/go/pkg/tool/linux_amd64\"\nGCCGO=\"gccgo\"\nAR=\"ar\"\nCC=\"gcc\"\nCXX=\"g++\"\nCGO_ENABLED=\"1\"\nGOMOD=\"\"\nCGO_CFLAGS=\"-g
-      -O2\"\nCGO_CPPFLAGS=\"\"\nCGO_CXXFLAGS=\"-g -O2\"\nCGO_FFLAGS=\"-g -O2\"\nCGO_LDFLAGS=\"-g
-      -O2\"\nPKG_CONFIG=\"pkg-config\"\nGOGCCFLAGS=\"-fPIC -m64 -pthread -fmessage-length=0
-      -fdebug-prefix-map=/tmp/go-build228718343=/tmp/go-build -gno-record-gcc-switches\"\n\n
-      ➜ neofetch --backend off\n\nOS: Ubuntu 20.04.1 LTS x86_64 \nKernel: 5.4.0-52-generic
-      \nShell: bash 5.0.17 \nDE: Xfce \nMemory: 38419MiB / 64206MiB","closed":false,"closedAt":null,"comments":{"totalCount":3},"createdAt":"2020-11-17T19:48:59Z","createdViaEmail":false,"databaseId":745038526,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":72,"participants":{"totalCount":3},"publishedAt":"2020-11-17T19:48:59Z","reactions":{"totalCount":0},"state":"OPEN","title":"Install
-      error: cannot find package \"github.com/libgit2/git2go/v30\"","updatedAt":"2020-12-13T04:07:18Z","url":"https://github.com/askgitdev/askgit/issues/72","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOC0zMFQxNzoyNTozNS0wNDowMM4pDitS","node":{"activeLockReason":null,"author":{"login":"federico-razzoli","url":"https://github.com/federico-razzoli"},"body":"$
-      go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\r\ngo/src/github.com/go-git/go-git/remote.go:9:2:
-      code in directory /home/federico/go/src/github.com/go-git/go-billy/osfs expects
-      import \"github.com/go-git/go-billy/v5/osfs\"\r\n","bodyText":"$ go get -v -tags=sqlite_vtable
-      github.com/augmentable-dev/askgit\ngo/src/github.com/go-git/go-git/remote.go:9:2:
-      code in directory /home/federico/go/src/github.com/go-git/go-billy/osfs expects
-      import \"github.com/go-git/go-billy/v5/osfs\"","closed":true,"closedAt":"2020-09-02T01:24:23Z","comments":{"totalCount":1},"createdAt":"2020-08-30T21:25:35Z","createdViaEmail":false,"databaseId":688794450,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":49,"participants":{"totalCount":2},"publishedAt":"2020-08-30T21:25:35Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Incorrect/incomplete
-      install instructions","updatedAt":"2020-09-02T01:24:23Z","url":"https://github.com/askgitdev/askgit/issues/49","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOC0zMFQwNDoxMDoxMC0wNDowMM4pDFqr","node":{"activeLockReason":null,"author":{"login":"borekb","url":"https://github.com/borekb"},"body":"Is
-      it expected that the basic command from README is so heavy? I initially thought
-      that there''s something wrong with my invocation, I did this:\r\n\r\n```\r\ndocker
-      run --rm -v `pwd`:/repo:ro augmentable/askgit \"SELECT * FROM commits\"\r\n```\r\n\r\nThen
-      my computer just seemed to be stuck. I was seeing resource usage like this for
-      over a minute:\r\n\r\n<img width=\"1152\" alt=\"Screenshot 2020-08-30 at 10
-      02 57\" src=\"https://user-images.githubusercontent.com/101152/91654422-c6dd0400-eaa8-11ea-911f-8a133a5a9966.png\">\r\n\r\nThen
-      it eventually finished after about 2.5 minutes but I was seriously worried that
-      I''m doing something wrong, e.g., not escaping the SQL query correctly.\r\n\r\nWhat
-      does it do on the first run? Is it building some sort of database behind the
-      scenes? Would even \"simpler\" queries like `SELECT count(*) FROM commits` take
-      similarly long?","bodyText":"Is it expected that the basic command from README
-      is so heavy? I initially thought that there''s something wrong with my invocation,
-      I did this:\ndocker run --rm -v `pwd`:/repo:ro augmentable/askgit \"SELECT *
-      FROM commits\"\n\nThen my computer just seemed to be stuck. I was seeing resource
-      usage like this for over a minute:\n\nThen it eventually finished after about
-      2.5 minutes but I was seriously worried that I''m doing something wrong, e.g.,
-      not escaping the SQL query correctly.\nWhat does it do on the first run? Is
-      it building some sort of database behind the scenes? Would even \"simpler\"
-      queries like SELECT count(*) FROM commits take similarly long?","closed":false,"closedAt":null,"comments":{"totalCount":5},"createdAt":"2020-08-30T08:10:10Z","createdViaEmail":false,"databaseId":688675499,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":46,"participants":{"totalCount":2},"publishedAt":"2020-08-30T08:10:10Z","reactions":{"totalCount":0},"state":"OPEN","title":"Took
-      very long time on the first run","updatedAt":"2020-09-02T02:32:35Z","url":"https://github.com/askgitdev/askgit/issues/46","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOC0yMVQyMTozNDo0Ny0wNDowMM4ow4Vb","node":{"activeLockReason":null,"author":{"login":"nhinds","url":"https://github.com/nhinds"},"body":"`askgit`
-      has trouble with repository directories that contain characters that are either
-      special to Go''s `%q` string encoding or special to sqlite. Some characters
-      cause `askgit` to exit with \"unrecognized token\" trying to create the virtual
-      table, while others make it further and fail (or produce no data) when executing
-      SQL statements.\r\n\r\nSome special characters do not render well on github,
-      so I''ve included equivalent shell commands for making these directories.\r\n\r\nThe
-      following directories behave the same. `select count(*) from commits` returns
-      no results (not the number 0 - it returns an empty resultset), while `select
-      count(*) from files` panics with \"panic: invalid handle\":\r\n* `back\\slash`
-      (`mkdir ''back\\slash''`)\r\n* `thing﷐` (`mkdir ''thing''$''\\357\\267\\220''`)\r\n*
-      `new\r\nline` (`mkdir ''new''$''\\n''''line''`)\r\n* `doublequotes\");--injection`
-      (`mkdir ''doublequotes\");--injection''`)\r\n\r\nThe following directories all
-      fail without running the SQL query, with an error like `unrecognized token:
-      \"\");\"`:\r\n* `quotation\"marks` (`mkdir ''quotation\"marks''`)\r\n* `comma\",separated\"`
-      (`mkdir ''comma\",separated\"''`)\r\n\r\nThis seems to be caused by building
-      a SQL string using `fmt.Sprintf` and `%q`, which quotes/escapes strings in a
-      way that Go understands rather than in a way that sqlite understands.\r\nGo
-      will format `\"` in the middle of a string as `\\\"`, which Sqlite considers
-      to be a literal backslash character followed by the end of a string, which is
-      why most directories with the double quote character result in \"unrecognized
-      token\".\r\nFor other characters it seems like Go will escape them (e.g. `\\`
-      becomes `\\\\`, newline becomes `\\n`), and Sqlite happily passes the escaped
-      versions to the modules'' `Create` functions, which presumably try and fail
-      to open a directory named e.g. `back\\\\slash` instead of `back\\slash`\r\n\r\nThis
-      can be reproduced in the tests by changing the fixture repo from `\"repo\"`
-      to e.g. `\"repo\\\\\"` or `\"repo\\\"\"`","bodyText":"askgit has trouble with
-      repository directories that contain characters that are either special to Go''s
-      %q string encoding or special to sqlite. Some characters cause askgit to exit
-      with \"unrecognized token\" trying to create the virtual table, while others
-      make it further and fail (or produce no data) when executing SQL statements.\nSome
-      special characters do not render well on github, so I''ve included equivalent
-      shell commands for making these directories.\nThe following directories behave
-      the same. select count(*) from commits returns no results (not the number 0
-      - it returns an empty resultset), while select count(*) from files panics with
-      \"panic: invalid handle\":\n\nback\\slash (mkdir ''back\\slash'')\nthing� (mkdir
-      ''thing''$''\\357\\267\\220'')\nnew line (mkdir ''new''$''\\n''''line'')\ndoublequotes\");--injection
-      (mkdir ''doublequotes\");--injection'')\n\nThe following directories all fail
-      without running the SQL query, with an error like unrecognized token: \"\");\":\n\nquotation\"marks
-      (mkdir ''quotation\"marks'')\ncomma\",separated\" (mkdir ''comma\",separated\"'')\n\nThis
-      seems to be caused by building a SQL string using fmt.Sprintf and %q, which
-      quotes/escapes strings in a way that Go understands rather than in a way that
-      sqlite understands.\nGo will format \" in the middle of a string as \\\", which
-      Sqlite considers to be a literal backslash character followed by the end of
-      a string, which is why most directories with the double quote character result
-      in \"unrecognized token\".\nFor other characters it seems like Go will escape
-      them (e.g. \\ becomes \\\\, newline becomes \\n), and Sqlite happily passes
-      the escaped versions to the modules'' Create functions, which presumably try
-      and fail to open a directory named e.g. back\\\\slash instead of back\\slash\nThis
-      can be reproduced in the tests by changing the fixture repo from \"repo\" to
-      e.g. \"repo\\\\\" or \"repo\\\"\"","closed":true,"closedAt":"2020-09-02T02:51:45Z","comments":{"totalCount":5},"createdAt":"2020-08-22T01:34:47Z","createdViaEmail":false,"databaseId":683902299,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":41,"participants":{"totalCount":4},"publishedAt":"2020-08-22T01:34:47Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Issues
-      with repository directories with special characters","updatedAt":"2020-09-02T02:51:45Z","url":"https://github.com/askgitdev/askgit/issues/41","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOC0xNlQwODoxNDoyNS0wNDowMM4ohBLN","node":{"activeLockReason":null,"author":{"login":"muhmud","url":"https://github.com/muhmud"},"body":"Would
-      be nice to have PAGER support so that the produced table results are more easily
-      browseable.\r\n\r\nMost SQL command line clients support this. I could pipe
-      the results into `less -SinFX`, but would be nice if I didn''t have to on each
-      query.\r\n","bodyText":"Would be nice to have PAGER support so that the produced
-      table results are more easily browseable.\nMost SQL command line clients support
-      this. I could pipe the results into less -SinFX, but would be nice if I didn''t
-      have to on each query.","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2020-08-16T12:14:25Z","createdViaEmail":false,"databaseId":679744205,"editor":{"login":"muhmud","url":"https://github.com/muhmud"},"includesCreatedEdit":true,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":"2020-08-16T12:16:23Z","locked":false,"milestone":null,"number":38,"participants":{"totalCount":1},"publishedAt":"2020-08-16T12:14:25Z","reactions":{"totalCount":0},"state":"OPEN","title":"Support
-      for a PAGER","updatedAt":"2020-08-16T12:16:23Z","url":"https://github.com/askgitdev/askgit/issues/38","userContentEdits":{"totalCount":3},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOC0xNlQwNzozMzozOS0wNDowMM4og_3e","node":{"activeLockReason":null,"author":{"login":"simon-brooke","url":"https://github.com/simon-brooke"},"body":"Build
+    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","issues":{"edges":[{"cursor":"Y3Vyc29yOnYyOpHOJs4z-A==","node":{"activeLockReason":null,"author":{"login":"erezsh","url":"https://github.com/erezsh"},"body":"I''m
+      not very familiar with Go, so perhaps I''m doing something wrong?\r\n\r\n```bash\r\n$
+      go install -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite\r\ncan''t
+      load package: package github.com/augmentable-dev/gitqlite: cannot find package
+      \"github.com/augmentable-dev/gitqlite\" in any of:\r\n        /usr/lib/go-1.10/src/github.com/augmentable-dev/gitqlite
+      (from $GOROOT)\r\n        /home/erez/go/src/github.com/augmentable-dev/gitqlite
+      (from $GOPATH)\r\n```\r\n","bodyText":"I''m not very familiar with Go, so perhaps
+      I''m doing something wrong?\n$ go install -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite\ncan''t
+      load package: package github.com/augmentable-dev/gitqlite: cannot find package
+      \"github.com/augmentable-dev/gitqlite\" in any of:\n        /usr/lib/go-1.10/src/github.com/augmentable-dev/gitqlite
+      (from $GOROOT)\n        /home/erez/go/src/github.com/augmentable-dev/gitqlite
+      (from $GOPATH)","closed":true,"closedAt":"2020-07-05T18:01:42Z","comments":{"totalCount":12},"createdAt":"2020-07-05T11:00:44Z","createdViaEmail":false,"databaseId":651047928,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":3,"participants":{"totalCount":3},"publishedAt":"2020-07-05T11:00:44Z","reactions":{"totalCount":1},"state":"CLOSED","title":"Following
+      installation instructions doesn''t work?","updatedAt":"2020-07-05T18:01:42Z","url":"https://github.com/askgitdev/askgit/issues/3","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOJtui8g==","node":{"activeLockReason":null,"author":{"login":"joni2back","url":"https://github.com/joni2back"},"body":"","bodyText":"","closed":true,"closedAt":"2020-07-07T02:08:51Z","comments":{"totalCount":1},"createdAt":"2020-07-07T01:50:24Z","createdViaEmail":false,"databaseId":651928306,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":9,"participants":{"totalCount":2},"publishedAt":"2020-07-07T01:50:24Z","reactions":{"totalCount":0},"state":"CLOSED","title":"It
+      is necessary?","updatedAt":"2020-07-07T02:08:51Z","url":"https://github.com/askgitdev/askgit/issues/9","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOJuDdaA==","node":{"activeLockReason":null,"author":{"login":"klauern","url":"https://github.com/klauern"},"body":"It
+      would be nice to release this as a downloadable set of binaries.  I have had
+      some experience with [GoReleaser](https://goreleaser.com/) and I have to say
+      it''s a pretty nice little tool, especially if you''re working in Go.  I''d
+      prefer to be able to just `brew install gitqlite`, which GoReleaser has good
+      support for: https://goreleaser.com/customization/homebrew/","bodyText":"It
+      would be nice to release this as a downloadable set of binaries.  I have had
+      some experience with GoReleaser and I have to say it''s a pretty nice little
+      tool, especially if you''re working in Go.  I''d prefer to be able to just brew
+      install gitqlite, which GoReleaser has good support for: https://goreleaser.com/customization/homebrew/","closed":true,"closedAt":"2020-09-03T02:08:40Z","comments":{"totalCount":4},"createdAt":"2020-07-07T12:10:47Z","createdViaEmail":false,"databaseId":652270952,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":10,"participants":{"totalCount":4},"publishedAt":"2020-07-07T12:10:47Z","reactions":{"totalCount":2},"state":"CLOSED","title":"provide
+      releases for non-Go developers","updatedAt":"2020-09-03T02:08:40Z","url":"https://github.com/askgitdev/askgit/issues/10","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOJuEhqA==","node":{"activeLockReason":null,"author":{"login":"mwarkentin","url":"https://github.com/mwarkentin"},"body":"It''d
+      be nice if we could just run `docker run -v `pwd`:/repo:ro gitqlite \"SELECT
+      * FROM commits\"` without needing to clone and build the docker image locally.","bodyText":"It''d
+      be nice if we could just run docker run -v pwd:/repo:ro gitqlite \"SELECT *
+      FROM commits\" without needing to clone and build the docker image locally.","closed":true,"closedAt":"2020-07-17T03:17:40Z","comments":{"totalCount":3},"createdAt":"2020-07-07T12:38:12Z","createdViaEmail":false,"databaseId":652288424,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":11,"participants":{"totalCount":3},"publishedAt":"2020-07-07T12:38:12Z","reactions":{"totalCount":3},"state":"CLOSED","title":"Publish
+      image to dockerhub?","updatedAt":"2020-07-17T03:17:40Z","url":"https://github.com/askgitdev/askgit/issues/11","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOJvAC8A==","node":{"activeLockReason":null,"author":{"login":"lycclsltt","url":"https://github.com/lycclsltt"},"body":"请教一下，SQL语法的解析如何实现的？又是如何和git查询接口对接上的呢","bodyText":"请教一下，SQL语法的解析如何实现的？又是如何和git查询接口对接上的呢","closed":true,"closedAt":"2020-07-25T06:54:59Z","comments":{"totalCount":2},"createdAt":"2020-07-08T12:38:36Z","createdViaEmail":false,"databaseId":653263600,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":17,"participants":{"totalCount":2},"publishedAt":"2020-07-08T12:38:36Z","reactions":{"totalCount":0},"state":"CLOSED","title":"请教一下，SQL语法的解析如何实现的？","updatedAt":"2020-07-25T06:54:59Z","url":"https://github.com/askgitdev/askgit/issues/17","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOJ0R9aw==","node":{"activeLockReason":null,"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"body":"Info
+      about the recently implemented `branches` and `tags` tables should be added
+      to the documentation in the README, similar to what''s done for `commits` and
+      `files`","bodyText":"Info about the recently implemented branches and tags tables
+      should be added to the documentation in the README, similar to what''s done
+      for commits and files","closed":true,"closedAt":"2020-09-12T00:47:55Z","comments":{"totalCount":0},"createdAt":"2020-07-17T03:19:12Z","createdViaEmail":false,"databaseId":658799979,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":24,"participants":{"totalCount":1},"publishedAt":"2020-07-17T03:19:12Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Document
+      the branches and tags tables","updatedAt":"2020-09-12T00:47:55Z","url":"https://github.com/askgitdev/askgit/issues/24","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":true,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOJ6seQA==","node":{"activeLockReason":null,"author":{"login":"pjebs","url":"https://github.com/pjebs"},"body":"I
+      was wondering where in the repo is the SQL getting parsed? How is it being parse?","bodyText":"I
+      was wondering where in the repo is the SQL getting parsed? How is it being parse?","closed":true,"closedAt":"2020-08-29T15:00:12Z","comments":{"totalCount":1},"createdAt":"2020-07-25T06:12:26Z","createdViaEmail":false,"databaseId":665525824,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":32,"participants":{"totalCount":3},"publishedAt":"2020-07-25T06:12:26Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Parsing
+      SQL","updatedAt":"2020-08-29T15:00:12Z","url":"https://github.com/askgitdev/askgit/issues/32","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOKIP93g==","node":{"activeLockReason":null,"author":{"login":"simon-brooke","url":"https://github.com/simon-brooke"},"body":"Build
       log as follows:\r\n\r\n```\r\nsimon@mason:~/tmp$ go get -v -tags=sqlite_vtable
       github.com/augmentable-dev/askgit\r\ngithub.com/augmentable-dev/askgit (download)\r\ngithub.com/go-git/go-git
       (download)\r\ngithub.com/go-git/go-billy (download)\r\nFetching https://golang.org/x/sys/unix?go-get=1\r\nParsing
@@ -298,44 +145,197 @@ interactions:
       import \"github.com/go-git/go-billy/v5/osfs\"\n\nOn investigation, https://github.com/go-git/go-billy/v5/osfs
       does not exist but https://github.com/go-git/go-billy/osfs does. Suggest this
       is bit-rot caused by the upstream package changing its directory structure?","closed":true,"closedAt":"2020-09-18T01:00:42Z","comments":{"totalCount":4},"createdAt":"2020-08-16T11:33:39Z","createdViaEmail":false,"databaseId":679738846,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":37,"participants":{"totalCount":4},"publishedAt":"2020-08-16T11:33:39Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Build
-      fails looking for ''github.com/go-git/go-billy/v5/osfs''","updatedAt":"2020-09-18T01:00:43Z","url":"https://github.com/askgitdev/askgit/issues/37","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0yNVQwMjoxMjoyNi0wNDowMM4nqx5A","node":{"activeLockReason":null,"author":{"login":"pjebs","url":"https://github.com/pjebs"},"body":"I
-      was wondering where in the repo is the SQL getting parsed? How is it being parse?","bodyText":"I
-      was wondering where in the repo is the SQL getting parsed? How is it being parse?","closed":true,"closedAt":"2020-08-29T15:00:12Z","comments":{"totalCount":1},"createdAt":"2020-07-25T06:12:26Z","createdViaEmail":false,"databaseId":665525824,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":32,"participants":{"totalCount":3},"publishedAt":"2020-07-25T06:12:26Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Parsing
-      SQL","updatedAt":"2020-08-29T15:00:12Z","url":"https://github.com/askgitdev/askgit/issues/32","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0xNlQyMzoxOToxMi0wNDowMM4nRH1r","node":{"activeLockReason":null,"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"body":"Info
-      about the recently implemented `branches` and `tags` tables should be added
-      to the documentation in the README, similar to what''s done for `commits` and
-      `files`","bodyText":"Info about the recently implemented branches and tags tables
-      should be added to the documentation in the README, similar to what''s done
-      for commits and files","closed":true,"closedAt":"2020-09-12T00:47:55Z","comments":{"totalCount":0},"createdAt":"2020-07-17T03:19:12Z","createdViaEmail":false,"databaseId":658799979,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":24,"participants":{"totalCount":1},"publishedAt":"2020-07-17T03:19:12Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Document
-      the branches and tags tables","updatedAt":"2020-09-12T00:47:55Z","url":"https://github.com/askgitdev/askgit/issues/24","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":true,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0wOFQwODozODozNi0wNDowMM4m8ALw","node":{"activeLockReason":null,"author":{"login":"lycclsltt","url":"https://github.com/lycclsltt"},"body":"请教一下，SQL语法的解析如何实现的？又是如何和git查询接口对接上的呢","bodyText":"请教一下，SQL语法的解析如何实现的？又是如何和git查询接口对接上的呢","closed":true,"closedAt":"2020-07-25T06:54:59Z","comments":{"totalCount":2},"createdAt":"2020-07-08T12:38:36Z","createdViaEmail":false,"databaseId":653263600,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":17,"participants":{"totalCount":2},"publishedAt":"2020-07-08T12:38:36Z","reactions":{"totalCount":0},"state":"CLOSED","title":"请教一下，SQL语法的解析如何实现的？","updatedAt":"2020-07-25T06:54:59Z","url":"https://github.com/askgitdev/askgit/issues/17","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0wN1QwODozODoxMi0wNDowMM4m4SGo","node":{"activeLockReason":null,"author":{"login":"mwarkentin","url":"https://github.com/mwarkentin"},"body":"It''d
-      be nice if we could just run `docker run -v `pwd`:/repo:ro gitqlite \"SELECT
-      * FROM commits\"` without needing to clone and build the docker image locally.","bodyText":"It''d
-      be nice if we could just run docker run -v pwd:/repo:ro gitqlite \"SELECT *
-      FROM commits\" without needing to clone and build the docker image locally.","closed":true,"closedAt":"2020-07-17T03:17:40Z","comments":{"totalCount":3},"createdAt":"2020-07-07T12:38:12Z","createdViaEmail":false,"databaseId":652288424,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":11,"participants":{"totalCount":3},"publishedAt":"2020-07-07T12:38:12Z","reactions":{"totalCount":3},"state":"CLOSED","title":"Publish
-      image to dockerhub?","updatedAt":"2020-07-17T03:17:40Z","url":"https://github.com/askgitdev/askgit/issues/11","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0wN1QwODoxMDo0Ny0wNDowMM4m4N1o","node":{"activeLockReason":null,"author":{"login":"klauern","url":"https://github.com/klauern"},"body":"It
-      would be nice to release this as a downloadable set of binaries.  I have had
-      some experience with [GoReleaser](https://goreleaser.com/) and I have to say
-      it''s a pretty nice little tool, especially if you''re working in Go.  I''d
-      prefer to be able to just `brew install gitqlite`, which GoReleaser has good
-      support for: https://goreleaser.com/customization/homebrew/","bodyText":"It
-      would be nice to release this as a downloadable set of binaries.  I have had
-      some experience with GoReleaser and I have to say it''s a pretty nice little
-      tool, especially if you''re working in Go.  I''d prefer to be able to just brew
-      install gitqlite, which GoReleaser has good support for: https://goreleaser.com/customization/homebrew/","closed":true,"closedAt":"2020-09-03T02:08:40Z","comments":{"totalCount":4},"createdAt":"2020-07-07T12:10:47Z","createdViaEmail":false,"databaseId":652270952,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":10,"participants":{"totalCount":4},"publishedAt":"2020-07-07T12:10:47Z","reactions":{"totalCount":2},"state":"CLOSED","title":"provide
-      releases for non-Go developers","updatedAt":"2020-09-03T02:08:40Z","url":"https://github.com/askgitdev/askgit/issues/10","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0wNlQyMTo1MDoyNC0wNDowMM4m26Ly","node":{"activeLockReason":null,"author":{"login":"joni2back","url":"https://github.com/joni2back"},"body":"","bodyText":"","closed":true,"closedAt":"2020-07-07T02:08:51Z","comments":{"totalCount":1},"createdAt":"2020-07-07T01:50:24Z","createdViaEmail":false,"databaseId":651928306,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":9,"participants":{"totalCount":2},"publishedAt":"2020-07-07T01:50:24Z","reactions":{"totalCount":0},"state":"CLOSED","title":"It
-      is necessary?","updatedAt":"2020-07-07T02:08:51Z","url":"https://github.com/askgitdev/askgit/issues/9","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0wNVQwNzowMDo0NC0wNDowMM4mzjP4","node":{"activeLockReason":null,"author":{"login":"erezsh","url":"https://github.com/erezsh"},"body":"I''m
-      not very familiar with Go, so perhaps I''m doing something wrong?\r\n\r\n```bash\r\n$
-      go install -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite\r\ncan''t
-      load package: package github.com/augmentable-dev/gitqlite: cannot find package
-      \"github.com/augmentable-dev/gitqlite\" in any of:\r\n        /usr/lib/go-1.10/src/github.com/augmentable-dev/gitqlite
-      (from $GOROOT)\r\n        /home/erez/go/src/github.com/augmentable-dev/gitqlite
-      (from $GOPATH)\r\n```\r\n","bodyText":"I''m not very familiar with Go, so perhaps
-      I''m doing something wrong?\n$ go install -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite\ncan''t
-      load package: package github.com/augmentable-dev/gitqlite: cannot find package
-      \"github.com/augmentable-dev/gitqlite\" in any of:\n        /usr/lib/go-1.10/src/github.com/augmentable-dev/gitqlite
-      (from $GOROOT)\n        /home/erez/go/src/github.com/augmentable-dev/gitqlite
-      (from $GOPATH)","closed":true,"closedAt":"2020-07-05T18:01:42Z","comments":{"totalCount":12},"createdAt":"2020-07-05T11:00:44Z","createdViaEmail":false,"databaseId":651047928,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":3,"participants":{"totalCount":3},"publishedAt":"2020-07-05T11:00:44Z","reactions":{"totalCount":1},"state":"CLOSED","title":"Following
-      installation instructions doesn''t work?","updatedAt":"2020-07-05T18:01:42Z","url":"https://github.com/askgitdev/askgit/issues/3","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wNy0wNVQwNzowMDo0NC0wNDowMM4mzjP4","hasNextPage":false}}}}}'
+      fails looking for ''github.com/go-git/go-billy/v5/osfs''","updatedAt":"2020-09-18T01:00:43Z","url":"https://github.com/askgitdev/askgit/issues/37","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOKIQSzQ==","node":{"activeLockReason":null,"author":{"login":"muhmud","url":"https://github.com/muhmud"},"body":"Would
+      be nice to have PAGER support so that the produced table results are more easily
+      browseable.\r\n\r\nMost SQL command line clients support this. I could pipe
+      the results into `less -SinFX`, but would be nice if I didn''t have to on each
+      query.\r\n","bodyText":"Would be nice to have PAGER support so that the produced
+      table results are more easily browseable.\nMost SQL command line clients support
+      this. I could pipe the results into less -SinFX, but would be nice if I didn''t
+      have to on each query.","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2020-08-16T12:14:25Z","createdViaEmail":false,"databaseId":679744205,"editor":{"login":"muhmud","url":"https://github.com/muhmud"},"includesCreatedEdit":true,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":"2020-08-16T12:16:23Z","locked":false,"milestone":null,"number":38,"participants":{"totalCount":1},"publishedAt":"2020-08-16T12:14:25Z","reactions":{"totalCount":0},"state":"OPEN","title":"Support
+      for a PAGER","updatedAt":"2020-08-16T12:16:23Z","url":"https://github.com/askgitdev/askgit/issues/38","userContentEdits":{"totalCount":3},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOKMOFWw==","node":{"activeLockReason":null,"author":{"login":"nhinds","url":"https://github.com/nhinds"},"body":"`askgit`
+      has trouble with repository directories that contain characters that are either
+      special to Go''s `%q` string encoding or special to sqlite. Some characters
+      cause `askgit` to exit with \"unrecognized token\" trying to create the virtual
+      table, while others make it further and fail (or produce no data) when executing
+      SQL statements.\r\n\r\nSome special characters do not render well on github,
+      so I''ve included equivalent shell commands for making these directories.\r\n\r\nThe
+      following directories behave the same. `select count(*) from commits` returns
+      no results (not the number 0 - it returns an empty resultset), while `select
+      count(*) from files` panics with \"panic: invalid handle\":\r\n* `back\\slash`
+      (`mkdir ''back\\slash''`)\r\n* `thing﷐` (`mkdir ''thing''$''\\357\\267\\220''`)\r\n*
+      `new\r\nline` (`mkdir ''new''$''\\n''''line''`)\r\n* `doublequotes\");--injection`
+      (`mkdir ''doublequotes\");--injection''`)\r\n\r\nThe following directories all
+      fail without running the SQL query, with an error like `unrecognized token:
+      \"\");\"`:\r\n* `quotation\"marks` (`mkdir ''quotation\"marks''`)\r\n* `comma\",separated\"`
+      (`mkdir ''comma\",separated\"''`)\r\n\r\nThis seems to be caused by building
+      a SQL string using `fmt.Sprintf` and `%q`, which quotes/escapes strings in a
+      way that Go understands rather than in a way that sqlite understands.\r\nGo
+      will format `\"` in the middle of a string as `\\\"`, which Sqlite considers
+      to be a literal backslash character followed by the end of a string, which is
+      why most directories with the double quote character result in \"unrecognized
+      token\".\r\nFor other characters it seems like Go will escape them (e.g. `\\`
+      becomes `\\\\`, newline becomes `\\n`), and Sqlite happily passes the escaped
+      versions to the modules'' `Create` functions, which presumably try and fail
+      to open a directory named e.g. `back\\\\slash` instead of `back\\slash`\r\n\r\nThis
+      can be reproduced in the tests by changing the fixture repo from `\"repo\"`
+      to e.g. `\"repo\\\\\"` or `\"repo\\\"\"`","bodyText":"askgit has trouble with
+      repository directories that contain characters that are either special to Go''s
+      %q string encoding or special to sqlite. Some characters cause askgit to exit
+      with \"unrecognized token\" trying to create the virtual table, while others
+      make it further and fail (or produce no data) when executing SQL statements.\nSome
+      special characters do not render well on github, so I''ve included equivalent
+      shell commands for making these directories.\nThe following directories behave
+      the same. select count(*) from commits returns no results (not the number 0
+      - it returns an empty resultset), while select count(*) from files panics with
+      \"panic: invalid handle\":\n\nback\\slash (mkdir ''back\\slash'')\nthing� (mkdir
+      ''thing''$''\\357\\267\\220'')\nnew line (mkdir ''new''$''\\n''''line'')\ndoublequotes\");--injection
+      (mkdir ''doublequotes\");--injection'')\n\nThe following directories all fail
+      without running the SQL query, with an error like unrecognized token: \"\");\":\n\nquotation\"marks
+      (mkdir ''quotation\"marks'')\ncomma\",separated\" (mkdir ''comma\",separated\"'')\n\nThis
+      seems to be caused by building a SQL string using fmt.Sprintf and %q, which
+      quotes/escapes strings in a way that Go understands rather than in a way that
+      sqlite understands.\nGo will format \" in the middle of a string as \\\", which
+      Sqlite considers to be a literal backslash character followed by the end of
+      a string, which is why most directories with the double quote character result
+      in \"unrecognized token\".\nFor other characters it seems like Go will escape
+      them (e.g. \\ becomes \\\\, newline becomes \\n), and Sqlite happily passes
+      the escaped versions to the modules'' Create functions, which presumably try
+      and fail to open a directory named e.g. back\\\\slash instead of back\\slash\nThis
+      can be reproduced in the tests by changing the fixture repo from \"repo\" to
+      e.g. \"repo\\\\\" or \"repo\\\"\"","closed":true,"closedAt":"2020-09-02T02:51:45Z","comments":{"totalCount":5},"createdAt":"2020-08-22T01:34:47Z","createdViaEmail":false,"databaseId":683902299,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":41,"participants":{"totalCount":4},"publishedAt":"2020-08-22T01:34:47Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Issues
+      with repository directories with special characters","updatedAt":"2020-09-02T02:51:45Z","url":"https://github.com/askgitdev/askgit/issues/41","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOKQxaqw==","node":{"activeLockReason":null,"author":{"login":"borekb","url":"https://github.com/borekb"},"body":"Is
+      it expected that the basic command from README is so heavy? I initially thought
+      that there''s something wrong with my invocation, I did this:\r\n\r\n```\r\ndocker
+      run --rm -v `pwd`:/repo:ro augmentable/askgit \"SELECT * FROM commits\"\r\n```\r\n\r\nThen
+      my computer just seemed to be stuck. I was seeing resource usage like this for
+      over a minute:\r\n\r\n<img width=\"1152\" alt=\"Screenshot 2020-08-30 at 10
+      02 57\" src=\"https://user-images.githubusercontent.com/101152/91654422-c6dd0400-eaa8-11ea-911f-8a133a5a9966.png\">\r\n\r\nThen
+      it eventually finished after about 2.5 minutes but I was seriously worried that
+      I''m doing something wrong, e.g., not escaping the SQL query correctly.\r\n\r\nWhat
+      does it do on the first run? Is it building some sort of database behind the
+      scenes? Would even \"simpler\" queries like `SELECT count(*) FROM commits` take
+      similarly long?","bodyText":"Is it expected that the basic command from README
+      is so heavy? I initially thought that there''s something wrong with my invocation,
+      I did this:\ndocker run --rm -v `pwd`:/repo:ro augmentable/askgit \"SELECT *
+      FROM commits\"\n\nThen my computer just seemed to be stuck. I was seeing resource
+      usage like this for over a minute:\n\nThen it eventually finished after about
+      2.5 minutes but I was seriously worried that I''m doing something wrong, e.g.,
+      not escaping the SQL query correctly.\nWhat does it do on the first run? Is
+      it building some sort of database behind the scenes? Would even \"simpler\"
+      queries like SELECT count(*) FROM commits take similarly long?","closed":false,"closedAt":null,"comments":{"totalCount":5},"createdAt":"2020-08-30T08:10:10Z","createdViaEmail":false,"databaseId":688675499,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":46,"participants":{"totalCount":2},"publishedAt":"2020-08-30T08:10:10Z","reactions":{"totalCount":0},"state":"OPEN","title":"Took
+      very long time on the first run","updatedAt":"2020-09-02T02:32:35Z","url":"https://github.com/askgitdev/askgit/issues/46","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOKQ4rUg==","node":{"activeLockReason":null,"author":{"login":"federico-razzoli","url":"https://github.com/federico-razzoli"},"body":"$
+      go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\r\ngo/src/github.com/go-git/go-git/remote.go:9:2:
+      code in directory /home/federico/go/src/github.com/go-git/go-billy/osfs expects
+      import \"github.com/go-git/go-billy/v5/osfs\"\r\n","bodyText":"$ go get -v -tags=sqlite_vtable
+      github.com/augmentable-dev/askgit\ngo/src/github.com/go-git/go-git/remote.go:9:2:
+      code in directory /home/federico/go/src/github.com/go-git/go-billy/osfs expects
+      import \"github.com/go-git/go-billy/v5/osfs\"","closed":true,"closedAt":"2020-09-02T01:24:23Z","comments":{"totalCount":1},"createdAt":"2020-08-30T21:25:35Z","createdViaEmail":false,"databaseId":688794450,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":49,"participants":{"totalCount":2},"publishedAt":"2020-08-30T21:25:35Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Incorrect/incomplete
+      install instructions","updatedAt":"2020-09-02T01:24:23Z","url":"https://github.com/askgitdev/askgit/issues/49","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOLGhivg==","node":{"activeLockReason":null,"author":{"login":"dflock","url":"https://github.com/dflock"},"body":"When
+      trying to install by running this:\r\n\r\n```\r\ngo get -v -tags=sqlite_vtable
+      github.com/augmentable-dev/askgit\r\n```\r\n\r\nI get this:\r\n\r\n```\r\n➜
+      go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\r\n\r\ngithub.com/libgit2/git2go
+      (download)\r\ncannot find package \"github.com/libgit2/git2go/v30\" in any of:\r\n\t/usr/local/go/src/github.com/libgit2/git2go/v30
+      (from $GOROOT)\r\n\t/home/duncan/.go/src/github.com/libgit2/git2go/v30 (from
+      $GOPATH)\r\n```\r\n\r\nMy environment is as follows:\r\n\r\n```\r\n ➜ go version\r\ngo
+      version go1.15.5 linux/amd64\r\n\r\n➜ go env\r\nGO111MODULE=\"\"\r\nGOARCH=\"amd64\"\r\nGOBIN=\"\"\r\nGOCACHE=\"/home/duncan/.cache/go-build\"\r\nGOENV=\"/home/duncan/.config/go/env\"\r\nGOEXE=\"\"\r\nGOFLAGS=\"\"\r\nGOHOSTARCH=\"amd64\"\r\nGOHOSTOS=\"linux\"\r\nGOINSECURE=\"\"\r\nGOMODCACHE=\"/home/duncan/.go/pkg/mod\"\r\nGONOPROXY=\"\"\r\nGONOSUMDB=\"\"\r\nGOOS=\"linux\"\r\nGOPATH=\"/home/duncan/.go\"\r\nGOPRIVATE=\"\"\r\nGOPROXY=\"https://proxy.golang.org,direct\"\r\nGOROOT=\"/usr/local/go\"\r\nGOSUMDB=\"sum.golang.org\"\r\nGOTMPDIR=\"\"\r\nGOTOOLDIR=\"/usr/local/go/pkg/tool/linux_amd64\"\r\nGCCGO=\"gccgo\"\r\nAR=\"ar\"\r\nCC=\"gcc\"\r\nCXX=\"g++\"\r\nCGO_ENABLED=\"1\"\r\nGOMOD=\"\"\r\nCGO_CFLAGS=\"-g
+      -O2\"\r\nCGO_CPPFLAGS=\"\"\r\nCGO_CXXFLAGS=\"-g -O2\"\r\nCGO_FFLAGS=\"-g -O2\"\r\nCGO_LDFLAGS=\"-g
+      -O2\"\r\nPKG_CONFIG=\"pkg-config\"\r\nGOGCCFLAGS=\"-fPIC -m64 -pthread -fmessage-length=0
+      -fdebug-prefix-map=/tmp/go-build228718343=/tmp/go-build -gno-record-gcc-switches\"\r\n\r\n
+      ➜ neofetch --backend off\r\n\r\nOS: Ubuntu 20.04.1 LTS x86_64 \r\nKernel: 5.4.0-52-generic
+      \r\nShell: bash 5.0.17 \r\nDE: Xfce \r\nMemory: 38419MiB / 64206MiB \r\n```\r\n","bodyText":"When
+      trying to install by running this:\ngo get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\n\nI
+      get this:\n➜ go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\n\ngithub.com/libgit2/git2go
+      (download)\ncannot find package \"github.com/libgit2/git2go/v30\" in any of:\n\t/usr/local/go/src/github.com/libgit2/git2go/v30
+      (from $GOROOT)\n\t/home/duncan/.go/src/github.com/libgit2/git2go/v30 (from $GOPATH)\n\nMy
+      environment is as follows:\n ➜ go version\ngo version go1.15.5 linux/amd64\n\n➜
+      go env\nGO111MODULE=\"\"\nGOARCH=\"amd64\"\nGOBIN=\"\"\nGOCACHE=\"/home/duncan/.cache/go-build\"\nGOENV=\"/home/duncan/.config/go/env\"\nGOEXE=\"\"\nGOFLAGS=\"\"\nGOHOSTARCH=\"amd64\"\nGOHOSTOS=\"linux\"\nGOINSECURE=\"\"\nGOMODCACHE=\"/home/duncan/.go/pkg/mod\"\nGONOPROXY=\"\"\nGONOSUMDB=\"\"\nGOOS=\"linux\"\nGOPATH=\"/home/duncan/.go\"\nGOPRIVATE=\"\"\nGOPROXY=\"https://proxy.golang.org,direct\"\nGOROOT=\"/usr/local/go\"\nGOSUMDB=\"sum.golang.org\"\nGOTMPDIR=\"\"\nGOTOOLDIR=\"/usr/local/go/pkg/tool/linux_amd64\"\nGCCGO=\"gccgo\"\nAR=\"ar\"\nCC=\"gcc\"\nCXX=\"g++\"\nCGO_ENABLED=\"1\"\nGOMOD=\"\"\nCGO_CFLAGS=\"-g
+      -O2\"\nCGO_CPPFLAGS=\"\"\nCGO_CXXFLAGS=\"-g -O2\"\nCGO_FFLAGS=\"-g -O2\"\nCGO_LDFLAGS=\"-g
+      -O2\"\nPKG_CONFIG=\"pkg-config\"\nGOGCCFLAGS=\"-fPIC -m64 -pthread -fmessage-length=0
+      -fdebug-prefix-map=/tmp/go-build228718343=/tmp/go-build -gno-record-gcc-switches\"\n\n
+      ➜ neofetch --backend off\n\nOS: Ubuntu 20.04.1 LTS x86_64 \nKernel: 5.4.0-52-generic
+      \nShell: bash 5.0.17 \nDE: Xfce \nMemory: 38419MiB / 64206MiB","closed":false,"closedAt":null,"comments":{"totalCount":3},"createdAt":"2020-11-17T19:48:59Z","createdViaEmail":false,"databaseId":745038526,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":72,"participants":{"totalCount":3},"publishedAt":"2020-11-17T19:48:59Z","reactions":{"totalCount":0},"state":"OPEN","title":"Install
+      error: cannot find package \"github.com/libgit2/git2go/v30\"","updatedAt":"2020-12-13T04:07:18Z","url":"https://github.com/askgitdev/askgit/issues/72","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOLIZd9w==","node":{"activeLockReason":null,"author":{"login":"iwasherefirst2","url":"https://github.com/iwasherefirst2"},"body":"I
+      don''t get that query:\r\n\r\n`SELECT count(*) AS commits, SUM(additions) AS
+      additions, SUM(deletions) AS  deletions, author_email FROM commits GROUP BY
+      author_email ORDER BY commits` \r\n\r\nAccording to the docs there is no  `additions`
+      and `deletions` column for the `commits` table.\r\nAre they missing in the docs?\r\n\r\n![image](https://user-images.githubusercontent.com/1765602/99736489-c01dc600-2ac6-11eb-9000-65a50ee1f709.png)\r\n\r\n\r\n","bodyText":"I
+      don''t get that query:\nSELECT count(*) AS commits, SUM(additions) AS additions,
+      SUM(deletions) AS  deletions, author_email FROM commits GROUP BY author_email
+      ORDER BY commits\nAccording to the docs there is no  additions and deletions
+      column for the commits table.\nAre they missing in the docs?","closed":true,"closedAt":"2020-11-22T17:17:28Z","comments":{"totalCount":1},"createdAt":"2020-11-19T23:24:37Z","createdViaEmail":false,"databaseId":747003383,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":73,"participants":{"totalCount":2},"publishedAt":"2020-11-19T23:24:37Z","reactions":{"totalCount":0},"state":"CLOSED","title":"commits
+      has no `additions` column?","updatedAt":"2020-11-22T17:17:28Z","url":"https://github.com/askgitdev/askgit/issues/73","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOLSSJSw==","node":{"activeLockReason":null,"author":{"login":"kevin-cantwell","url":"https://github.com/kevin-cantwell"},"body":"I''m
+      running OSX Catalina with libgit2 v1.1.0:\r\n```\r\n$ brew info --installed
+      --json | jq ''.[] | select(.name == \"libgit2\") | .versions''\r\n{\r\n  \"stable\":
+      \"1.1.0\",\r\n  \"head\": \"HEAD\",\r\n  \"bottle\": true\r\n}\r\n```\r\n\r\nI
+      cannot build askgit due to a git2go version incompatibility with my libgit2
+      version:\r\n```\r\n$ make build\r\ngo build -v -tags=\"sqlite_vtable,static,system_libgit2\"
+      askgit.go\r\ngithub.com/augmentable-dev/askgit/pkg/gitlog\r\ngithub.com/libgit2/git2go/v30\r\n#
+      github.com/libgit2/git2go/v30\r\n../../../../go/pkg/mod/github.com/libgit2/git2go/v30@v30.2.2/git_system_static.go:11:3:
+      error: \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\r\n# error
+      \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\r\n  ^\r\n1 error
+      generated.\r\nmake: *** [build] Error 1\r\n```\r\n\r\nThe git2go module has
+      very strict libgit2 version dependencies: https://github.com/libgit2/git2go#which-go-version-to-use\r\n\r\nI
+      was able to successfully build askgit by replacing `github.com/libgit2/git2go/v30`
+      with `github.com/libgit2/git2go/v31`, but I imagine this would break things
+      for those with older libgit2 versions.","bodyText":"I''m running OSX Catalina
+      with libgit2 v1.1.0:\n$ brew info --installed --json | jq ''.[] | select(.name
+      == \"libgit2\") | .versions''\n{\n  \"stable\": \"1.1.0\",\n  \"head\": \"HEAD\",\n  \"bottle\":
+      true\n}\n\nI cannot build askgit due to a git2go version incompatibility with
+      my libgit2 version:\n$ make build\ngo build -v -tags=\"sqlite_vtable,static,system_libgit2\"
+      askgit.go\ngithub.com/augmentable-dev/askgit/pkg/gitlog\ngithub.com/libgit2/git2go/v30\n#
+      github.com/libgit2/git2go/v30\n../../../../go/pkg/mod/github.com/libgit2/git2go/v30@v30.2.2/git_system_static.go:11:3:
+      error: \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\n# error
+      \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\n  ^\n1 error
+      generated.\nmake: *** [build] Error 1\n\nThe git2go module has very strict libgit2
+      version dependencies: https://github.com/libgit2/git2go#which-go-version-to-use\nI
+      was able to successfully build askgit by replacing github.com/libgit2/git2go/v30
+      with github.com/libgit2/git2go/v31, but I imagine this would break things for
+      those with older libgit2 versions.","closed":true,"closedAt":"2020-12-13T00:58:37Z","comments":{"totalCount":1},"createdAt":"2020-12-04T20:03:37Z","createdViaEmail":false,"databaseId":757369163,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":81,"participants":{"totalCount":2},"publishedAt":"2020-12-04T20:03:37Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Build
+      fails with any libgit2 version other than v1.0","updatedAt":"2020-12-13T00:58:37Z","url":"https://github.com/askgitdev/askgit/issues/81","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOLe2QCg==","node":{"activeLockReason":null,"author":{"login":"jingkai1","url":"https://github.com/jingkai1"},"body":"askgit:
+      error while loading shared libraries: libgit2.so.1.1","bodyText":"askgit: error
+      while loading shared libraries: libgit2.so.1.1","closed":false,"closedAt":null,"comments":{"totalCount":1},"createdAt":"2020-12-18T03:46:47Z","createdViaEmail":false,"databaseId":770543626,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":85,"participants":{"totalCount":1},"publishedAt":"2020-12-18T03:46:47Z","reactions":{"totalCount":0},"state":"OPEN","title":"can''t
+      loading libgit2.so","updatedAt":"2020-12-18T03:47:38Z","url":"https://github.com/askgitdev/askgit/issues/85","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOLjsT7Q==","node":{"activeLockReason":null,"author":{"login":"pjebs","url":"https://github.com/pjebs"},"body":"Is
+      there someway to update for example to committer email address etc or a commit
+      message using SQL.","bodyText":"Is there someway to update for example to committer
+      email address etc or a commit message using SQL.","closed":false,"closedAt":null,"comments":{"totalCount":5},"createdAt":"2020-12-28T23:17:36Z","createdViaEmail":false,"databaseId":775623661,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":95,"participants":{"totalCount":3},"publishedAt":"2020-12-28T23:17:36Z","reactions":{"totalCount":1},"state":"OPEN","title":"UPDATE
+      functionality","updatedAt":"2021-04-17T14:30:18Z","url":"https://github.com/askgitdev/askgit/issues/95","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOL7mYyQ==","node":{"activeLockReason":null,"author":{"login":"mikermcneil","url":"https://github.com/mikermcneil"},"body":"would
+      be neat!\r\n\r\nLike \r\n![image](https://user-images.githubusercontent.com/618009/106808199-b3bdf980-662f-11eb-8e2c-f065a25366f1.png)\r\n\r\n…but
+      for GitLab","bodyText":"would be neat!\nLike\n\n…but for GitLab","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2021-02-03T20:56:07Z","createdViaEmail":false,"databaseId":800692425,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":118,"participants":{"totalCount":1},"publishedAt":"2021-02-03T20:56:07Z","reactions":{"totalCount":0},"state":"OPEN","title":"GitLab
+      tables","updatedAt":"2021-02-03T20:56:07Z","url":"https://github.com/askgitdev/askgit/issues/118","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"UNSUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOOG4PiA==","node":{"activeLockReason":null,"author":{"login":"nordicdyno","url":"https://github.com/nordicdyno"},"body":"`go
+      get` becomes a deprecated way to install binaries https://golang.org/doc/go-get-install-deprecation,
+      but go install fails with error:\r\n```\r\ngo install github.com/augmentable-dev/askgit@latest:
+      github.com/augmentable-dev/askgit@v0.3.7\r\n\tThe go.mod file for the module
+      providing named packages contains one or\r\n\tmore replace directives. It must
+      not contain directives that would cause\r\n\tit to be interpreted differently
+      than if it were the main module.\r\n```\r\n\r\n","bodyText":"go get becomes
+      a deprecated way to install binaries https://golang.org/doc/go-get-install-deprecation,
+      but go install fails with error:\ngo install github.com/augmentable-dev/askgit@latest:
+      github.com/augmentable-dev/askgit@v0.3.7\n\tThe go.mod file for the module providing
+      named packages contains one or\n\tmore replace directives. It must not contain
+      directives that would cause\n\tit to be interpreted differently than if it were
+      the main module.","closed":false,"closedAt":null,"comments":{"totalCount":1},"createdAt":"2021-07-17T06:42:29Z","createdViaEmail":false,"databaseId":946737032,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":130,"participants":{"totalCount":2},"publishedAt":"2021-07-17T06:42:29Z","reactions":{"totalCount":0},"state":"OPEN","title":"Go
+      install doesn''t work","updatedAt":"2021-07-20T23:23:52Z","url":"https://github.com/askgitdev/askgit/issues/130","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOOG4RCQ==","node":{"activeLockReason":null,"author":{"login":"nordicdyno","url":"https://github.com/nordicdyno"},"body":"it
+      would be nice to mention libgit2 requirement in README\r\n\r\nMy environment:
+      macOS Big Sur, go1.16.5 darwin/amd64","bodyText":"it would be nice to mention
+      libgit2 requirement in README\nMy environment: macOS Big Sur, go1.16.5 darwin/amd64","closed":true,"closedAt":"2021-07-20T23:04:09Z","comments":{"totalCount":1},"createdAt":"2021-07-17T06:45:10Z","createdViaEmail":false,"databaseId":946737417,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":131,"participants":{"totalCount":2},"publishedAt":"2021-07-17T06:45:10Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Go
+      get doesn''t work without libgit2 dependency","updatedAt":"2021-07-20T23:04:09Z","url":"https://github.com/askgitdev/askgit/issues/131","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOOMRG5Q==","node":{"activeLockReason":null,"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"body":"#136
+      re-adds support for GitHub tables again. We should add some tests to validate
+      the behavior in these tables, ideally ones that don''t make actual calls to
+      the GitHub API as was done before (let''s mock the responses as we should)","bodyText":"#136
+      re-adds support for GitHub tables again. We should add some tests to validate
+      the behavior in these tables, ideally ones that don''t make actual calls to
+      the GitHub API as was done before (let''s mock the responses as we should)","closed":true,"closedAt":"2021-08-02T19:42:06Z","comments":{"totalCount":0},"createdAt":"2021-07-26T00:17:03Z","createdViaEmail":false,"databaseId":952387301,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":137,"participants":{"totalCount":1},"publishedAt":"2021-07-26T00:17:03Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Add
+      tests for new GitHub tables","updatedAt":"2021-08-02T19:42:06Z","url":"https://github.com/askgitdev/askgit/issues/137","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":true,"viewerSubscription":"SUBSCRIBED"}},{"cursor":"Y3Vyc29yOnYyOpHOOMdk6Q==","node":{"activeLockReason":null,"author":{"login":"wi1dcard","url":"https://github.com/wi1dcard"},"body":"Hey
+      team, thank you for providing this awesome tool which helps me a lot traversing
+      the data in git repos. I''m wondering that do we have any plan to add binaries
+      in the GitHub releases (for example, on GitHub Actions)? It seems not so friendly
+      to the new users who have to build from source to install and try.","bodyText":"Hey
+      team, thank you for providing this awesome tool which helps me a lot traversing
+      the data in git repos. I''m wondering that do we have any plan to add binaries
+      in the GitHub releases (for example, on GitHub Actions)? It seems not so friendly
+      to the new users who have to build from source to install and try.","closed":true,"closedAt":"2021-07-26T18:45:18Z","comments":{"totalCount":1},"createdAt":"2021-07-26T07:24:04Z","createdViaEmail":false,"databaseId":952591593,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":138,"participants":{"totalCount":2},"publishedAt":"2021-07-26T07:24:04Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Binary
+      release?","updatedAt":"2021-07-26T18:45:18Z","url":"https://github.com/askgitdev/askgit/issues/138","userContentEdits":{"totalCount":0},"viewerCanReact":true,"viewerCanSubscribe":true,"viewerCanUpdate":true,"viewerDidAuthor":false,"viewerSubscription":"SUBSCRIBED"}}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpHOOMdk6Q==","hasNextPage":false}}}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -351,7 +351,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 02 Aug 2021 19:19:51 GMT
+      - Tue, 03 Aug 2021 16:16:49 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -369,21 +369,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - D107:3383:12ABBEB:32EF5D8:61084556
+      - D309:0CCB:5698AE:C24548:61096BF0
       X-Oauth-Scopes:
       - repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4997"
+      - "4970"
       X-Ratelimit-Reset:
-      - "1627935095"
+      - "1628008014"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "3"
+      - "30"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 1.397951523s
+    duration: 1.373615417s

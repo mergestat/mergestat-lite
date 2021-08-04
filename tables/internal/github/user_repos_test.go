@@ -6,13 +6,13 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestStarredRepos(t *testing.T) {
+func TestUserRepos(t *testing.T) {
 	cleanup := newRecorder(t)
 	defer cleanup()
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT * FROM github_starred_repos('patrickdevivo') LIMIT 10")
+	rows, err := db.Query("SELECT * FROM github_user_repos('josephjacks') LIMIT 10")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
@@ -23,8 +23,8 @@ func TestStarredRepos(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if colCount != 9 {
-		t.Fatalf("expected 9 columns, got: %d", colCount)
+	if colCount != 29 {
+		t.Fatalf("expected 29 columns, got: %d", colCount)
 	}
 
 	if len(content) != 10 {

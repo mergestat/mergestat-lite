@@ -42,8 +42,8 @@ type fetchStarsResults struct {
 }
 
 type stargazerEdge struct {
-	StarredAt string    //StarredAt insists on being a string whereas createdAt and updatedAt are time.Time.
-	Node      stargazer //change to a more informative name
+	StarredAt string
+	Node      stargazer
 }
 
 func fetchStars(ctx context.Context, input *fetchStarsOptions) (*fetchStarsResults, error) {
@@ -114,14 +114,14 @@ func (i *iterStargazers) Column(ctx *sqlite.Context, c int) error {
 	case 8:
 		t := i.results.Edges[i.current].Node.CreatedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 9:
 		t := i.results.Edges[i.current].Node.UpdatedAt
 		if t.IsZero() {
-			ctx.ResultText(" ")
+			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
@@ -174,19 +174,19 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 }
 
 var stargazersCols = []vtab.Column{
-	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}, OrderBy: vtab.NONE},
-	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "email", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "bio", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "company", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "avatar_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "twitter", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "website", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "location", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "email", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "bio", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "company", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "avatar_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "twitter", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "website", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "location", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
 	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
 }
 
@@ -204,18 +204,16 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 			}
 		}
 
-		starOrder := &githubv4.StarOrder{
-			Field:     githubv4.StarOrderFieldStarredAt,
-			Direction: githubv4.OrderDirectionDesc,
-		}
-
-		for _, order := range orders { //adding this for loop for scalability. might need to order the data by more columns in the future.
+		var starOrder *githubv4.StarOrder
+		// for now we can only support single field order bys
+		if len(orders) == 1 {
+			order := orders[0]
+			starOrder = &githubv4.StarOrder{}
 			switch order.ColumnIndex {
 			case 13:
-				if !order.Desc {
-					starOrder.Direction = githubv4.OrderDirectionAsc
-				}
+				starOrder.Field = githubv4.StarOrderFieldStarredAt
 			}
+			starOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
 		return &iterStargazers{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, starOrder}, nil
