@@ -98,7 +98,6 @@ func fetchUserRepos(ctx context.Context, input *fetchUserReposOptions) (*fetchUs
 	}
 
 	err := input.Client.Query(ctx, &reposQuery, variables)
-
 	if err != nil {
 		return nil, err
 	}
