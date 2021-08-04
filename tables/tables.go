@@ -100,6 +100,8 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 			var modules = map[string]sqlite.Module{
 				"github_stargazers":    github.NewStargazersModule(githubOpts),
 				"github_starred_repos": github.NewStarredReposModule(githubOpts),
+				"github_user_repos":    github.NewUserReposModule(githubOpts),
+				"github_org_repos":     github.NewOrgReposModule(githubOpts),
 				"github_repo_issues":   github.NewIssuesModule(githubOpts),
 			}
 
