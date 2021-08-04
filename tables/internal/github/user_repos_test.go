@@ -23,8 +23,8 @@ func TestUserRepos(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if colCount != 6 {
-		t.Fatalf("expected 6 columns, got: %d", colCount)
+	if colCount != 29 {
+		t.Fatalf("expected 29 columns, got: %d", colCount)
 	}
 
 	if len(content) != 10 {
