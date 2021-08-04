@@ -12,11 +12,6 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type user struct {
-	Login string
-	URL   string
-}
-
 type pullRequest struct {
 	ActiveLockReason githubv4.LockReason
 	Assignees        struct {
@@ -130,11 +125,11 @@ type fetchPROptions struct {
 	Name        string
 	PerPage     int
 	StartCursor *githubv4.String
-	PROrder     *githubv4.PullRequestOrder
+	PROrder     *githubv4.IssueOrder
 }
 
 type fetchPRResults struct {
-	Edges       []*prEdge
+	Edges       []*pullRequest
 	HasNextPage bool
 	EndCursor   *githubv4.String
 }
@@ -150,14 +145,14 @@ func fetchPR(ctx context.Context, input *fetchPROptions) (*fetchPRResults, error
 			Owner struct {
 				Login string
 			}
-			Name        string
-			pullRequest struct {
-				Edges    []*prEdge
+			Name         string
+			PullRequests struct {
+				Nodes    []*pullRequest
 				PageInfo struct {
 					EndCursor   githubv4.String
 					HasNextPage bool
 				}
-			} `graphql:"PR(first: $perpage, after: $prcursor, orderBy: $prorder)"`
+			} `graphql:"pullRequests(first: $perpage, after: $prcursor, orderBy: $prorder)"`
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	variables := map[string]interface{}{
@@ -175,9 +170,9 @@ func fetchPR(ctx context.Context, input *fetchPROptions) (*fetchPRResults, error
 	}
 
 	return &fetchPRResults{
-		PRQuery.Repository.pullRequest.Edges,
-		PRQuery.Repository.pullRequest.PageInfo.HasNextPage,
-		&PRQuery.Repository.pullRequest.PageInfo.EndCursor,
+		PRQuery.Repository.PullRequests.Nodes,
+		PRQuery.Repository.PullRequests.PageInfo.HasNextPage,
+		&PRQuery.Repository.PullRequests.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -188,7 +183,7 @@ type iterPR struct {
 	current         int
 	results         *fetchPRResults
 	rateLimiter     *rate.Limiter
-	issueOrder      *githubv4.IssueOrder
+	prOrder         *githubv4.IssueOrder
 }
 
 func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
@@ -198,144 +193,144 @@ func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
 	case 1:
 		ctx.ResultText(i.name)
 	case 2:
-		ctx.ResultText(i.results.Edges[i.current].Node.Author.Login)
+		ctx.ResultText(i.results.Edges[i.current].Author.Login)
 	case 3:
 		assigned := ""
-		for _, assign := range i.results.Edges[i.current].Node.Assignees.Nodes {
+		for _, assign := range i.results.Edges[i.current].Assignees.Nodes {
 			assigned += assign.Login + " "
 		}
 		ctx.ResultText(assigned)
 	case 4:
-		ctx.ResultText(i.results.Edges[i.current].Node.Author.URL)
+		ctx.ResultText(i.results.Edges[i.current].Author.URL)
 	case 5:
-		ctx.ResultText(string(i.results.Edges[i.current].Node.AuthorAssociation))
+		ctx.ResultText(string(i.results.Edges[i.current].AuthorAssociation))
 	case 7:
-		ctx.ResultText(i.results.Edges[i.current].Node.Body)
+		ctx.ResultText(i.results.Edges[i.current].Body)
 	case 8:
-		ctx.ResultText(string(i.results.Edges[i.current].Node.BodyText))
+		ctx.ResultText(string(i.results.Edges[i.current].BodyText))
 	case 9:
-		ctx.ResultText(string(i.results.Edges[i.current].Node.BaseRefOid))
+		ctx.ResultText(string(i.results.Edges[i.current].BaseRefOid))
 	case 10:
-		ctx.ResultText(i.results.Edges[i.current].Node.BaseRepository.Name)
+		ctx.ResultText(i.results.Edges[i.current].BaseRepository.Name)
 	case 11:
-		ctx.ResultText(i.results.Edges[i.current].Node.BaseRepository.Owner.Login)
+		ctx.ResultText(i.results.Edges[i.current].BaseRepository.Owner.Login)
 	case 12:
-		ctx.ResultText(i.results.Edges[i.current].Node.ChecksResourcePath.String())
+		ctx.ResultText(i.results.Edges[i.current].ChecksResourcePath.String())
 	case 13:
-		ctx.ResultText(i.results.Edges[i.current].Node.ChecksURL.Opaque)
+		ctx.ResultText(i.results.Edges[i.current].ChecksURL.Opaque)
 	case 14:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Comments.TotalCount)
+		ctx.ResultInt(i.results.Edges[i.current].Comments.TotalCount)
 	case 15:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Commits.TotalCount)
+		ctx.ResultInt(i.results.Edges[i.current].Commits.TotalCount)
 	case 16:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.Closed))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].Closed))
 
 	case 17:
-		t := i.results.Edges[i.current].Node.ClosedAt
+		t := i.results.Edges[i.current].ClosedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 18:
-		t := i.results.Edges[i.current].Node.CreatedAt
+		t := i.results.Edges[i.current].CreatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 19:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.CreatedViaEmail))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].CreatedViaEmail))
 	case 20:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Deletions)
+		ctx.ResultInt(i.results.Edges[i.current].Deletions)
 	case 21:
-		ctx.ResultInt(int(i.results.Edges[i.current].Node.DatabaseID))
+		ctx.ResultInt(int(i.results.Edges[i.current].DatabaseID))
 	case 22:
-		ctx.ResultText(i.results.Edges[i.current].Node.Editor.Login)
+		ctx.ResultText(i.results.Edges[i.current].Editor.Login)
 	case 23:
-		ctx.ResultInt(int(i.results.Edges[i.current].Node.Files.TotalCount))
+		ctx.ResultInt(int(i.results.Edges[i.current].Files.TotalCount))
 	case 24:
-		ctx.ResultText(i.results.Edges[i.current].Node.HeadRepository.Name)
+		ctx.ResultText(i.results.Edges[i.current].HeadRepository.Name)
 	case 25:
-		ctx.ResultText(i.results.Edges[i.current].Node.HeadRepositoryOwner.Login)
+		ctx.ResultText(i.results.Edges[i.current].HeadRepositoryOwner.Login)
 	case 26:
-		ctx.ResultText(string(i.results.Edges[i.current].Node.HeadRefOid))
+		ctx.ResultText(string(i.results.Edges[i.current].HeadRefOid))
 	case 27:
-		ctx.ResultText(i.results.Edges[i.current].Node.HeadRefName)
+		ctx.ResultText(i.results.Edges[i.current].HeadRefName)
 	case 28:
-		ctx.ResultText(i.results.Edges[i.current].Node.HeadRef.Name)
+		ctx.ResultText(i.results.Edges[i.current].HeadRef.Name)
 	case 29:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.IncludesCreatedEdit))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].IncludesCreatedEdit))
 	case 30:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.IsCrossRepository))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].IsCrossRepository))
 	case 31:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.IsDraft))
+		ctx.ResultInt(t1f0(i.results.Edges[i.current].IsDraft))
 	case 32:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Labels.TotalCount)
+		ctx.ResultInt(i.results.Edges[i.current].Labels.TotalCount)
 	case 33:
-		t := i.results.Edges[i.current].Node.LastEditedAt
+		t := i.results.Edges[i.current].LastEditedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 34:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.Locked))
+		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].Locked)))
 	case 35:
-		t := i.results.Edges[i.current].Node.MergedAt
+		t := i.results.Edges[i.current].MergedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 36:
-		ctx.ResultText(i.results.Edges[i.current].Node.MergedBy.Login)
+		ctx.ResultText(i.results.Edges[i.current].MergedBy.Login)
 	case 37:
-		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].Node.Merged)))
+		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].Merged)))
 	case 38:
-		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].Node.MaintainerCanModify)))
+		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].MaintainerCanModify)))
 	case 39:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Milestone.Number)
+		ctx.ResultInt(i.results.Edges[i.current].Milestone.Number)
 	case 40:
-		ctx.ResultInt(int(i.results.Edges[i.current].Node.Number))
+		ctx.ResultInt(int(i.results.Edges[i.current].Number))
 	case 41:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Participants.TotalCount)
+		ctx.ResultInt(i.results.Edges[i.current].Participants.TotalCount)
 	case 42:
-		ctx.ResultText(i.results.Edges[i.current].Node.Permalink.Scheme)
+		ctx.ResultText(i.results.Edges[i.current].Permalink.Scheme)
 	case 43:
-		t := i.results.Edges[i.current].Node.PublishedAt
+		t := i.results.Edges[i.current].PublishedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 44:
-		ctx.ResultText(string(i.results.Edges[i.current].Node.ReviewDecision))
+		ctx.ResultText(string(i.results.Edges[i.current].ReviewDecision))
 	case 45:
 		reviewRequests := ""
-		for _, request := range i.results.Edges[i.current].Node.ReviewRequests.Nodes {
+		for _, request := range i.results.Edges[i.current].ReviewRequests.Nodes {
 			reviewRequests += fmt.Sprint(request.RequestedReviewer) + " "
 		}
 		ctx.ResultText(reviewRequests)
 	case 46:
-		ctx.ResultInt(i.results.Edges[i.current].Node.ReviewThreads.TotalCount)
+		ctx.ResultInt(i.results.Edges[i.current].ReviewThreads.TotalCount)
 	case 47:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Reviews.TotalCount)
+		ctx.ResultInt(i.results.Edges[i.current].Reviews.TotalCount)
 	case 48:
-		ctx.ResultText(string(i.results.Edges[i.current].Node.State))
+		ctx.ResultText(string(i.results.Edges[i.current].State))
 	case 49:
-		ctx.ResultText(string(i.results.Edges[i.current].Node.Title))
+		ctx.ResultText(string(i.results.Edges[i.current].Title))
 	case 50:
-		t := i.results.Edges[i.current].Node.UpdatedAt
+		t := i.results.Edges[i.current].UpdatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
 	case 51:
-		ctx.ResultText(i.results.Edges[i.current].Node.Url.String())
+		ctx.ResultText(i.results.Edges[i.current].Url.String())
 	case 52:
-		ctx.ResultInt(i.results.Edges[i.current].Node.UserContentEdits.TotalCount)
+		ctx.ResultInt(i.results.Edges[i.current].UserContentEdits.TotalCount)
 	}
 	return nil
 
@@ -361,7 +356,7 @@ func (i *iterPR) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, 100, cursor, i.issueOrder})
+			results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, 100, cursor, i.prOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -447,22 +442,19 @@ func NewPRModule(opts *Options) sqlite.Module {
 				}
 			}
 		}
-
-		var issueOrder *githubv4.IssueOrder
+		var prOrder *githubv4.IssueOrder
 		if len(orders) == 1 {
 			order := orders[0]
-			issueOrder = &githubv4.IssueOrder{}
+			prOrder = &githubv4.IssueOrder{}
 			switch order.ColumnIndex {
-			case 8:
-				issueOrder.Field = githubv4.IssueOrderFieldComments
-			case 9:
-				issueOrder.Field = githubv4.IssueOrderFieldCreatedAt
-			case 27:
-				issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
+			case 18:
+				prOrder.Field = githubv4.IssueOrderFieldCreatedAt
+			case 50:
+				prOrder.Field = githubv4.IssueOrderFieldUpdatedAt
 			}
-			issueOrder.Direction = orderByToGitHubOrder(order.Desc)
+			prOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterPR{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, issueOrder}, nil
+		return &iterPR{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, prOrder}, nil
 	})
 }
