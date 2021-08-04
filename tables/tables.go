@@ -103,6 +103,7 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 				"github_user_repos":    github.NewUserReposModule(githubOpts),
 				"github_org_repos":     github.NewOrgReposModule(githubOpts),
 				"github_repo_issues":   github.NewIssuesModule(githubOpts),
+				"github_repo_prs":      github.NewPRModule(githubOpts),
 			}
 
 			// register GitHub tables
