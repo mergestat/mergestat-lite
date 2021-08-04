@@ -450,6 +450,50 @@ SELECT github_stargazer_count('askgitdev', 'askgit');
 SELECT github_stargazer_count('askgitdev/askgit'); -- both are equivalent
 ```
 
+##### `github_user_repos` and `github_org_repos`
+
+Table-valued function that returns all the repositories belonging to a user or an organization.
+
+| Column                      | Type |
+|-----------------------------|------|
+| created_at                  | TEXT |
+| database_id                 | INT  |
+| default_branch_ref_name     | TEXT |
+| default_branch_ref_prefix   | TEXT |
+| description                 | TEXT |
+| disk_usage                  | INT  |
+| fork_count                  | INT  |
+| homepage_url                | TEXT |
+| is_archived                 | INT  |
+| is_disabled                 | INT  |
+| is_fork                     | INT  |
+| is_mirror                   | INT  |
+| is_private                  | INT  |
+| issue_count                 | INT  |
+| latest_release_author       | TEXT |
+| latest_release_created_at   | TEXT |
+| latest_release_name         | TEXT |
+| latest_release_published_at | TEXT |
+| license_key                 | TEXT |
+| license_name                | TEXT |
+| name                        | TEXT |
+| open_graph_image_url        | TEXT |
+| primary_language            | TEXT |
+| pull_request_count          | INT  |
+| pushed_at                   | TEXT |
+| release_count               | INT  |
+| stargazer_count             | TEXT |
+| updated_at                  | TEXT |
+| watcher_count               | INT  |
+
+Params:
+  1. `login` - the `login` of a GitHub user or organization
+
+```sql
+SELECT * FROM github_user_repos('patrickdevivo')
+SELECT * FROM github_org_repos('askgitdev')
+```
+
 ##### `github_repo_issues`
 
 Table-valued-function that returns all the issues of a GitHub repository.
