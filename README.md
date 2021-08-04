@@ -372,6 +372,179 @@ SELECT enry_is_vendor('vendor/file.go')
 ```
 
 
+
+#### GitHub API
+
+You can use `askgit` to query the [GitHub API (v4)](https://docs.github.com/en/graphql).
+Constraints in your SQL query are pushed to the GitHub API as much as possible.
+For instance, if your query includes an `ORDER BY` clause and if items can be ordered in the GitHub API response (on the specified column), your query can avoid doing a full table scan and rely on the ordering returned by the API.
+
+##### Authenticating
+
+You must provide an authentication token in order to use the GitHub API tables.
+You can create a personal access token [following these instructions](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+`askgit` will look for a `GITHUB_TOKEN` environment variable when executing, to use for authentication.
+This is also true if running as a runtime loadable extension.
+
+##### `github_stargazers`
+
+Table-valued-function that returns a list of users who have starred a repository.
+
+| Column     | Type |
+|------------|------|
+| login      | TEXT |
+| email      | TEXT |
+| name       | TEXT |
+| bio        | TEXT |
+| company    | TEXT |
+| avatar_url | TEXT |
+| created_at | TEXT |
+| updated_at | TEXT |
+| twitter    | TEXT |
+| website    | TEXT |
+| location   | TEXT |
+| starred_at | TEXT |
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+
+```sql
+SELECT * FROM github_stargazers('askgitdev', 'askgit');
+SELECT * FROM github_stargazers('askgitdev/askgit'); -- both are equivalent
+```
+
+##### `github_starred_repos`
+
+Table-valued-function that returns a list of repositories a user has starred.
+
+| Column          | Type |
+|-----------------|------|
+| name            | TEXT |
+| url             | TEXT |
+| description     | TEXT |
+| created_at      | TEXT |
+| pushed_at       | TEXT |
+| updated_at      | TEXT |
+| stargazer_count | INT  |
+| name_with_owner | TEXT |
+| starred_at      | TEXT |
+
+Params:
+  1. `login` - the `login` of a GitHub user
+
+```sql
+SELECT * FROM github_starred_repos('patrickdevivo')
+```
+
+##### `github_stargazer_count`
+
+Scalar function that returns the number of stars a GitHub repository has.
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+
+```sql
+SELECT github_stargazer_count('askgitdev', 'askgit');
+SELECT github_stargazer_count('askgitdev/askgit'); -- both are equivalent
+```
+
+##### `github_user_repos` and `github_org_repos`
+
+Table-valued function that returns all the repositories belonging to a user or an organization.
+
+| Column                      | Type |
+|-----------------------------|------|
+| created_at                  | TEXT |
+| database_id                 | INT  |
+| default_branch_ref_name     | TEXT |
+| default_branch_ref_prefix   | TEXT |
+| description                 | TEXT |
+| disk_usage                  | INT  |
+| fork_count                  | INT  |
+| homepage_url                | TEXT |
+| is_archived                 | INT  |
+| is_disabled                 | INT  |
+| is_fork                     | INT  |
+| is_mirror                   | INT  |
+| is_private                  | INT  |
+| issue_count                 | INT  |
+| latest_release_author       | TEXT |
+| latest_release_created_at   | TEXT |
+| latest_release_name         | TEXT |
+| latest_release_published_at | TEXT |
+| license_key                 | TEXT |
+| license_name                | TEXT |
+| name                        | TEXT |
+| open_graph_image_url        | TEXT |
+| primary_language            | TEXT |
+| pull_request_count          | INT  |
+| pushed_at                   | TEXT |
+| release_count               | INT  |
+| stargazer_count             | TEXT |
+| updated_at                  | TEXT |
+| watcher_count               | INT  |
+
+Params:
+  1. `login` - the `login` of a GitHub user or organization
+
+```sql
+SELECT * FROM github_user_repos('patrickdevivo')
+SELECT * FROM github_org_repos('askgitdev')
+```
+
+##### `github_repo_issues`
+
+Table-valued-function that returns all the issues of a GitHub repository.
+
+| Column                | Type  |
+|-----------------------|-------|
+| owner                 | TEXT  |
+| reponame              | TEXT  |
+| author_login          | TEXT  |
+| author_url            | TEXT  |
+| body                  | TEXT  |
+| body_text             | TEXT  |
+| closed                | INT   |
+| closed_at             | TEXT  |
+| comment_count         | INT   |
+| created_at            | TEXT  |
+| created_via_email     | INT   |
+| database_id           | TEXT  |
+| editor_login          | TEXT  |
+| editor_url            | TEXT  |
+| includes_created_edit | INT   |
+| is_read_by_viewer     | INT   |
+| label_count           | INT   |
+| last_edited_at        | TEXT  |
+| locked                | INT   |
+| milestone_count       | INT   |
+| milestone_progress    | FLOAT |
+| issue_number          | INT   |
+| participant_count     | INT   |
+| published_at          | TEXT  |
+| reaction_count        | INT   |
+| state                 | TEXT  |
+| title                 | TEXT  |
+| updated_at            | TEXT  |
+| url                   | TEXT  |
+| user_edits_count      | INT   |
+| viewer_can_react      | INT   |
+| viewer_can_subscribe  | INT   |
+| viewer_can_update     | INT   |
+| viewer_did_author     | INT   |
+| viewer_subscription   | TEXT  |
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+
+```sql
+SELECT * FROM github_repo_issues('askgitdev/askgit');
+SELECT * FROM github_repo_issues('askgitdev', 'askgit'); -- both are equivalent
+```
+
 ### Example Queries
 
 This will return all commits in the history of the currently checked out branch/commit of the repo.
