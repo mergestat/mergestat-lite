@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"time"
 
@@ -13,98 +12,59 @@ import (
 )
 
 type pullRequest struct {
-	ActiveLockReason githubv4.LockReason
-	Assignees        struct {
-		Nodes []user
-	} `graphql:"assignees(first:10)"`
-	Additions         githubv4.Int
+	ActiveLockReason  githubv4.LockReason
+	Additions         int
 	Author            user
 	AuthorAssociation githubv4.CommentAuthorAssociation
-
-	BodyText    githubv4.String
-	BaseRefOid  githubv4.GitObjectID
-	BaseRefName string
-	BaseRef     struct {
-		Name string
+	BaseRefOid        githubv4.GitObjectID
+	BaseRefName       string
+	BaseRepository    struct {
+		NameWithOwner string
 	}
-	BaseRepository struct {
-		Name  string
-		Owner struct {
-			Login string
-		}
-	}
-	Body string
-	//BodyHTML           string
-	//CanBeRebased       bool
-	ChecksResourcePath githubv4.URI
-	ChecksURL          githubv4.URI
-
-	Comments struct {
+	Body         string
+	BodyText     string
+	ChangedFiles int
+	Closed       bool
+	ClosedAt     githubv4.DateTime
+	Comments     struct {
 		TotalCount int
-	} `graphql:"comments(first:1)"`
-	// setting this to 1 as it will still pass the correct totalCount (theoretically)
+	}
 	Commits struct {
 		TotalCount int
-	} `graphql:"commits(first:1)"`
-	ChangedFiles    int
-	Closed          bool
-	ClosedAt        githubv4.DateTime
+	}
 	CreatedAt       githubv4.DateTime
 	CreatedViaEmail bool
+	DatabaseID      int
 	Deletions       int
-	DatabaseID      githubv4.Int
 	Editor          struct {
 		Login string
 	}
-	Files struct {
-		TotalCount int
-	}
+	HeadRefName    string
+	HeadRefOid     githubv4.GitObjectID
 	HeadRepository struct {
-		Name string
+		NameWithOwner string
 	}
-	HeadRepositoryOwner struct {
-		Login string
-	}
-	HeadRefOid  githubv4.GitObjectID
-	HeadRefName string
-	HeadRef     struct {
-		Name string
-	}
-	IncludesCreatedEdit bool
-	IsCrossRepository   bool
-	IsDraft             bool
-	Labels              struct {
-		// Nodes []struct {
-		// 	Name string
-		// }
+	IsCrossRepository bool
+	IsDraft           bool
+	Labels            struct {
 		TotalCount int
-	} `graphql:"labels(first:1)"`
-	LastEditedAt githubv4.DateTime
-	Locked       githubv4.Boolean
-	MergedAt     githubv4.DateTime
-	MergeCommit  struct {
-		Oid githubv4.GitObjectID
 	}
-	Merged              githubv4.Boolean
+	LastEditedAt        githubv4.DateTime
+	Locked              bool
+	MaintainerCanModify bool
 	Mergeable           githubv4.MergeableState
+	Merged              bool
+	MergedAt            githubv4.DateTime
 	MergedBy            user
-	MaintainerCanModify githubv4.Boolean
-	//MergeStateStatuses  string
-	Milestone struct {
-		Number int
-	}
-	Number       githubv4.Int
-	Participants struct {
+	Number              int
+	Participants        struct {
 		TotalCount int
 	}
-	Permalink      githubv4.URI
 	PublishedAt    githubv4.DateTime
 	ReviewDecision githubv4.PullRequestReviewDecision
 	ReviewRequests struct {
-		Nodes []struct {
-			RequestedReviewer []interface{}
-		}
-	} `graphql:"reviewRequests(first:10)"`
+		TotalCount int
+	}
 	ReviewThreads struct {
 		TotalCount int
 	}
@@ -112,7 +72,7 @@ type pullRequest struct {
 		TotalCount int
 	}
 	State            githubv4.PullRequestState
-	Title            githubv4.String
+	Title            string
 	UpdatedAt        githubv4.DateTime
 	Url              githubv4.URI
 	UserContentEdits struct {
@@ -183,153 +143,128 @@ type iterPR struct {
 }
 
 func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
+	current := i.results.Edges[i.current]
 	switch c {
 	case 0:
 		ctx.ResultText(i.fullNameOrOwner)
 	case 1:
 		ctx.ResultText(i.name)
 	case 2:
-		ctx.ResultText(i.results.Edges[i.current].Author.Login)
+		ctx.ResultInt(int(current.Additions))
 	case 3:
-		assigned := ""
-		for _, assign := range i.results.Edges[i.current].Assignees.Nodes {
-			assigned += assign.Login + " "
-		}
-		ctx.ResultText(assigned)
+		ctx.ResultText(current.Author.Login)
 	case 4:
-		ctx.ResultText(i.results.Edges[i.current].Author.URL)
+		ctx.ResultText(string(current.AuthorAssociation))
 	case 5:
-		ctx.ResultText(string(i.results.Edges[i.current].AuthorAssociation))
+		ctx.ResultText(string(current.BaseRefOid))
+	case 6:
+		ctx.ResultText(current.BaseRefName)
 	case 7:
-		ctx.ResultText(i.results.Edges[i.current].Body)
+		ctx.ResultText(current.BaseRepository.NameWithOwner)
 	case 8:
-		ctx.ResultText(string(i.results.Edges[i.current].BodyText))
+		ctx.ResultText(current.Body)
 	case 9:
-		ctx.ResultText(string(i.results.Edges[i.current].BaseRefOid))
+		ctx.ResultText(current.BodyText)
 	case 10:
-		ctx.ResultText(i.results.Edges[i.current].BaseRepository.Name)
+		ctx.ResultInt(current.ChangedFiles)
 	case 11:
-		ctx.ResultText(i.results.Edges[i.current].BaseRepository.Owner.Login)
+		ctx.ResultInt(t1f0(current.Closed))
 	case 12:
-		ctx.ResultText(i.results.Edges[i.current].ChecksResourcePath.String())
+		t := current.ClosedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 13:
-		ctx.ResultText(i.results.Edges[i.current].ChecksURL.Opaque)
+		ctx.ResultInt(current.Comments.TotalCount)
 	case 14:
-		ctx.ResultInt(i.results.Edges[i.current].Comments.TotalCount)
+		ctx.ResultInt(current.Commits.TotalCount)
 	case 15:
-		ctx.ResultInt(i.results.Edges[i.current].Commits.TotalCount)
+		t := current.CreatedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 16:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Closed))
-
+		ctx.ResultInt(t1f0(current.CreatedViaEmail))
 	case 17:
-		t := i.results.Edges[i.current].ClosedAt
-		if t.IsZero() {
-			ctx.ResultNull()
-		} else {
-			ctx.ResultText(t.Format(time.RFC3339Nano))
-		}
+		ctx.ResultInt(current.DatabaseID)
 	case 18:
-		t := i.results.Edges[i.current].CreatedAt
-		if t.IsZero() {
-			ctx.ResultNull()
-		} else {
-			ctx.ResultText(t.Format(time.RFC3339Nano))
-		}
+		ctx.ResultInt(current.Deletions)
 	case 19:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].CreatedViaEmail))
+		ctx.ResultText(current.Editor.Login)
 	case 20:
-		ctx.ResultInt(i.results.Edges[i.current].Deletions)
+		ctx.ResultText(current.HeadRefName)
 	case 21:
-		ctx.ResultInt(int(i.results.Edges[i.current].DatabaseID))
+		ctx.ResultText(string(current.HeadRefOid))
 	case 22:
-		ctx.ResultText(i.results.Edges[i.current].Editor.Login)
+		ctx.ResultText(string(current.HeadRepository.NameWithOwner))
 	case 23:
-		ctx.ResultInt(int(i.results.Edges[i.current].Files.TotalCount))
+		ctx.ResultInt(t1f0(current.IsDraft))
 	case 24:
-		ctx.ResultText(i.results.Edges[i.current].HeadRepository.Name)
+		ctx.ResultInt(current.Labels.TotalCount)
 	case 25:
-		ctx.ResultText(i.results.Edges[i.current].HeadRepositoryOwner.Login)
+		t := current.LastEditedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 26:
-		ctx.ResultText(string(i.results.Edges[i.current].HeadRefOid))
+		ctx.ResultInt(t1f0(current.Locked))
 	case 27:
-		ctx.ResultText(i.results.Edges[i.current].HeadRefName)
+		ctx.ResultInt(t1f0(current.MaintainerCanModify))
 	case 28:
-		ctx.ResultText(i.results.Edges[i.current].HeadRef.Name)
+		ctx.ResultText(string(current.Mergeable))
 	case 29:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].IncludesCreatedEdit))
+		ctx.ResultInt(t1f0(current.Merged))
 	case 30:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].IsCrossRepository))
+		t := current.MergedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 31:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].IsDraft))
+		ctx.ResultText(current.MergedBy.Login)
 	case 32:
-		ctx.ResultInt(i.results.Edges[i.current].Labels.TotalCount)
+		ctx.ResultInt(current.Number)
 	case 33:
-		t := i.results.Edges[i.current].LastEditedAt
-		if t.IsZero() {
-			ctx.ResultNull()
-		} else {
-			ctx.ResultText(t.Format(time.RFC3339Nano))
-		}
+		ctx.ResultInt(current.Participants.TotalCount)
 	case 34:
-		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].Locked)))
+		t := current.PublishedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 35:
-		t := i.results.Edges[i.current].MergedAt
-		if t.IsZero() {
-			ctx.ResultNull()
-		} else {
-			ctx.ResultText(t.Format(time.RFC3339Nano))
-		}
+		ctx.ResultText(string(current.ReviewDecision))
 	case 36:
-		ctx.ResultText(i.results.Edges[i.current].MergedBy.Login)
+		ctx.ResultInt(current.ReviewRequests.TotalCount)
 	case 37:
-		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].Merged)))
+		ctx.ResultInt(current.ReviewThreads.TotalCount)
 	case 38:
-		ctx.ResultInt(t1f0(bool(i.results.Edges[i.current].MaintainerCanModify)))
+		ctx.ResultInt(current.Reviews.TotalCount)
 	case 39:
-		ctx.ResultInt(i.results.Edges[i.current].Milestone.Number)
+		ctx.ResultText(string(current.State))
 	case 40:
-		ctx.ResultInt(int(i.results.Edges[i.current].Number))
+		ctx.ResultText(current.Title)
 	case 41:
-		ctx.ResultInt(i.results.Edges[i.current].Participants.TotalCount)
+		t := current.UpdatedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case 42:
-		ctx.ResultText(i.results.Edges[i.current].Permalink.Scheme)
+		ctx.ResultText(current.Url.String())
 	case 43:
-		t := i.results.Edges[i.current].PublishedAt
-		if t.IsZero() {
-			ctx.ResultNull()
-		} else {
-			ctx.ResultText(t.Format(time.RFC3339Nano))
-		}
-	case 44:
-		ctx.ResultText(string(i.results.Edges[i.current].ReviewDecision))
-	case 45:
-		reviewRequests := ""
-		for _, request := range i.results.Edges[i.current].ReviewRequests.Nodes {
-			reviewRequests += fmt.Sprint(request.RequestedReviewer) + " "
-		}
-		ctx.ResultText(reviewRequests)
-	case 46:
-		ctx.ResultInt(i.results.Edges[i.current].ReviewThreads.TotalCount)
-	case 47:
-		ctx.ResultInt(i.results.Edges[i.current].Reviews.TotalCount)
-	case 48:
-		ctx.ResultText(string(i.results.Edges[i.current].State))
-	case 49:
-		ctx.ResultText(string(i.results.Edges[i.current].Title))
-	case 50:
-		t := i.results.Edges[i.current].UpdatedAt
-		if t.IsZero() {
-			ctx.ResultNull()
-		} else {
-			ctx.ResultText(t.Format(time.RFC3339Nano))
-		}
-	case 51:
-		ctx.ResultText(i.results.Edges[i.current].Url.String())
-	case 52:
-		ctx.ResultInt(i.results.Edges[i.current].UserContentEdits.TotalCount)
+		ctx.ResultInt(current.UserContentEdits.TotalCount)
 	}
 	return nil
-
 }
 
 func (i *iterPR) Next() (vtab.Row, error) {
@@ -371,58 +306,48 @@ func (i *iterPR) Next() (vtab.Row, error) {
 var PRCols = []vtab.Column{
 	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
 	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
-	{Name: "author_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "assignees", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "author_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "author_association", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "body", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "body_text", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "base_ref_oid", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "base_repository_name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "base_repository_owner_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "checks_resource_path", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "checks_url", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "comment_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "commit_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "closed", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "closed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "deletions", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "database_id", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "editor_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "file_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "head_repository", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "head_repository_owner", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "head_ref_oid", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "head_ref_name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "head_ref", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "includes_created_edit", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "is_cross_repository", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "is_draft", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "label_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "locked", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "merged_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "merge_commit_sha", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "merged", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "mergeable", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "merged_by", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "maintainer_can_modify", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "milestone_number", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "pr_number", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "permalink", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "published_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "review_decision", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "review_requests", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "review_threads", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "review_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "state", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "title", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "user_edits_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "additions", Type: sqlite.SQLITE_INTEGER},
+	{Name: "author_login", Type: sqlite.SQLITE_TEXT},
+	{Name: "author_association", Type: sqlite.SQLITE_TEXT},
+	{Name: "base_ref_oid", Type: sqlite.SQLITE_TEXT},
+	{Name: "base_ref_name", Type: sqlite.SQLITE_TEXT},
+	{Name: "base_repository_name", Type: sqlite.SQLITE_TEXT},
+	{Name: "body", Type: sqlite.SQLITE_TEXT},
+	{Name: "body_text", Type: sqlite.SQLITE_TEXT},
+	{Name: "changed_files", Type: sqlite.SQLITE_INTEGER},
+	{Name: "closed", Type: sqlite.SQLITE_INTEGER},
+	{Name: "closed_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "comment_count", Type: sqlite.SQLITE_INTEGER, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "commit_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "created_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER},
+	{Name: "database_id", Type: sqlite.SQLITE_INTEGER},
+	{Name: "deletions", Type: sqlite.SQLITE_INTEGER},
+	{Name: "editor_login", Type: sqlite.SQLITE_TEXT},
+	{Name: "head_ref_name", Type: sqlite.SQLITE_TEXT},
+	{Name: "head_ref_oid", Type: sqlite.SQLITE_TEXT},
+	{Name: "head_repository_name", Type: sqlite.SQLITE_TEXT},
+	{Name: "is_draft", Type: sqlite.SQLITE_INTEGER},
+	{Name: "label_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "locked", Type: sqlite.SQLITE_INTEGER},
+	{Name: "maintainer_can_modify", Type: sqlite.SQLITE_TEXT},
+	{Name: "mergeable", Type: sqlite.SQLITE_TEXT},
+	{Name: "merged", Type: sqlite.SQLITE_INTEGER},
+	{Name: "merged_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "merged_by", Type: sqlite.SQLITE_TEXT},
+	{Name: "number", Type: sqlite.SQLITE_INTEGER},
+	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "published_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "review_decision", Type: sqlite.SQLITE_TEXT},
+	{Name: "review_request_count", Type: sqlite.SQLITE_TEXT},
+	{Name: "review_thread_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "review_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "state", Type: sqlite.SQLITE_TEXT},
+	{Name: "title", Type: sqlite.SQLITE_TEXT},
+	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "url", Type: sqlite.SQLITE_TEXT},
+	{Name: "user_content_edits_count", Type: sqlite.SQLITE_INTEGER},
 }
 
 func NewPRModule(opts *Options) sqlite.Module {
