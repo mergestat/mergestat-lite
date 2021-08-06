@@ -368,9 +368,11 @@ func NewPRModule(opts *Options) sqlite.Module {
 			order := orders[0]
 			prOrder = &githubv4.IssueOrder{}
 			switch order.ColumnIndex {
-			case 18:
+			case 13:
+				prOrder.Field = githubv4.IssueOrderFieldComments
+			case 15:
 				prOrder.Field = githubv4.IssueOrderFieldCreatedAt
-			case 50:
+			case 41:
 				prOrder.Field = githubv4.IssueOrderFieldUpdatedAt
 			}
 			prOrder.Direction = orderByToGitHubOrder(order.Desc)
