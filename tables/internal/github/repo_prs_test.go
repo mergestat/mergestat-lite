@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/tables/internal/tools"
 )
 
-func TestRepoPrs(t *testing.T) {
+func TestRepoPRs(t *testing.T) {
 	cleanup := newRecorder(t)
 	defer cleanup()
 
@@ -23,8 +23,8 @@ func TestRepoPrs(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if colCount != 53 {
-		t.Fatalf("expected 33 columns, got: %d", colCount)
+	if colCount != 52 {
+		t.Fatalf("expected 52 columns, got: %d", colCount)
 	}
 
 	if len(content) != 10 {
