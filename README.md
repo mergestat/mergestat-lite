@@ -544,6 +544,77 @@ Params:
 SELECT * FROM github_repo_issues('askgitdev/askgit');
 SELECT * FROM github_repo_issues('askgitdev', 'askgit'); -- both are equivalent
 ```
+##### `github_repo_prs`
+
+Table-valued-function that returns all the pull requests of a GitHub repository.
+
+| Column                | Type  |
+|---------------------------------|-------|
+| owner                           | TEXT  |
+| reponame                        | TEXT  |
+| author_login                    | TEXT  |
+| assignees                       | TEXT  |
+| author_login                    | TEXT  |
+| assignees                       | TEXT  |
+| author_url                      | TEXT  |
+| author_association              | TEXT  |
+| body                            | TEXT  |
+| body_text                       | TEXT  |
+| base_ref_oid                    | TEXT  |
+| base_repository_name            | TEXT  |
+| base_repository_owner_login     | TEXT  |
+| checks_resource_path            | TEXT  |
+| checks_url                      | INT   |
+| comment_count                   | INT   |
+| commit_count                    | INT   |
+| closed                          | INT   |
+| closed_at                       | TEXT  |
+| created_at                      | TEXT  |
+| created_via_email               | INT   |
+| deletions                       | INT   |
+| database_id                     | INT   |
+| editor_login                    | TEXT  |
+| file_count                      | INT   |
+| head_repository                 | TEXT  |
+| head_repository_owner           | TEXT  |
+| head_ref_oid                    | TEXT  |
+| head_ref_name                   | TEXT  |
+| head_ref_name                   | TEXT  |
+| includes_created_edit           | INT   |
+| is_cross_repository             | INT   |
+| label_count                     | INT   |
+| is_draft                        | INT   |
+| last_edited_at                  | TEXT  |
+| locked                          | INT   |
+| merged_at                       | TEXT  |
+| merge_commit_sha                | TEXT  |
+| merged                          | INT   |
+| mergeable                       | INT   |
+| merged_by                       | TEXT  |
+| maintainer_can_modify           | TEXT  |
+| milestone_number                | INT   |
+| pr_number                       | INT   |
+| participant_count               | INT   |
+| permalink                       | TEXT  |
+| published_at                    | TEXT  |
+| review_decision                 | TEXT  |
+| review_requests                 | TEXT  |
+| review_threads                  | INT   |
+| review_count                    | INT   |
+| state                           | TEXT  |
+| title                           | TEXT  |
+| updated_at                      | TEXT  |
+| url                             | TEXT  |
+| user_edits_count                | INT   |
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+
+```sql
+SELECT * FROM github_repo_issues('askgitdev/askgit');
+SELECT * FROM github_repo_issues('askgitdev', 'askgit'); -- both are equivalent
+```
 
 ### Example Queries
 
