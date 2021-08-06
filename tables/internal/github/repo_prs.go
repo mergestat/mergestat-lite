@@ -135,11 +135,6 @@ type fetchPRResults struct {
 	EndCursor   *githubv4.String
 }
 
-type prEdge struct {
-	Cursor string
-	Node   pullRequest
-}
-
 func fetchPR(ctx context.Context, input *fetchPROptions) (*fetchPRResults, error) {
 	var PRQuery struct {
 		Repository struct {
