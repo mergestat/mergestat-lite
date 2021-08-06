@@ -16,7 +16,7 @@ type pullRequest struct {
 	ActiveLockReason githubv4.LockReason
 	Assignees        struct {
 		Nodes []user
-	} `graphql:"assignees(first:100)"`
+	} `graphql:"assignees(first:10)"`
 	Additions         githubv4.Int
 	Author            user
 	AuthorAssociation githubv4.CommentAuthorAssociation
@@ -41,10 +41,11 @@ type pullRequest struct {
 
 	Comments struct {
 		TotalCount int
-	} `graphql:"comments(first:100)"`
+	} `graphql:"comments(first:1)"`
+	// setting this to 1 as it will still pass the correct totalCount (theoretically)
 	Commits struct {
 		TotalCount int
-	} `graphql:"commits(first:100)"`
+	} `graphql:"commits(first:1)"`
 	ChangedFiles    int
 	Closed          bool
 	ClosedAt        githubv4.DateTime
@@ -77,7 +78,7 @@ type pullRequest struct {
 		// 	Name string
 		// }
 		TotalCount int
-	} `graphql:"labels(first:100)"`
+	} `graphql:"labels(first:1)"`
 	LastEditedAt githubv4.DateTime
 	Locked       githubv4.Boolean
 	MergedAt     githubv4.DateTime
@@ -103,7 +104,7 @@ type pullRequest struct {
 		Nodes []struct {
 			RequestedReviewer []interface{}
 		}
-	} `graphql:"reviewRequests(first:100)"`
+	} `graphql:"reviewRequests(first:10)"`
 	ReviewThreads struct {
 		TotalCount int
 	}
