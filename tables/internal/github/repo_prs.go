@@ -351,7 +351,7 @@ var PRCols = []vtab.Column{
 }
 
 func NewPRModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_repo_PR", PRCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("github_repo_prs", PRCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
