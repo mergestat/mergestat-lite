@@ -21,6 +21,7 @@ func registerExt() {
 			tables.WithGitHub(),
 			tables.WithContextValue("githubToken", githubToken),
 			tables.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
+			tables.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
 		),
 	)
 }

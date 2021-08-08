@@ -82,8 +82,13 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 
 		// conditionally register the GitHub functionality
 		if opt.GitHub {
+			rateLimiter := github.GetGitHubRateLimitFromCtx(opt.Context)
+			if rateLimiter == nil {
+				rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), 2)
+			}
+
 			githubOpts := &github.Options{
-				RateLimiter: rate.NewLimiter(rate.Every(1*time.Second), github.GetGithubReqPerSecondFromCtx(opt.Context)),
+				RateLimiter: rateLimiter,
 				Client: func() *githubv4.Client {
 					httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
 						&oauth2.Token{AccessToken: github.GetGitHubTokenFromCtx(opt.Context)},
