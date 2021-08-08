@@ -64,7 +64,7 @@ func GetGitHubRateLimitFromCtx(ctx services.Context) *rate.Limiter {
 // GetGitHubPerPageFromCtx looks up the githubPerPage key in the supplied context and returns it if set,
 // otherwise it returns a default of 100
 func GetGitHubPerPageFromCtx(ctx services.Context) int {
-	if val, ok := ctx.GetInt("githubPerPage"); ok {
+	if val, ok := ctx.GetInt("githubPerPage"); ok && val != 0 {
 		return val
 	} else {
 		return 100
