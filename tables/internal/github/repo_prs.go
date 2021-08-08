@@ -22,7 +22,6 @@ type pullRequest struct {
 		NameWithOwner string
 	}
 	Body         string
-	BodyText     string
 	ChangedFiles int
 	Closed       bool
 	ClosedAt     githubv4.DateTime
@@ -62,22 +61,10 @@ type pullRequest struct {
 	}
 	PublishedAt    githubv4.DateTime
 	ReviewDecision githubv4.PullRequestReviewDecision
-	ReviewRequests struct {
-		TotalCount int
-	}
-	ReviewThreads struct {
-		TotalCount int
-	}
-	Reviews struct {
-		TotalCount int
-	}
-	State            githubv4.PullRequestState
-	Title            string
-	UpdatedAt        githubv4.DateTime
-	Url              githubv4.URI
-	UserContentEdits struct {
-		TotalCount int
-	}
+	State          githubv4.PullRequestState
+	Title          string
+	UpdatedAt      githubv4.DateTime
+	Url            githubv4.URI
 }
 
 type fetchPROptions struct {
@@ -144,125 +131,118 @@ type iterPR struct {
 
 func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Edges[i.current]
-	switch c {
-	case 0:
+
+	col := PRCols[c]
+
+	switch col.Name {
+	case "owner":
 		ctx.ResultText(i.fullNameOrOwner)
-	case 1:
+	case "reponame":
 		ctx.ResultText(i.name)
-	case 2:
+	case "additions":
 		ctx.ResultInt(int(current.Additions))
-	case 3:
+	case "author_login":
 		ctx.ResultText(current.Author.Login)
-	case 4:
+	case "author_association":
 		ctx.ResultText(string(current.AuthorAssociation))
-	case 5:
+	case "base_ref_oid":
 		ctx.ResultText(string(current.BaseRefOid))
-	case 6:
+	case "base_ref_name":
 		ctx.ResultText(current.BaseRefName)
-	case 7:
+	case "base_repository_name":
 		ctx.ResultText(current.BaseRepository.NameWithOwner)
-	case 8:
+	case "body":
 		ctx.ResultText(current.Body)
-	case 9:
-		ctx.ResultText(current.BodyText)
-	case 10:
+	case "changed_files":
 		ctx.ResultInt(current.ChangedFiles)
-	case 11:
+	case "closed":
 		ctx.ResultInt(t1f0(current.Closed))
-	case 12:
+	case "closed_at":
 		t := current.ClosedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 13:
+	case "comment_count":
 		ctx.ResultInt(current.Comments.TotalCount)
-	case 14:
+	case "commit_count":
 		ctx.ResultInt(current.Commits.TotalCount)
-	case 15:
+	case "created_at":
 		t := current.CreatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 16:
+	case "created_via_email":
 		ctx.ResultInt(t1f0(current.CreatedViaEmail))
-	case 17:
+	case "database_id":
 		ctx.ResultInt(current.DatabaseID)
-	case 18:
+	case "deletions":
 		ctx.ResultInt(current.Deletions)
-	case 19:
+	case "editor_login":
 		ctx.ResultText(current.Editor.Login)
-	case 20:
+	case "head_ref_name":
 		ctx.ResultText(current.HeadRefName)
-	case 21:
+	case "head_ref_oid":
 		ctx.ResultText(string(current.HeadRefOid))
-	case 22:
+	case "head_repository_name":
 		ctx.ResultText(string(current.HeadRepository.NameWithOwner))
-	case 23:
+	case "is_draft":
 		ctx.ResultInt(t1f0(current.IsDraft))
-	case 24:
+	case "label_count":
 		ctx.ResultInt(current.Labels.TotalCount)
-	case 25:
+	case "last_edited_at":
 		t := current.LastEditedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 26:
+	case "locked":
 		ctx.ResultInt(t1f0(current.Locked))
-	case 27:
+	case "maintainer_can_modify":
 		ctx.ResultInt(t1f0(current.MaintainerCanModify))
-	case 28:
+	case "mergeable":
 		ctx.ResultText(string(current.Mergeable))
-	case 29:
+	case "merged":
 		ctx.ResultInt(t1f0(current.Merged))
-	case 30:
+	case "merged_at":
 		t := current.MergedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 31:
+	case "merged_by":
 		ctx.ResultText(current.MergedBy.Login)
-	case 32:
+	case "number":
 		ctx.ResultInt(current.Number)
-	case 33:
+	case "participant_count":
 		ctx.ResultInt(current.Participants.TotalCount)
-	case 34:
+	case "published_at":
 		t := current.PublishedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 35:
+	case "review_decision":
 		ctx.ResultText(string(current.ReviewDecision))
-	case 36:
-		ctx.ResultInt(current.ReviewRequests.TotalCount)
-	case 37:
-		ctx.ResultInt(current.ReviewThreads.TotalCount)
-	case 38:
-		ctx.ResultInt(current.Reviews.TotalCount)
-	case 39:
+	case "state":
 		ctx.ResultText(string(current.State))
-	case 40:
+	case "title":
 		ctx.ResultText(current.Title)
-	case 41:
+	case "updated_at":
 		t := current.UpdatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 42:
+	case "url":
 		ctx.ResultText(current.Url.String())
-	case 43:
-		ctx.ResultInt(current.UserContentEdits.TotalCount)
 	}
 	return nil
 }
@@ -313,7 +293,6 @@ var PRCols = []vtab.Column{
 	{Name: "base_ref_name", Type: sqlite.SQLITE_TEXT},
 	{Name: "base_repository_name", Type: sqlite.SQLITE_TEXT},
 	{Name: "body", Type: sqlite.SQLITE_TEXT},
-	{Name: "body_text", Type: sqlite.SQLITE_TEXT},
 	{Name: "changed_files", Type: sqlite.SQLITE_INTEGER},
 	{Name: "closed", Type: sqlite.SQLITE_INTEGER},
 	{Name: "closed_at", Type: sqlite.SQLITE_TEXT},
@@ -340,14 +319,10 @@ var PRCols = []vtab.Column{
 	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER},
 	{Name: "published_at", Type: sqlite.SQLITE_TEXT},
 	{Name: "review_decision", Type: sqlite.SQLITE_TEXT},
-	{Name: "review_request_count", Type: sqlite.SQLITE_TEXT},
-	{Name: "review_thread_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "review_count", Type: sqlite.SQLITE_INTEGER},
 	{Name: "state", Type: sqlite.SQLITE_TEXT},
 	{Name: "title", Type: sqlite.SQLITE_TEXT},
 	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "url", Type: sqlite.SQLITE_TEXT},
-	{Name: "user_content_edits_count", Type: sqlite.SQLITE_INTEGER},
 }
 
 func NewPRModule(opts *Options) sqlite.Module {

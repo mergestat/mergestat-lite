@@ -557,7 +557,6 @@ Table-valued-function that returns all the pull requests of a GitHub repository.
 | base_ref_name            | TEXT |
 | base_repository_name     | TEXT |
 | body                     | TEXT |
-| body_text                | TEXT |
 | changed_files            | INT  |
 | closed                   | INT  |
 | closed_at                | TEXT |
@@ -584,14 +583,10 @@ Table-valued-function that returns all the pull requests of a GitHub repository.
 | participant_count        | INT  |
 | published_at             | TEXT |
 | review_decision          | TEXT |
-| review_request_count     | TEXT |
-| review_thread_count      | INT  |
-| review_count             | INT  |
 | state                    | TEXT |
 | title                    | TEXT |
 | updated_at               | TEXT |
 | url                      | TEXT |
-| user_content_edits_count | INT  |
 
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
