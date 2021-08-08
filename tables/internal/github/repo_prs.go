@@ -12,9 +12,11 @@ import (
 )
 
 type pullRequest struct {
-	ActiveLockReason  githubv4.LockReason
-	Additions         int
-	Author            user
+	ActiveLockReason githubv4.LockReason
+	Additions        int
+	Author           struct {
+		Login string
+	}
 	AuthorAssociation githubv4.CommentAuthorAssociation
 	BaseRefOid        githubv4.GitObjectID
 	BaseRefName       string
@@ -54,9 +56,11 @@ type pullRequest struct {
 	Mergeable           githubv4.MergeableState
 	Merged              bool
 	MergedAt            githubv4.DateTime
-	MergedBy            user
-	Number              int
-	Participants        struct {
+	MergedBy            struct {
+		Login string
+	}
+	Number       int
+	Participants struct {
 		TotalCount int
 	}
 	PublishedAt    githubv4.DateTime
@@ -132,7 +136,7 @@ type iterPR struct {
 
 func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Edges[i.current]
-	col := PRCols[c]
+	col := prCols[c]
 
 	switch col.Name {
 	case "owner":
@@ -283,7 +287,7 @@ func (i *iterPR) Next() (vtab.Row, error) {
 	return i, nil
 }
 
-var PRCols = []vtab.Column{
+var prCols = []vtab.Column{
 	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
 	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
 	{Name: "additions", Type: sqlite.SQLITE_INTEGER},
@@ -326,7 +330,7 @@ var PRCols = []vtab.Column{
 }
 
 func NewPRModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_repo_prs", PRCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("github_repo_prs", prCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
@@ -342,7 +346,7 @@ func NewPRModule(opts *Options) sqlite.Module {
 		if len(orders) == 1 {
 			order := orders[0]
 			prOrder = &githubv4.IssueOrder{}
-			switch PRCols[order.ColumnIndex].Name {
+			switch prCols[order.ColumnIndex].Name {
 			case "comment_count":
 				prOrder.Field = githubv4.IssueOrderFieldComments
 			case "created_at":

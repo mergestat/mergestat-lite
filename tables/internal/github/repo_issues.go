@@ -12,26 +12,23 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type user struct {
-	Login string
-	URL   string
-}
-
 type issue struct {
 	ActiveLockReason githubv4.LockReason
-	//Assignees
-	Author   user
+	Author           struct {
+		Login string
+	}
 	Body     string
-	BodyText string
 	Closed   bool
 	ClosedAt githubv4.DateTime
 	Comments struct {
 		TotalCount int
 	}
-	CreatedAt           githubv4.DateTime
-	CreatedViaEmail     bool
-	DatabaseId          int
-	Editor              user
+	CreatedAt       githubv4.DateTime
+	CreatedViaEmail bool
+	DatabaseId      int
+	Editor          struct {
+		Login string
+	}
 	IncludesCreatedEdit bool
 	IsReadByViewer      bool
 	Labels              struct {
@@ -40,30 +37,20 @@ type issue struct {
 	LastEditedAt githubv4.DateTime
 	Locked       bool
 	Milestone    struct {
-		Number             int
-		ProgressPercentage githubv4.Float
+		Number int
 	}
 	Number       int
 	Participants struct {
 		TotalCount int
 	}
 	PublishedAt githubv4.DateTime
-	//reactionGroups
-	Reactions struct {
+	Reactions   struct {
 		TotalCount int
 	}
-	State            githubv4.IssueState
-	Title            string
-	UpdatedAt        githubv4.DateTime
-	Url              githubv4.URI
-	UserContentEdits struct {
-		TotalCount int
-	}
-	ViewerCanReact     bool
-	ViewerCanSubscribe bool
-	ViewerCanUpdate    bool
-	ViewerDidAuthor    bool
-	ViewerSubscription githubv4.SubscriptionState
+	State     githubv4.IssueState
+	Title     string
+	UpdatedAt githubv4.DateTime
+	Url       githubv4.URI
 }
 
 type fetchIssuesOptions struct {
@@ -135,104 +122,83 @@ type iterIssues struct {
 }
 
 func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
-	switch c {
-	case 0:
+	current := i.results.Edges[i.current]
+	col := issuesCols[c]
+
+	switch col.Name {
+	case "owner":
 		ctx.ResultText(i.fullNameOrOwner)
-	case 1:
+	case "reponame":
 		ctx.ResultText(i.name)
-	case 2:
-		ctx.ResultText(i.results.Edges[i.current].Node.Author.Login)
-	case 3:
-		ctx.ResultText(i.results.Edges[i.current].Node.Author.URL)
-	case 4:
-		ctx.ResultText(i.results.Edges[i.current].Node.Body)
-	case 5:
-		ctx.ResultText(i.results.Edges[i.current].Node.BodyText)
-	case 6:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.Closed))
-	case 7:
-		t := i.results.Edges[i.current].Node.ClosedAt
+	case "author_login":
+		ctx.ResultText(current.Node.Author.Login)
+	case "body":
+		ctx.ResultText(current.Node.Body)
+	case "closed":
+		ctx.ResultInt(t1f0(current.Node.Closed))
+	case "closed_at":
+		t := current.Node.ClosedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 8:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Comments.TotalCount)
-	case 9:
-		t := i.results.Edges[i.current].Node.CreatedAt
+	case "comment_count":
+		ctx.ResultInt(current.Node.Comments.TotalCount)
+	case "created_at":
+		t := current.Node.CreatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 10:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.CreatedViaEmail))
-	case 11:
-		ctx.ResultInt(i.results.Edges[i.current].Node.DatabaseId)
-	case 12:
-		ctx.ResultText(i.results.Edges[i.current].Node.Editor.Login)
-	case 13:
-		ctx.ResultText(i.results.Edges[i.current].Node.Editor.URL)
-	case 14:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.IncludesCreatedEdit))
-	case 15:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.IsReadByViewer))
-	case 16:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Labels.TotalCount)
-	case 17:
-		t := i.results.Edges[i.current].Node.LastEditedAt
+	case "created_via_email":
+		ctx.ResultInt(t1f0(current.Node.CreatedViaEmail))
+	case "database_id":
+		ctx.ResultInt(current.Node.DatabaseId)
+	case "editor_login":
+		ctx.ResultText(current.Node.Editor.Login)
+	case "includes_created_edit":
+		ctx.ResultInt(t1f0(current.Node.IncludesCreatedEdit))
+	case "label_count":
+		ctx.ResultInt(current.Node.Labels.TotalCount)
+	case "last_edited_at":
+		t := current.Node.LastEditedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 18:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.Locked))
-	case 19:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Milestone.Number)
-	case 20:
-		ctx.ResultFloat(float64(i.results.Edges[i.current].Node.Milestone.ProgressPercentage))
-	case 21:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Number)
-	case 22:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Participants.TotalCount)
-	case 23:
-		t := i.results.Edges[i.current].Node.PublishedAt
+	case "locked":
+		ctx.ResultInt(t1f0(current.Node.Locked))
+	case "milestone_number":
+		ctx.ResultInt(current.Node.Milestone.Number)
+	case "number":
+		ctx.ResultInt(current.Node.Number)
+	case "participant_count":
+		ctx.ResultInt(current.Node.Participants.TotalCount)
+	case "published_at":
+		t := current.Node.PublishedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 24:
-		ctx.ResultInt(i.results.Edges[i.current].Node.Reactions.TotalCount)
-	case 25:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.State))
-	case 26:
-		ctx.ResultText(i.results.Edges[i.current].Node.Title)
-	case 27:
-		t := i.results.Edges[i.current].Node.UpdatedAt
+	case "reaction_count":
+		ctx.ResultInt(current.Node.Reactions.TotalCount)
+	case "state":
+		ctx.ResultText(fmt.Sprint(current.Node.State))
+	case "title":
+		ctx.ResultText(current.Node.Title)
+	case "updated_at":
+		t := current.Node.UpdatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 28:
-		ctx.ResultText(i.results.Edges[i.current].Node.Url.String())
-	case 29:
-		ctx.ResultInt(i.results.Edges[i.current].Node.UserContentEdits.TotalCount)
-	case 30:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerCanReact))
-	case 31:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerCanSubscribe))
-	case 32:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerCanUpdate))
-
-	case 33:
-		ctx.ResultInt(t1f0(i.results.Edges[i.current].Node.ViewerDidAuthor))
-
-	case 34:
-		ctx.ResultText(fmt.Sprint(i.results.Edges[i.current].Node.ViewerSubscription))
+	case "url":
+		ctx.ResultText(current.Node.Url.String())
 	}
 	return nil
 }
@@ -276,39 +242,28 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 var issuesCols = []vtab.Column{
 	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
 	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
-	{Name: "author_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "author_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "body", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "body_text", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "closed", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "closed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "comment_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "database_id", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "editor_login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "editor_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "includes_created_edit", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "is_read_by_viewer", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "label_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "locked", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "milestone_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "milestone_progress", Type: sqlite.SQLITE_FLOAT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "issue_number", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "published_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "reaction_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "state", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "title", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "user_edits_count", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "viewer_can_react", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "viewer_can_subscribe", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "viewer_can_update", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "viewer_did_author", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "viewer_subscription", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
+	{Name: "author_login", Type: sqlite.SQLITE_TEXT},
+	{Name: "body", Type: sqlite.SQLITE_TEXT},
+	{Name: "closed", Type: sqlite.SQLITE_INTEGER},
+	{Name: "closed_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "comment_count", Type: sqlite.SQLITE_INTEGER, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "created_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER},
+	{Name: "database_id", Type: sqlite.SQLITE_TEXT},
+	{Name: "editor_login", Type: sqlite.SQLITE_TEXT},
+	{Name: "includes_created_edit", Type: sqlite.SQLITE_INTEGER},
+	{Name: "label_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "locked", Type: sqlite.SQLITE_INTEGER},
+	{Name: "milestone_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "number", Type: sqlite.SQLITE_INTEGER},
+	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "published_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "reaction_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "state", Type: sqlite.SQLITE_TEXT},
+	{Name: "title", Type: sqlite.SQLITE_TEXT},
+	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "url", Type: sqlite.SQLITE_TEXT},
 }
 
 func NewIssuesModule(opts *Options) sqlite.Module {
@@ -328,13 +283,14 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 		var issueOrder *githubv4.IssueOrder
 		if len(orders) == 1 {
 			order := orders[0]
+
 			issueOrder = &githubv4.IssueOrder{}
-			switch order.ColumnIndex {
-			case 8:
+			switch issuesCols[order.ColumnIndex].Name {
+			case "comment_count":
 				issueOrder.Field = githubv4.IssueOrderFieldComments
-			case 9:
+			case "created_at":
 				issueOrder.Field = githubv4.IssueOrderFieldCreatedAt
-			case 27:
+			case "updated_at":
 				issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
 			}
 			issueOrder.Direction = orderByToGitHubOrder(order.Desc)
