@@ -91,6 +91,7 @@ type iterStargazers struct {
 	results         *fetchStarsResults
 	rateLimiter     *rate.Limiter
 	starOrder       *githubv4.StarOrder
+	perPage         int
 }
 
 func (i *iterStargazers) Column(ctx *sqlite.Context, c int) error {
@@ -157,7 +158,7 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchStars(context.Background(), &fetchStarsOptions{i.client, owner, name, 100, cursor, i.starOrder})
+			results, err := fetchStars(context.Background(), &fetchStarsOptions{i.client, owner, name, i.perPage, cursor, i.starOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -216,6 +217,6 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 			starOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterStargazers{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, starOrder}, nil
+		return &iterStargazers{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, starOrder, opts.PerPage}, nil
 	})
 }

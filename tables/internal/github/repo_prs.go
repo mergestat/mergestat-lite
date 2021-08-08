@@ -127,11 +127,11 @@ type iterPR struct {
 	results         *fetchPRResults
 	rateLimiter     *rate.Limiter
 	prOrder         *githubv4.IssueOrder
+	perPage         int
 }
 
 func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Edges[i.current]
-
 	col := PRCols[c]
 
 	switch col.Name {
@@ -267,7 +267,7 @@ func (i *iterPR) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, 100, cursor, i.prOrder})
+			results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, i.perPage, cursor, i.prOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -342,17 +342,17 @@ func NewPRModule(opts *Options) sqlite.Module {
 		if len(orders) == 1 {
 			order := orders[0]
 			prOrder = &githubv4.IssueOrder{}
-			switch order.ColumnIndex {
-			case 13:
+			switch PRCols[order.ColumnIndex].Name {
+			case "comment_count":
 				prOrder.Field = githubv4.IssueOrderFieldComments
-			case 15:
+			case "created_at":
 				prOrder.Field = githubv4.IssueOrderFieldCreatedAt
-			case 41:
+			case "updated_at":
 				prOrder.Field = githubv4.IssueOrderFieldUpdatedAt
 			}
 			prOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterPR{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, prOrder}, nil
+		return &iterPR{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, prOrder, opts.PerPage}, nil
 	})
 }

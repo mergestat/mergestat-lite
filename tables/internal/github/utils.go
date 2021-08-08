@@ -2,7 +2,6 @@ package github
 
 import (
 	"errors"
-	"strconv"
 	"strings"
 
 	"github.com/askgitdev/askgit/tables/services"
@@ -13,6 +12,8 @@ import (
 type Options struct {
 	Client      func() *githubv4.Client
 	RateLimiter *rate.Limiter
+	// PerPage is the default number of items per page to use when making a paginated GitHub API request
+	PerPage int
 }
 
 // GetGitHubTokenFromCtx looks up the githubToken key in the supplied context and returns it if set
@@ -23,15 +24,20 @@ func GetGitHubTokenFromCtx(ctx services.Context) string {
 // GetGithubReqPerSecondFromCtx looks up the githubReqPerSec key in the supplied context and returns it if set,
 // otherwise it returns a default of 1
 func GetGithubReqPerSecondFromCtx(ctx services.Context) int {
-	defaultValue := 1
-	if githubReqPerSec, ok := ctx["githubReqPerSec"]; ok && githubReqPerSec != "" {
-		if i, err := strconv.Atoi(githubReqPerSec); err != nil {
-			return i
-		} else {
-			return defaultValue
-		}
+	if val, ok := ctx.GetInt("githubReqPerSec"); ok {
+		return val
 	} else {
-		return defaultValue
+		return 1
+	}
+}
+
+// GetGitHubPerPageFromCtx looks up the githubPerPage key in the supplied context and returns it if set,
+// otherwise it returns a default of 100
+func GetGitHubPerPageFromCtx(ctx services.Context) int {
+	if val, ok := ctx.GetInt("githubPerPage"); ok {
+		return val
+	} else {
+		return 100
 	}
 }
 

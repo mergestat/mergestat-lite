@@ -83,6 +83,7 @@ type iterStarredRepos struct {
 	results     *fetchStarredReposResults
 	rateLimiter *rate.Limiter
 	starOrder   *githubv4.StarOrder
+	perPage     int
 }
 
 func (i *iterStarredRepos) Column(ctx *sqlite.Context, c int) error {
@@ -141,7 +142,7 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 			if i.results != nil {
 				cursor = i.results.EndCursor
 			}
-			results, err := fetchStarredRepos(context.Background(), &fetchStarredReposOptions{i.client, i.login, 100, cursor, i.starOrder})
+			results, err := fetchStarredRepos(context.Background(), &fetchStarredReposOptions{i.client, i.login, i.perPage, cursor, i.starOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -194,6 +195,6 @@ func NewStarredReposModule(opts *Options) sqlite.Module {
 			starOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter, starOrder}, nil
+		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter, starOrder, opts.PerPage}, nil
 	})
 }

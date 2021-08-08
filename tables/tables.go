@@ -91,6 +91,7 @@ func RegisterFn(fns ...OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorC
 					client := githubv4.NewClient(httpClient)
 					return client
 				},
+				PerPage: github.GetGitHubPerPageFromCtx(opt.Context),
 			}
 
 			if opt.GitHubClientGetter != nil {

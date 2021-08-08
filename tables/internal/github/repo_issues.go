@@ -131,6 +131,7 @@ type iterIssues struct {
 	results         *fetchIssuesResults
 	rateLimiter     *rate.Limiter
 	issueOrder      *githubv4.IssueOrder
+	perPage         int
 }
 
 func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
@@ -256,7 +257,7 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchIssues(context.Background(), &fetchIssuesOptions{i.client, owner, name, 100, cursor, i.issueOrder})
+			results, err := fetchIssues(context.Background(), &fetchIssuesOptions{i.client, owner, name, i.perPage, cursor, i.issueOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -339,6 +340,6 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 			issueOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterIssues{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, issueOrder}, nil
+		return &iterIssues{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, issueOrder, opts.PerPage}, nil
 	})
 }

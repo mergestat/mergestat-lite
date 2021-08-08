@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/askgitdev/askgit/pkg/locator"
 	"github.com/askgitdev/askgit/tables"
 	"go.riyazali.net/sqlite"
@@ -18,6 +20,7 @@ func registerExt() {
 			tables.WithContextValue("defaultRepoPath", repo),
 			tables.WithGitHub(),
 			tables.WithContextValue("githubToken", githubToken),
+			tables.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
 		),
 	)
 }
