@@ -518,9 +518,7 @@ Table-valued-function that returns all the issues of a GitHub repository.
 | owner                 | TEXT  |
 | reponame              | TEXT  |
 | author_login          | TEXT  |
-| author_url            | TEXT  |
 | body                  | TEXT  |
-| body_text             | TEXT  |
 | closed                | INT   |
 | closed_at             | TEXT  |
 | comment_count         | INT   |
@@ -528,15 +526,12 @@ Table-valued-function that returns all the issues of a GitHub repository.
 | created_via_email     | INT   |
 | database_id           | TEXT  |
 | editor_login          | TEXT  |
-| editor_url            | TEXT  |
 | includes_created_edit | INT   |
-| is_read_by_viewer     | INT   |
 | label_count           | INT   |
 | last_edited_at        | TEXT  |
 | locked                | INT   |
 | milestone_count       | INT   |
-| milestone_progress    | FLOAT |
-| issue_number          | INT   |
+| number                | INT   |
 | participant_count     | INT   |
 | published_at          | TEXT  |
 | reaction_count        | INT   |
@@ -544,12 +539,6 @@ Table-valued-function that returns all the issues of a GitHub repository.
 | title                 | TEXT  |
 | updated_at            | TEXT  |
 | url                   | TEXT  |
-| user_edits_count      | INT   |
-| viewer_can_react      | INT   |
-| viewer_can_subscribe  | INT   |
-| viewer_can_update     | INT   |
-| viewer_did_author     | INT   |
-| viewer_subscription   | TEXT  |
 
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)

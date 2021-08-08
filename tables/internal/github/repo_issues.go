@@ -13,8 +13,7 @@ import (
 )
 
 type issue struct {
-	ActiveLockReason githubv4.LockReason
-	Author           struct {
+	Author struct {
 		Login string
 	}
 	Body     string
