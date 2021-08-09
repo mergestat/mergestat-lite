@@ -120,91 +120,91 @@ type iterOrgRepos struct {
 
 func (i *iterOrgRepos) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.OrgRepos[i.current]
-	switch c {
-	case 0:
+	switch userReposCols[c].Name {
+	case "login":
 		ctx.ResultText(i.login)
-	case 1:
+	case "created_at":
 		t := current.CreatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 2:
+	case "database_id":
 		ctx.ResultInt(current.DatabaseId)
-	case 3:
+	case "default_branch_ref_name":
 		ctx.ResultText(current.DefaultBranchRef.Name)
-	case 4:
+	case "default_branch_ref_prefix":
 		ctx.ResultText(current.DefaultBranchRef.Prefix)
-	case 5:
+	case "description":
 		ctx.ResultText(current.Description)
-	case 6:
+	case "disk_usage":
 		ctx.ResultInt(current.DiskUsage)
-	case 7:
+	case "fork_count":
 		ctx.ResultInt(current.ForkCount)
-	case 8:
+	case "homepage_url":
 		ctx.ResultText(current.HomepageUrl)
-	case 9:
+	case "is_archived":
 		ctx.ResultInt(t1f0(current.IsArchived))
-	case 10:
+	case "is_disabled":
 		ctx.ResultInt(t1f0(current.IsDisabled))
-	case 11:
+	case "is_fork":
 		ctx.ResultInt(t1f0(current.IsFork))
-	case 12:
+	case "is_mirror":
 		ctx.ResultInt(t1f0(current.IsMirror))
-	case 13:
+	case "is_private":
 		ctx.ResultInt(t1f0(current.IsPrivate))
-	case 14:
+	case "issue_count":
 		ctx.ResultInt(current.Issues.TotalCount)
-	case 15:
+	case "latest_release_author":
 		ctx.ResultText(current.LatestRelease.Author.Login)
-	case 16:
+	case "latest_release_created_at":
 		t := current.LatestRelease.CreatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 17:
+	case "latest_release_name":
 		ctx.ResultText(current.LatestRelease.Name)
-	case 18:
+	case "latest_release_published_at":
 		t := current.LatestRelease.PublishedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 19:
+	case "license_key":
 		ctx.ResultText(current.LicenseInfo.Key)
-	case 20:
+	case "license_name":
 		ctx.ResultText(current.LicenseInfo.Name)
-	case 21:
+	case "name":
 		ctx.ResultText(current.Name)
-	case 22:
+	case "open_graph_image_url":
 		ctx.ResultText(current.OpenGraphImageUrl.String())
-	case 23:
+	case "primary_language":
 		ctx.ResultText(current.PrimaryLanguage.Name)
-	case 24:
+	case "pull_request_count":
 		ctx.ResultInt(current.PullRequests.TotalCount)
-	case 25:
+	case "pushed_at":
 		t := current.PushedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 26:
+	case "release_count":
 		ctx.ResultInt(current.Releases.TotalCount)
-	case 27:
+	case "stargazer_count":
 		ctx.ResultInt(current.StargazerCount)
-	case 28:
+	case "updated_at":
 		t := current.UpdatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 29:
+	case "watcher_count":
 		ctx.ResultInt(current.Watchers.TotalCount)
 	}
 	return nil
@@ -290,18 +290,19 @@ func NewOrgReposModule(opts *Options) sqlite.Module {
 		if len(orders) == 1 {
 			repoOrder = &githubv4.RepositoryOrder{}
 			order := orders[0]
-			switch order.ColumnIndex {
-			case 1:
+			switch userReposCols[order.ColumnIndex].Name {
+			case "name":
 				repoOrder.Field = githubv4.RepositoryOrderFieldName
-			case 3:
+			case "created_at":
 				repoOrder.Field = githubv4.RepositoryOrderFieldCreatedAt
-			case 4:
+			case "updated_at":
 				repoOrder.Field = githubv4.RepositoryOrderFieldUpdatedAt
-			case 5:
+			case "pushed_at":
 				repoOrder.Field = githubv4.RepositoryOrderFieldPushedAt
-			case 6:
+			case "stargazer_count":
 				repoOrder.Field = githubv4.RepositoryOrderFieldStargazers
 			}
+			repoOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
 		return &iterOrgRepos{login, opts.Client(), -1, nil, opts.RateLimiter, repoOrder}, nil
