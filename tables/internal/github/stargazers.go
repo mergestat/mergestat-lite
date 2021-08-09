@@ -17,7 +17,6 @@ type stargazer struct {
 	Name            string
 	Bio             string
 	Company         string
-	IsHireable      bool
 	AvatarUrl       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -91,48 +90,50 @@ type iterStargazers struct {
 	results         *fetchStarsResults
 	rateLimiter     *rate.Limiter
 	starOrder       *githubv4.StarOrder
+	perPage         int
 }
 
 func (i *iterStargazers) Column(ctx *sqlite.Context, c int) error {
-	switch c {
-	case 0:
+	current := i.results.Edges[i.current]
+	switch stargazersCols[c].Name {
+	case "owner":
 		ctx.ResultText(i.fullNameOrOwner)
-	case 1:
+	case "reponame":
 		ctx.ResultText(i.name)
-	case 2:
-		ctx.ResultText(i.results.Edges[i.current].Node.Login)
-	case 3:
-		ctx.ResultText(i.results.Edges[i.current].Node.Email)
-	case 4:
-		ctx.ResultText(i.results.Edges[i.current].Node.Name)
-	case 5:
-		ctx.ResultText(i.results.Edges[i.current].Node.Bio)
-	case 6:
-		ctx.ResultText(i.results.Edges[i.current].Node.Company)
-	case 7:
-		ctx.ResultText(i.results.Edges[i.current].Node.AvatarUrl)
-	case 8:
-		t := i.results.Edges[i.current].Node.CreatedAt
+	case "login":
+		ctx.ResultText(current.Node.Login)
+	case "email":
+		ctx.ResultText(current.Node.Email)
+	case "name":
+		ctx.ResultText(current.Node.Name)
+	case "bio":
+		ctx.ResultText(current.Node.Bio)
+	case "company":
+		ctx.ResultText(current.Node.Company)
+	case "avatar_url":
+		ctx.ResultText(current.Node.AvatarUrl)
+	case "created_at":
+		t := current.Node.CreatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 9:
-		t := i.results.Edges[i.current].Node.UpdatedAt
+	case "updated_at":
+		t := current.Node.UpdatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 10:
-		ctx.ResultText(i.results.Edges[i.current].Node.TwitterUsername)
-	case 11:
-		ctx.ResultText(i.results.Edges[i.current].Node.WebsiteUrl)
-	case 12:
-		ctx.ResultText(i.results.Edges[i.current].Node.Location)
-	case 13:
-		ctx.ResultText(i.results.Edges[i.current].StarredAt)
+	case "twitter":
+		ctx.ResultText(current.Node.TwitterUsername)
+	case "website":
+		ctx.ResultText(current.Node.WebsiteUrl)
+	case "location":
+		ctx.ResultText(current.Node.Location)
+	case "starred_at":
+		ctx.ResultText(current.StarredAt)
 	}
 	return nil
 }
@@ -157,7 +158,7 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchStars(context.Background(), &fetchStarsOptions{i.client, owner, name, 100, cursor, i.starOrder})
+			results, err := fetchStars(context.Background(), &fetchStarsOptions{i.client, owner, name, i.perPage, cursor, i.starOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -174,20 +175,20 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 }
 
 var stargazersCols = []vtab.Column{
-	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
-	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "email", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "bio", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "company", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "avatar_url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "twitter", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "website", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "location", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "owner", Type: sqlite.SQLITE_TEXT, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "reponame", Type: sqlite.SQLITE_TEXT, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "login", Type: sqlite.SQLITE_TEXT},
+	{Name: "email", Type: sqlite.SQLITE_TEXT},
+	{Name: "name", Type: sqlite.SQLITE_TEXT},
+	{Name: "bio", Type: sqlite.SQLITE_TEXT},
+	{Name: "company", Type: sqlite.SQLITE_TEXT},
+	{Name: "avatar_url", Type: sqlite.SQLITE_TEXT},
+	{Name: "created_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "updated_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "twitter", Type: sqlite.SQLITE_TEXT},
+	{Name: "website", Type: sqlite.SQLITE_TEXT},
+	{Name: "location", Type: sqlite.SQLITE_TEXT},
+	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewStargazersModule(opts *Options) sqlite.Module {
@@ -209,13 +210,13 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 		if len(orders) == 1 {
 			order := orders[0]
 			starOrder = &githubv4.StarOrder{}
-			switch order.ColumnIndex {
-			case 13:
+			switch stargazersCols[order.ColumnIndex].Name {
+			case "starred_at":
 				starOrder.Field = githubv4.StarOrderFieldStarredAt
 			}
 			starOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterStargazers{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, starOrder}, nil
+		return &iterStargazers{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, starOrder, opts.PerPage}, nil
 	})
 }

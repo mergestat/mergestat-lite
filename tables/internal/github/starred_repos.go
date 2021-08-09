@@ -63,7 +63,6 @@ func fetchStarredRepos(ctx context.Context, input *fetchStarredReposOptions) (*f
 	}
 
 	err := input.Client.Query(ctx, &reposQuery, variables)
-
 	if err != nil {
 		return nil, err
 	}
@@ -83,45 +82,46 @@ type iterStarredRepos struct {
 	results     *fetchStarredReposResults
 	rateLimiter *rate.Limiter
 	starOrder   *githubv4.StarOrder
+	perPage     int
 }
 
 func (i *iterStarredRepos) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Edges[i.current]
-	switch c {
-	case 0:
+	switch starredReposCols[c].Name {
+	case "login":
 		ctx.ResultText(i.login)
-	case 1:
+	case "name":
 		ctx.ResultText(current.Node.Name)
-	case 2:
+	case "url":
 		ctx.ResultText(current.Node.Url)
-	case 3:
+	case "description":
 		ctx.ResultText(current.Node.Description)
-	case 4:
+	case "created_at":
 		t := current.Node.CreatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 5:
+	case "pushed_at":
 		t := current.Node.PushedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 6:
+	case "updated_at":
 		t := current.Node.UpdatedAt
 		if t.IsZero() {
 			ctx.ResultNull()
 		} else {
 			ctx.ResultText(t.Format(time.RFC3339Nano))
 		}
-	case 7:
+	case "stargazer_count":
 		ctx.ResultInt(current.Node.StargazerCount)
-	case 8:
+	case "name_with_owner":
 		ctx.ResultText(current.Node.NameWithOwner)
-	case 9:
+	case "starred_at":
 		ctx.ResultText(current.StarredAt)
 	}
 	return nil
@@ -141,7 +141,7 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 			if i.results != nil {
 				cursor = i.results.EndCursor
 			}
-			results, err := fetchStarredRepos(context.Background(), &fetchStarredReposOptions{i.client, i.login, 100, cursor, i.starOrder})
+			results, err := fetchStarredRepos(context.Background(), &fetchStarredReposOptions{i.client, i.login, i.perPage, cursor, i.starOrder})
 			if err != nil {
 				return nil, err
 			}
@@ -159,15 +159,15 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 
 var starredReposCols = []vtab.Column{
 	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "name", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "url", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "description", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "pushed_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "stargazer_count", Type: sqlite.SQLITE_INTEGER, NotNull: true, Hidden: false, Filters: nil},
-	{Name: "name_with_owner", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil},
-	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "name", Type: sqlite.SQLITE_TEXT},
+	{Name: "url", Type: sqlite.SQLITE_TEXT},
+	{Name: "description", Type: sqlite.SQLITE_TEXT},
+	{Name: "created_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "pushed_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "updated_at", Type: sqlite.SQLITE_TEXT},
+	{Name: "stargazer_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "name_with_owner", Type: sqlite.SQLITE_TEXT},
+	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewStarredReposModule(opts *Options) sqlite.Module {
@@ -187,13 +187,13 @@ func NewStarredReposModule(opts *Options) sqlite.Module {
 		if len(orders) == 1 {
 			starOrder = &githubv4.StarOrder{}
 			order := orders[0]
-			switch order.ColumnIndex {
-			case 9:
+			switch starredReposCols[order.ColumnIndex].Name {
+			case "starred_at":
 				starOrder.Field = githubv4.StarOrderFieldStarredAt
 			}
 			starOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter, starOrder}, nil
+		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter, starOrder, opts.PerPage}, nil
 	})
 }

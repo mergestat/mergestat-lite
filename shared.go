@@ -18,6 +18,8 @@ func init() {
 		tables.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
 		tables.WithGitHub(),
 		tables.WithContextValue("githubToken", os.Getenv("GITHUB_TOKEN")),
+		tables.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
+		tables.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
 	))
 }
 

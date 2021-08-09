@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/askgitdev/askgit/tables/services"
 	"github.com/shurcooL/githubv4"
@@ -13,6 +14,8 @@ import (
 type Options struct {
 	Client      func() *githubv4.Client
 	RateLimiter *rate.Limiter
+	// PerPage is the default number of items per page to use when making a paginated GitHub API request
+	PerPage int
 }
 
 // GetGitHubTokenFromCtx looks up the githubToken key in the supplied context and returns it if set
@@ -20,18 +23,51 @@ func GetGitHubTokenFromCtx(ctx services.Context) string {
 	return ctx["githubToken"]
 }
 
-// GetGithubReqPerSecondFromCtx looks up the githubReqPerSec key in the supplied context and returns it if set,
-// otherwise it returns a default of 1
-func GetGithubReqPerSecondFromCtx(ctx services.Context) int {
-	defaultValue := 1
-	if githubReqPerSec, ok := ctx["githubReqPerSec"]; ok && githubReqPerSec != "" {
-		if i, err := strconv.Atoi(githubReqPerSec); err != nil {
-			return i
+// GetGitHubRateLimitFromCtx looks up the githubRateLimit key in the supplied context and parses it to return a client
+// side rate limit in the form "(number of reqs)/(number of seconds)". For instance a string "2/3" would yield a rate limiter
+// that permis 2 requests every 3 seconds. A single integer is also permitted, which assumes the "denominator" is 1 second.
+// So a value of "5" would simple mean 5 requests per second.
+// If the string cannot be parsed, nil is returned.
+func GetGitHubRateLimitFromCtx(ctx services.Context) *rate.Limiter {
+	if val, ok := ctx["githubRateLimit"]; ok {
+		if strings.Contains(val, "/") {
+			parts := strings.SplitN(val, "/", 2)
+			if len(parts) != 2 {
+				return nil
+			}
+
+			var first, second int
+			var err error
+			if first, err = strconv.Atoi(parts[0]); err != nil {
+				return nil
+			}
+			if second, err = strconv.Atoi(parts[1]); err != nil {
+				return nil
+			}
+
+			return rate.NewLimiter(
+				rate.Every(time.Second*time.Duration(second)),
+				first,
+			)
 		} else {
-			return defaultValue
+			if perSec, ok := ctx.GetInt("githubRateLimit"); ok {
+				return rate.NewLimiter(rate.Every(time.Second), perSec)
+			} else {
+				return nil
+			}
 		}
 	} else {
-		return defaultValue
+		return nil
+	}
+}
+
+// GetGitHubPerPageFromCtx looks up the githubPerPage key in the supplied context and returns it if set,
+// otherwise it returns a default of 100
+func GetGitHubPerPageFromCtx(ctx services.Context) int {
+	if val, ok := ctx.GetInt("githubPerPage"); ok && val != 0 {
+		return val
+	} else {
+		return 100
 	}
 }
 

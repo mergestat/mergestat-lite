@@ -386,6 +386,21 @@ You can create a personal access token [following these instructions](https://do
 `askgit` will look for a `GITHUB_TOKEN` environment variable when executing, to use for authentication.
 This is also true if running as a runtime loadable extension.
 
+##### Rate Limiting
+
+All API requests to GitHub are [rate limited](https://docs.github.com/en/graphql/overview/resource-limitations#rate-limit).
+The following tables make use of the GitHub GraphQL API (v4), which rate limits additionally based on the "complexity" of GraphQL queries.
+Generally speaking, the more fields/relations in your GraphQL query, the higher the "cost" of a single API request, and the faster you may reach a rate limit.
+Depending on your SQL query, it's hard to know ahead of time what a good client-side rate limit is.
+By default, each of the tables below will fetch **100 items per page** and permit **2 API requests per second**.
+You can override both of these parameters by setting the following environment variables:
+
+1. `GITHUB_PER_PAGE` - expects an integer between 1 and 100, sets how many items are fetched per-page in API calls that paginate results.
+2. `GITHUB_RATE_LIMIT` - expressed in the form `(number of requests) / (number of seconds)` (i.e. `1/3` means at most 1 request per 3 seconds)
+
+If you encounter a rate limit error that looks like `You have exceeded a secondary rate limit`, consider setting the `GITHUB_PER_PAGE` value to a lower number.
+If you have a large number of items to scan in your query, it may take longer, but you should avoid hitting a rate limit error.
+
 ##### `github_stargazers`
 
 Table-valued-function that returns a list of users who have starred a repository.
@@ -503,9 +518,7 @@ Table-valued-function that returns all the issues of a GitHub repository.
 | owner                 | TEXT  |
 | reponame              | TEXT  |
 | author_login          | TEXT  |
-| author_url            | TEXT  |
 | body                  | TEXT  |
-| body_text             | TEXT  |
 | closed                | INT   |
 | closed_at             | TEXT  |
 | comment_count         | INT   |
@@ -513,15 +526,12 @@ Table-valued-function that returns all the issues of a GitHub repository.
 | created_via_email     | INT   |
 | database_id           | TEXT  |
 | editor_login          | TEXT  |
-| editor_url            | TEXT  |
 | includes_created_edit | INT   |
-| is_read_by_viewer     | INT   |
 | label_count           | INT   |
 | last_edited_at        | TEXT  |
 | locked                | INT   |
 | milestone_count       | INT   |
-| milestone_progress    | FLOAT |
-| issue_number          | INT   |
+| number                | INT   |
 | participant_count     | INT   |
 | published_at          | TEXT  |
 | reaction_count        | INT   |
@@ -529,12 +539,6 @@ Table-valued-function that returns all the issues of a GitHub repository.
 | title                 | TEXT  |
 | updated_at            | TEXT  |
 | url                   | TEXT  |
-| user_edits_count      | INT   |
-| viewer_can_react      | INT   |
-| viewer_can_subscribe  | INT   |
-| viewer_can_update     | INT   |
-| viewer_did_author     | INT   |
-| viewer_subscription   | TEXT  |
 
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
@@ -557,7 +561,6 @@ Table-valued-function that returns all the pull requests of a GitHub repository.
 | base_ref_name            | TEXT |
 | base_repository_name     | TEXT |
 | body                     | TEXT |
-| body_text                | TEXT |
 | changed_files            | INT  |
 | closed                   | INT  |
 | closed_at                | TEXT |
@@ -584,14 +587,10 @@ Table-valued-function that returns all the pull requests of a GitHub repository.
 | participant_count        | INT  |
 | published_at             | TEXT |
 | review_decision          | TEXT |
-| review_request_count     | TEXT |
-| review_thread_count      | INT  |
-| review_count             | INT  |
 | state                    | TEXT |
 | title                    | TEXT |
 | updated_at               | TEXT |
 | url                      | TEXT |
-| user_content_edits_count | INT  |
 
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
