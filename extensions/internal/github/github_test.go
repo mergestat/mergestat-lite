@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/askgitdev/askgit/extensions"
+	"github.com/askgitdev/askgit/extensions/options"
 	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	"github.com/dnaeon/go-vcr/v2/cassette"
 	"github.com/dnaeon/go-vcr/v2/recorder"
@@ -48,9 +49,9 @@ func newRecorder(t *testing.T) func() {
 func TestMain(m *testing.M) {
 	// register sqlite extension when this package is loaded
 	sqlite.Register(extensions.RegisterFn(
-		extensions.WithExtraFunctions(),
-		extensions.WithGitHub(),
-		extensions.WithGitHubClientGetter(func() *githubv4.Client {
+		options.WithExtraFunctions(),
+		options.WithGitHub(),
+		options.WithGitHubClientGetter(func() *githubv4.Client {
 			return githubv4.NewClient(httpClient)
 		}),
 	))

@@ -16,7 +16,7 @@ var FixtureDatabase *sql.DB
 func init() {
 	// register sqlite extension when this package is loaded
 	sqlite.Register(func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
-		return Register(ext)
+		return Register(ext, nil)
 	})
 }
 

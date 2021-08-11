@@ -1,11 +1,13 @@
 package helpers
 
 import (
+	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )
 
-func Register(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
+// Register registers helpers as a SQLite extension
+func Register(ext *sqlite.ExtensionApi, _ *options.Options) (_ sqlite.ErrorCode, err error) {
 	var fns = map[string]sqlite.Function{
 		"str_split":    &StringSplit{},
 		"toml_to_json": &TomlToJson{},

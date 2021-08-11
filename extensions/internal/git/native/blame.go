@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/askgitdev/askgit/extensions/internal/git"
+	"github.com/askgitdev/askgit/extensions/internal/git/utils"
 	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
@@ -48,7 +48,7 @@ func NewBlameModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 
 		if repoPath == "" {
 			var err error
-			repoPath, err = git.GetDefaultRepoFromCtx(ctx)
+			repoPath, err = utils.GetDefaultRepoFromCtx(ctx)
 			if err != nil {
 				return nil, err
 			}

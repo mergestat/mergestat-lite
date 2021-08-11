@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/askgitdev/askgit/extensions/internal/git/utils"
 	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -180,7 +181,7 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	var repo *git.Repository
 	{ // open the git repository
 		if path == "" {
-			path, err = GetDefaultRepoFromCtx(cur.ctx)
+			path, err = utils.GetDefaultRepoFromCtx(cur.ctx)
 			if err != nil {
 				return err
 			}

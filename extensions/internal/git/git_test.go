@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/askgitdev/askgit/extensions"
+	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/askgitdev/askgit/pkg/locator"
 	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
@@ -15,7 +16,7 @@ import (
 func init() {
 	// register sqlite extension when this package is loaded
 	sqlite.Register(extensions.RegisterFn(
-		extensions.WithExtraFunctions(), extensions.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
+		options.WithExtraFunctions(), options.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
 	))
 }
 

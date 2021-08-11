@@ -1,11 +1,13 @@
 package enry
 
 import (
+	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )
 
-func Register(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
+// Register registers enry related functionality as a SQLite extension
+func Register(ext *sqlite.ExtensionApi, _ *options.Options) (_ sqlite.ErrorCode, err error) {
 	var fns = map[string]sqlite.Function{
 		"enry_detect_language":  &EnryDetectLanguage{},
 		"enry_is_binary":        &EnryIsBinary{},
