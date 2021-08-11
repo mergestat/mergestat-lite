@@ -14,8 +14,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/askgitdev/askgit/tables"
-	"github.com/askgitdev/askgit/tables/services"
+	"github.com/askgitdev/askgit/extensions"
+	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
@@ -25,7 +25,7 @@ import (
 
 // DiskLocator is a repo locator implementation that opens on-disk repository at the specified path.
 func DiskLocator() services.RepoLocator {
-	return tables.RepoLocatorFn(func(_ context.Context, path string) (*git.Repository, error) {
+	return extensions.RepoLocatorFn(func(_ context.Context, path string) (*git.Repository, error) {
 		return git.PlainOpen(path)
 	})
 }
@@ -36,7 +36,7 @@ func DiskLocator() services.RepoLocator {
 func CachedLocator(rl services.RepoLocator) services.RepoLocator {
 	var cache = make(map[string]*git.Repository)
 
-	return tables.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+	return extensions.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
 		if cached, ok := cache[path]; ok {
 			return cached, nil
 		}
@@ -56,7 +56,7 @@ func CachedLocator(rl services.RepoLocator) services.RepoLocator {
 // that you club it with something like CachedLocator to improve performance
 // and remove the need to clone a single repository multiple times.
 func HttpLocator() services.RepoLocator {
-	return tables.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+	return extensions.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
 		var err error
 		if _, err = url.ParseRequestURI(path); err != nil {
 			return nil, errors.Wrap(err, "invalid remote url")
@@ -80,7 +80,7 @@ func MultiLocator() services.RepoLocator {
 		"file": DiskLocator,
 	}
 
-	return tables.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+	return extensions.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
 		var fn = locators["file"] // file is the default locator
 		if strings.HasPrefix(path, "http") || strings.HasPrefix(path, "https") {
 			fn = locators["http"]

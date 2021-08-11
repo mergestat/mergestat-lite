@@ -1,14 +1,14 @@
 // +build shared
 
 // This file provides a build target while building the dynamically loadable shared object library.
-// It imports github.com/askgitdev/askgit/tables which provides the actual extension implementation.
+// It imports github.com/askgitdev/askgit/extensions which provides the actual extension implementation.
 package main
 
 import (
 	"os"
 
 	"github.com/askgitdev/askgit/pkg/locator"
-	"github.com/askgitdev/askgit/tables"
+	"github.com/askgitdev/askgit/extensions"
 	"go.riyazali.net/sqlite"
 )
 
