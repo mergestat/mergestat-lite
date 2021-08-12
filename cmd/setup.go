@@ -3,8 +3,9 @@ package cmd
 import (
 	"os"
 
+	"github.com/askgitdev/askgit/extensions"
+	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/askgitdev/askgit/pkg/locator"
-	"github.com/askgitdev/askgit/tables"
 	"go.riyazali.net/sqlite"
 
 	// bring in sqlite 🙌
@@ -14,14 +15,14 @@ import (
 
 func registerExt() {
 	sqlite.Register(
-		tables.RegisterFn(
-			tables.WithExtraFunctions(),
-			tables.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
-			tables.WithContextValue("defaultRepoPath", repo),
-			tables.WithGitHub(),
-			tables.WithContextValue("githubToken", githubToken),
-			tables.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
-			tables.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
+		extensions.RegisterFn(
+			options.WithExtraFunctions(),
+			options.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
+			options.WithContextValue("defaultRepoPath", repo),
+			options.WithGitHub(),
+			options.WithContextValue("githubToken", githubToken),
+			options.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
+			options.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
 		),
 	)
 }

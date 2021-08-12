@@ -271,6 +271,14 @@ SELECT yaml_to_json('hello: world')
 -- +------------------------------+
 ```
 
+##### `go_mod_to_json`
+
+Scalar function that parses a `go.mod` file and returns a JSON representation of it.
+
+```SQL
+SELECT go_mod_to_json('<contents-of-go.mod-file>')
+```
+
 ##### `str_split`
 
 Helper for splitting strings on some separator.
