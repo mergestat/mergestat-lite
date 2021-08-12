@@ -609,6 +609,20 @@ SELECT * FROM github_repo_prs('askgitdev/askgit');
 SELECT * FROM github_repo_prs('askgitdev', 'askgit'); -- both are equivalent
 ```
 
+##### `github_repo_file_content`
+
+Scalar function that returns the contents of a file in a GitHub repository
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+  3. `expression` - either a simple file path (`README.md`) or a rev-parse suitable expression that includes a path (`HEAD:README.md` or `<some-sha>:README.md`)
+
+```sql
+SELECT github_stargazer_count('askgitdev', 'askgit', 'README.md');
+SELECT github_stargazer_count('askgitdev/askgit', 'README.md'); -- both are equivalent
+```
+
 ### Example Queries
 
 This will return all commits in the history of the currently checked out branch/commit of the repo.

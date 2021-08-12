@@ -1,0 +1,342 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($expression:String!$name:String!$owner:String!){repository(owner: $owner, name: $name){object(expression: $expression){... on Blob{text}}}}","variables":{"expression":"cfdcd109d8582ac7cb5b69c48bb426f31f39e948:README.md","name":"askgit","owner":"askgitdev"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: "{\"data\":{\"repository\":{\"object\":{\"text\":\"[![Go Reference](https://pkg.go.dev/badge/github.com/askgitdev/askgit.svg)](https://pkg.go.dev/github.com/askgitdev/askgit)\\n[![BuildStatus](https://github.com/askgitdev/askgit/workflows/tests/badge.svg)](https://github.com/askgitdev/askgit/actions?workflow=tests)\\n[![Go
+      Report Card](https://goreportcard.com/badge/github.com/askgitdev/askgit)](https://goreportcard.com/report/github.com/askgitdev/askgit)\\n[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/askgitdev/askgit/main)](https://www.tickgit.com/browse?repo=github.com/askgitdev/askgit&branch=main)\\n[![codecov](https://codecov.io/gh/askgitdev/askgit/branch/main/graph/badge.svg)](https://codecov.io/gh/askgitdev/askgit)\\n\\n\\n#
+      askgit <a href=\\\"https://try.askgit.com/\\\"><img align=\\\"right\\\" src=\\\"docs/logo.png\\\"
+      alt=\\\"AskGit Logo\\\" height=\\\"100\\\"></a>\\n\\n`askgit` is a command-line
+      tool for running SQL queries on git repositories.\\nIt's meant for ad-hoc querying
+      of git repositories on disk through a common interface (SQL), as an alternative
+      to patching together various shell commands.\\nIt can execute queries that look
+      like:\\n```sql\\n-- how many commits have been authored by user@email.com?\\nSELECT
+      count(*) FROM commits WHERE author_email = 'user@email.com'\\n```\\n\\nYou can
+      try queries on public git repositories without installing anything at [https://try.askgit.com/](https://try.askgit.com/)\\n\\nMore
+      in-depth examples and documentation can be found below.\\nAlso checkout [our
+      newsletter](https://askgit.substack.com) to stay up to date with feature releases
+      and interesting queries and use cases.\\n\\n## Installation\\n\\n### Homebrew\\n\\n```\\nbrew
+      tap askgitdev/askgit\\nbrew install askgit\\n```\\n\\n### Pre-Built Binaries\\n\\nThe
+      [latest releases](https://github.com/askgitdev/askgit/releases) should have
+      pre-built binaries for Mac and Linux.\\nYou can download and add the `askgit`
+      binary somewhere on your `$PATH` to use.\\n`libaskgit.so` is also available
+      to be loaded as a SQLite run-time extension.\\n\\n### Go\\n\\n[`libgit2`](https://libgit2.org/)
+      is a build dependency (used via [`git2go`](https://github.com/libgit2/git2go))
+      and must be available on your system for linking.\\n\\nThe following (long \U0001F62C)
+      `go install` commands can be used to install a binary via the go toolchain.\\n\\nOn
+      Mac:\\n```\\nCGO_CFLAGS=-DUSE_LIBSQLITE3 CGO_LDFLAGS=-Wl,-undefined,dynamic_lookup
+      go install -tags=\\\"sqlite_vtable,vtable,sqlite_json1,static,system_libgit2\\\"
+      github.com/askgitdev/askgit@latest\\n```\\n\\nOn Linux:\\n```\\nCGO_CFLAGS=-DUSE_LIBSQLITE3
+      CGO_LDFLAGS=-Wl,--unresolved-symbols=ignore-in-object-files go install -tags=\\\"sqlite_vtable,vtable,sqlite_json1,static,system_libgit2\\\"
+      github.com/askgitdev/askgit@latest\\n```\\n\\nSee the [`Makefile`](https://github.com/askgitdev/askgit/blob/main/Makefile)
+      for more context.\\nChecking out this repository and running `make` in the root
+      will produce two files in the `.build` directory:\\n\\n  1. `askgit` - the CLI
+      binary (which can then be moved into your `$PATH` for use)\\n  2. `libaskgit.so`
+      - a shared object file [SQLite extension](https://www.sqlite.org/loadext.html)
+      that can be used by SQLite directly\\n\\n### Using Docker\\n\\nBuild an image
+      locally using docker\\n\\n```\\ndocker build -t askgit:latest .\\n```\\n\\nOr
+      use an official image from [docker hub](https://hub.docker.com/repository/docker/augmentable/askgit)\\n\\n```\\ndocker
+      pull augmentable/askgit:latest\\n```\\n\\n#### Running commands\\n\\n`askgit`
+      operates on a git repository. This repository needs to be attached as a volume.
+      This example uses the (bash) built-in command `pwd` for the current working
+      directory\\n\\n> [**pwd**] Print the absolute pathname of the current working
+      directory.\\n\\n```\\ndocker run --rm -v `pwd`:/repo:ro augmentable/askgit \\\"SELECT
+      * FROM commits\\\"\\n```\\n\\n#### Running commands from STDIN\\n\\nFor piping
+      commands via STDIN, the docker command needs to be told to run non-interactively,
+      as well as attaching the repository at `/repo`.\\n\\n```\\ncat query.sql | docker
+      run --rm -i -v `pwd`:/repo:ro augmentable/askgit\\n```\\n\\n## Usage\\n\\n```\\naskgit
+      -h\\n```\\n\\nWill output the most up to date usage instructions for your version
+      of the CLI.\\nTypically the first argument is a SQL query string:\\n\\n```\\naskgit
+      \\\"SELECT * FROM commits\\\"\\n```\\n\\nYour current working directory will
+      be used as the path to the git repository to query by default.\\nUse the `--repo`
+      flag to specify an alternate path, or even a remote repository reference (http(s)
+      or ssh).\\n`askgit` will clone the remote repository to a temporary directory
+      before executing a query.\\n\\nYou can also pass a query in via `stdin`:\\n\\n```\\ncat
+      query.sql | askgit\\n```\\n\\nBy default, output will be an ASCII table.\\nUse
+      `--format json` or `--format csv` for alternatives.\\nSee `-h` for all the options.\\n\\n###
+      Tables and Functions\\n\\n#### Local Git Repository\\n\\nThe following tables
+      access a git repository in the current directory by default.\\nIf the `--repo`
+      flag is specified, they will use the path provided there instead.\\nA parameter
+      (usually the first) can also be provided to any of the tables below to override
+      the default repo path.\\nFor instance, `SELECT * FROM commits('https://github.com/askgitdev/askgit')`
+      will clone this repo to a temporary directory on disk and return its commits.\\n\\n#####
+      `commits`\\n\\nSimilar to `git log`, the `commits` table includes all commits
+      in the history of the currently checked out commit.\\n\\n| Column          |
+      Type     |\\n|-----------------|----------|\\n| hash            | TEXT     |\\n|
+      message         | TEXT     |\\n| author_name     | TEXT     |\\n| author_email
+      \   | TEXT     |\\n| author_when     | DATETIME |\\n| committer_name  | TEXT
+      \    |\\n| committer_email | TEXT     |\\n| committer_when  | DATETIME |\\n|
+      parents         | INT      |\\n\\nParams:\\n  1. `repository` - path to a local
+      (on disk) or remote (http(s)) repository\\n  2. `rev` - return commits starting
+      at this revision (i.e. branch name or SHA), defaults to `HEAD`\\n\\n```sql\\n--
+      return all commits starting at HEAD\\nSELECT * FROM commits\\n\\n-- specify
+      an alternative repo on disk\\nSELECT * FROM commits('/some/path/to/repo')\\n\\n--
+      clone a remote repo and use it\\nSELECT * FROM commits('https://github.com/askgitdev/askgit')\\n\\n--
+      use the default repo, but provide an alternate branch\\nSELECT * FROM commits('',
+      'some-ref')\\n```\\n\\n##### `refs`\\n\\n| Column    | Type |\\n|-----------|------|\\n|
+      name      | TEXT |\\n| type      | TEXT |\\n| remote    | TEXT |\\n| full_name
+      | TEXT |\\n| hash      | TEXT |\\n| target    | TEXT |\\n\\nParams:\\n  1. `repository`
+      - path to a local (on disk) or remote (http(s)) repository\\n\\n##### `stats`\\n\\n|
+      Column    | Type |\\n|-----------|------|\\n| file_path | TEXT |\\n| additions
+      | INT  |\\n| deletions | INT  |\\n\\nParams:\\n  1. `repository` - path to a
+      local (on disk) or remote (http(s)) repository\\n  2. `rev` - commit hash (or
+      branch/tag name) to use for retrieving stats, defaults to `HEAD`\\n  3. `to_rev`
+      - commit hash to calculate stats relative to\\n\\n```sql\\n-- return stats of
+      HEAD\\nSELECT * FROM stats\\n\\n-- return stats of a specific commit\\nSELECT
+      * FROM stats('', 'COMMIT_HASH')\\n\\n-- return stats for every commit in the
+      current history\\nSELECT commits.hash, stats.* FROM commits, stats('', commits.hash)\\n```\\n\\n#####
+      `files`\\n\\n| Column     | Type |\\n|------------|------|\\n| path       |
+      TEXT |\\n| executable | BOOL |\\n| contents   | TEXT |\\n\\nParams:\\n  1. `repository`
+      - path to a local (on disk) or remote (http(s)) repository\\n  2. `rev` - commit
+      hash (or branch/tag name) to use for retrieving files in, defaults to `HEAD`\\n\\n#####
+      `blame`\\n\\nSimilar to `git blame`, the `blame` table includes blame information
+      for all files in the current HEAD.\\n\\n| Column      | Type     |\\n|-------------|----------|\\n|
+      line_no     | INT      |\\n| commit_hash | TEXT     |\\n\\nParams:\\n  1. `repository`
+      - path to a local (on disk) or remote (http(s)) repository\\n  2. `rev` - commit
+      hash (or branch/tag name) to use for retrieving blame information from, defaults
+      to `HEAD`\\n  3. `file_path` - path of file to blame\\n\\n#### Utilities\\n\\n#####
+      JSON\\n\\nThe [SQLite JSON1 extension](https://www.sqlite.org/json1.html) is
+      included for working with JSON data.\\n\\n##### `toml_to_json`\\n\\nScalar function
+      that converts `toml` to `json`.\\n\\n```SQL\\nSELECT toml_to_json('[some-toml]')\\n\\n--
+      +-----------------------------+\\n-- | TOML_TO_JSON('[SOME-TOML]') |\\n-- +-----------------------------+\\n--
+      | {\\\"some-toml\\\":{}}            |\\n-- +-----------------------------+\\n```\\n\\n#####
+      `xml_to_json`\\n\\nScalar function that converts `xml` to `json`.\\n\\n```SQL\\nSELECT
+      xml_to_json('<some-xml>hello</some-xml>')\\n\\n-- +-------------------------------------------+\\n--
+      | XML_TO_JSON('<SOME-XML>HELLO</SOME-XML>') |\\n-- +-------------------------------------------+\\n--
+      | {\\\"some-xml\\\":\\\"hello\\\"}                      |\\n-- +-------------------------------------------+\\n```\\n\\n#####
+      `yaml_to_json` and `yml_to_json`\\n\\nScalar function that converts `yaml` to
+      `json`.\\n\\n```SQL\\nSELECT yaml_to_json('hello: world')\\n\\n-- +------------------------------+\\n--
+      | YAML_TO_JSON('HELLO: WORLD') |\\n-- +------------------------------+\\n--
+      | {\\\"hello\\\":\\\"world\\\"}            |\\n-- +------------------------------+\\n```\\n\\n#####
+      `go_mod_to_json`\\n\\nScalar function that parses a `go.mod` file and returns
+      a JSON representation of it.\\n\\n```SQL\\nSELECT go_mod_to_json('<contents-of-go.mod-file>')\\n```\\n\\n#####
+      `str_split`\\n\\nHelper for splitting strings on some separator.\\n\\n```sql\\nSELECT
+      str_split('hello,world', ',', 0)\\n\\n-- +----------------------------------+\\n--
+      | STR_SPLIT('HELLO,WORLD', ',', 0) |\\n-- +----------------------------------+\\n--
+      | hello                            |\\n-- +----------------------------------+\\n```\\n\\n```sql\\nSELECT
+      str_split('hello,world', ',', 1)\\n\\n-- +----------------------------------+\\n--
+      | STR_SPLIT('HELLO,WORLD', ',', 1) |\\n-- +----------------------------------+\\n--
+      | world                            |\\n-- +----------------------------------+\\n```\\n\\n####
+      Enry Functions\\n\\nFunctions from the [`enry` project](https://github.com/go-enry/go-enry)
+      are also available as SQL scalar functions\\n\\n##### `enry_detect_language`\\n\\nSupply
+      a file path and some source code to detect the language.\\n\\n```sql\\nSELECT
+      enry_detect_language('some/path/to/file.go', '<contents of file>')\\n```\\n\\n#####
+      `enry_is_binary`\\n\\nGiven a blob, determine if it's a binary file or not (returns
+      1 or 0).\\n\\n```sql\\nSELECT enry_is_binary('<contents of file>')\\n```\\n\\n#####
+      `enry_is_configuration`\\n\\nDetect whether a file path is to a configuration
+      file (returns 1 or 0).\\n\\n```sql\\nSELECT enry_is_configuration('some/path/to/file/config.json')\\n```\\n\\n#####
+      `enry_is_documentation`\\n\\nDetect whether a file path is to a documentation
+      file (returns 1 or 0).\\n\\n```sql\\nSELECT enry_is_documentation('some/path/to/file/README.md')\\n```\\n\\n#####
+      `enry_is_dot_file`\\n\\nDetect whether a file path is to a dot file (returns
+      1 or 0).\\n\\n```sql\\nSELECT enry_is_dot_file('some/path/to/file/.gitignore')\\n```\\n\\n#####
+      `enry_is_generated`\\n\\nDetect whether a file path is generated (returns 1
+      or 0).\\n\\n```sql\\nSELECT enry_is_generated('some/path/to/file/generated.go',
+      '<contents of file>')\\n```\\n\\n##### `enry_is_image`\\n\\nDetect whether a
+      file path is to an image (returns 1 or 0).\\n\\n```sql\\nSELECT enry_is_image('some/path/to/file/image.png')\\n```\\n\\n#####
+      `enry_is_test`\\n\\nDetect whether a file path is to a test file (returns 1
+      or 0).\\n\\n```sql\\nSELECT enry_is_test('some/path/to/file/image.png')\\n```\\n\\n#####
+      `enry_is_vendor`\\n\\nDetect whether a file path is to a vendored file (returns
+      1 or 0).\\n\\n```sql\\nSELECT enry_is_vendor('vendor/file.go')\\n```\\n\\n\\n\\n####
+      GitHub API\\n\\nYou can use `askgit` to query the [GitHub API (v4)](https://docs.github.com/en/graphql).\\nConstraints
+      in your SQL query are pushed to the GitHub API as much as possible.\\nFor instance,
+      if your query includes an `ORDER BY` clause and if items can be ordered in the
+      GitHub API response (on the specified column), your query can avoid doing a
+      full table scan and rely on the ordering returned by the API.\\n\\n##### Authenticating\\n\\nYou
+      must provide an authentication token in order to use the GitHub API tables.\\nYou
+      can create a personal access token [following these instructions](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token).\\n`askgit`
+      will look for a `GITHUB_TOKEN` environment variable when executing, to use for
+      authentication.\\nThis is also true if running as a runtime loadable extension.\\n\\n#####
+      Rate Limiting\\n\\nAll API requests to GitHub are [rate limited](https://docs.github.com/en/graphql/overview/resource-limitations#rate-limit).\\nThe
+      following tables make use of the GitHub GraphQL API (v4), which rate limits
+      additionally based on the \\\"complexity\\\" of GraphQL queries.\\nGenerally
+      speaking, the more fields/relations in your GraphQL query, the higher the \\\"cost\\\"
+      of a single API request, and the faster you may reach a rate limit.\\nDepending
+      on your SQL query, it's hard to know ahead of time what a good client-side rate
+      limit is.\\nBy default, each of the tables below will fetch **100 items per
+      page** and permit **2 API requests per second**.\\nYou can override both of
+      these parameters by setting the following environment variables:\\n\\n1. `GITHUB_PER_PAGE`
+      - expects an integer between 1 and 100, sets how many items are fetched per-page
+      in API calls that paginate results.\\n2. `GITHUB_RATE_LIMIT` - expressed in
+      the form `(number of requests) / (number of seconds)` (i.e. `1/3` means at most
+      1 request per 3 seconds)\\n\\nIf you encounter a rate limit error that looks
+      like `You have exceeded a secondary rate limit`, consider setting the `GITHUB_PER_PAGE`
+      value to a lower number.\\nIf you have a large number of items to scan in your
+      query, it may take longer, but you should avoid hitting a rate limit error.\\n\\n#####
+      `github_stargazers`\\n\\nTable-valued-function that returns a list of users
+      who have starred a repository.\\n\\n| Column     | Type |\\n|------------|------|\\n|
+      login      | TEXT |\\n| email      | TEXT |\\n| name       | TEXT |\\n| bio
+      \       | TEXT |\\n| company    | TEXT |\\n| avatar_url | TEXT |\\n| created_at
+      | TEXT |\\n| updated_at | TEXT |\\n| twitter    | TEXT |\\n| website    | TEXT
+      |\\n| location   | TEXT |\\n| starred_at | TEXT |\\n\\nParams:\\n  1. `fullNameOrOwner`
+      - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which
+      would require the second argument)\\n  2. `name` - optional if the first argument
+      is a \\\"full\\\" name, otherwise required - the name of the repo\\n\\n```sql\\nSELECT
+      * FROM github_stargazers('askgitdev', 'askgit');\\nSELECT * FROM github_stargazers('askgitdev/askgit');
+      -- both are equivalent\\n```\\n\\n##### `github_starred_repos`\\n\\nTable-valued-function
+      that returns a list of repositories a user has starred.\\n\\n| Column          |
+      Type |\\n|-----------------|------|\\n| name            | TEXT |\\n| url             |
+      TEXT |\\n| description     | TEXT |\\n| created_at      | TEXT |\\n| pushed_at
+      \      | TEXT |\\n| updated_at      | TEXT |\\n| stargazer_count | INT  |\\n|
+      name_with_owner | TEXT |\\n| starred_at      | TEXT |\\n\\nParams:\\n  1. `login`
+      - the `login` of a GitHub user\\n\\n```sql\\nSELECT * FROM github_starred_repos('patrickdevivo')\\n```\\n\\n#####
+      `github_stargazer_count`\\n\\nScalar function that returns the number of stars
+      a GitHub repository has.\\n\\nParams:\\n  1. `fullNameOrOwner` - either the
+      full repo name `askgitdev/askgit` or just the owner `askgit` (which would require
+      the second argument)\\n  2. `name` - optional if the first argument is a \\\"full\\\"
+      name, otherwise required - the name of the repo\\n\\n```sql\\nSELECT github_stargazer_count('askgitdev',
+      'askgit');\\nSELECT github_stargazer_count('askgitdev/askgit'); -- both are
+      equivalent\\n```\\n\\n##### `github_user_repos` and `github_org_repos`\\n\\nTable-valued
+      function that returns all the repositories belonging to a user or an organization.\\n\\n|
+      Column                      | Type |\\n|-----------------------------|------|\\n|
+      created_at                  | TEXT |\\n| database_id                 | INT  |\\n|
+      default_branch_ref_name     | TEXT |\\n| default_branch_ref_prefix   | TEXT
+      |\\n| description                 | TEXT |\\n| disk_usage                  |
+      INT  |\\n| fork_count                  | INT  |\\n| homepage_url                |
+      TEXT |\\n| is_archived                 | INT  |\\n| is_disabled                 |
+      INT  |\\n| is_fork                     | INT  |\\n| is_mirror                   |
+      INT  |\\n| is_private                  | INT  |\\n| issue_count                 |
+      INT  |\\n| latest_release_author       | TEXT |\\n| latest_release_created_at
+      \  | TEXT |\\n| latest_release_name         | TEXT |\\n| latest_release_published_at
+      | TEXT |\\n| license_key                 | TEXT |\\n| license_name                |
+      TEXT |\\n| name                        | TEXT |\\n| open_graph_image_url        |
+      TEXT |\\n| primary_language            | TEXT |\\n| pull_request_count          |
+      INT  |\\n| pushed_at                   | TEXT |\\n| release_count               |
+      INT  |\\n| stargazer_count             | TEXT |\\n| updated_at                  |
+      TEXT |\\n| watcher_count               | INT  |\\n\\nParams:\\n  1. `login`
+      - the `login` of a GitHub user or organization\\n\\n```sql\\nSELECT * FROM github_user_repos('patrickdevivo')\\nSELECT
+      * FROM github_org_repos('askgitdev')\\n```\\n\\n##### `github_repo_issues`\\n\\nTable-valued-function
+      that returns all the issues of a GitHub repository.\\n\\n| Column                |
+      Type  |\\n|-----------------------|-------|\\n| owner                 | TEXT
+      \ |\\n| reponame              | TEXT  |\\n| author_login          | TEXT  |\\n|
+      body                  | TEXT  |\\n| closed                | INT   |\\n| closed_at
+      \            | TEXT  |\\n| comment_count         | INT   |\\n| created_at            |
+      TEXT  |\\n| created_via_email     | INT   |\\n| database_id           | TEXT
+      \ |\\n| editor_login          | TEXT  |\\n| includes_created_edit | INT   |\\n|
+      label_count           | INT   |\\n| last_edited_at        | TEXT  |\\n| locked
+      \               | INT   |\\n| milestone_count       | INT   |\\n| number                |
+      INT   |\\n| participant_count     | INT   |\\n| published_at          | TEXT
+      \ |\\n| reaction_count        | INT   |\\n| state                 | TEXT  |\\n|
+      title                 | TEXT  |\\n| updated_at            | TEXT  |\\n| url
+      \                  | TEXT  |\\n\\nParams:\\n  1. `fullNameOrOwner` - either
+      the full repo name `askgitdev/askgit` or just the owner `askgit` (which would
+      require the second argument)\\n  2. `name` - optional if the first argument
+      is a \\\"full\\\" name, otherwise required - the name of the repo\\n\\n```sql\\nSELECT
+      * FROM github_repo_issues('askgitdev/askgit');\\nSELECT * FROM github_repo_issues('askgitdev',
+      'askgit'); -- both are equivalent\\n```\\n##### `github_repo_prs`\\n\\nTable-valued-function
+      that returns all the pull requests of a GitHub repository.\\n\\n| Column                   |
+      Type |\\n|--------------------------|------|\\n| additions                |
+      INT  |\\n| author_login             | TEXT |\\n| author_association       |
+      TEXT |\\n| base_ref_oid             | TEXT |\\n| base_ref_name            |
+      TEXT |\\n| base_repository_name     | TEXT |\\n| body                     |
+      TEXT |\\n| changed_files            | INT  |\\n| closed                   |
+      INT  |\\n| closed_at                | TEXT |\\n| comment_count            |
+      INT  |\\n| commit_count             | INT  |\\n| created_at               |
+      TEXT |\\n| created_via_email        | INT  |\\n| database_id              |
+      INT  |\\n| deletions                | INT  |\\n| editor_login             |
+      TEXT |\\n| head_ref_name            | TEXT |\\n| head_ref_oid             |
+      TEXT |\\n| head_repository_name     | TEXT |\\n| is_draft                 |
+      INT  |\\n| label_count              | INT  |\\n| last_edited_at           |
+      TEXT |\\n| locked                   | INT  |\\n| maintainer_can_modify    |
+      TEXT |\\n| mergeable                | TEXT |\\n| merged                   |
+      INT  |\\n| merged_at                | TEXT |\\n| merged_by                |
+      TEXT |\\n| number                   | INT  |\\n| participant_count        |
+      INT  |\\n| published_at             | TEXT |\\n| review_decision          |
+      TEXT |\\n| state                    | TEXT |\\n| title                    |
+      TEXT |\\n| updated_at               | TEXT |\\n| url                      |
+      TEXT |\\n\\nParams:\\n  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit`
+      or just the owner `askgit` (which would require the second argument)\\n  2.
+      `name` - optional if the first argument is a \\\"full\\\" name, otherwise required
+      - the name of the repo\\n\\n```sql\\nSELECT * FROM github_repo_prs('askgitdev/askgit');\\nSELECT
+      * FROM github_repo_prs('askgitdev', 'askgit'); -- both are equivalent\\n```\\n\\n###
+      Example Queries\\n\\nThis will return all commits in the history of the currently
+      checked out branch/commit of the repo.\\n```sql\\nSELECT * FROM commits\\n```\\n\\nReturn
+      the (de-duplicated) email addresses of commit authors:\\n```sql\\nSELECT DISTINCT
+      author_email FROM commits\\n```\\n\\nReturn the commit counts of every author
+      (by email):\\n```sql\\nSELECT author_email, count(*) FROM commits GROUP BY author_email
+      ORDER BY count(*) DESC\\n```\\n\\nSame as above, but excluding merge commits:\\n```sql\\nSELECT
+      author_email, count(*) FROM commits WHERE parents < 2 GROUP BY author_email
+      ORDER BY count(*) DESC\\n```\\n\\nOutputs the set of files in the current tree:\\n```sql\\nSELECT
+      * FROM files\\n```\\n\\n\\nReturns author emails with lines added/removed, ordered
+      by total number of commits in the history (excluding merges):\\n```sql\\nSELECT
+      count(DISTINCT commits.hash) AS commits, SUM(additions) AS additions, SUM(deletions)
+      AS deletions, author_email\\nFROM commits LEFT JOIN stats('', commits.hash)\\nWHERE
+      commits.parents < 2\\nGROUP BY author_email ORDER BY commits\\n```\\n\\n\\nReturns
+      commit counts by author, broken out by day of the week:\\n\\n```sql\\nSELECT\\n
+      \   count(*) AS commits,\\n    count(CASE WHEN strftime('%w',author_when)='0'
+      THEN 1 END) AS sunday,\\n    count(CASE WHEN strftime('%w',author_when)='1'
+      THEN 1 END) AS monday,\\n    count(CASE WHEN strftime('%w',author_when)='2'
+      THEN 1 END) AS tuesday,\\n    count(CASE WHEN strftime('%w',author_when)='3'
+      THEN 1 END) AS wednesday,\\n    count(CASE WHEN strftime('%w',author_when)='4'
+      THEN 1 END) AS thursday,\\n    count(CASE WHEN strftime('%w',author_when)='5'
+      THEN 1 END) AS friday,\\n    count(CASE WHEN strftime('%w',author_when)='6'
+      THEN 1 END) AS saturday,\\n    author_email\\nFROM commits GROUP BY author_email
+      ORDER BY commits\\n```\\n\\n#### Exporting\\n\\nYou can use the `askgit export`
+      sub command to save the output of queries into a sqlite database file.\\nThe
+      command expects a path to a db file (which will be created if it doesn't already
+      exist) and a variable number of \\\"export pairs,\\\" specified by the `-e`
+      flag.\\nEach pair represents the name of a table to create and a query to generate
+      its contents.\\n\\n```\\naskgit export my-export-file -e commits -e \\\"SELECT
+      * FROM commits\\\" -e files -e \\\"SELECT * FROM files\\\"\\n```\\n\\nThis can
+      be useful if you're looking to use another tool to examine the data emitted
+      by `askgit`.\\nSince the exported file is a plain SQLite database, queries should
+      be much faster (as the original git repository is no longer traversed) and you
+      should be able to use any tool that supports querying SQLite database files.\\n\"}}}}"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Cache-Control:
+      - no-cache
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 12 Aug 2021 01:44:44 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - E8FE:04B8:22466:DB0A7:61147D0C
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4975"
+      X-Ratelimit-Reset:
+      - "1628734978"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "25"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 283.942439ms
