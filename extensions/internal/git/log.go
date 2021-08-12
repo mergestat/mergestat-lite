@@ -94,6 +94,11 @@ func (tab *gitLogTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 			return nil, sqlite.SQLITE_CONSTRAINT
 		}
 
+		// if repository is provided, it must be usable
+		if idx == 9 && !constraint.Usable {
+			return nil, sqlite.SQLITE_CONSTRAINT
+		}
+
 		if !constraint.Usable {
 			continue
 		}

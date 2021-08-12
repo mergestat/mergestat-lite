@@ -55,6 +55,11 @@ func (tab *gitRefTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 	out.ConstraintUsage = make([]*sqlite.ConstraintUsage, len(input.Constraints))
 
 	for i, constraint := range input.Constraints {
+		// if repository is provided, it must be usable
+		if constraint.ColumnIndex == 6 && !constraint.Usable {
+			return nil, sqlite.SQLITE_CONSTRAINT
+		}
+
 		if !constraint.Usable {
 			continue // we do not support unusable constraint at all
 		}
