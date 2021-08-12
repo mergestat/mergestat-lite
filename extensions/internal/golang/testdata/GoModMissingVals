@@ -1,0 +1,10 @@
+module github.com/askgitdev/askgit
+
+require (
+	github.com/BurntSushi/toml v0.3.1
+	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/Microsoft/go-winio v0.5.0 // indirect
+	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/augmentable-dev/vtab v0.0.0-20210717200339-0c8dcfe2033b
+)

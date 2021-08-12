@@ -58,18 +58,32 @@ func goModVersionToVersion(v module.Version) Version {
 func (f *GoModToJSON) Args() int           { return 1 }
 func (f *GoModToJSON) Deterministic() bool { return true }
 func (f *GoModToJSON) Apply(context *sqlite.Context, value ...sqlite.Value) {
-	parsed, err := modfile.Parse("go.mod", value[0].Blob(), nil)
+	input := value[0].Blob()
+
+	if len(input) == 0 {
+		context.ResultNull()
+		return
+	}
+
+	parsed, err := modfile.Parse("go.mod", input, nil)
 	if err != nil {
 		context.ResultError(err)
 		return
 	}
+
 	file := &GoModFile{
-		Version: goModVersionToVersion(parsed.Module.Mod),
-		Go:      parsed.Go.Version,
 		Require: make([]*Require, len(parsed.Require)),
 		Exclude: make([]*Exclude, len(parsed.Exclude)),
 		Replace: make([]*Replace, len(parsed.Replace)),
 		Retract: make([]*Retract, len(parsed.Retract)),
+	}
+
+	if parsed.Module != nil {
+		file.Version = goModVersionToVersion(parsed.Module.Mod)
+	}
+
+	if parsed.Go != nil {
+		file.Go = parsed.Go.Version
 	}
 
 	for i, r := range parsed.Require {
