@@ -1,13 +1,13 @@
 ## AskGit Public API
 
 The [demo site](https://try.askgit.com/) makes use of a publicly available AskGit HTTP API which can be called directly.
-Queries are executed in an AWS lambda function and have the following limitations:
+Queries are executed in an AWS Lambda function and have the following limitations:
 
-1. At most 500 rows will be returned
+1. At most 500 rows can be returned
 2. Queries time out after 30 seconds
 3. Query results must be under 10 MB
 
-You can use this API by sending a `POST` request to `https://try.askgit.com/api/query`.
+You can use this API directly by sending a `POST` request to `https://try.askgit.com/api/query`.
 Make sure you set a `Content-Type: application/json` header.
 The request body shoud have the following fields:
 
@@ -21,12 +21,13 @@ The JSON response will have the following fields:
 3. `columnNames` - array of column names in the result set
 4. `columnTypes` - array of column types in the result set
 
+For example:
 
 ```
 curl -X POST -H "content-type: application/json" https://try.askgit.com/api/query -d '{"query": "select * from commits limit 1", "repo": "https://github.com/askgitdev/askgit"}'
 ```
 
-Will yield something like:
+Will yield a result like:
 
 ```json
 {
