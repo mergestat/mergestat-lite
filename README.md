@@ -89,6 +89,11 @@ For piping commands via STDIN, the docker command needs to be told to run non-in
 cat query.sql | docker run --rm -i -v `pwd`:/repo:ro augmentable/askgit
 ```
 
+## Public API
+
+We maintain a free to use, public API for running queries (executed in an AWS Lambda function).
+See [this page](docs/API.md) for more information.
+
 ## Usage
 
 ```
