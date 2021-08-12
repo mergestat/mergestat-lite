@@ -85,7 +85,6 @@ func (tab *gitLogTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 
 	var out = &sqlite.IndexInfoOutput{}
 	out.ConstraintUsage = make([]*sqlite.ConstraintUsage, len(input.Constraints))
-	out.EstimatedCost = 10000.0 // set a high initial estimated cost, to be decremented below
 
 	for i, constraint := range input.Constraints {
 		idx := constraint.ColumnIndex
@@ -104,8 +103,7 @@ func (tab *gitLogTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 			continue
 		}
 
-		argv += 1                // increment pro-actively .. if unused we decrement it later
-		out.EstimatedCost -= 100 // decrement pro-actively .. if unused we increment it later
+		argv += 1 // increment pro-actively .. if unused we decrement it later
 
 		switch {
 		// user has specified WHERE hash = 'xxx' .. we just need to pick a single commit here
@@ -137,7 +135,6 @@ func (tab *gitLogTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 
 		default:
 			argv -= 1 // constraint not used .. decrement back the argv
-			out.EstimatedCost += 100
 		}
 	}
 
