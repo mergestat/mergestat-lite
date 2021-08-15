@@ -21,6 +21,7 @@ func registerExt() {
 			options.WithContextValue("defaultRepoPath", repo),
 			options.WithGitHub(),
 			options.WithContextValue("githubToken", githubToken),
+			options.WithContextValue("sourcegraphToken", sourcegraphToken),
 			options.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
 			options.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
 		),

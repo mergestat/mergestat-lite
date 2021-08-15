@@ -6,6 +6,7 @@ import (
 	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
 	"github.com/shurcooL/githubv4"
+	"github.com/shurcooL/graphql"
 )
 
 // Options is the container for various different options
@@ -23,6 +24,12 @@ type Options struct {
 
 	// GitHubClientGetter overrides the default GitHub v4 client
 	GitHubClientGetter func() *githubv4.Client
+
+	// Sourcegraph set to true to register Sourcegraph tables/func
+	Sourcegraph bool
+
+	// SourcegraphClientGetter establishes graphql client
+	SourcegraphClientGetter func() *graphql.Client
 
 	// Context is a key-value store to pass along values to the underlying extensions
 	Context services.Context
