@@ -257,7 +257,7 @@ func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*search_r
 			Search struct {
 				Results search_results
 			} `graphql:"search(query: $query, version: V2)"`
-		} `graphql:"query($query: String!)"`
+		} `graphql:"query ($query: String!)"`
 	}
 
 	variables := map[string]interface{}{
