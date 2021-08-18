@@ -268,7 +268,7 @@ var userReposCols = []vtab.Column{
 	{Name: "pull_request_count", Type: sqlite.SQLITE_INTEGER},
 	{Name: "pushed_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "release_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "stargazer_count", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "stargazer_count", Type: sqlite.SQLITE_INTEGER, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "watcher_count", Type: sqlite.SQLITE_INTEGER},
 }
