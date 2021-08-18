@@ -54,6 +54,16 @@ func WithGitHubClientGetter(getter func() *githubv4.Client) OptionFn {
 	return func(o *Options) { o.GitHubClientGetter = getter }
 }
 
+// WithSourceGraph configures the extension to also register the SourceGraph related tables and funcs
+func WithSourceGraph() OptionFn {
+	return func(o *Options) { o.Sourcegraph = true }
+}
+
+// WithSourceGraphClientGetter configures a way to use a custom SourceGraphv4 client
+func WithSourceGraphClientGetter(getter func() *graphql.Client) OptionFn {
+	return func(o *Options) { o.SourcegraphClientGetter = getter }
+}
+
 // RepoLocatorFn is an adapter type that adapts any function with compatible
 // signature to a RepoLocator instance.
 type RepoLocatorFn func(ctx context.Context, path string) (*git.Repository, error)

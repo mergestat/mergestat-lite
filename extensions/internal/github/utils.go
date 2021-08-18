@@ -103,8 +103,3 @@ func repoOwnerAndName(name, fullNameOrOwner string) (string, string, error) {
 		return fullNameOrOwner, name, nil
 	}
 }
-
-// GetSourcegraphTokenFromCtx looks up the sourcegraphToken key in the supplied context and returns it if set
-func GetSourcegraphTokenFromCtx(ctx services.Context) string {
-	return ctx["sourcegraphToken"]
-}
