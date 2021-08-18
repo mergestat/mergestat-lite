@@ -510,7 +510,7 @@ Table-valued function that returns all the repositories belonging to a user or a
 | pull_request_count          | INT  |
 | pushed_at                   | TEXT |
 | release_count               | INT  |
-| stargazer_count             | TEXT |
+| stargazer_count             | INT  |
 | updated_at                  | TEXT |
 | watcher_count               | INT  |
 
