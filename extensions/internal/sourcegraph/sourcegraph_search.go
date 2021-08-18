@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/graphql"
@@ -148,7 +147,7 @@ type search_results struct {
 			Commit_search_result []commit_search_result `graphql:"...CommitSearchResultFields"`
 		} `graphql:"... on CommitSearchResults"`
 		Repository struct {
-			Repository_fields []repository_fields `graphql:"...RepositoryFields`
+			Repository_fields []repository_fields `graphql:"...RepositoryFields"`
 		} `graphql:"... on Repository"`
 	}
 	LimitHit graphql.Boolean
@@ -176,7 +175,7 @@ type file_match struct {
 		Url     graphql.String
 		Content graphql.String
 		Commit  struct {
-			oid graphql.String
+			Oid graphql.String
 		}
 	}
 	LineMatches []struct {
@@ -283,11 +282,11 @@ type iterResults struct {
 
 func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 	col := searchCols[c]
-	switch col.Type{
+	switch i.results.Results.Typename {
 	case "FileMatch":
-		switch col.Name{
+		switch col.Name {
 		case "file_commit":
-			ctx.ResultText(i.results.Results.FileMatch.FileMatchFields[i.current].File.Commit.oid)
+			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Commit.Oid))
 		case "file_content":
 			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Content))
 		case "file_name":
@@ -296,20 +295,86 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Path))
 		case "file_url":
 			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Url))
-		case "line_matches_preview":
+		case "linematches_preview":
 			var p string
-			for _,x := range(i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches){
-				p+="\n"+string(x.Preview)
+			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
+				p += "\n" + string(x.Preview)
+			}
+			ctx.ResultText(p)
+		case "linematches_line_no":
+			var p string
+			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
+				p += "\n" + string(x.LineNumber)
+			}
+			ctx.ResultText(p)
+		case "linematches_offset_and_length":
+			var p string
+			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
+				p += "\n" + string(x.OffsetAndLength)
+			}
+			ctx.ResultText(p)
+		case "linematches_limit_hit":
+			var p string
+			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
+				p += "\n" + fmt.Sprint(x.LimitHit)
 			}
 			ctx.ResultText(p)
 		}
 
 	case "CommitSearchResult":
-
+		switch col.Name {
+		case "CSR_message_preview_value":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].MessagePreview.Value))
+		case "CSR_message_preview_highlight":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].MessagePreview.Highlights.Line))
+		case "CSR_diff_preview_value":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].DiffPreview.Value))
+		case "CSR_diff_preview_highlight":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].DiffPreview.Highlights.Line))
+		case "CSR_label":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Label.Html))
+		case "CSR_url":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Url))
+		case "CSR_matches_url":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Url))
+		case "CSR_matches_body_html":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Body.Html))
+		case "CSR_matches_body_text":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Body.Text))
+		case "CSR_matches_highlights_line":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Highlights.Line))
+		case "CSR_matches_highlights_character":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Highlights.Character))
+		case "CSR_matches_highlights_length":
+			ctx.ResultInt(int(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Highlights.Length))
+		case "CSR_commit_repository_name":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Repository.name))
+		case "CSR_commit_hash":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Oid))
+		case "CSR_commit_url":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Url))
+		case "CSR_commit_subject":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Subject))
+		case "CSR_commit_author_date":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Author.Date))
+		case "CSR_commit_author_displayname":
+			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Author.Person.DisplayName))
+		}
 	case "Repository":
-
+		switch col.Name {
+		case "repository_name":
+			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].Name))
+		case "repository_url":
+			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].Url))
+		case "repository_externalurl_servicetype":
+			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].ExternalURLs.ServiceType))
+		case "repository_externalurl_url":
+			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].ExternalURLs.Url))
+		case "repository_label_html":
+			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].Label.Html))
+		}
 	}
-	
+
 	switch col.Name {
 	case "cloning":
 		ctx.ResultText(string(i.results.Cloning.Name))
@@ -323,17 +388,36 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 		ctx.ResultInt(int(i.results.ElapsedMilliseconds))
 	case "search_results_alert_fields":
 		var alerts string
-		for _,result:=range(i.results.SearchResultsAlertFields){
-			alerts+=string(result.Alert.Title+result.Alert.Description+"\n"+result.Alert.ProposedQueries.Description)
+		for _, result := range i.results.SearchResultsAlertFields {
+			alerts += string(result.Alert.Title + result.Alert.Description + "\n" + result.Alert.ProposedQueries.Description)
 		}
 		ctx.ResultText(alerts)
-	
+	}
 	return nil
 }
 
 func (i *iterResults) Next() (vtab.Row, error) {
+	var err error
+	println(i.current)
+	if i.current == -1 {
+		i.results, err = fetchSearch(context.Background(), &fetchSourcegraphOptions{i.client, i.query})
+		if err != nil {
+			return nil, err
+		}
+	}
+	//results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, i.perPage, cursor, i.prOrder})
+
 	i.current += 1
-	length := len(i.results.Results.CommitSearchResults.Commit_search_result) + len(i.results.Results.Repository.Repository_fields) + len(i.results.Results.FileMatch.FileMatchFields)
+	var length int
+	switch i.results.Results.Typename {
+	case "FileMatch":
+		length = len(i.results.Results.FileMatch.FileMatchFields)
+	case "CommitSearchResults":
+		length = len(i.results.Results.CommitSearchResults.Commit_search_result)
+	case "RepositoryFields":
+		length = len(i.results.Results.Repository.Repository_fields)
+	}
+
 	if i.results == nil || i.current >= length {
 		return nil, io.EOF
 	}
@@ -342,34 +426,50 @@ func (i *iterResults) Next() (vtab.Row, error) {
 }
 
 var searchCols = []vtab.Column{
-	{Name: "owner", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "reponame", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
-	{Name: "author_login", Type: sqlite.SQLITE_TEXT},
-	{Name: "body", Type: sqlite.SQLITE_TEXT},
-	{Name: "closed", Type: sqlite.SQLITE_INTEGER},
-	{Name: "closed_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "comment_count", Type: sqlite.SQLITE_INTEGER, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_via_email", Type: sqlite.SQLITE_INTEGER},
-	{Name: "database_id", Type: sqlite.SQLITE_TEXT},
-	{Name: "editor_login", Type: sqlite.SQLITE_TEXT},
-	{Name: "includes_created_edit", Type: sqlite.SQLITE_INTEGER},
-	{Name: "label_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "last_edited_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "locked", Type: sqlite.SQLITE_INTEGER},
-	{Name: "milestone_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "number", Type: sqlite.SQLITE_INTEGER},
-	{Name: "participant_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "published_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "reaction_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "state", Type: sqlite.SQLITE_TEXT},
-	{Name: "title", Type: sqlite.SQLITE_TEXT},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "url", Type: sqlite.SQLITE_TEXT},
+	{Name: "query", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "sourcegraph_token", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "CSR_commit_author_date", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_commit_author_displayname", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_commit_hash", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_commit_repository_name", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_commit_subject", Type: sqlite.SQLITE_INTEGER},
+	{Name: "CSR_commit_url", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_diff_preview_highlight", Type: sqlite.SQLITE_INTEGER, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "CSR_diff_preview_value", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "CSR_label", Type: sqlite.SQLITE_INTEGER},
+	{Name: "CSR_matches_body_html", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_matches_body_text", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_matches_highlights_character", Type: sqlite.SQLITE_INTEGER},
+	{Name: "CSR_matches_highlights_length", Type: sqlite.SQLITE_INTEGER},
+	{Name: "CSR_matches_highlights_line", Type: sqlite.SQLITE_TEXT},
+	{Name: "CSR_matches_url", Type: sqlite.SQLITE_INTEGER},
+	{Name: "CSR_message_preview_highlight", Type: sqlite.SQLITE_INTEGER},
+	{Name: "CSR_message_preview_value", Type: sqlite.SQLITE_INTEGER},
+	{Name: "CSR_url", Type: sqlite.SQLITE_INTEGER},
+	{Name: "cloning", Type: sqlite.SQLITE_TEXT},
+	{Name: "elapsed_milliseconds", Type: sqlite.SQLITE_INTEGER},
+	{Name: "file_commit", Type: sqlite.SQLITE_TEXT},
+	{Name: "file_content", Type: sqlite.SQLITE_TEXT},
+	{Name: "file_name", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "file_path", Type: sqlite.SQLITE_TEXT},
+	{Name: "file_url", Type: sqlite.SQLITE_TEXT},
+	{Name: "linematches_limit_hit", Type: sqlite.SQLITE_TEXT},
+	{Name: "linematches_line_no", Type: sqlite.SQLITE_INTEGER},
+	{Name: "linematches_offset_and_length", Type: sqlite.SQLITE_INTEGER},
+	{Name: "linematches_preview", Type: sqlite.SQLITE_TEXT},
+	{Name: "match_count", Type: sqlite.SQLITE_INTEGER},
+	{Name: "missing", Type: sqlite.SQLITE_INTEGER},
+	{Name: "repository_externalurl_servicetype", Type: sqlite.SQLITE_INTEGER},
+	{Name: "repository_externalurl_url", Type: sqlite.SQLITE_INTEGER},
+	{Name: "repository_label_html", Type: sqlite.SQLITE_TEXT},
+	{Name: "repository_name", Type: sqlite.SQLITE_INTEGER},
+	{Name: "repository_url", Type: sqlite.SQLITE_TEXT},
+	{Name: "search_results_alert_fields", Type: sqlite.SQLITE_TEXT},
+	{Name: "timed_out", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_repo_issues", issuesCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("github_repo_issues", searchCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var query string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {

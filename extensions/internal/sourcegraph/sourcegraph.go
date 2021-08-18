@@ -32,7 +32,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 		"sourcegraph_search": NewSourcegraphSearchModule(sourcegraphOpts),
 	}
 
-	// register GitHub tables
+	// register SourceGraph tables
 	for name, mod := range modules {
 		if err = ext.CreateModule(name, mod); err != nil {
 			return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register Sourcegraph %q module", name)
