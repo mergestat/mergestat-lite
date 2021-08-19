@@ -257,8 +257,6 @@ func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*search_r
 	variables := map[string]interface{}{
 		"query": graphql.String(input.Query),
 	}
-	println(input.Query)
-	println(fmt.Sprint(variables["query"]))
 
 	err := input.Client.Query(ctx, &sourcegraphQuery, variables)
 
@@ -426,19 +424,17 @@ func graphqlStrArrToString(strArr []graphql.String) string {
 }
 func (i *iterResults) Next() (vtab.Row, error) {
 	var err error
-	println(i.current)
 	if i.current == -1 {
 		i.results, err = fetchSearch(context.Background(), &fetchSourcegraphOptions{i.client, i.query})
 		if err != nil {
 			return nil, err
 		}
 	}
-	//results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, i.perPage, cursor, i.prOrder})
 
 	i.current += 1
-	//length := len(i.results.Results)
+	length := len(i.results.Results)
 
-	if i.results == nil || i.current >= 10 /*length*/ {
+	if i.results == nil || i.current >= length {
 		return nil, io.EOF
 	}
 
