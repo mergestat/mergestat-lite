@@ -138,17 +138,14 @@ fragment SearchResultsAlertFields on SearchResults {
 }
 */
 type search_results struct {
-	Results struct {
-		Typename  graphql.String `graphql:"__typename"`
-		FileMatch struct {
-			FileMatchFields []file_match `graphql:"...FileMatchFields"`
-		} `graphql:"... on FileMatch"`
-		CommitSearchResults struct {
-			Commit_search_result []commit_search_result `graphql:"...CommitSearchResultFields"`
-		} `graphql:"... on CommitSearchResults"`
-		Repository struct {
-			Repository_fields []repository_fields `graphql:"...RepositoryFields"`
-		} `graphql:"... on Repository"`
+	Results []struct {
+		Typename graphql.String `graphql:"__typename"`
+
+		FileMatchFields file_match `graphql:"... on FileMatch"`
+
+		CommitSearchResultFields commit_search_result `graphql:"... on CommitSearchResult"`
+
+		RepositoryFields repository_fields `graphql:"... on Repository"`
 	}
 	LimitHit graphql.Boolean
 	Cloning  struct {
@@ -162,7 +159,7 @@ type search_results struct {
 	}
 	MatchCount               graphql.Int
 	ElapsedMilliseconds      graphql.Int
-	SearchResultsAlertFields []search_results_alert_fields `graphql:"...SearchResultsAlertFields"`
+	SearchResultsAlertFields search_results_alert_fields `graphql:"... on SearchResults"`
 }
 type file_match struct {
 	Repository struct {
@@ -179,10 +176,9 @@ type file_match struct {
 		}
 	}
 	LineMatches []struct {
-		Preview         graphql.String
-		LineNumber      graphql.Int
-		OffsetAndLength graphql.String
-		LimitHit        graphql.Boolean
+		Preview          graphql.String
+		LineNumber       graphql.Int
+		OffsetAndLengths [][]graphql.Int
 	}
 }
 type preview struct {
@@ -207,7 +203,7 @@ type commit_search_result struct {
 			Html graphql.String
 			Text graphql.String
 		}
-		Highlights highlight
+		Highlights []highlight
 	}
 	Commit struct {
 		Repository struct {
@@ -227,10 +223,10 @@ type commit_search_result struct {
 type repository_fields struct {
 	Name         graphql.String
 	Url          graphql.String
-	ExternalURLs struct {
-		ServiceType graphql.String
+	ExternalURLs []struct {
+		ServiceKind graphql.String
 		Url         graphql.String
-	}
+	} `graphql:"externalURLs"`
 	Label struct {
 		Html graphql.String
 	}
@@ -239,7 +235,7 @@ type search_results_alert_fields struct {
 	Alert struct {
 		Title           graphql.String
 		Description     graphql.String
-		ProposedQueries struct {
+		ProposedQueries []struct {
 			Description graphql.String
 			Query       graphql.String
 		}
@@ -253,16 +249,16 @@ type fetchSourcegraphOptions struct {
 
 func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*search_results, error) {
 	var sourcegraphQuery struct {
-		Query struct {
-			Search struct {
-				Results search_results
-			} `graphql:"search(query: $query, version: V2)"`
-		} `graphql:"query ($query: String!)"`
+		Search struct {
+			Results search_results
+		} `graphql:"search(query: $query, version: V2)"`
 	}
 
 	variables := map[string]interface{}{
 		"query": graphql.String(input.Query),
 	}
+	println(input.Query)
+	println(fmt.Sprint(variables["query"]))
 
 	err := input.Client.Query(ctx, &sourcegraphQuery, variables)
 
@@ -270,7 +266,7 @@ func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*search_r
 		return nil, err
 	}
 
-	return &sourcegraphQuery.Query.Search.Results, nil
+	return &sourcegraphQuery.Search.Results, nil
 }
 
 type iterResults struct {
@@ -281,42 +277,37 @@ type iterResults struct {
 }
 
 func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
+
 	col := searchCols[c]
-	switch i.results.Results.Typename {
+	switch i.results.Results[i.current].Typename {
 	case "FileMatch":
 		switch col.Name {
 		case "file_commit":
-			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Commit.Oid))
+			ctx.ResultText(string(i.results.Results[i.current].FileMatchFields.File.Commit.Oid))
 		case "file_content":
-			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Content))
+			ctx.ResultText(string(i.results.Results[i.current].FileMatchFields.File.Content))
 		case "file_name":
-			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Name))
+			ctx.ResultText(string(i.results.Results[i.current].FileMatchFields.File.Name))
 		case "file_path":
-			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Path))
+			ctx.ResultText(string(i.results.Results[i.current].FileMatchFields.File.Path))
 		case "file_url":
-			ctx.ResultText(string(i.results.Results.FileMatch.FileMatchFields[i.current].File.Url))
+			ctx.ResultText(string(i.results.Results[i.current].FileMatchFields.File.Url))
 		case "linematches_preview":
 			var p string
-			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
+			for _, x := range i.results.Results[i.current].FileMatchFields.LineMatches {
 				p += "\n" + string(x.Preview)
 			}
 			ctx.ResultText(p)
 		case "linematches_line_no":
 			var p string
-			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
+			for _, x := range i.results.Results[i.current].FileMatchFields.LineMatches {
 				p += "\n" + string(x.LineNumber)
 			}
 			ctx.ResultText(p)
 		case "linematches_offset_and_length":
 			var p string
-			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
-				p += "\n" + string(x.OffsetAndLength)
-			}
-			ctx.ResultText(p)
-		case "linematches_limit_hit":
-			var p string
-			for _, x := range i.results.Results.FileMatch.FileMatchFields[i.current].LineMatches {
-				p += "\n" + fmt.Sprint(x.LimitHit)
+			for _, x := range i.results.Results[i.current].FileMatchFields.LineMatches {
+				p += "\n" + string(fmt.Sprint(x.OffsetAndLengths))
 			}
 			ctx.ResultText(p)
 		}
@@ -324,54 +315,74 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 	case "CommitSearchResult":
 		switch col.Name {
 		case "CSR_message_preview_value":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].MessagePreview.Value))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.MessagePreview.Value))
 		case "CSR_message_preview_highlight":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].MessagePreview.Highlights.Line))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.MessagePreview.Highlights.Line))
 		case "CSR_diff_preview_value":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].DiffPreview.Value))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.DiffPreview.Value))
 		case "CSR_diff_preview_highlight":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].DiffPreview.Highlights.Line))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.DiffPreview.Highlights.Line))
 		case "CSR_label":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Label.Html))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Label.Html))
 		case "CSR_url":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Url))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Url))
 		case "CSR_matches_url":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Url))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Matches.Url))
 		case "CSR_matches_body_html":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Body.Html))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Matches.Body.Html))
 		case "CSR_matches_body_text":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Body.Text))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Matches.Body.Text))
 		case "CSR_matches_highlights_line":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Highlights.Line))
+			var line string
+			for _, x := range i.results.Results[i.current].CommitSearchResultFields.Matches.Highlights {
+				line += string(x.Line) + "\n"
+			}
+			ctx.ResultText(line)
 		case "CSR_matches_highlights_character":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Highlights.Character))
+			var character string
+			for _, x := range i.results.Results[i.current].CommitSearchResultFields.Matches.Highlights {
+				character += string(x.Character) + "\n"
+			}
+			ctx.ResultText(character)
 		case "CSR_matches_highlights_length":
-			ctx.ResultInt(int(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Matches.Highlights.Length))
+			var length string
+			for _, x := range i.results.Results[i.current].CommitSearchResultFields.Matches.Highlights {
+				length += string(x.Length) + "\n"
+			}
+			ctx.ResultText(length)
 		case "CSR_commit_repository_name":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Repository.name))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Commit.Repository.name))
 		case "CSR_commit_hash":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Oid))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Commit.Oid))
 		case "CSR_commit_url":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Url))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Commit.Url))
 		case "CSR_commit_subject":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Subject))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Commit.Subject))
 		case "CSR_commit_author_date":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Author.Date))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Commit.Author.Date))
 		case "CSR_commit_author_displayname":
-			ctx.ResultText(string(i.results.Results.CommitSearchResults.Commit_search_result[i.current].Commit.Author.Person.DisplayName))
+			ctx.ResultText(string(i.results.Results[i.current].CommitSearchResultFields.Commit.Author.Person.DisplayName))
 		}
 	case "Repository":
 		switch col.Name {
 		case "repository_name":
-			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].Name))
+			ctx.ResultText(string(i.results.Results[i.current].RepositoryFields.Name))
 		case "repository_url":
-			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].Url))
+			ctx.ResultText(string(i.results.Results[i.current].RepositoryFields.Url))
 		case "repository_externalurl_servicetype":
-			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].ExternalURLs.ServiceType))
+			var serviceType string
+			for _, x := range i.results.Results[i.current].RepositoryFields.ExternalURLs {
+				serviceType += string(x.ServiceKind) + "\n"
+			}
+			ctx.ResultText(serviceType)
 		case "repository_externalurl_url":
-			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].ExternalURLs.Url))
+			var url string
+			for _, x := range i.results.Results[i.current].RepositoryFields.ExternalURLs {
+				url += string(x.Url) + "\n"
+			}
+			ctx.ResultText(url)
 		case "repository_label_html":
-			ctx.ResultText(string(i.results.Results.Repository.Repository_fields[i.current].Label.Html))
+			ctx.ResultText(string(i.results.Results[i.current].RepositoryFields.Label.Html))
 		}
 	}
 
@@ -386,16 +397,33 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 		ctx.ResultInt(int(i.results.MatchCount))
 	case "elapsed_milliseconds":
 		ctx.ResultInt(int(i.results.ElapsedMilliseconds))
-	case "search_results_alert_fields":
-		var alerts string
-		for _, result := range i.results.SearchResultsAlertFields {
-			alerts += string(result.Alert.Title + result.Alert.Description + "\n" + result.Alert.ProposedQueries.Description)
+	case "search_results_alert_fields_title":
+		ctx.ResultText(string(i.results.SearchResultsAlertFields.Alert.Title))
+	case "search_results_alert_fields_description":
+		ctx.ResultText(string(i.results.SearchResultsAlertFields.Alert.Description))
+	case "search_results_alert_fields_proposedQueries_descriptions":
+		var descriptions string
+		for _, x := range i.results.SearchResultsAlertFields.Alert.ProposedQueries {
+			descriptions += string(x.Description)
 		}
-		ctx.ResultText(alerts)
+		ctx.ResultText(descriptions)
+	case "search_results_alert_fields_proposedQueries_queries":
+		var queries string
+		for _, x := range i.results.SearchResultsAlertFields.Alert.ProposedQueries {
+			queries += string(x.Query)
+		}
+		ctx.ResultText(queries)
 	}
+
 	return nil
 }
-
+func graphqlStrArrToString(strArr []graphql.String) string {
+	var ret string
+	for _, x := range strArr {
+		ret += string(x) + "\n"
+	}
+	return ret
+}
 func (i *iterResults) Next() (vtab.Row, error) {
 	var err error
 	println(i.current)
@@ -408,17 +436,9 @@ func (i *iterResults) Next() (vtab.Row, error) {
 	//results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, i.perPage, cursor, i.prOrder})
 
 	i.current += 1
-	var length int
-	switch i.results.Results.Typename {
-	case "FileMatch":
-		length = len(i.results.Results.FileMatch.FileMatchFields)
-	case "CommitSearchResults":
-		length = len(i.results.Results.CommitSearchResults.Commit_search_result)
-	case "RepositoryFields":
-		length = len(i.results.Results.Repository.Repository_fields)
-	}
+	//length := len(i.results.Results)
 
-	if i.results == nil || i.current >= length {
+	if i.results == nil || i.current >= 10 /*length*/ {
 		return nil, io.EOF
 	}
 
@@ -453,7 +473,6 @@ var searchCols = []vtab.Column{
 	{Name: "file_name", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "file_path", Type: sqlite.SQLITE_TEXT},
 	{Name: "file_url", Type: sqlite.SQLITE_TEXT},
-	{Name: "linematches_limit_hit", Type: sqlite.SQLITE_TEXT},
 	{Name: "linematches_line_no", Type: sqlite.SQLITE_INTEGER},
 	{Name: "linematches_offset_and_length", Type: sqlite.SQLITE_INTEGER},
 	{Name: "linematches_preview", Type: sqlite.SQLITE_TEXT},
@@ -465,6 +484,10 @@ var searchCols = []vtab.Column{
 	{Name: "repository_name", Type: sqlite.SQLITE_INTEGER},
 	{Name: "repository_url", Type: sqlite.SQLITE_TEXT},
 	{Name: "search_results_alert_fields", Type: sqlite.SQLITE_TEXT},
+	{Name: "search_results_alert_title", Type: sqlite.SQLITE_TEXT},
+	{Name: "search_results_alert_description", Type: sqlite.SQLITE_TEXT},
+	{Name: "search_results_alert_proposedQueries_descriptions", Type: sqlite.SQLITE_TEXT},
+	{Name: "search_results_alert_proposedQueries_queries", Type: sqlite.SQLITE_TEXT},
 	{Name: "timed_out", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
 }
 
@@ -476,6 +499,7 @@ func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
 				switch constraint.ColIndex {
 				case 0:
 					query = constraint.Value.Text()
+					// TODO: allow auth token to be passed in as second parameter
 					// case 1:
 					// 	auth_token = constraint.Value.Text()
 				}
