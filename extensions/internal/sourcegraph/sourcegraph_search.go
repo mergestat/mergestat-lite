@@ -277,113 +277,6 @@ type iterResults struct {
 func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Results[i.current]
 	col := searchCols[c]
-	// switch current.Typename {
-	// case "FileMatch":
-	// 	switch col.Name {
-	// 	case "file_commit":
-	// 		ctx.ResultText(string(current.FileMatchFields.File.Commit.Oid))
-	// 	case "file_content":
-	// 		ctx.ResultText(string(current.FileMatchFields.File.Content))
-	// 	case "file_name":
-	// 		ctx.ResultText(string(current.FileMatchFields.File.Name))
-	// 	case "file_path":
-	// 		ctx.ResultText(string(current.FileMatchFields.File.Path))
-	// 	case "file_url":
-	// 		ctx.ResultText(string(current.FileMatchFields.File.Url))
-	// 	case "linematches_preview":
-	// 		var p string
-	// 		for _, x := range current.FileMatchFields.LineMatches {
-	// 			p += "\n" + string(x.Preview)
-	// 		}
-	// 		ctx.ResultText(p)
-	// 	case "linematches_line_no":
-	// 		var p string
-	// 		for _, x := range current.FileMatchFields.LineMatches {
-	// 			p += "\n" + string(x.LineNumber)
-	// 		}
-	// 		ctx.ResultText(p)
-	// 	case "linematches_offset_and_length":
-	// 		var p string
-	// 		for _, x := range current.FileMatchFields.LineMatches {
-	// 			p += "\n" + string(fmt.Sprint(x.OffsetAndLengths))
-	// 		}
-	// 		ctx.ResultText(p)
-	// 	}
-
-	// case "CommitSearchResult":
-	// 	switch col.Name {
-	// 	case "CSR_message_preview_value":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.MessagePreview.Value))
-	// 	case "CSR_message_preview_highlight":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.MessagePreview.Highlights.Line))
-	// 	case "CSR_diff_preview_value":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.DiffPreview.Value))
-	// 	case "CSR_diff_preview_highlight":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.DiffPreview.Highlights.Line))
-	// 	case "CSR_label":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Label.Html))
-	// 	case "CSR_url":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Url))
-	// 	case "CSR_matches_url":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Matches.Url))
-	// 	case "CSR_matches_body_html":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Matches.Body.Html))
-	// 	case "CSR_matches_body_text":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Matches.Body.Text))
-	// 	case "CSR_matches_highlights_line":
-	// 		var line string
-	// 		for _, x := range current.CommitSearchResultFields.Matches.Highlights {
-	// 			line += string(x.Line) + "\n"
-	// 		}
-	// 		ctx.ResultText(line)
-	// 	case "CSR_matches_highlights_character":
-	// 		var character string
-	// 		for _, x := range current.CommitSearchResultFields.Matches.Highlights {
-	// 			character += string(x.Character) + "\n"
-	// 		}
-	// 		ctx.ResultText(character)
-	// 	case "CSR_matches_highlights_length":
-	// 		var length string
-	// 		for _, x := range current.CommitSearchResultFields.Matches.Highlights {
-	// 			length += string(x.Length) + "\n"
-	// 		}
-	// 		ctx.ResultText(length)
-	// 	case "CSR_commit_repository_name":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Commit.Repository.name))
-	// 	case "CSR_commit_hash":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Commit.Oid))
-	// 	case "CSR_commit_url":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Commit.Url))
-	// 	case "CSR_commit_subject":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Commit.Subject))
-	// 	case "CSR_commit_author_date":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Commit.Author.Date))
-	// 	case "CSR_commit_author_displayname":
-	// 		ctx.ResultText(string(current.CommitSearchResultFields.Commit.Author.Person.DisplayName))
-	// 	}
-	// case "Repository":
-	// 	switch col.Name {
-	// 	case "repository_name":
-	// 		ctx.ResultText(string(current.RepositoryFields.Name))
-	// 	case "repository_url":
-	// 		ctx.ResultText(string(current.RepositoryFields.Url))
-	// 	case "repository_externalurl_servicetype":
-	// 		var serviceType string
-	// 		for _, x := range current.RepositoryFields.ExternalURLs {
-	// 			serviceType += string(x.ServiceKind) + "\n"
-	// 		}
-	// 		ctx.ResultText(serviceType)
-	// 	case "repository_externalurl_url":
-	// 		var url string
-	// 		for _, x := range current.RepositoryFields.ExternalURLs {
-	// 			url += string(x.Url) + "\n"
-	// 		}
-	// 		ctx.ResultText(url)
-	// 	case "repository_label_html":
-	// 		ctx.ResultText(string(current.RepositoryFields.Label.Html))
-	// 	}
-	// }
-
 	switch col.Name {
 	case "results":
 		switch current.Typename {
@@ -470,41 +363,11 @@ func (i *iterResults) Next() (vtab.Row, error) {
 var searchCols = []vtab.Column{
 	{Name: "query", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
 	{Name: "sourcegraph_token", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
-	// {Name: "CSR_commit_author_date", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_commit_author_displayname", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_commit_hash", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_commit_repository_name", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_commit_subject", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "CSR_commit_url", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_diff_preview_highlight", Type: sqlite.SQLITE_INTEGER, OrderBy: vtab.ASC | vtab.DESC},
-	// {Name: "CSR_diff_preview_value", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
-	// {Name: "CSR_label", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "CSR_matches_body_html", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_matches_body_text", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_matches_highlights_character", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "CSR_matches_highlights_length", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "CSR_matches_highlights_line", Type: sqlite.SQLITE_TEXT},
-	// {Name: "CSR_matches_url", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "CSR_message_preview_highlight", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "CSR_message_preview_value", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "CSR_url", Type: sqlite.SQLITE_INTEGER},
 	{Name: "cloning", Type: sqlite.SQLITE_TEXT},
 	{Name: "elapsed_milliseconds", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "file_commit", Type: sqlite.SQLITE_TEXT},
-	// {Name: "file_content", Type: sqlite.SQLITE_TEXT},
-	// {Name: "file_name", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
-	// {Name: "file_path", Type: sqlite.SQLITE_TEXT},
-	// {Name: "file_url", Type: sqlite.SQLITE_TEXT},
-	// {Name: "linematches_line_no", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "linematches_offset_and_length", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "linematches_preview", Type: sqlite.SQLITE_TEXT},
+
 	{Name: "match_count", Type: sqlite.SQLITE_INTEGER},
 	{Name: "missing", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "repository_externalurl_servicetype", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "repository_externalurl_url", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "repository_label_html", Type: sqlite.SQLITE_TEXT},
-	// {Name: "repository_name", Type: sqlite.SQLITE_INTEGER},
-	// {Name: "repository_url", Type: sqlite.SQLITE_TEXT},
 	{Name: "results", Type: sqlite.SQLITE_TEXT},
 	{Name: "search_results_alert_fields", Type: sqlite.SQLITE_TEXT},
 	{Name: "search_results_alert_title", Type: sqlite.SQLITE_TEXT},
