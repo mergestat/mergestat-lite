@@ -365,15 +365,14 @@ var searchCols = []vtab.Column{
 	{Name: "sourcegraph_token", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
 	{Name: "cloning", Type: sqlite.SQLITE_TEXT},
 	{Name: "elapsed_milliseconds", Type: sqlite.SQLITE_INTEGER},
-
 	{Name: "match_count", Type: sqlite.SQLITE_INTEGER},
 	{Name: "missing", Type: sqlite.SQLITE_INTEGER},
 	{Name: "results", Type: sqlite.SQLITE_TEXT},
 	{Name: "search_results_alert_fields", Type: sqlite.SQLITE_TEXT},
 	{Name: "search_results_alert_title", Type: sqlite.SQLITE_TEXT},
 	{Name: "search_results_alert_description", Type: sqlite.SQLITE_TEXT},
-	{Name: "search_results_alert_proposedQueries_descriptions", Type: sqlite.SQLITE_TEXT},
-	{Name: "search_results_alert_proposedQueries_queries", Type: sqlite.SQLITE_TEXT},
+	{Name: "search_results_alert_proposed_queries_descriptions", Type: sqlite.SQLITE_TEXT},
+	{Name: "search_results_alert_proposed_queries_queries", Type: sqlite.SQLITE_TEXT},
 	{Name: "timed_out", Type: sqlite.SQLITE_TEXT},
 	{Name: "__typename", Type: sqlite.SQLITE_TEXT},
 }
