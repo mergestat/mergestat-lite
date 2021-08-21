@@ -21,8 +21,8 @@ func init() {
 		options.WithContextValue("githubToken", os.Getenv("GITHUB_TOKEN")),
 		options.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
 		options.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
-		options.WithSourceGraph(),
-		options.WithContextValue("sourcegraphToken",os.Getenv("SOURCEGRAPH_TOKEN")),
+		options.WithSourcegraph(),
+		options.WithContextValue("sourcegraphToken", os.Getenv("SOURCEGRAPH_TOKEN")),
 	))
 }
 

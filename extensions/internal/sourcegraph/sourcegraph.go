@@ -32,21 +32,12 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 		"sourcegraph_search": NewSourcegraphSearchModule(sourcegraphOpts),
 	}
 
-	// register SourceGraph tables
+	// register Sourcegraph tables
 	for name, mod := range modules {
 		if err = ext.CreateModule(name, mod); err != nil {
 			return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register Sourcegraph %q module", name)
 		}
 	}
 
-	// var fns = map[string]sqlite.Function{
-	// }
-
-	// register Sourcegraph funcs
-	// for name, fn := range fns {
-	// 	if err = ext.CreateFunction(name, fn); err != nil {
-	// 		return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register Sourcegraph %q function", name)
-	// 	}
-	// }
 	return sqlite.SQLITE_OK, nil
 }

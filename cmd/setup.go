@@ -23,7 +23,7 @@ func registerExt() {
 			options.WithContextValue("githubToken", githubToken),
 			options.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
 			options.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
-			options.WithSourceGraph(),
+			options.WithSourcegraph(),
 			options.WithContextValue("sourcegraphToken", sourcegraphToken),
 		),
 	)

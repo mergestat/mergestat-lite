@@ -54,13 +54,13 @@ func WithGitHubClientGetter(getter func() *githubv4.Client) OptionFn {
 	return func(o *Options) { o.GitHubClientGetter = getter }
 }
 
-// WithSourceGraph configures the extension to also register the SourceGraph related tables and funcs
-func WithSourceGraph() OptionFn {
+// WithSourcegraph configures the extension to also register the Sourcegraph related tables and funcs
+func WithSourcegraph() OptionFn {
 	return func(o *Options) { o.Sourcegraph = true }
 }
 
-// WithSourceGraphClientGetter configures a way to use a custom SourceGraphv4 client
-func WithSourceGraphClientGetter(getter func() *graphql.Client) OptionFn {
+// WithSourcegraphClientGetter configures a way to use a custom graphql client
+func WithSourcegraphClientGetter(getter func() *graphql.Client) OptionFn {
 	return func(o *Options) { o.SourcegraphClientGetter = getter }
 }
 
