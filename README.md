@@ -418,20 +418,20 @@ If you have a large number of items to scan in your query, it may take longer, b
 
 Table-valued-function that returns a list of users who have starred a repository.
 
-| Column     | Type |
-|------------|------|
-| login      | TEXT |
-| email      | TEXT |
-| name       | TEXT |
-| bio        | TEXT |
-| company    | TEXT |
-| avatar_url | TEXT |
-| created_at | TEXT |
-| updated_at | TEXT |
-| twitter    | TEXT |
-| website    | TEXT |
-| location   | TEXT |
-| starred_at | TEXT |
+| Column     | Type     |
+|------------|----------|
+| login      | TEXT     |
+| email      | TEXT     |
+| name       | TEXT     |
+| bio        | TEXT     |
+| company    | TEXT     |
+| avatar_url | TEXT     |
+| created_at | DATETIME |
+| updated_at | DATETIME |
+| twitter    | TEXT     |
+| website    | TEXT     |
+| location   | TEXT     |
+| starred_at | DATETIME |
 
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
@@ -446,17 +446,17 @@ SELECT * FROM github_stargazers('askgitdev/askgit'); -- both are equivalent
 
 Table-valued-function that returns a list of repositories a user has starred.
 
-| Column          | Type |
-|-----------------|------|
-| name            | TEXT |
-| url             | TEXT |
-| description     | TEXT |
-| created_at      | TEXT |
-| pushed_at       | TEXT |
-| updated_at      | TEXT |
-| stargazer_count | INT  |
-| name_with_owner | TEXT |
-| starred_at      | TEXT |
+| Column          | Type     |
+|-----------------|----------|
+| name            | TEXT     |
+| url             | TEXT     |
+| description     | TEXT     |
+| created_at      | DATETIME |
+| pushed_at       | DATETIME |
+| updated_at      | DATETIME |
+| stargazer_count | INT      |
+| name_with_owner | TEXT     |
+| starred_at      | DATETIME |
 
 Params:
   1. `login` - the `login` of a GitHub user
@@ -482,37 +482,37 @@ SELECT github_stargazer_count('askgitdev/askgit'); -- both are equivalent
 
 Table-valued function that returns all the repositories belonging to a user or an organization.
 
-| Column                      | Type |
-|-----------------------------|------|
-| created_at                  | TEXT |
-| database_id                 | INT  |
-| default_branch_ref_name     | TEXT |
-| default_branch_ref_prefix   | TEXT |
-| description                 | TEXT |
-| disk_usage                  | INT  |
-| fork_count                  | INT  |
-| homepage_url                | TEXT |
-| is_archived                 | INT  |
-| is_disabled                 | INT  |
-| is_fork                     | INT  |
-| is_mirror                   | INT  |
-| is_private                  | INT  |
-| issue_count                 | INT  |
-| latest_release_author       | TEXT |
-| latest_release_created_at   | TEXT |
-| latest_release_name         | TEXT |
-| latest_release_published_at | TEXT |
-| license_key                 | TEXT |
-| license_name                | TEXT |
-| name                        | TEXT |
-| open_graph_image_url        | TEXT |
-| primary_language            | TEXT |
-| pull_request_count          | INT  |
-| pushed_at                   | TEXT |
-| release_count               | INT  |
-| stargazer_count             | INT  |
-| updated_at                  | TEXT |
-| watcher_count               | INT  |
+| Column                      | Type     |
+|-----------------------------|----------|
+| created_at                  | DATETIME |
+| database_id                 | INT      |
+| default_branch_ref_name     | TEXT     |
+| default_branch_ref_prefix   | TEXT     |
+| description                 | TEXT     |
+| disk_usage                  | INT      |
+| fork_count                  | INT      |
+| homepage_url                | TEXT     |
+| is_archived                 | BOOLEAN  |
+| is_disabled                 | BOOLEAN  |
+| is_fork                     | BOOLEAN  |
+| is_mirror                   | BOOLEAN  |
+| is_private                  | BOOLEAN  |
+| issue_count                 | INT      |
+| latest_release_author       | TEXT     |
+| latest_release_created_at   | DATETIME |
+| latest_release_name         | TEXT     |
+| latest_release_published_at | DATETIME |
+| license_key                 | TEXT     |
+| license_name                | TEXT     |
+| name                        | TEXT     |
+| open_graph_image_url        | TEXT     |
+| primary_language            | TEXT     |
+| pull_request_count          | INT      |
+| pushed_at                   | DATETIME |
+| release_count               | INT      |
+| stargazer_count             | INT      |
+| updated_at                  | DATETIME |
+| watcher_count               | INT      |
 
 Params:
   1. `login` - the `login` of a GitHub user or organization
@@ -526,32 +526,32 @@ SELECT * FROM github_org_repos('askgitdev')
 
 Table-valued-function that returns all the issues of a GitHub repository.
 
-| Column                | Type  |
-|-----------------------|-------|
-| owner                 | TEXT  |
-| reponame              | TEXT  |
-| author_login          | TEXT  |
-| body                  | TEXT  |
-| closed                | INT   |
-| closed_at             | TEXT  |
-| comment_count         | INT   |
-| created_at            | TEXT  |
-| created_via_email     | INT   |
-| database_id           | TEXT  |
-| editor_login          | TEXT  |
-| includes_created_edit | INT   |
-| label_count           | INT   |
-| last_edited_at        | TEXT  |
-| locked                | INT   |
-| milestone_count       | INT   |
-| number                | INT   |
-| participant_count     | INT   |
-| published_at          | TEXT  |
-| reaction_count        | INT   |
-| state                 | TEXT  |
-| title                 | TEXT  |
-| updated_at            | TEXT  |
-| url                   | TEXT  |
+| Column                | Type      |
+|-----------------------|-----------|
+| owner                 | TEXT      |
+| reponame              | TEXT      |
+| author_login          | TEXT      |
+| body                  | TEXT      |
+| closed                | BOOLEAN   |
+| closed_at             | DATETIME  |
+| comment_count         | INT       |
+| created_at            | DATETIME  |
+| created_via_email     | BOOLEAN   |
+| database_id           | TEXT      |
+| editor_login          | TEXT      |
+| includes_created_edit | BOOLEAN   |
+| label_count           | INT       |
+| last_edited_at        | DATETIME  |
+| locked                | BOOLEAN   |
+| milestone_count       | INT       |
+| number                | INT       |
+| participant_count     | INT       |
+| published_at          | DATETIME  |
+| reaction_count        | INT       |
+| state                 | TEXT      |
+| title                 | TEXT      |
+| updated_at            | DATETIME  |
+| url                   | TEXT      |
 
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
@@ -565,45 +565,45 @@ SELECT * FROM github_repo_issues('askgitdev', 'askgit'); -- both are equivalent
 
 Table-valued-function that returns all the pull requests of a GitHub repository.
 
-| Column                   | Type |
-|--------------------------|------|
-| additions                | INT  |
-| author_login             | TEXT |
-| author_association       | TEXT |
-| base_ref_oid             | TEXT |
-| base_ref_name            | TEXT |
-| base_repository_name     | TEXT |
-| body                     | TEXT |
-| changed_files            | INT  |
-| closed                   | INT  |
-| closed_at                | TEXT |
-| comment_count            | INT  |
-| commit_count             | INT  |
-| created_at               | TEXT |
-| created_via_email        | INT  |
-| database_id              | INT  |
-| deletions                | INT  |
-| editor_login             | TEXT |
-| head_ref_name            | TEXT |
-| head_ref_oid             | TEXT |
-| head_repository_name     | TEXT |
-| is_draft                 | INT  |
-| label_count              | INT  |
-| last_edited_at           | TEXT |
-| locked                   | INT  |
-| maintainer_can_modify    | TEXT |
-| mergeable                | TEXT |
-| merged                   | INT  |
-| merged_at                | TEXT |
-| merged_by                | TEXT |
-| number                   | INT  |
-| participant_count        | INT  |
-| published_at             | TEXT |
-| review_decision          | TEXT |
-| state                    | TEXT |
-| title                    | TEXT |
-| updated_at               | TEXT |
-| url                      | TEXT |
+| Column                   | Type     |
+|--------------------------|----------|
+| additions                | INT      |
+| author_login             | TEXT     |
+| author_association       | TEXT     |
+| base_ref_oid             | TEXT     |
+| base_ref_name            | TEXT     |
+| base_repository_name     | TEXT     |
+| body                     | TEXT     |
+| changed_files            | INT      |
+| closed                   | BOOLEAN  |
+| closed_at                | DATETIME |
+| comment_count            | INT      |
+| commit_count             | INT      |
+| created_at               | TEXT     |
+| created_via_email        | BOOLEAN  |
+| database_id              | INT      |
+| deletions                | INT      |
+| editor_login             | TEXT     |
+| head_ref_name            | TEXT     |
+| head_ref_oid             | TEXT     |
+| head_repository_name     | TEXT     |
+| is_draft                 | INT      |
+| label_count              | INT      |
+| last_edited_at           | DATETIME |
+| locked                   | BOOLEAN  |
+| maintainer_can_modify    | BOOLEAN  |
+| mergeable                | TEXT     |
+| merged                   | BOOLEAN  |
+| merged_at                | DATETIME |
+| merged_by                | TEXT     |
+| number                   | INT      |
+| participant_count        | INT      |
+| published_at             | DATETIME |
+| review_decision          | TEXT     |
+| state                    | TEXT     |
+| title                    | TEXT     |
+| updated_at               | DATETIME |
+| url                      | TEXT     |
 
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
