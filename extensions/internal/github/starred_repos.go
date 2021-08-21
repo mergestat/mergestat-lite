@@ -158,16 +158,16 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 }
 
 var starredReposCols = []vtab.Column{
-	{Name: "login", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "name", Type: sqlite.SQLITE_TEXT},
-	{Name: "url", Type: sqlite.SQLITE_TEXT},
-	{Name: "description", Type: sqlite.SQLITE_TEXT},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "pushed_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "stargazer_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "name_with_owner", Type: sqlite.SQLITE_TEXT},
-	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "login", Type: "TEXT", NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "name", Type: "TEXT"},
+	{Name: "url", Type: "TEXT"},
+	{Name: "description", Type: "TEXT"},
+	{Name: "created_at", Type: "TEXT"},
+	{Name: "pushed_at", Type: "TEXT"},
+	{Name: "updated_at", Type: "TEXT"},
+	{Name: "stargazer_count", Type: "INT"},
+	{Name: "name_with_owner", Type: "TEXT"},
+	{Name: "starred_at", Type: "TEXT", OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewStarredReposModule(opts *Options) sqlite.Module {
