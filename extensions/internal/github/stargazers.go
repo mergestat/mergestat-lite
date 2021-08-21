@@ -183,12 +183,12 @@ var stargazersCols = []vtab.Column{
 	{Name: "bio", Type: "TEXT"},
 	{Name: "company", Type: "TEXT"},
 	{Name: "avatar_url", Type: "TEXT"},
-	{Name: "created_at", Type: "TEXT"},
-	{Name: "updated_at", Type: "TEXT"},
+	{Name: "created_at", Type: "DATETIME"},
+	{Name: "updated_at", Type: "DATETIME"},
 	{Name: "twitter", Type: "TEXT"},
 	{Name: "website", Type: "TEXT"},
 	{Name: "location", Type: "TEXT"},
-	{Name: "starred_at", Type: "TEXT", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "starred_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewStargazersModule(opts *Options) sqlite.Module {
