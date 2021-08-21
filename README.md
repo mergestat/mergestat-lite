@@ -646,14 +646,10 @@ Table-valued-function that returns results from a Sourcegraph search.
 | Column               | Type |
 |----------------------|------|
 | __typename           | TEXT |
-| cloning              | TEXT |
-| elapsed_milliseconds | INT  |
-| match_count          | INT  |
-| missing              | INT  |
 | results              | TEXT |
-| timed_out            | TEXT |
 
 `__typename` will be one of `Repository`, `CommitSearchResult`, or `FileMatch`.
+`results` will be the JSON value of a search result (will match what's returned from the API)
 
 Params:
   1. `query` - a sourcegraph search query [docs](https://docs.sourcegraph.com/)
