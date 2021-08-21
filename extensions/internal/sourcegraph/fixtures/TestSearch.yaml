@@ -1,0 +1,645 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($query:String!){search(query: $query, version: V2){results{results{__typename,... on FileMatch{repository{name,url},file{name,path,url,content,commit{oid}},lineMatches{preview,lineNumber,offsetAndLengths}},... on CommitSearchResult{messagePreview{value,highlights{line,character,length}},diffPreview{value,highlights{line,character,length}},label{html},url,matches{url,body{html,text},highlights{line,character,length}},commit{repository{name,url},oid,url,subject,author{date,person{displayName}}}},... on Repository{name,url,externalURLs{serviceKind,url},label{html}}},limitHit,cloning{name},missing{name},timedout{name},matchCount,elapsedMilliseconds}}}","variables":{"query":"TODO"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://sourcegraph.com/.api/graphql
+    method: POST
+  response:
+    body: "{\"data\":{\"search\":{\"results\":{\"results\":[{\"__typename\":\"Repository\",\"name\":\"github.com/1061700625/QQZone_AutoDownload_Album\",\"url\":\"/github.com/1061700625/QQZone_AutoDownload_Album\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/1061700625/QQZone_AutoDownload_Album\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/1061700625/QQZone_AutoDownload_Album\\\" rel=\\\"nofollow\\\"\\u003egithub.com/1061700625/QQZone_AutoDownload_Album\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/3den/riotjs-todomvc\",\"url\":\"/github.com/3den/riotjs-todomvc\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/3den/riotjs-todomvc\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/3den/riotjs-todomvc\\\" rel=\\\"nofollow\\\"\\u003egithub.com/3den/riotjs-todomvc\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/4gray/electronTodoApp\",\"url\":\"/github.com/4gray/electronTodoApp\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/4gray/electronTodoApp\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/4gray/electronTodoApp\\\" rel=\\\"nofollow\\\"\\u003egithub.com/4gray/electronTodoApp\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/4tomik/JSTodoList\",\"url\":\"/github.com/4tomik/JSTodoList\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/4tomik/JSTodoList\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/4tomik/JSTodoList\\\" rel=\\\"nofollow\\\"\\u003egithub.com/4tomik/JSTodoList\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/521xueweihan/HelloGitHub\",\"url\":\"/github.com/521xueweihan/HelloGitHub\"},\"file\":{\"name\":\"HelloGitHub15.md\",\"path\":\"content/15/HelloGitHub15.md\",\"url\":\"/github.com/521xueweihan/HelloGitHub/-/blob/content/15/HelloGitHub15.md\",\"content\":\"#
+      《HelloGitHub》第 15 期\\n\\u003e 兴趣是最好的老师，**HelloGitHub** 让你对编程感兴趣！\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/01/img/hello-github.jpg'
+      style=\\\"max-width:100%;\\\"\\u003e\\u003c/img\\u003e\\n\\u003c/p\\u003e\\n\\n##
+      目录\\n\\n**Tips**：如果文中的图刷不出来，可以点击 [这里](https://hellogithub.com/periodical/volume/15/)
+      获取更好的阅读体验。\\n\\n- [CSS 项目](#CSS-项目)\\n- [Go 项目](#Go-项目)\\n- [Java 项目](#Java-项目)\\n-
+      [JavaScript 项目](#JavaScript-项目)\\n- [Objective-C 项目](#Objective-C-项目)\\n- [Python
+      项目](#Python-项目)\\n- [Ruby 项目](#Ruby-项目)\\n- [其它](#其它)\\n- [开源书籍](#开源书籍)\\n\\n\\n-
+      [返回首页](https://github.com/521xueweihan/HelloGitHub#%E5%86%85%E5%AE%B9)\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n  \\u003cimg src=\\\"https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/logo/weixin.png\\\"
+      style=\\\"max-width:30%;\\\"\\u003e\\u003c/img\\u003e\\u003cbr\\u003e\\n关注「HelloGitHub」公众号，第一时间收到推送\\n\\u003c/p\\u003e\\n\\n##
+      内容\\n\\u003e **以下为本期内容**｜每个月 **28** 号更新\\n\\n### CSS 项目\\n1、[mdui](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/zdhxiong/mdui)：MDUI
+      是一套用于开发 Material Design 网页的响应式前端框架。没有任何依赖，支持主题切换，轻量级，低学习成本，[文档](https://www.mdui.org/docs)\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/mdui-show-min.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Go 项目\\n2、[aliyungo](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/denverdino/aliyungo)：非官方的
+      Aliyun Go语言 SDK 支持API：ECS, OSS, DNS, SLB, RDS, RAM, MNS, STS, SLS, MQ, Push,
+      OpenSearch, DM, Container Service\\n\\n3、[conference](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/gopherchina/conference)：Go
+      语言实际项目应用的技术分享\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519
+      返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n### Java
+      项目\\n4、[FunGameRefresh](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/Hitomis/FunGameRefresh)：好玩的下拉刷新控件\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/FunGameRefresh.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n5、[ProgressManager](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/JessYanCoding/ProgressManager)：一行代码即可监听
+      App 中所有网络链接的上传以及下载进度，包括 Glide 的图片加载进度。实现原理类似 EventBus 你可在 App 中的任何地方，将多个监听器以
+      URL 地址作为标识符，注册到本框架。当此 URL 地址存在下载或者上传的动作时，框架会主动调用所有使用此 URL 地址注册过的监听器，达到多个模块的同步更新\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/progressManager.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      JavaScript 项目\\n6、[veneno](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/zhuyingda/veneno)：一个基于
+      Node.js 编写的 web 安全漏洞自动化扫描框架\\n\\n7、[xdomain](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/jpillora/xdomain)：纯
+      JavaScript 实现 CROS 的库，[在线示例](http://jpillora.com/xdomain/)\\n\\n8、[font-spider](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/aui/font-spider)：字蛛是一个智能
+      WebFont 压缩工具，它能自动分析出页面使用的 WebFont 并进行按需压缩\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/font-spider-show-min.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n9、[slick](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/kenwheeler/slick)：实现了几乎所有效果的轮播图插件，[在线演示](http://kenwheeler.github.io/slick/)\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Objective-C 项目\\n10、[spectacle](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/eczarny/spectacle)：OS
+      X 系统下的窗口管理工具，通过快捷键方便、快捷的调整窗口大小和位置\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/spectacle-show-min.jpg'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n11、[FLEX](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/FLEXTool/FLEX)：用于
+      iOS 开发的一组应用内调试工具，功能强大且多，多到不一一列举了\\n\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/flex.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Python 项目\\n12、[musicbox](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/darknessomi/musicbox)：基于
+      Python 编写的网易云音乐**命令行**版本，使用起来简单优雅，能够快速安装及使用\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/musicbox.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n13、[django-blog-tutorial](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/jukanntenn/django-blog-tutorial)：基于最新版
+      Django 1.10 和 Python 3.5，通过 26 篇教程一步步带你使用 Django 从零开发一个个人博客系统，在实践的同时掌握 Django
+      的开发技巧，[完成效果展示](http://demo.zmrenwu.com/)\\n\\n14、[aredis](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/NoneGG/aredis)：一款基于
+      Python3 asyncio 的异步 redis 客户端，支持对于单实例，连接池， 哨兵以及集群。[作者](https://github.com/NoneGG)希望可以找到志同道合的小伙伴集思广益，一起维护、优化。示例代码如下：\\n```Python\\n
+      \  \\u003e\\u003e\\u003e import asyncio\\n   \\u003e\\u003e\\u003e from aredis
+      import StrictRedis\\n   \\u003e\\u003e\\u003e\\n   \\u003e\\u003e\\u003e async
+      def example():\\n   \\u003e\\u003e\\u003e      client = StrictRedis(host='127.0.0.1',
+      port=6379, db=0)\\n   \\u003e\\u003e\\u003e      await client.flushdb()\\n   \\u003e\\u003e\\u003e
+      \     await client.set('foo', 1)\\n   \\u003e\\u003e\\u003e      assert await
+      client.exists('foo') is True\\n   \\u003e\\u003e\\u003e      await client.incr('foo',
+      100)\\n   \\u003e\\u003e\\u003e\\n   \\u003e\\u003e\\u003e      assert int(await
+      client.get('foo')) == 101\\n   \\u003e\\u003e\\u003e      await client.expire('foo',
+      1)\\n   \\u003e\\u003e\\u003e      await asyncio.sleep(0.1)\\n   \\u003e\\u003e\\u003e
+      \     await client.ttl('foo')\\n   \\u003e\\u003e\\u003e      await asyncio.sleep(1)\\n
+      \  \\u003e\\u003e\\u003e      assert not await client.exists('foo')\\n   \\u003e\\u003e\\u003e\\n
+      \  \\u003e\\u003e\\u003e loop = asyncio.get_event_loop()\\n   \\u003e\\u003e\\u003e
+      loop.run_until_complete(example())\\n```\\n\\n15、[freezegun](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/spulec/freezegun)：时间漫步模块，模拟到某一个时间，使用简单方式多样，实现了装饰器、上下文等调用方式。示例代码如下：\\n```python\\nfrom
+      freezegun import freeze_time\\nimport datetime\\nimport unittest\\n\\n\\n@freeze_time(\\\"2012-01-14\\\")\\ndef
+      test():\\n    assert datetime.datetime.now() == datetime.datetime(2012, 1, 14)\\n\\n```\\n\\n16、[snake](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/chuyangliu/snake)：贪吃蛇游戏
+      AI 版，通过算法实现让小蛇通过吃豆，最后蛇的身体填满整个地图算结束。该项目详细描述实现思想以及相关算法的讨论\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/snake.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Ruby 项目\\n17、[mastodon](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/mastodon/mastodon)：基于
+      Ruby 语言的社交网站服务器端所有的源代码，通过这个项目，你可以自己部署一个属于自己的社交网站\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/mastodon-show-min.jpeg'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      其它\\n18、[vim-galore-zh_cn](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/wsdjeg/vim-galore-zh_cn)：Vim
+      从入门到精通\\n\\n19、[Spacemacs-rocks](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/emacs-china/Spacemacs-rocks)：用
+      21 天学习 Emacs 以及 Spacemacs（Emacs 的配置文件）的使用\\n\\n20、[SpaceVim](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/SpaceVim/SpaceVim)：一个社区驱动的模块化
+      vim/neovim 配置集合，其中包含了多种功能模块，并且针对 neovim 做了功能优化。spacevim 有多种功能模块可供选择，支持多种语言。用户只需要选择需要的模块，就可以配置出一个适合自己的开发环境\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/spacevim-show-min.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n21、[English-level-up-tips-for-Chinese](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/byoungd/English-level-up-tips-for-Chinese)：如何提高英语技能\\n\\n22、[ch](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/xnum/ch)：类似
+      virtualenv，可以在 Linux 下建立虛拟的 home 目录並切换，以管理不同工作或项目的文件\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/ch.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      开源书籍\\n23、[redis](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/huangz1990/redis)：《Redis
+      Command Reference》全文的中文翻译版，[在线阅读](http://redisdoc.com/)\\n\\n\\n24、[es6tutorial](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/ruanyf/es6tutorial)：阮一峰老师的开源精品，ECMAScript
+      6 入门书籍，[在线阅读](http://es6.ruanyifeng.com/)\\n\\n\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca
+      href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \\u003ca href=\\\"https://github.com/521xueweihan/HelloGitHub/blob/master/content/14/HelloGitHub14.md\\\"\\u003e『上一期』\\u003c/a\\u003e
+      | \\u003ca href='https://github.com/521xueweihan/HelloGitHub/issues/899'\\u003e反馈和建议\\u003c/a\\u003e
+      | \\u003ca href=\\\"https://github.com/521xueweihan/HelloGitHub/blob/master/content/16/HelloGitHub16.md\\\"\\u003e『下一期』\\u003c/a\\u003e\\n\\u003c/p\\u003e\\n\\n---\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \U0001F449 \\u003ca href='https://www.ucloud.cn/site/active/kuaijie.html?invitation_code=C1xF2ECA89A2592'\\u003e云主机
+      4 元/月\\u003c/a\\u003e ｜ \\u003ca href='https://github.com/521xueweihan/HelloGitHub/issues/new'\\u003e推荐项目\\u003c/a\\u003e
+      \U0001F448\\u003cbr\\u003e\\n    微信中搜：\\u003cstrong\\u003eHelloGitHub\\u003c/strong\\u003e
+      关注公众号\\u003cbr\\u003e\\n    不仅能第一时间收到推送，还有各种回馈粉丝活动\\u003cbr\\u003e\\n    如果文中的图刷不出来，可以点击
+      \\u003ca href='https://hellogithub.com/periodical/volume/15/'\\u003e这里\\u003c/a\\u003e
+      获取更好的阅读体验。\\n\\u003c/p\\u003e\\n\\n## 声明\\n\\u003ca rel=\\\"license\\\" href=\\\"https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh\\\"\\u003e\\u003cimg
+      alt=\\\"知识共享许可协议\\\" style=\\\"border-width: 0\\\" src=\\\"https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png\\\"\\u003e\\u003c/a\\u003e\\u003cbr\\u003e本作品采用
+      \\u003ca rel=\\\"license\\\" href=\\\"https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh\\\"\\u003e署名-非商业性使用-禁止演绎
+      4.0 国际\\u003c/a\\u003e 进行许可。\\n\",\"commit\":{\"oid\":\"dab905db5f7d1a0535e24283f68e2c5f1aecaaea\"}},\"lineMatches\":[{\"preview\":\"17、[mastodon](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/mastodon/mastodon)：基于
+      Ruby 语言的社交网站服务器端所有的源代码，通过这个项目，你可以自己部署一个属于自己的社交网站\",\"lineNumber\":131,\"offsetAndLengths\":[[7,4],[96,4],[105,4]]},{\"preview\":\"\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/15/img/mastodon-show-min.jpeg'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\",\"lineNumber\":133,\"offsetAndLengths\":[[108,4]]}]},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/521xueweihan/HelloGitHub\",\"url\":\"/github.com/521xueweihan/HelloGitHub\"},\"file\":{\"name\":\"HelloGitHub61.md\",\"path\":\"content/61/HelloGitHub61.md\",\"url\":\"/github.com/521xueweihan/HelloGitHub/-/blob/content/61/HelloGitHub61.md\",\"content\":\"#
+      《HelloGitHub》第 61 期\\n\\u003e 兴趣是最好的老师，**HelloGitHub** 让你对编程感兴趣！\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/01/img/hello-github.jpg'
+      style=\\\"max-width:100%;\\\"\\u003e\\u003c/img\\u003e\\n\\u003c/p\\u003e\\n\\n##
+      目录\\n\\n**Tips**：如果文中的图刷不出来，可以点击 [这里](https://hellogithub.com/periodical/volume/61/)
+      获取更好的阅读体验。\\n\\n- [C 项目](#C-项目)\\n- [C# 项目](#C-项目-1)\\n- [Go 项目](#Go-项目)\\n-
+      [Java 项目](#Java-项目)\\n- [JavaScript 项目](#JavaScript-项目)\\n- [PHP 项目](#PHP-项目)\\n-
+      [Python 项目](#Python-项目)\\n- [Rust 项目](#Rust-项目)\\n- [Swift 项目](#Swift-项目)\\n-
+      [其它](#其它)\\n- [开源书籍](#开源书籍)\\n- [机器学习](#机器学习)\\n\\n\\n- [返回首页](https://github.com/521xueweihan/HelloGitHub#%E5%86%85%E5%AE%B9)\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n  \\u003cimg src=\\\"https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/logo/weixin.png\\\"
+      style=\\\"max-width:30%;\\\"\\u003e\\u003c/img\\u003e\\u003cbr\\u003e\\n关注「HelloGitHub」公众号，第一时间收到推送\\n\\u003c/p\\u003e\\n\\n##
+      内容\\n\\u003e **以下为本期内容**｜每个月 **28** 号更新\\n\\n### C 项目\\n1、[acwj](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/DoctorWkt/acwj)：教你写
+      C 语言编译器的实战教程。教程注重实战循序渐进，一步步教你如何用 C 语言写一个可以自己编译自己（自举）、能够在真正的硬件上运行的 C 语言编译器\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/acwj.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n2、[zstd](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/facebook/zstd)：快速、无损的数据压缩算法
+      Zstandard 的实现。Zstd 的压缩比接近 lzma、lzham 和 ppmx，并且比 lza 或 bzip2 性能更好。在相似的压缩比情况下，它解压缩的速度比其他的算法都要快。很多知名项目和游戏都有这个算法的身影，示例代码：\\n```c\\nstatic
+      void compress_orDie(const char* fname, const char* oname)\\n{\\n    size_t fSize;\\n
+      \   void* const fBuff = mallocAndLoadFile_orDie(fname, \\u0026fSize);\\n    size_t
+      const cBuffSize = ZSTD_compressBound(fSize);\\n    void* const cBuff = malloc_orDie(cBuffSize);\\n\\n
+      \   /* Compress.\\n     * If you are doing many compressions, you may want to
+      reuse the context.\\n     * See the multiple_simple_compression.c example.\\n
+      \    */\\n    size_t const cSize = ZSTD_compress(cBuff, cBuffSize, fBuff, fSize,
+      1);\\n    CHECK_ZSTD(cSize);\\n\\n    saveFile_orDie(oname, cBuff, cSize);\\n\\n
+      \   /* success */\\n    printf(\\\"%25s : %6u -\\u003e %7u - %s \\\\n\\\", fname,
+      (unsigned)fSize, (unsigned)cSize, oname);\\n\\n    free(fBuff);\\n    free(cBuff);\\n}\\n```\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/zstd.jpeg'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      C# 项目\\n3、[ravendb](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/ravendb/ravendb)：一款快速、可靠的开源
+      NoSQL 数据库\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/ravendb.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n4、[Files](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/files-community/Files)：一个全新的文件管理器。采用
+      Fluent Design 和 Windows 平台最新的 API 实现，简约但不简单\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/Files.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Go 项目\\n5、[jql](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/cube2222/jql)：用
+      Go 写的 JSON 数据查询工具。该工具安装方便，语法简单容易上手，实用示例代码很多比如：\\n```\\n# 查询 test.json 文件中，所有国家的名称\\ncat
+      test.json | jql '(elem \\\"countries\\\" (elem (keys) (elem \\\"name\\\")))'\\n[\\n
+      \ \\\"Poland\\\",\\n  \\\"United States\\\",\\n  \\\"Germany\\\"\\n]\\n```\\n\\n6、[chanify](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/chanify/chanify)：基于
+      Go 实现的向 iOS 设备推送消息的服务。手机上安装好配套的 iOS 应用，然后以 Docker 的方式部署完服务，就可以通过一条命令推送指定消息到
+      APP 上，是不是很方便吖\\n```\\n# 发送文本消息\\n$ curl --form-string \\\"text=hello\\\" \\\"http://\\u003caddress\\u003e:\\u003cport\\u003e/v1/sender/\\u003ctoken\\u003e\\\"\\n\\n#
+      发送文本文件\\n$ cat message.txt | curl -H \\\"Content-Type: text/plain\\\" --data-binary
+      @- \\\"http://\\u003caddress\\u003e:\\u003cport\\u003e/v1/sender/\\u003ctoken\\u003e\\\"\\n```\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/chanify.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n7、[algorithm-pattern](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/greyireland/algorithm-pattern)：LeetCode
+      刷题集合项目。项目从 Go 语言入门讲起，总结了一套刷题模板和解题套路，示例代码为 Go 语言\\n\\n8、[imaging](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/disintegration/imaging)：Go
+      语言的图像处理库。支持：调整大小、旋转、剪切、亮度调整等功能，示例代码：\\n```go\\n// 调整\\ndstImage128 := imaging.Resize(srcImage,
+      128, 128, imaging.Lanczos)\\n// 锐化\\ndstImage := imaging.Sharpen(srcImage, 0.5)\\n```\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/imaging.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n9、[ebiten](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/hajimehoshi/ebiten)：Go
+      语言的 2D 游戏引擎库。通过它可以轻松地用 Go 语言制作出支持多平台的 2D 游戏，项目中还包含很多示例代码，帮助你快速上手\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/ebiten.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Java 项目\\n10、[flink-recommandSystem-demo](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/CheckChe0803/flink-recommandSystem-demo)：一个基于
+      Flink 实现的商品实时推荐系统。可以通过这个项目了解和学习推荐系统的设计和流程，该系统是通过 Flink 处理日志和统计商品热度，将处理好的数据放入
+      Redis 缓存。然后再将画像标签和实时记录放入 HBase。在用户请求获取推荐时，根据用户画像生成商品热度榜，并结合协同过滤和标签两个推荐模块，返回最终生成的商品推荐列表\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/flink-recommandSystem-demo.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n11、[OpenRefine](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/OpenRefine/OpenRefine)：一款用于清理数据的桌面工具。通过可视化的方式分析、整理数据，支持
+      Windows、Linux、Mac 操作系统。拥有查询、过滤、去重、分析等功能，可以把杂乱的数据变成“整洁”的电子表格，还能够将结果导出成多种格式的文件。不会编程和
+      SQL 的小伙伴们，也可以轻松分析海量数据啦！\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/OpenRefine.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n12、[jacoco](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/jacoco/jacoco)：Java
+      代码测试覆盖率库\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/jacoco.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n13、[kooder](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/oschina/kooder)：一个开源的代码搜索服务。为包括
+      GitLab、Gitea 的代码托管系统提供源码、仓库、Issue 的搜索服务\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/kooder.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      JavaScript 项目\\n14、[taro](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/Cloud9c/taro)：一款
+      Web 轻量级的 3D 游戏引擎。底层基于 three.js 和 cannon-es 支持 3D 刚体物理引擎\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/taro.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n15、[kutt](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/thedevs-network/kutt)：免费开源的短链接服务。服务基于
+      Node.js+Express+React 实现，支持管理链接、自定义短链接、设置链接密码、访问统计等功能\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/kutt.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n16、[nav](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/xjh22222228/nav)：一个支持
+      SEO 的静态导航网站。不依赖后端的纯前端项目开箱即用，简单清爽\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/nav.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n17、[drawio](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/jgraph/drawio)：一款简洁强大的绘图工具。免费开源可以自行部署也可以[在线使用](https://app.diagrams.net/)，功能上直追
+      Microsoft Visio。支持流程图、序列图、网络拓扑图、甘特图、思维导图、模型图等，还能导出多种格式类型比如 png、svg、PDF、HTML
+      和 VSDX 格式（Microsoft Visio 图形格式）\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/drawio.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n18、[npkill](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/voidcosmos/npkill)：快速查找和轻松删除
+      node_modules 文件夹的工具。还在为 node_modules 占了很多磁盘空间而烦恼吗？还在手动找用不到的 node_modules 目录吗？快来试试
+      npkill 吧！轻松地删除 node_modules 目录\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/npkill.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      PHP 项目\\n19、[question2answer](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/q2a/question2answer)：采用
+      PHP+MySQL 实现的免费开源的问答平台。基本上问答平台该有的功能它都有，那么问题来了是做个知乎还是 Stack Overflow 呢？\\n- 支持回答投票、评论、最佳回答、关注和关闭问题\\n-
+      完备的用户和权限管理\\n- 多语言支持\\n- 搜索时的相似问题匹配\\n- 等等\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/question2answer.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Python 项目\\n20、[tomato-clock](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/coolcode/tomato-clock)：Python
+      写的命令行番茄工作法定时器。代码仅有 100 多行，不依赖其它第三方库\\n```\\n\U0001F345 tomato 25 minutes. Ctrl+C
+      to exit\\n \U0001F345\U0001F345----------------------------------------------
+      [8%] 23:4 ⏰ \\n```\\n\\n21、[vardbg](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/CCExtractor/vardbg)：一款能够把
+      Python 程序执行过程，导出成视频或动图的代码调试工具。可用于动画学算法、制作代码讲解视频等场景\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/vardbg.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n22、[apkleaks](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/dwisiswant0/apkleaks)：扫描
+      APK 文件是否包含敏感信息的命令行工具\\n```\\n// custom-rules.json\\n{\\n  \\\"Amazon AWS Access
+      Key ID\\\": \\\"AKIA[0-9A-Z]{16}\\\",\\n  ...\\n}\\n$ apkleaks -f /path/to/file.apk
+      -p rules.json -o ~/Documents/apkleaks-results.txt\\n```\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/apkleaks.jpeg'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n23、[graphene-django](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/graphql-python/graphene-django)：让你轻松地将
+      GraphQL 整合到 Django 项目的库\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519
+      返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n### Rust
+      项目\\n24、[fselect](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/jhspetersson/fselect)：用类
+      SQL 的命令查找文件的命令行工具\\n```\\nfselect size, path from /home/user where name = '*.cfg'
+      or name = '*.tmp'\\nfselect size, abspath from ./tmp where size gt 2g\\nfselect
+      hsize, abspath from ./tmp where size lt 8k\\n```\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca
+      href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Swift 项目\\n25、[awesome-ios](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/vsouza/awesome-ios)：超棒的
+      iOS 开源项目集合。它非常全面包含 Objective-C、Swift 语言的项目，拥有网络、UI、JSON、数据库、音视频等分类，iOS 初学者寻找开源项目的好地方\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/awesome-ios.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n26、[Knot](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/Lojii/Knot)：一款
+      iOS 抓包工具。实现了 HTTP(S) 解析、流量解析、多格式导出、证书管理以及过程分析等\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/Knot.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n27、[SwiftUITodo](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/devxoul/SwiftUITodo)：用
+      SwiftUI 做的 Todo 工具。这是一个示例项目帮助新手掌握 SwiftUI \\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/SwiftUITodo.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      其它\\n28、[LIII](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/aliakseis/LIII)：免费开源的
+      BT 下载工具。如果你厌倦了广告、购买 VIP 才能提速，只想要一个简单好用的下载工具，那你可以试试这个开源项目\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/LIII.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n29、[cloudmusic-vscode](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/YXL76/cloudmusic-vscode)：网易云音乐
+      VS Code 插件。基于网易云网页 API 实现，支持：\\n- 歌曲播放、收藏、喜欢\\n- 心动模式、私人 FM\\n- 评论（单曲、歌单...）\\n-
+      歌词显示\\n- 搜索（热搜/单曲/专辑/歌手...）\\n- 等等\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/cloudmusic-vscode.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n30、[shapez.io](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/tobspr/shapez.io)：一款
+      Steam 上的模拟建造游戏《异形工厂》的源码。游戏是在无边的地图上开采资源、放置设施、组合图形、相互搭配，扩建自己的异形工厂。游戏轻松但也很有挑战性，快去试一试吧\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/shapez_io.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      开源书籍\\n31、[Probabilistic-Programming-and-Bayesian-Methods-for-Hackers](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/CamDavidsonPilon/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers)：《黑客的贝叶斯方法：以
+      Python 为例》\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n32、[The-design-and-implementation-of-a-64-bit-os](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/yifengyou/The-design-and-implementation-of-a-64-bit-os)：《一个
+      64 位操作系统的设计与实现》\\n\\n33、[tensorflow-handbook](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/snowkylin/tensorflow-handbook)：《简明的
+      TensorFlow 2》，[在线阅读](https://tf.wiki/zh_hans/)\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca
+      href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      机器学习\\n34、[Real-Time-Person-Removal](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/jasonmayes/Real-Time-Person-Removal)：在
+      Web 浏览器中实时移除人像。该项目采用 JavaScript+TensorFlow.js 实现“凭空消失”\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/Real-Time-Person-Removal.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n35、[AI-Expert-Roadmap](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/AMAI-GmbH/AI-Expert-Roadmap)：人工智能学习路线图\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/AI-Expert-Roadmap.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \\u003ca href=\\\"https://github.com/521xueweihan/HelloGitHub/blob/master/content/60/HelloGitHub60.md\\\"\\u003e『上一期』\\u003c/a\\u003e
+      | \\u003ca href='https://github.com/521xueweihan/HelloGitHub/issues/899'\\u003e反馈和建议\\u003c/a\\u003e
+      | \\u003ca href=\\\"https://github.com/521xueweihan/HelloGitHub/blob/master/content/62/HelloGitHub62.md\\\"\\u003e『下一期』\\u003c/a\\u003e\\n\\u003c/p\\u003e\\n\\n---\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \U0001F449 \\u003ca href='https://www.ucloud.cn/site/active/kuaijie.html?invitation_code=C1xF2ECA89A2592'\\u003e云主机
+      4 元/月\\u003c/a\\u003e ｜ \\u003ca href='https://github.com/521xueweihan/HelloGitHub/issues/new'\\u003e推荐项目\\u003c/a\\u003e
+      \U0001F448\\u003cbr\\u003e\\n    微信中搜：\\u003cstrong\\u003eHelloGitHub\\u003c/strong\\u003e
+      关注公众号\\u003cbr\\u003e\\n    不仅能第一时间收到推送，还有各种回馈粉丝活动\\u003cbr\\u003e\\n    如果文中的图刷不出来，可以点击
+      \\u003ca href='https://hellogithub.com/periodical/volume/61/'\\u003e这里\\u003c/a\\u003e
+      获取更好的阅读体验。\\n\\u003c/p\\u003e\\n\\n## 声明\\n\\u003ca rel=\\\"license\\\" href=\\\"https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh\\\"\\u003e\\u003cimg
+      alt=\\\"知识共享许可协议\\\" style=\\\"border-width: 0\\\" src=\\\"https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png\\\"\\u003e\\u003c/a\\u003e\\u003cbr\\u003e本作品采用
+      \\u003ca rel=\\\"license\\\" href=\\\"https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh\\\"\\u003e署名-非商业性使用-禁止演绎
+      4.0 国际\\u003c/a\\u003e 进行许可。\\n\",\"commit\":{\"oid\":\"dab905db5f7d1a0535e24283f68e2c5f1aecaaea\"}},\"lineMatches\":[{\"preview\":\"27、[SwiftUITodo](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/devxoul/SwiftUITodo)：用
+      SwiftUI 做的 Todo 工具。这是一个示例项目帮助新手掌握 SwiftUI \",\"lineNumber\":221,\"offsetAndLengths\":[[11,4],[111,4],[130,4]]},{\"preview\":\"\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/61/img/SwiftUITodo.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\",\"lineNumber\":223,\"offsetAndLengths\":[[113,4]]}]},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/521xueweihan/HelloGitHub\",\"url\":\"/github.com/521xueweihan/HelloGitHub\"},\"file\":{\"name\":\"HelloGitHub63.md\",\"path\":\"content/63/HelloGitHub63.md\",\"url\":\"/github.com/521xueweihan/HelloGitHub/-/blob/content/63/HelloGitHub63.md\",\"content\":\"#
+      《HelloGitHub》第 63 期\\n\\u003e 兴趣是最好的老师，**HelloGitHub** 让你对编程感兴趣！\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/01/img/hello-github.jpg'
+      style=\\\"max-width:100%;\\\"\\u003e\\u003c/img\\u003e\\n\\u003c/p\\u003e\\n\\n##
+      目录\\n\\n**Tips**：如果文中的图刷不出来，可以点击 [这里](https://hellogithub.com/periodical/volume/63/)
+      获取更好的阅读体验。\\n\\n- [C 项目](#C-项目)\\n- [C++ 项目](#C-项目-1)\\n- [Go 项目](#Go-项目)\\n-
+      [Java 项目](#Java-项目)\\n- [JavaScript 项目](#JavaScript-项目)\\n- [Kotlin 项目](#Kotlin-项目)\\n-
+      [Python 项目](#Python-项目)\\n- [Ruby 项目](#Ruby-项目)\\n- [Rust 项目](#Rust-项目)\\n-
+      [Swift 项目](#Swift-项目)\\n- [其它](#其它)\\n- [开源书籍](#开源书籍)\\n- [机器学习](#机器学习)\\n\\n\\n-
+      [返回首页](https://github.com/521xueweihan/HelloGitHub#%E5%86%85%E5%AE%B9)\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n  \\u003cimg src=\\\"https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/logo/weixin.png\\\"
+      style=\\\"max-width:30%;\\\"\\u003e\\u003c/img\\u003e\\u003cbr\\u003e\\n关注「HelloGitHub」公众号，第一时间收到推送\\n\\u003c/p\\u003e\\n\\n##
+      内容\\n\\u003e **以下为本期内容**｜每个月 **28** 号更新\\n\\n### C 项目\\n1、[mgba](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/mgba-emu/mgba)：用
+      C 语言实现的 GBA 模拟器。唤起你童年回忆的同时，还能边学边玩，然后再约上三两好友一起看看源码和实现，快乐就是这么简单\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/mgba.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      C++ 项目\\n2、[rocksdb](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/facebook/rocksdb)：用
+      C++ 编写的高性能键值存储引擎。该项目是由 Fackbook 数据库团队基于 levelDB 开发，键值均支持二进制流，能够充分利用多核 CPU 获得高性能，并兼容
+      levelDB 的 API 可谓是青出于蓝而胜于蓝。RocksDB 当下十分流行，一些开源数据库底层存储用的就是它\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca
+      href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Go 项目\\n3、[learngo](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/inancgumus/learngo)：适合新手学习
+      Go 语法的开源项目。学习一门编程语言最好的方法就是动手写，该仓库拥有 1000 多个 Go 语法的问题，让你可以跟着练并附有答案\\n\\n4、[tunny](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/Jeffail/tunny)：可设置固定数量协程的
+      goroutine pool 库。通过这个项目可实现 goroutine 重复使用，从而避免过度创建 goroutine 而造成的内存占用过多等问题\\n```go\\npackage
+      main\\n\\nimport (\\n\\t\\\"io/ioutil\\\"\\n\\t\\\"net/http\\\"\\n\\t\\\"runtime\\\"\\n\\n\\t\\\"github.com/Jeffail/tunny\\\"\\n)\\n\\nfunc
+      main() {\\n\\tnumCPUs := runtime.NumCPU()\\n\\n\\tpool := tunny.NewFunc(numCPUs,
+      func(payload interface{}) interface{} {\\n\\t\\tvar result []byte\\n\\n\\t\\t//
+      TODO: Something CPU heavy with payload\\n\\n\\t\\treturn result\\n\\t})\\n\\tdefer
+      pool.Close()\\n\\n\\thttp.HandleFunc(\\\"/work\\\", func(w http.ResponseWriter,
+      r *http.Request) {\\n\\t\\tinput, err := ioutil.ReadAll(r.Body)\\n\\t\\tif err
+      != nil {\\n\\t\\t\\thttp.Error(w, \\\"Internal error\\\", http.StatusInternalServerError)\\n\\t\\t}\\n\\t\\tdefer
+      r.Body.Close()\\n\\n\\t\\t// Funnel this work into our pool. This call is synchronous
+      and will\\n\\t\\t// block until the job is completed.\\n\\t\\tresult := pool.Process(input)\\n\\n\\t\\tw.Write(result.([]byte))\\n\\t})\\n\\n\\thttp.ListenAndServe(\\\":8080\\\",
+      nil)\\n}\\n```\\n\\n5、[glab](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/profclems/glab)：用
+      Go 写的 GitLab 命令行工具。通过它除了能够在命令行管理项目、issues、合并提交之外，还能够查看 CI 的运行状态\\n```\\n  api:
+      \        Make authenticated REST/GRAPHQL\\n  auth:        Manage glab's authentication
+      state\\n  issue:       Work with GitLab issues\\n  label:       Manage labels
+      on remote\\n  mr:          Create, view and manage merge requests\\n  ci:          Work
+      with GitLab CI pipelines and jobs\\n  release:     Manage GitLab releases\\n
+      \ repo:        Work with GitLab repositories and projects\\n```\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/glab.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n6、[fzf](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/junegunn/fzf)：能够搜“一切”的模糊搜索命令行工具。它能够搜文件、历史命令、进程、git
+      提交记录等信息，支持预览内容、整合到 Vim/Neovim 编辑器，而且搜索速度极快\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/fzf.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n7、[godis](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/HDT3213/godis)：用
+      Go 语言写的 Redis 服务器。它实现了 Redis 通信协议并兼容 redis-cli 客户端，包含 5 种常用的数据结构和命令比如：TTL、发布订阅、地理位置以及
+      AOF 持久化等，Go 的初学者可以通过该项目能够学习到关于 TCP、通信协议实现、常用的数据结构等知识，Web 开发学烦了？换一个口味，写个 Redis
+      作为实战项目吧\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519
+      返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n### Java
+      项目\\n8、[ExoPlayer](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/google/ExoPlayer)：谷歌官方开源的
+      Android 媒体播放器。易于定制和扩展，支持丰富的数据格式比如：FMP4、FLV、SmoothStreaming、MP3 等\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/ExoPlayer.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n9、[traccar](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/traccar/traccar)：GPS
+      追踪平台。此项目支持 170 多种 GPS 协议，1500 多种型号的 GPS 设备，功能包含：实时 GPS 追踪、数据统计报告、报警和通知等等\\n\\n10、[airbyte](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/airbytehq/airbyte)：一个开源的
+      EL(T) 平台。能简单快速地把用户提供的应用、数据库等地方的数据聚合到平台，从而可以在一个平台查询、展示、更新、管理这些数据\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/airbyte.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n11、[Ward](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/B-Software/Ward)：拥有漂亮仪表盘的服务器监控工具\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/Ward.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      JavaScript 项目\\n12、[moovie.js](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/BMSVieira/moovie.js)：专注于电影的
+      HTML5 播放器。容易上手和使用，支持倍速播放、快捷键操作、字幕偏移即时调整等功能\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/moovie_js.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n13、[nativefier](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/nativefier/nativefier)：能够把
+      Web 页面变成本地应用的命令行工具。通过 Electron+Chromium 把网站包装成本地 .app、.exe 等可执行文件，支持运行在 Windows、macOS
+      和 Linux 操作系统上\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/nativefier.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n14、[lowdb](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/typicode/lowdb)：支持浏览器和
+      Electron 的轻量级 JSON 文件数据库。如果是创建没有后端的小型前端项目，但还有存储和管理数据的需求，那就快试试 lowdb 吧\\n```javascript\\nimport
+      { join } from 'path'\\nimport { Low, JSONFile } from 'lowdb'\\n\\n// 新建 JSON
+      文件用于存储数据\\nconst file = join(__dirname, 'db.json')\\nconst adapter = new JSONFile(file)\\nconst
+      db = new Low(adapter)\\n\\n// 把内容更新到 db.data 并写入 JSON 文件\\ndb.data.posts.push({
+      id: 1, title: 'lowdb is awesome' }).write()\\ndb.get('posts')\\n  .filter({title:
+      'lowdb is awesome'})\\n  .sortBy('id')\\n  .take(5)\\n  .value()\\n```\\n\\n15、[eruda](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/liriliri/eruda)：一个专为手机端设计的前端页面调试工具。类似手机端迷你版开发者模式，可用于在手机端调试页面。主要功能包括：显示
+      console 日志、检查元素状态、捕获 XHR 请求、显示本地存储和 Cookie 等信息\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/eruda.jpeg'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n16、[cusdis](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/djyde/cusdis)：这是一个界面清爽、注重隐私的轻量级博客评论系统。可以很方便地与
+      React、Vue 或其他博客系统结合，并且还提供了一个后台来管理所有的评论。除此之外，还支持一键从 Disqus 导入、邮件通知等强大的功能\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/cusdis.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Kotlin 项目\\n17、[mirai](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/mamoe/mirai)：由
+      Kotlin 语言编写的 QQ 机器人框架。该项目提供了 Android QQ 协议的 API，通过这些 API 可以实现自动化操作，比如：群管理等功能，注意！该项目不支持一切商业使用。最后项目的
+      Kotlin 代码写的很好，感兴趣的同学可以去看下源码\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca
+      href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Python 项目\\n18、[pygame](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/pygame/pygame)：用来开发游戏的
+      Python 库。Pygame 已经持续更新多年，网上的教程和资料十分充足，虽然在游戏开发领域 Python 只是个弟弟，但如果只是用这个库开发个 2D
+      小游戏还是很顺手的。推荐给想用 Python 写个小游戏的朋友\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/pygame.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n19、[GitHubPoster](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/yihong0618/GitHubPoster)：能够把多个平台上的数据，生成类似
+      GitHub 绿墙图像的工具。比如能够把发推的频率、扇贝单词打卡等情况生成类似 GitHub 绿墙图像，使用简单感兴趣的同学可以把玩一下\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/GitHubPoster.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n20、[guietta](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/alfiopuglisi/guietta)：用于制作简单
+      GUI 程序的 Python 库。换一种简单的方式写 GUI（图形用户界面）程序\\n```python\\nfrom guietta import _,
+      Gui, Quit\\ngui = Gui(\\n\\t[ \\\"Enter numbers:\\\",  \\\"__a__\\\", \\\"+\\\",
+      \\\"__b__\\\", [\\\"Calculate\\\"] ],\\n\\t[    \\\"Result: --\\u003e\\\", \\\"result\\\",
+      \  _,       _,             _ ],\\n\\t[                _,        _,   _,       _,
+      \         Quit ]\\n)\\n\\nwith gui.Calculate:\\n\\tgui.result = float(gui.a)
+      + float(gui.b)\\n\\ngui.run()\\n```\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/guietta.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Ruby 项目\\n21、[forem](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/forem/forem)：用来构建社区的
+      Ruby 开源项目。一款开源、现成的论坛项目，能够让你快速搭建起来一个社区平台。国外知名的程序员社区 dev 用的就是它\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/forem.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Rust 项目\\n22、[rustdesk](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/rustdesk/rustdesk)：免费开源的远程桌面软件。开箱即用无需任何配置，支持
+      Linux/Mac/Win/Android 等平台。还能够自行搭建服务器，由用户自己掌控数据，不必担心隐私数据泄露的问题。在当下越来越多的远程桌面软件都收费的情况下的另一个选择\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/rustdesk.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n23、[indicatif](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/mitsuhiko/indicatif)：样式丰富的
+      Rust 终端进度条库\\n```rust\\nuse indicatif::ProgressBar;\\n\\nlet bar = ProgressBar::new(1000);\\nfor
+      _ in 0..1000 {\\n    bar.inc(1);\\n    // ...\\n}\\nbar.finish();\\n```\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/indicatif.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n24、[azul](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/fschutt/azul)：一个跨平台的
+      Rust 和 C/C++ 的 GUI 框架。使用 WebRender 渲染引擎和 CSS/HTML-like DOM 构建，可用于开发漂亮的原生桌面应用程序\\n```rust\\n#![cfg_attr(not(debug_assertions),
+      windows_subsystem = \\\"windows\\\")]\\n\\nuse azul::prelude::*;\\nuse azul_widgets::table_view::*;\\n\\nstruct
+      TableDemo {\\n    // cells: BTreeMap\\u003cTableCell, String\\u003e,\\n}\\n\\nextern
+      \\\"C\\\" fn layout(data: \\u0026mut RefAny, _: LayoutCallbackInfo) -\\u003e
+      StyledDom {\\n\\n    let mut table_view_state = TableViewState::default();\\n
+      \   table_view_state.set_cell_content(TableCellIndex { row: 2, column: 2 },
+      \\\"Hello World\\\");\\n    table_view_state.set_selection(Some(TableCellSelection::from(3,
+      4).to(3, 4)));\\n\\n    TableView::new(table_view_state).dom().style(Css::empty())\\n}\\n\\nfn
+      main() {\\n    let app = App::new(RefAny::new(TableDemo { }), AppConfig::new(LayoutSolver::Default));\\n
+      \   app.run(WindowCreateOptions::new(layout));\\n}\\n```\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/azul.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      Swift 项目\\n25、[Grid](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/exyte/Grid)：受
+      CSS Grid 启发，用 SwiftUI 编写关于视图（view）布局的开源项目\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/Grid.gif'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n26、[SwiftyJSON](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/SwiftyJSON/SwiftyJSON)：一个
+      Swift JSON 三方库，用更简单的方式处理 JSON\\n```swift\\nlet json = JSON(data: dataFromNetworking)\\nif
+      let userName = json[0][\\\"user\\\"][\\\"name\\\"].string {\\n  //Now you got
+      your value\\n}\\n```\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519
+      返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n### 其它\\n27、[aind](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/aind-containers/aind)：实现在
+      Docker 中启动安卓应用的项目\\n```\\ndocker run -td --name aind --privileged -p 5900:5900
+      -v /lib/modules:/lib/modules:ro ghcr.io/aind-containers/aind\\ndocker exec aind
+      cat /home/user/.vnc/passwdfile\\n```\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/aind.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n28、[librime](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/rime/librime)：一款开源的中文输入法。市面上的输入法有很多，但你找到让自己称心如意的那款了吗？或许通过今天的开源项目你就能找到它。RIME
+      这款开源的输入法，它不追踪输入的内容源码完全开放，可自由切换繁/简中文，选择/设计输入方案和主题，对繁体字输入尤为优秀。作为输入法给予用户无限的自由和个性化，作为输入法框架让开发者有更多的发挥空间。比如支持不同操作系统的版本：Linux（中州韵）、Windows（小狼毫）、macOS（鼠须管）、Android（同文）由于自由度较高上手需要一些时间，这大概就是获得自由的代价吧\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/librime.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n29、[android-foss](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/offa/android-foss)：开源的安卓客户端应用集合\\n\\n30、[secguide](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/Tencent/secguide)：腾讯开源的代码安全指南。该项目包含：C/C++、Python、JavaScript、Java、Go
+      等语言的安全编码指南，内容简单易懂能够帮助开发者，在代码源头规避安全风险减少漏洞\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/secguide.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n31、[Kanmail](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/Oxygem/Kanmail)：以看板的方式管理邮件的客户端应用。适用于
+      Mac/Windows 操作系统，支持 Gmail、Outlook 等邮箱\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/Kanmail.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n32、[hello-world](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/leachim6/hello-world)：汇集了
+      800 多种编程语言 Hello World 的项目\\n\\n33、[material-theme-jetbrains](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/ChrisRM/material-theme-jetbrains)：一款
+      JetBrains IDE 的 Material 风格主题\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/material-theme-jetbrains.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      开源书籍\\n34、[awesome-fenix](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/fenixsoft/awesome-fenix)：讲述“如何构建大型且可靠的分布式系统”的开源书籍。推荐给想成为架构师的你，[在线阅读](https://icyfenix.cn/)
+      \\n\\n35、[google-sre-ebook](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/captn3m0/google-sre-ebook)：Google
+      SRE 相关的书籍。Google SRE 是谷歌的专业运维团队的工程师，他们有一个共同的名字：Site Reliability Engineer，而这本书由
+      Google SRE 们撰写，分享了谷歌运维相关的一些技术和知识\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/google-sre-ebook.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n###
+      机器学习\\n36、[AugLy](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/facebookresearch/AugLy)：Facebook
+      开源的一个数据增强 Python 库。该库目前支持音频、图像、文本和视频四种模式，一方面可以用现实数据对数据进行增强，另一方面还可以检测出相似内容，消除重复数据带来的干扰\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/AugLy.png'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n37、[Real-Time-Voice-Cloning](https://hellogithub.com/periodical/statistics/click/?target=https://github.com/CorentinJ/Real-Time-Voice-Cloning)：克隆某个人说话声音的
+      AI 项目。仅需几秒音频，就能模仿出原音频的人声\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\u003cimg
+      src='https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/63/img/Real-Time-Voice-Cloning.jpg'
+      style=\\\"max-width:80%; max-height=80%;\\\"\\u003e\\u003c/img\\u003e\\u003c/p\\u003e\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\u003ca href=\\\"#目录\\\"\\u003e\U0001F519 返回目录 \U0001F519\\u003c/a\\u003e\\u003c/p\\u003e\\u003cbr\\u003e\\n\\n\\n\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \\u003ca href=\\\"https://github.com/521xueweihan/HelloGitHub/blob/master/content/62/HelloGitHub62.md\\\"\\u003e『上一期』\\u003c/a\\u003e
+      | \\u003ca href='https://github.com/521xueweihan/HelloGitHub/issues/899'\\u003e反馈和建议\\u003c/a\\u003e
+      | \\u003ca href=\\\"https://github.com/521xueweihan/HelloGitHub/blob/master/content/64/HelloGitHub64.md\\\"\\u003e『下一期』\\u003c/a\\u003e\\n\\u003c/p\\u003e\\n\\n---\\n\\u003cp
+      align=\\\"center\\\"\\u003e\\n    \U0001F449 \\u003ca href='https://www.ucloud.cn/site/active/kuaijie.html?invitation_code=C1xF2ECA89A2592'\\u003e云主机
+      4 元/月\\u003c/a\\u003e ｜ \\u003ca href='https://github.com/521xueweihan/HelloGitHub/issues/new'\\u003e推荐项目\\u003c/a\\u003e
+      \U0001F448\\u003cbr\\u003e\\n    微信中搜：\\u003cstrong\\u003eHelloGitHub\\u003c/strong\\u003e
+      关注公众号\\u003cbr\\u003e\\n    不仅能第一时间收到推送，还有各种回馈粉丝活动\\u003cbr\\u003e\\n    如果文中的图刷不出来，可以点击
+      \\u003ca href='https://hellogithub.com/periodical/volume/63/'\\u003e这里\\u003c/a\\u003e
+      获取更好的阅读体验。\\n\\u003c/p\\u003e\\n\\n## 声明\\n\\u003ca rel=\\\"license\\\" href=\\\"https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh\\\"\\u003e\\u003cimg
+      alt=\\\"知识共享许可协议\\\" style=\\\"border-width: 0\\\" src=\\\"https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png\\\"\\u003e\\u003c/a\\u003e\\u003cbr\\u003e本作品采用
+      \\u003ca rel=\\\"license\\\" href=\\\"https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh\\\"\\u003e署名-非商业性使用-禁止演绎
+      4.0 国际\\u003c/a\\u003e 进行许可。\\n\",\"commit\":{\"oid\":\"dab905db5f7d1a0535e24283f68e2c5f1aecaaea\"}},\"lineMatches\":[{\"preview\":\"\\t\\t//
+      TODO: Something CPU heavy with payload\",\"lineNumber\":68,\"offsetAndLengths\":[[5,4]]}]},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/521xueweihan/HelloGitHub\",\"url\":\"/github.com/521xueweihan/HelloGitHub\"},\"file\":{\"name\":\"README.md\",\"path\":\"script/github_bot/README.md\",\"url\":\"/github.com/521xueweihan/HelloGitHub/-/blob/script/github_bot/README.md\",\"content\":\"#
+      GitHub Bot\\n\\u003e兴趣是最好的老师，[HelloGitHub](https://github.com/521xueweihan/HelloGitHub)
+      就是帮你找到兴趣！\\n\\n\\u003cp align=\\\"center\\\"\\u003e\\n    \\u003cimg src='https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/01/img/hello-github.jpg'
+      style=\\\"max-width:100%;\\\"\\u003e\\u003c/img\\u003e\\n\\u003c/p\\u003e\\n\\n##
+      运行步骤\\n这个脚本主要用于收集 GitHub 上优秀的项目，用于编写[《HelloGitHub 月刊》](https://github.com/521xueweihan/HelloGitHub)，后面还会持续开发～\\n\\n1.
+      **安装依赖**：`pip install -r requirements.txt`\\n2. **配置脚本中相关参数**：\\n\\t```\\n\\t#
+      github帐号\\n\\tACCOUNT = {\\n\\t    'username': '',\\n\\t    'password': ''\\n\\t}\\n\\n\\t#
+      发送邮件，邮箱的信息\\n\\tMAIL = {\\n\\t    'mail': '',  # 发送邮件的邮箱地址\\n\\t    'username':
+      '',\\n\\t    'password': '',\\n\\t    'host': 'smtp.qq.com',\\n\\t    'port':
+      465\\n\\t}\\n\\n\\t# 接收邮件的邮箱地址\\n\\tRECEIVERS = []\\n\\t# qq邮件服务文档：http://service.mail.qq.com/cgi-bin/help?id=28\\n\\t```\\n\\n3.**运行脚本**：`python
+      github_bot.py`\\n\\n## 开发日志\\n#### 2017-04-06\\n1. GitHub Api 更新，event 最多获取
+      300 条\\n2. 新注册帐号 521hellogithub 用于获取每天的数据\\n\\n#### 2017-03-28\\n增加收集项目 star
+      临界值\\n\\n#### 2016-09-29\\n- GitHub 今日热点项目不统计自己的项目\\n- 错误日志放到脚本的同目录下\\n\\n####
+      2016-09-24\\n实现根据 star 数量，从高到低展示。\\n\\n#### 2016-09-05\\n实现请求 GitHub Api 获取关注的用户
+      star 的项目、过滤内容、定时发邮件\\n\\n## Todo\\n1. 获取 explore 页的数据\\n2. 异步请求获取 star 数\\n3.
+      自己项目的数据统计\\n\",\"commit\":{\"oid\":\"dab905db5f7d1a0535e24283f68e2c5f1aecaaea\"}},\"lineMatches\":[{\"preview\":\"##
+      Todo\",\"lineNumber\":53,\"offsetAndLengths\":[[3,4]]}]},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/521xueweihan/HelloGitHub\",\"url\":\"/github.com/521xueweihan/HelloGitHub\"},\"file\":{\"name\":\"README.md\",\"path\":\"script/make_content/README.md\",\"url\":\"/github.com/521xueweihan/HelloGitHub/-/blob/script/make_content/README.md\",\"content\":\"#
+      GitHub MakeContent\\n\\u003e兴趣是最好的老师，[《HelloGitHub》](https://github.com/521xueweihan/HelloGitHub)就是帮你找到兴趣！\\n\\n![](https://github.com/521xueweihan/HelloGitHub/blob/master/content/01/img/hello-github.jpg)\\n\\n\\n##
+      运行步骤\\n后面的月刊都通过这个脚本生成，这样如果通用内容部分需要修改，就只需要使用脚本重新生成月刊，而不需\\n要手动修改已发布的所有期的内容。后面还会持续开发～\\n\\n```\\npython
+      make_content.py 期数/all（重新生成所有期）\\n```\\n注意：需要放在本项目的根目录下运行该脚本\\n\\n## TODO\\n-
+      自动生成 README\\n\",\"commit\":{\"oid\":\"dab905db5f7d1a0535e24283f68e2c5f1aecaaea\"}},\"lineMatches\":[{\"preview\":\"##
+      TODO\",\"lineNumber\":15,\"offsetAndLengths\":[[3,4]]}]},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/996icu/996.ICU\",\"url\":\"/github.com/996icu/996.ICU\"},\"file\":{\"name\":\"lib.rs\",\"path\":\"archived/licenses[WIP]/tools/test-gen-license/src/lib.rs\",\"url\":\"/github.com/996icu/996.ICU/-/blob/archived/licenses%5BWIP%5D/tools/test-gen-license/src/lib.rs\",\"content\":\"pub
+      mod test_go;\\npub mod test_py;\\npub mod test_rust;\\n\\nuse assert_cmd::prelude::*;\\nuse
+      dir_diff;\\nuse std::process::Command;\\nuse tempdir;\\nuse tempdir::TempDir;\\n\\n#[test]\\nfn
+      test_rust_help() {\\n    /// todo: compile rust executive file\\n    let path
+      = \\\"cargo\\\";\\n    let mut cmd = Command::new(\\\"run\\\");\\n    /// todo:
+      add directory\\n    cmd.dir(\\\"\\\");\\n    // assert_eq!(output, help);\\n
+      \   let assert = cmd.assert();\\n    assert.success().stdout(\\n        r#\\\"gen-license-go
+      is a 996.icu license generator implemented in Go,\\nthis generator is developed
+      to generate various open-source licenses including MIT, Apache, etc.\\nMore
+      importantly, the main purpose of this tool is to incorporate those aforesaid
+      licenses into\\na brand new license: 996.icu, defined by this repository.\\n\\nUsage:\\n
+      \ gen-license-go [flags]\\n  gen-license-go [command]\\n\\nAvailable Commands:\\n
+      \ gen         gen is a 996.icu license generator-command.\\n  help        Help
+      about any command\\n\\nFlags:\\n  -h, --help   help for gen-license-go\\n  -l,
+      --list   list all licenses (default true)\\n\\nUse \\\"gen-license-go [command]
+      --help\\\" for more information about a command.\\\"#,\\n    );\\n}\\n\",\"commit\":{\"oid\":\"19c6d18efb52b6bf12c34f2893c9bafad9e66ebb\"}},\"lineMatches\":[{\"preview\":\"
+      \   /// todo: compile rust executive file\",\"lineNumber\":12,\"offsetAndLengths\":[[8,4]]},{\"preview\":\"
+      \   /// todo: add directory\",\"lineNumber\":15,\"offsetAndLengths\":[[8,4]]}]},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/996icu/996.ICU\",\"url\":\"/github.com/996icu/996.ICU\"},\"file\":{\"name\":\"es_ES.md\",\"path\":\"i18n/es_ES.md\",\"url\":\"/github.com/996icu/996.ICU/-/blob/i18n/es_ES.md\",\"content\":\"
+      \\\"996\\\"?\\n===\\n \\\"996\\\" trabajando, esperando en la UCI.\\n\\n Un
+      horario de trabajo \\\"996\\\" se refiere a un horario de trabajo no oficial
+      (9 am - 9 pm, 6 días a la semana) que ha ido ganando más popularidad. Servir
+      a una compañía que fomenta el horario de trabajo \\\"996\\\" generalmente significa
+      trabajar por lo menos 60 horas a la semana.\\n\\n Citado de la Ley del Trabajo
+      de la República Popular China.\\n\\n**Artículo 36:**\\n\\n\\u003e El Estado
+      deberá practicar un sistema de horas de trabajo en el que los empleados trabajen
+      durante un máximo de ocho horas por día y no más de 44 horas por semana en promedio.\\n\\n**Artículo
+      39:**\\n\\n\\u003e Si una empresa no puede cumplir con lo estipulado en el artículo
+      36 y el artículo 38 de esta Ley debido a las características especiales de su
+      producción, puede seguir otras reglas sobre el trabajo y descansar con la aprobación
+      de los departamentos administrativos del trabajo.\\n**Artículo 41:**\\n\\n\\u003e
+      El empleador puede prolongar las horas de trabajo debido a las necesidades de
+      producción o negocios después de consultar con su sindicato y empleados. Las
+      horas de trabajo que se prolongarán, en general, no deberán durar más de una
+      hora al día, o no más de tres horas al día si se requiere tal prolongación debido
+      a razones especiales y con la condición de garantizar la salud física de los
+      empleados. . El tiempo de trabajo a prolongar no debe exceder, sin embargo,
+      36 horas al mes.\\n\\n**Artículo 43:**\\n\\n\\u003e El empleador no prolongará
+      las horas de trabajo de los empleados en violación de las estipulaciones de
+      esta Ley.\\n\\n**Artículo 90:**\\n\\n\\u003e Si el empleador prolonga las horas
+      de trabajo en violación de las estipulaciones de esta Ley, los departamentos
+      administrativos de trabajo pueden advertirle, ordenarle que haga correcciones
+      y puede imponerle una multa.\\n\\n**Artículo 91:**\\n\\n\\u003e (2) Negativa
+      a pagar a los trabajadores remuneraciones salariales por trabajar más horas;\\n\\nGanando
+      más popularidad y publicidad.\\n A principios de 2019, una empresa china de
+      comercio electrónico llamada Youzan anunció la adopción del horario de trabajo
+      \\\"996\\\" en el futuro, en la fiesta anual de la compañía. El CEO de Youzan
+      respondió: \\\"Definitivamente, esta sería una buena decisión cuando miremos
+      hacia atrás dentro de unos años\\\".\\n\\n A mediados de marzo de 2019, se informó
+      que JD.com comenzó a adoptar el horario de trabajo \\\"996\\\" o \\\"995\\\"
+      en algunas de sus unidades de negocios. JD.com PR publicó en su cuenta de Maimai
+      (platform, una plataforma de red social empresarial china de nombre real): \\\"(Nuestra
+      cultura es) para dedicarnos con todo nuestro corazón (para alcanzar los objetivos
+      comerciales)\\\".\\n\\n Aunque recientemente está ganando más publicidad, este
+      programa de trabajo es un \\\"secreto\\\" comúnmente conocido que se practica
+      en muchas compañías en China.\\n\\n Compensación y beneficios\\n De acuerdo
+      con la Ley del Trabajo, los empleados que siguen el horario de trabajo \\\"996\\\"
+      merecen ser pagados 2.275 veces de su salario base. Desafortunadamente, las
+      personas que trabajan bajo \\\"996\\\" rara vez cobran tanto.\\n\\n ¿De dónde
+      viene el nombre de la repo 996.ICU?\\n Si sigue constantemente el horario de
+      trabajo \\\"996\\\", corre el riesgo de ingresar a la Unidad de Cuidados Intensivos.\\n\\n
+      Las vidas de los desarrolladores son importantes.\\n\",\"commit\":{\"oid\":\"19c6d18efb52b6bf12c34f2893c9bafad9e66ebb\"}},\"lineMatches\":[{\"preview\":\"
+      A mediados de marzo de 2019, se informó que JD.com comenzó a adoptar el horario
+      de trabajo \\\"996\\\" o \\\"995\\\" en algunas de sus unidades de negocios.
+      JD.com PR publicó en su cuenta de Maimai (platform, una plataforma de red social
+      empresarial china de nombre real): \\\"(Nuestra cultura es) para dedicarnos
+      con todo nuestro corazón (para alcanzar los objetivos comerciales)\\\".\",\"lineNumber\":34,\"offsetAndLengths\":[[304,4]]}]},{\"__typename\":\"FileMatch\",\"repository\":{\"name\":\"github.com/996icu/996.ICU\",\"url\":\"/github.com/996icu/996.ICU\"},\"file\":{\"name\":\"es_MX.md\",\"path\":\"i18n/es_MX.md\",\"url\":\"/github.com/996icu/996.ICU/-/blob/i18n/es_MX.md\",\"content\":\"996.ICU\\n===\\n\\n##
+      ¿Qué es \\\"996\\\"?\\n996 en el trabajo, UCI a la espera.\\n\\nEl sistema \\\"996\\\"
+      se refiere a un horario de trabajo ilegal en China, pero que se ha popularizado
+      entre sus empresas. El horario empieza a las 9 horas y termina a las 21 horas
+      (9 de la tarde), 6 días por semana.\\n\\nTrabajar para una empresa que fomente
+      el horario \\\"996\\\" normalmente significa trabajar al menos 60h por semana.\\n\\n##
+      Leyes y regulaciones\\nEl horario de trabajo \\\"996\\\" **atenta directamente**
+      contra la Constitución de la República Popular China así como otras leyes.\\n\\n###
+      Constitución de la República Popular China\\nCapítulo II, artículo 43:\\n\\n\\u003eLos
+      trabajadores de la Republica Popular China tienen derecho al descanso.\\n\\u003eEl
+      Estado expande las facilidades para el descanso y reposo de los\\ntrabajadores
+      y fija la jornada laboral y el régimen de vacaciones para\\nlos obreros y empleados.\\n\\n###
+      Ley del Trabajo de la Rep. Popular China\\nArtículo 41 de la [Ley del Trabajo
+      de la Rep. Popular China](http://www.china.org.cn/living_in_china/abc/2009-07/15/content_18140508.htm)
+      se dice:\\n\\n\\u003eEl empleador puede prolongar las horas de trabajo debido
+      a las necesidades de producción o negocios después de consultar con su sindicato
+      y trabajadores. Las horas de trabajo que se prolongarán, en general, no deberán
+      durar más de una hora al día, o no más de tres horas al día si se requiere tal
+      prolongación debido a razones especiales y con la condición de que se garantice
+      la salud física de los trabajadores. El tiempo de trabajo a prolongar no debe
+      exceder, sin embargo, 36 horas al mes.\\n\\n## Ganando más popularidad\\nA principios
+      de 2019, _Youzan_, una empresa china de e-comercio ha anunciado la adopción
+      del patrón \\\"996\\\" en el futuro, en la fiesta del año nuevo chino de la
+      compañía. El CEO (director ejecutivo) de Youzan responde: \\\"Definitivamente
+      sería una buena decisión cuando miremos atrás después de unos años.\\\"\\n\\nA
+      mediados de marzo de 2019, se informó que _Jingdong_ comenzó a adoptar el patrón
+      \\\"996\\\" o \\\"995\\\" en algunas de las unidades negociarias. Jingdong PR
+      publicó en su cuenta Maimai (`脉脉`, una plataforma de red social empresarial
+      china de nombre real): \\\"(Nuestra cultura corporativa es) dedicarnos con todo
+      nuestro corazón (para lograr los objetivos comerciales).\\\"\\n\\n## Compensación
+      y beneficios\\nDe acuerdo con la Ley del Trabajo, los empleados que siguen el
+      patrón \\\"996\\\" merecen ser pagados 2.275 veces de su salario base. Desafortunadamente,
+      las personas que lograron \\\"996\\\" rara vez reciben un pago tan alto.\\n\\n##
+      ¿De dónde viene el nombre del repo `996.ICU`?\\nSi sigue constantemente el horario
+      \\\"996\\\", corre el riesgo de ingresar a la UCI (en Inglés, **I**ntensive
+      **C**are **U**nit).\\n\\n**Las vidas de los desarrolladores importan.**\\n\",\"commit\":{\"oid\":\"19c6d18efb52b6bf12c34f2893c9bafad9e66ebb\"}},\"lineMatches\":[{\"preview\":\"A
+      mediados de marzo de 2019, se informó que _Jingdong_ comenzó a adoptar el patrón
+      \\\"996\\\" o \\\"995\\\" en algunas de las unidades negociarias. Jingdong PR
+      publicó en su cuenta Maimai (`脉脉`, una plataforma de red social empresarial
+      china de nombre real): \\\"(Nuestra cultura corporativa es) dedicarnos con todo
+      nuestro corazón (para lograr los objetivos comerciales).\\\"\",\"lineNumber\":29,\"offsetAndLengths\":[[297,4]]}]},{\"__typename\":\"Repository\",\"name\":\"github.com/99ridho/todolist-mvvm-rxswift\",\"url\":\"/github.com/99ridho/todolist-mvvm-rxswift\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/99ridho/todolist-mvvm-rxswift\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/99ridho/todolist-mvvm-rxswift\\\" rel=\\\"nofollow\\\"\\u003egithub.com/99ridho/todolist-mvvm-rxswift\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/ACloudGuru/todoer-demo\",\"url\":\"/github.com/ACloudGuru/todoer-demo\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/ACloudGuru/todoer-demo\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/ACloudGuru/todoer-demo\\\" rel=\\\"nofollow\\\"\\u003egithub.com/ACloudGuru/todoer-demo\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/Adlai-Holler/Swift-Flux-TodoMVC\",\"url\":\"/github.com/Adlai-Holler/Swift-Flux-TodoMVC\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/Adlai-Holler/Swift-Flux-TodoMVC\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/Adlai-Holler/Swift-Flux-TodoMVC\\\" rel=\\\"nofollow\\\"\\u003egithub.com/Adlai-Holler/Swift-Flux-TodoMVC\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/Akryum/vue-apollo-todos\",\"url\":\"/github.com/Akryum/vue-apollo-todos\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/Akryum/vue-apollo-todos\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/Akryum/vue-apollo-todos\\\" rel=\\\"nofollow\\\"\\u003egithub.com/Akryum/vue-apollo-todos\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AkyunaAkish/react-redux-node-express-todo-list-boilerplate\",\"url\":\"/github.com/AkyunaAkish/react-redux-node-express-todo-list-boilerplate\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AkyunaAkish/react-redux-node-express-todo-list-boilerplate\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AkyunaAkish/react-redux-node-express-todo-list-boilerplate\\\"
+      rel=\\\"nofollow\\\"\\u003egithub.com/AkyunaAkish/react-redux-node-express-todo-list-boilerplate\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AlaaEdAouimeur/Flutter-moor-SqlTodo\",\"url\":\"/github.com/AlaaEdAouimeur/Flutter-moor-SqlTodo\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AlaaEdAouimeur/Flutter-moor-SqlTodo\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AlaaEdAouimeur/Flutter-moor-SqlTodo\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AlaaEdAouimeur/Flutter-moor-SqlTodo\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AlbertoDorado/droid-sans-mono-zeromod\",\"url\":\"/github.com/AlbertoDorado/droid-sans-mono-zeromod\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AlbertoDorado/droid-sans-mono-zeromod\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AlbertoDorado/droid-sans-mono-zeromod\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AlbertoDorado/droid-sans-mono-zeromod\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AlexAsplund/PSTodoist\",\"url\":\"/github.com/AlexAsplund/PSTodoist\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AlexAsplund/PSTodoist\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AlexAsplund/PSTodoist\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AlexAsplund/PSTodoist\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/Aly-ve/Mastodon-share-button\",\"url\":\"/github.com/Aly-ve/Mastodon-share-button\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/Aly-ve/Mastodon-share-button\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/Aly-ve/Mastodon-share-button\\\" rel=\\\"nofollow\\\"\\u003egithub.com/Aly-ve/Mastodon-share-button\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AmauryCarrade/MastodonToTwitter\",\"url\":\"/github.com/AmauryCarrade/MastodonToTwitter\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AmauryCarrade/MastodonToTwitter\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AmauryCarrade/MastodonToTwitter\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AmauryCarrade/MastodonToTwitter\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AndersDJohnson/firedux-todomvc\",\"url\":\"/github.com/AndersDJohnson/firedux-todomvc\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AndersDJohnson/firedux-todomvc\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AndersDJohnson/firedux-todomvc\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AndersDJohnson/firedux-todomvc\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AndresBott/ansible-autodoc\",\"url\":\"/github.com/AndresBott/ansible-autodoc\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AndresBott/ansible-autodoc\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AndresBott/ansible-autodoc\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AndresBott/ansible-autodoc\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/Angarsk8/realtime-todo-app\",\"url\":\"/github.com/Angarsk8/realtime-todo-app\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/Angarsk8/realtime-todo-app\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/Angarsk8/realtime-todo-app\\\" rel=\\\"nofollow\\\"\\u003egithub.com/Angarsk8/realtime-todo-app\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/Anguei/Luogu-Super-Todolist\",\"url\":\"/github.com/Anguei/Luogu-Super-Todolist\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/Anguei/Luogu-Super-Todolist\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/Anguei/Luogu-Super-Todolist\\\" rel=\\\"nofollow\\\"\\u003egithub.com/Anguei/Luogu-Super-Todolist\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AnilDeshpande/DBDemoToDoList\",\"url\":\"/github.com/AnilDeshpande/DBDemoToDoList\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AnilDeshpande/DBDemoToDoList\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AnilDeshpande/DBDemoToDoList\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AnilDeshpande/DBDemoToDoList\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AnnaSu/todolist-pwa-demo-react\",\"url\":\"/github.com/AnnaSu/todolist-pwa-demo-react\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AnnaSu/todolist-pwa-demo-react\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AnnaSu/todolist-pwa-demo-react\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AnnaSu/todolist-pwa-demo-react\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/AnthonyDiGirolamo/todotxt-machine\",\"url\":\"/github.com/AnthonyDiGirolamo/todotxt-machine\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/AnthonyDiGirolamo/todotxt-machine\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/AnthonyDiGirolamo/todotxt-machine\\\" rel=\\\"nofollow\\\"\\u003egithub.com/AnthonyDiGirolamo/todotxt-machine\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}},{\"__typename\":\"Repository\",\"name\":\"github.com/Anupam-dagar/react-Hasura-todo\",\"url\":\"/github.com/Anupam-dagar/react-Hasura-todo\",\"externalURLs\":[{\"serviceKind\":\"GITHUB\",\"url\":\"https://github.com/Anupam-dagar/react-Hasura-todo\"}],\"label\":{\"html\":\"\\u003cp\\u003e\\u003ca
+      href=\\\"/github.com/Anupam-dagar/react-Hasura-todo\\\" rel=\\\"nofollow\\\"\\u003egithub.com/Anupam-dagar/react-Hasura-todo\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}}],\"limitHit\":true,\"cloning\":[],\"missing\":[],\"timedout\":[],\"matchCount\":37,\"elapsedMilliseconds\":921}}}}"
+    headers:
+      Access-Control-Allow-Credentials:
+      - "true"
+      Cache-Control:
+      - no-cache, max-age=0
+      Cf-Cache-Status:
+      - DYNAMIC
+      Cf-Ray:
+      - 6820b72bb8e01780-EWR
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 21 Aug 2021 03:18:42 GMT
+      Expect-Ct:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      - Authorization
+      - Cookie, Authorization, X-Requested-With
+      - Cookie
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      X-Trace:
+      - ""
+      X-Xss-Protection:
+      - 1; mode=block
+    status: 200 OK
+    code: 200
+    duration: 1.202352605s

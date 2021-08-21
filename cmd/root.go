@@ -11,10 +11,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var format string                           // output format flag
-var presetQuery string                      // named / preset query flag
-var repo string                             // path to repo on disk
-var githubToken = os.Getenv("GITHUB_TOKEN") // GitHub auth token for GitHub tables
+var format string                                     // output format flag
+var presetQuery string                                // named / preset query flag
+var repo string                                       // path to repo on disk
+var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
+var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
 
 func init() {
 	// local (root command only) flags

@@ -9,6 +9,7 @@ import (
 	"github.com/askgitdev/askgit/extensions/internal/github"
 	"github.com/askgitdev/askgit/extensions/internal/golang"
 	"github.com/askgitdev/askgit/extensions/internal/helpers"
+	"github.com/askgitdev/askgit/extensions/internal/sourcegraph"
 	"github.com/askgitdev/askgit/extensions/options"
 	"go.riyazali.net/sqlite"
 )
@@ -39,11 +40,17 @@ func RegisterFn(fns ...options.OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlit
 			if sqliteErr, err := golang.Register(ext, opt); err != nil {
 				return sqliteErr, err
 			}
+			
 		}
 
 		// conditionally register the GitHub functionality
 		if opt.GitHub {
 			if sqliteErr, err := github.Register(ext, opt); err != nil {
+				return sqliteErr, err
+			}
+		}
+		if opt.Sourcegraph{
+			if sqliteErr, err := sourcegraph.Register(ext, opt); err != nil {
 				return sqliteErr, err
 			}
 		}

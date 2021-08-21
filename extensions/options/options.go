@@ -6,6 +6,7 @@ import (
 	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
 	"github.com/shurcooL/githubv4"
+	"github.com/shurcooL/graphql"
 )
 
 // Options is the container for various different options
@@ -23,6 +24,12 @@ type Options struct {
 
 	// GitHubClientGetter overrides the default GitHub v4 client
 	GitHubClientGetter func() *githubv4.Client
+
+	// Sourcegraph set to true to register Sourcegraph tables/func
+	Sourcegraph bool
+
+	// SourcegraphClientGetter establishes graphql client
+	SourcegraphClientGetter func() *graphql.Client
 
 	// Context is a key-value store to pass along values to the underlying extensions
 	Context services.Context
@@ -45,6 +52,16 @@ func WithGitHub() OptionFn {
 // WithGitHubClientGetter configures a way to use a custom GitHubv4 client
 func WithGitHubClientGetter(getter func() *githubv4.Client) OptionFn {
 	return func(o *Options) { o.GitHubClientGetter = getter }
+}
+
+// WithSourcegraph configures the extension to also register the Sourcegraph related tables and funcs
+func WithSourcegraph() OptionFn {
+	return func(o *Options) { o.Sourcegraph = true }
+}
+
+// WithSourcegraphClientGetter configures a way to use a custom graphql client
+func WithSourcegraphClientGetter(getter func() *graphql.Client) OptionFn {
+	return func(o *Options) { o.SourcegraphClientGetter = getter }
 }
 
 // RepoLocatorFn is an adapter type that adapts any function with compatible
