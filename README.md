@@ -628,10 +628,9 @@ SELECT github_stargazer_count('askgitdev', 'askgit', 'README.md');
 SELECT github_stargazer_count('askgitdev/askgit', 'README.md'); -- both are equivalent
 ```
 
-#### Sourcegraph API
+#### Sourcegraph API (`experimental`!)
 
 You can use `askgit` to query the [Sourcegraph API](https://sourcegraph.com/api/console).
-
 
 ##### Authenticating
 
@@ -642,28 +641,25 @@ This is also true if running as a runtime loadable extension.
 
 ##### `sourcegraph_search`
 
-Table-valued-function that returns all the pull requests of a GitHub repository.
+Table-valued-function that returns results from a Sourcegraph search.
 
-| Column                                             | Type |
-|----------------------------------------------------|------|
-| cloning                                            | TEXT |
-| elapsed_milliseconds                               | INT  |
-| match_count                                        | INT  |
-| missing                                            | INT  |
-| results                                            | TEXT |
-| search_results_alert_fields                        | TEXT |
-| search_results_alert_title                         | TEXT |
-| search_results_alert_description                   | INT  |
-| search_results_alert_proposed_queries_descriptions | INT  |
-| search_results_alert_proposed_queries_queries      | TEXT |
-| timed_out                                          | INT  |
-| __typename                                         | INT  |
+| Column               | Type |
+|----------------------|------|
+| __typename           | TEXT |
+| cloning              | TEXT |
+| elapsed_milliseconds | INT  |
+| match_count          | INT  |
+| missing              | INT  |
+| results              | TEXT |
+| timed_out            | TEXT |
+
+`__typename` will be one of `Repository`, `CommitSearchResult`, or `FileMatch`.
 
 Params:
   1. `query` - a sourcegraph search query [docs](https://docs.sourcegraph.com/)
 
 ```sql
-SELECT sourcegraph_search('graphql');
+SELECT sourcegraph_search('askgit');
 ```
 
 ### Example Queries

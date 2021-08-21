@@ -18,104 +18,93 @@ type searchResults struct {
 		RepositoryFields         repositoryFields    `graphql:"... on Repository"`
 	}
 	LimitHit graphql.Boolean
-	Cloning  struct {
+	Cloning  []struct {
 		Name graphql.String
 	}
-	Missing struct {
+	Missing []struct {
 		Name graphql.String
 	}
-	Timedout struct {
+	Timedout []struct {
 		Name graphql.String
 	}
-	MatchCount               graphql.Int
-	ElapsedMilliseconds      graphql.Int
-	SearchResultsAlertFields searchResultAlertFields `graphql:"... on SearchResults"`
+	MatchCount          graphql.Int
+	ElapsedMilliseconds graphql.Int
 }
 
 type fileMatch struct {
 	Repository struct {
-		Name graphql.String
-		Url  graphql.String
-	}
+		Name graphql.String `json:"name"`
+		Url  graphql.String `json:"url"`
+	} `json:"repository"`
 	File struct {
-		Name    graphql.String
-		Path    graphql.String
-		Url     graphql.String
-		Content graphql.String
+		Name    graphql.String `json:"name"`
+		Path    graphql.String `json:"path"`
+		Url     graphql.String `json:"url"`
+		Content graphql.String `json:"content"`
 		Commit  struct {
-			Oid graphql.String
-		}
+			Oid graphql.String `json:"oid"`
+		} `json:"commit"`
 	}
 	LineMatches []struct {
-		Preview          graphql.String
-		LineNumber       graphql.Int
-		OffsetAndLengths [][]graphql.Int
-	}
+		Preview          graphql.String  `json:"preview"`
+		LineNumber       graphql.Int     `json:"lineNumber"`
+		OffsetAndLengths [][]graphql.Int `json:"offsetAndLengths"`
+	} `json:"lineMatches"`
 }
 
 type preview struct {
-	Value      graphql.String
-	Highlights highlight
+	Value      graphql.String `json:"value"`
+	Highlights highlight      `json:"highlights"`
 }
 
 type highlight struct {
-	Line      graphql.String
-	Character graphql.String
-	Length    graphql.Int
+	Line      graphql.String `json:"line"`
+	Character graphql.String `json:"character"`
+	Length    graphql.Int    `json:"length"`
 }
 
 type commitSearchResults struct {
-	MessagePreview preview
-	DiffPreview    preview
+	MessagePreview preview `json:"messagePreview"`
+	DiffPreview    preview `json:"diffPreview"`
 	Label          struct {
-		Html graphql.String
-	}
-	Url     graphql.String
+		Html graphql.String `json:"html"`
+	} `json:"label"`
+	Url     graphql.String `json:"url"`
 	Matches struct {
-		Url  graphql.String
+		Url  graphql.String `json:"url"`
 		Body struct {
-			Html graphql.String
-			Text graphql.String
-		}
-		Highlights []highlight
+			Html graphql.String `json:"html"`
+			Text graphql.String `json:"text"`
+		} `json:"body"`
+		Highlights []highlight `json:"highlights"`
 	}
 	Commit struct {
 		Repository struct {
-			name graphql.String
-		}
-		Oid     graphql.String
-		Url     graphql.String
-		Subject graphql.String
+			Name graphql.String `json:"name"`
+			Url  graphql.String `json:"url"`
+		} `json:"repository"`
+		Oid     graphql.String `json:"oid"`
+		Url     graphql.String `json:"url"`
+		Subject graphql.String `json:"subject"`
 		Author  struct {
-			Date   graphql.String
+			Date   graphql.String `json:"date"`
 			Person struct {
-				DisplayName graphql.String
-			}
-		}
+				DisplayName graphql.String `json:"displayName"`
+			} `json:"person"`
+		} `json:"author"`
 	}
 }
 
 type repositoryFields struct {
-	Name         graphql.String
-	Url          graphql.String
+	Name         graphql.String `json:"name"`
+	Url          graphql.String `json:"url"`
 	ExternalURLs []struct {
-		ServiceKind graphql.String
-		Url         graphql.String
-	} `graphql:"externalURLs"`
+		ServiceKind graphql.String `json:"serviceKind"`
+		Url         graphql.String `json:"url"`
+	} `graphql:"externalURLs" json:"externalURLs"`
 	Label struct {
-		Html graphql.String
-	}
-}
-
-type searchResultAlertFields struct {
-	Alert struct {
-		Title           graphql.String
-		Description     graphql.String
-		ProposedQueries []struct {
-			Description graphql.String
-			Query       graphql.String
-		}
-	}
+		Html graphql.String `json:"html"`
+	} `json:"label"`
 }
 
 type fetchSourcegraphOptions struct {
@@ -153,55 +142,51 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Results[i.current]
 	col := searchCols[c]
 	switch col.Name {
+	case "__typename":
+		ctx.ResultText(string(current.Typename))
 	case "results":
 		switch current.Typename {
 		case "Repository":
 			res, err := json.Marshal(current.RepositoryFields)
 			if err != nil {
-				ctx.ResultError(err)
+				return err
 			}
 			ctx.ResultText(string(res))
 		case "CommitSearchResult":
 			res, err := json.Marshal(current.CommitSearchResultFields)
 			if err != nil {
-				ctx.ResultError(err)
+				return err
 			}
 			ctx.ResultText(string(res))
 		case "FileMatch":
 			res, err := json.Marshal(current.FileMatchFields)
 			if err != nil {
-				ctx.ResultError(err)
+				return err
 			}
 			ctx.ResultText(string(res))
 		}
-	case "__typename":
-		ctx.ResultText(string(current.Typename))
 	case "cloning":
-		ctx.ResultText(string(i.results.Cloning.Name))
+		res, err := json.Marshal(i.results.Cloning)
+		if err != nil {
+			return err
+		}
+		ctx.ResultText(string(res))
 	case "missing":
-		ctx.ResultText(string(i.results.Missing.Name))
+		res, err := json.Marshal(i.results.Missing)
+		if err != nil {
+			return err
+		}
+		ctx.ResultText(string(res))
 	case "timed_out":
-		ctx.ResultText(string(i.results.Timedout.Name))
+		res, err := json.Marshal(i.results.Timedout)
+		if err != nil {
+			return err
+		}
+		ctx.ResultText(string(res))
 	case "match_count":
 		ctx.ResultInt(int(i.results.MatchCount))
 	case "elapsed_milliseconds":
 		ctx.ResultInt(int(i.results.ElapsedMilliseconds))
-	case "search_results_alert_fields_title":
-		ctx.ResultText(string(i.results.SearchResultsAlertFields.Alert.Title))
-	case "search_results_alert_fields_description":
-		ctx.ResultText(string(i.results.SearchResultsAlertFields.Alert.Description))
-	case "search_results_alert_fields_proposedQueries_descriptions":
-		var descriptions string
-		for _, x := range i.results.SearchResultsAlertFields.Alert.ProposedQueries {
-			descriptions += string(x.Description)
-		}
-		ctx.ResultText(descriptions)
-	case "search_results_alert_fields_proposedQueries_queries":
-		var queries string
-		for _, x := range i.results.SearchResultsAlertFields.Alert.ProposedQueries {
-			queries += string(x.Query)
-		}
-		ctx.ResultText(queries)
 	}
 
 	return nil
@@ -228,23 +213,17 @@ func (i *iterResults) Next() (vtab.Row, error) {
 
 var searchCols = []vtab.Column{
 	{Name: "query", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "sourcegraph_token", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
-	{Name: "cloning", Type: sqlite.SQLITE_TEXT},
-	{Name: "elapsed_milliseconds", Type: sqlite.SQLITE_INTEGER},
-	{Name: "match_count", Type: sqlite.SQLITE_INTEGER},
-	{Name: "missing", Type: sqlite.SQLITE_INTEGER},
-	{Name: "results", Type: sqlite.SQLITE_TEXT},
-	{Name: "search_results_alert_fields", Type: sqlite.SQLITE_TEXT},
-	{Name: "search_results_alert_title", Type: sqlite.SQLITE_TEXT},
-	{Name: "search_results_alert_description", Type: sqlite.SQLITE_TEXT},
-	{Name: "search_results_alert_proposed_queries_descriptions", Type: sqlite.SQLITE_TEXT},
-	{Name: "search_results_alert_proposed_queries_queries", Type: sqlite.SQLITE_TEXT},
-	{Name: "timed_out", Type: sqlite.SQLITE_TEXT},
 	{Name: "__typename", Type: sqlite.SQLITE_TEXT},
+	{Name: "cloning", Type: sqlite.SQLITE_TEXT, Hidden: true},
+	{Name: "elapsed_milliseconds", Type: sqlite.SQLITE_INTEGER, Hidden: true},
+	{Name: "match_count", Type: sqlite.SQLITE_INTEGER, Hidden: true},
+	{Name: "missing", Type: sqlite.SQLITE_INTEGER, Hidden: true},
+	{Name: "timed_out", Type: sqlite.SQLITE_TEXT, Hidden: true},
+	{Name: "results", Type: sqlite.SQLITE_TEXT},
 }
 
 func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_repo_issues", searchCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("sourcegraph_search", searchCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var query string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
