@@ -212,14 +212,14 @@ func (i *iterResults) Next() (vtab.Row, error) {
 }
 
 var searchCols = []vtab.Column{
-	{Name: "query", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "__typename", Type: sqlite.SQLITE_TEXT},
-	{Name: "cloning", Type: sqlite.SQLITE_TEXT, Hidden: true},
-	{Name: "elapsed_milliseconds", Type: sqlite.SQLITE_INTEGER, Hidden: true},
-	{Name: "match_count", Type: sqlite.SQLITE_INTEGER, Hidden: true},
-	{Name: "missing", Type: sqlite.SQLITE_INTEGER, Hidden: true},
-	{Name: "timed_out", Type: sqlite.SQLITE_TEXT, Hidden: true},
-	{Name: "results", Type: sqlite.SQLITE_TEXT},
+	{Name: "query", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "__typename", Type: "TEXT"},
+	{Name: "cloning", Type: "TEXT", Hidden: true},
+	{Name: "elapsed_milliseconds", Type: "INT", Hidden: true},
+	{Name: "match_count", Type: "INT", Hidden: true},
+	{Name: "missing", Type: "INT", Hidden: true},
+	{Name: "timed_out", Type: "TEXT", Hidden: true},
+	{Name: "results", Type: "TEXT"},
 }
 
 func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
