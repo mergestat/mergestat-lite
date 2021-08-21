@@ -303,7 +303,7 @@ var prCols = []vtab.Column{
 	{Name: "comment_count", Type: "INT", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "commit_count", Type: "INT"},
 	{Name: "created_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "created_via_email", Type: "INT"},
+	{Name: "created_via_email", Type: "BOOLEAN"},
 	{Name: "database_id", Type: "INT"},
 	{Name: "deletions", Type: "INT"},
 	{Name: "editor_login", Type: "TEXT"},

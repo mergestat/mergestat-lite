@@ -19,6 +19,7 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
+	github.com/lib/pq v1.10.2
 	github.com/libgit2/git2go/v31 v31.4.14
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8
@@ -30,6 +31,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	go.mongodb.org/mongo-driver v1.7.1 // indirect
 	go.riyazali.net/sqlite v0.0.0-20210803070208-9d9dbac3dd38
+	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
