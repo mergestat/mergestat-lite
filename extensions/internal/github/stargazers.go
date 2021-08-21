@@ -175,20 +175,20 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 }
 
 var stargazersCols = []vtab.Column{
-	{Name: "owner", Type: sqlite.SQLITE_TEXT, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "reponame", Type: sqlite.SQLITE_TEXT, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
-	{Name: "login", Type: sqlite.SQLITE_TEXT},
-	{Name: "email", Type: sqlite.SQLITE_TEXT},
-	{Name: "name", Type: sqlite.SQLITE_TEXT},
-	{Name: "bio", Type: sqlite.SQLITE_TEXT},
-	{Name: "company", Type: sqlite.SQLITE_TEXT},
-	{Name: "avatar_url", Type: sqlite.SQLITE_TEXT},
-	{Name: "created_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "updated_at", Type: sqlite.SQLITE_TEXT},
-	{Name: "twitter", Type: sqlite.SQLITE_TEXT},
-	{Name: "website", Type: sqlite.SQLITE_TEXT},
-	{Name: "location", Type: sqlite.SQLITE_TEXT},
-	{Name: "starred_at", Type: sqlite.SQLITE_TEXT, OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "owner", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "reponame", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "login", Type: "TEXT"},
+	{Name: "email", Type: "TEXT"},
+	{Name: "name", Type: "TEXT"},
+	{Name: "bio", Type: "TEXT"},
+	{Name: "company", Type: "TEXT"},
+	{Name: "avatar_url", Type: "TEXT"},
+	{Name: "created_at", Type: "TEXT"},
+	{Name: "updated_at", Type: "TEXT"},
+	{Name: "twitter", Type: "TEXT"},
+	{Name: "website", Type: "TEXT"},
+	{Name: "location", Type: "TEXT"},
+	{Name: "starred_at", Type: "TEXT", OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewStargazersModule(opts *Options) sqlite.Module {

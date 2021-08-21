@@ -16,12 +16,12 @@ import (
 )
 
 var filesCols = []vtab.Column{
-	{Name: "path", Type: sqlite.SQLITE_TEXT, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "executable", Type: sqlite.SQLITE_INTEGER, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "contents", Type: sqlite.SQLITE_BLOB, NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "path", Type: "TEXT", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "executable", Type: "INT", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "contents", Type: "BLOB", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
-	{Name: "repository", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "rev", Type: sqlite.SQLITE_TEXT, NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "repository", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 // NewFilesModule returns the implementation of a table-valued-function for accessing the content of files in git
