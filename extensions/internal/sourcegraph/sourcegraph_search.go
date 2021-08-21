@@ -161,6 +161,7 @@ type search_results struct {
 	ElapsedMilliseconds      graphql.Int
 	SearchResultsAlertFields searchResultAlertFields `graphql:"... on SearchResults"`
 }
+
 type fileMatch struct {
 	Repository struct {
 		Name graphql.String
@@ -181,15 +182,18 @@ type fileMatch struct {
 		OffsetAndLengths [][]graphql.Int
 	}
 }
+
 type preview struct {
 	Value      graphql.String
 	Highlights highlight
 }
+
 type highlight struct {
 	Line      graphql.String
 	Character graphql.String
 	Length    graphql.Int
 }
+
 type commitSearchResults struct {
 	MessagePreview preview
 	DiffPreview    preview
@@ -220,6 +224,7 @@ type commitSearchResults struct {
 		}
 	}
 }
+
 type repositoryFields struct {
 	Name         graphql.String
 	Url          graphql.String
@@ -231,6 +236,7 @@ type repositoryFields struct {
 		Html graphql.String
 	}
 }
+
 type searchResultAlertFields struct {
 	Alert struct {
 		Title           graphql.String
@@ -334,13 +340,7 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 
 	return nil
 }
-func graphqlStrArrToString(strArr []graphql.String) string {
-	var ret string
-	for _, x := range strArr {
-		ret += string(x) + "\n"
-	}
-	return ret
-}
+
 func (i *iterResults) Next() (vtab.Row, error) {
 	var err error
 	if i.current == -1 {
