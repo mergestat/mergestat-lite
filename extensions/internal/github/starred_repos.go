@@ -162,12 +162,12 @@ var starredReposCols = []vtab.Column{
 	{Name: "name", Type: "TEXT"},
 	{Name: "url", Type: "TEXT"},
 	{Name: "description", Type: "TEXT"},
-	{Name: "created_at", Type: "TEXT"},
-	{Name: "pushed_at", Type: "TEXT"},
-	{Name: "updated_at", Type: "TEXT"},
+	{Name: "created_at", Type: "DATETIME"},
+	{Name: "pushed_at", Type: "DATETIME"},
+	{Name: "updated_at", Type: "DATETIME"},
 	{Name: "stargazer_count", Type: "INT"},
 	{Name: "name_with_owner", Type: "TEXT"},
-	{Name: "starred_at", Type: "TEXT", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "starred_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 }
 
 func NewStarredReposModule(opts *Options) sqlite.Module {
