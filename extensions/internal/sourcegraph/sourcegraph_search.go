@@ -10,142 +10,12 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
-/*
-query ($query: String!) {
-  search(query: $query, version: V2) {
-    results {
-      results {
-        __typename
-        ... on FileMatch {
-          ...FileMatchFields
-        }
-        ... on CommitSearchResult {
-          ...CommitSearchResultFields
-        }
-        ... on Repository {
-          ...RepositoryFields
-        }
-      }
-      limitHit
-      cloning {
-        name
-      }
-      missing {
-        name
-      }
-      timedout {
-        name
-      }
-      matchCount
-      elapsedMilliseconds
-      ...SearchResultsAlertFields
-    }
-  }
-}
-
-fragment FileMatchFields on FileMatch {
-  repository {
-    name
-    url
-  }
-  file {
-    name
-    path
-    url
-    content
-    commit {
-      oid
-    }
-  }
-  lineMatches {
-    preview
-    lineNumber
-    offsetAndLengths
-    limitHit
-  }
-}
-
-fragment CommitSearchResultFields on CommitSearchResult {
-  messagePreview {
-    value
-    highlights {
-      line
-      character
-      length
-    }
-  }
-  diffPreview {
-    value
-    highlights {
-      line
-      character
-      length
-    }
-  }
-  label {
-    html
-  }
-  url
-  matches {
-    url
-    body {
-      html
-      text
-    }
-    highlights {
-      character
-      line
-      length
-    }
-  }
-  commit {
-    repository {
-      name
-    }
-    oid
-    url
-    subject
-    author {
-      date
-      person {
-        displayName
-      }
-    }
-  }
-}
-
-fragment RepositoryFields on Repository {
-  name
-  url
-  externalURLs {
-    serviceType
-    url
-  }
-  label {
-    html
-  }
-}
-
-fragment SearchResultsAlertFields on SearchResults {
-  alert {
-    title
-    description
-    proposedQueries {
-      description
-      query
-    }
-  }
-}
-*/
-type search_results struct {
+type searchResults struct {
 	Results []struct {
-		Typename graphql.String `graphql:"__typename"`
-
-		FileMatchFields fileMatch `graphql:"... on FileMatch"`
-
+		Typename                 graphql.String      `graphql:"__typename"`
+		FileMatchFields          fileMatch           `graphql:"... on FileMatch"`
 		CommitSearchResultFields commitSearchResults `graphql:"... on CommitSearchResult"`
-
-		RepositoryFields repositoryFields `graphql:"... on Repository"`
+		RepositoryFields         repositoryFields    `graphql:"... on Repository"`
 	}
 	LimitHit graphql.Boolean
 	Cloning  struct {
@@ -253,10 +123,10 @@ type fetchSourcegraphOptions struct {
 	Query  string
 }
 
-func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*search_results, error) {
+func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*searchResults, error) {
 	var sourcegraphQuery struct {
 		Search struct {
-			Results search_results
+			Results searchResults
 		} `graphql:"search(query: $query, version: V2)"`
 	}
 
@@ -265,7 +135,6 @@ func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*search_r
 	}
 
 	err := input.Client.Query(ctx, &sourcegraphQuery, variables)
-
 	if err != nil {
 		return nil, err
 	}
@@ -277,7 +146,7 @@ type iterResults struct {
 	query   string
 	client  *graphql.Client
 	current int
-	results *search_results
+	results *searchResults
 }
 
 func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
@@ -293,20 +162,17 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 			}
 			ctx.ResultText(string(res))
 		case "CommitSearchResult":
-
 			res, err := json.Marshal(current.CommitSearchResultFields)
 			if err != nil {
 				ctx.ResultError(err)
 			}
 			ctx.ResultText(string(res))
-
 		case "FileMatch":
 			res, err := json.Marshal(current.FileMatchFields)
 			if err != nil {
 				ctx.ResultError(err)
 			}
 			ctx.ResultText(string(res))
-
 		}
 	case "__typename":
 		ctx.ResultText(string(current.Typename))
@@ -385,9 +251,6 @@ func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
 				switch constraint.ColIndex {
 				case 0:
 					query = constraint.Value.Text()
-					// TODO: allow auth token to be passed in as second parameter
-					// case 1:
-					// 	auth_token = constraint.Value.Text()
 				}
 			}
 		}
