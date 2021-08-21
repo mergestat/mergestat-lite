@@ -29,6 +29,12 @@ func init() {
 
 	// add the export sub command
 	rootCmd.AddCommand(exportCmd)
+
+	// conditionally add the pgsync sub command
+	// TODO(patrickdevivo) "conditional" for now until the behavior stabilizes
+	if os.Getenv("PGSYNC") != "" {
+		rootCmd.AddCommand(pgsyncCmd)
+	}
 }
 
 var rootCmd = &cobra.Command{
