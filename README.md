@@ -652,7 +652,7 @@ Table-valued-function that returns results from a Sourcegraph search.
 `results` will be the JSON value of a search result (will match what's returned from the API)
 
 Params:
-  1. `query` - a sourcegraph search query [docs](https://docs.sourcegraph.com/)
+  1. `query` - a sourcegraph search query ([docs](https://docs.sourcegraph.com/))
 
 ```sql
 SELECT sourcegraph_search('askgit');
