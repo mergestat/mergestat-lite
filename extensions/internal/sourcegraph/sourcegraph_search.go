@@ -70,7 +70,7 @@ type commitSearchResults struct {
 		Html graphql.String `json:"html"`
 	} `json:"label"`
 	Url     graphql.String `json:"url"`
-	Matches struct {
+	Matches []struct {
 		Url  graphql.String `json:"url"`
 		Body struct {
 			Html graphql.String `json:"html"`
