@@ -658,6 +658,24 @@ Params:
 SELECT sourcegraph_search('askgit');
 ```
 
+#### NPM Registry
+
+`askgit` can also query the NPM registry API.
+
+##### `npm_get_package`
+
+Scalar function that queries `https://registry.npmjs.org/<<packageName>>` or `https://registry.npmjs.org/<<packageName>>/<<version>>` (depending on number of params)
+and returns the JSON response.
+
+Params:
+  1. `package` - name of the NPM package
+  2. `version` - (optional) package version
+
+```sql
+SELECT npm_get_package('jquery')
+SELECT npm_get_package('jquery', 'latest')
+```
+
 ### Example Queries
 
 This will return all commits in the history of the currently checked out branch/commit of the repo.

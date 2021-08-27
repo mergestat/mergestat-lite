@@ -25,6 +25,7 @@ func registerExt() {
 			options.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
 			options.WithSourcegraph(),
 			options.WithContextValue("sourcegraphToken", sourcegraphToken),
+			options.WithNPM(),
 		),
 	)
 }

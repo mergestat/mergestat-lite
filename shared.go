@@ -23,6 +23,7 @@ func init() {
 		options.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
 		options.WithSourcegraph(),
 		options.WithContextValue("sourcegraphToken", os.Getenv("SOURCEGRAPH_TOKEN")),
+		options.WithNPM(),
 	))
 }
 
