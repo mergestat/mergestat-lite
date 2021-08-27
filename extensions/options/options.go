@@ -2,6 +2,7 @@ package options
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
@@ -30,6 +31,12 @@ type Options struct {
 
 	// SourcegraphClientGetter establishes graphql client
 	SourcegraphClientGetter func() *graphql.Client
+
+	// NPM set to true to register the NPM tables/funcs
+	NPM bool
+
+	// NPMHttpClient
+	NPMHttpClient *http.Client
 
 	// Context is a key-value store to pass along values to the underlying extensions
 	Context services.Context
@@ -62,6 +69,16 @@ func WithSourcegraph() OptionFn {
 // WithSourcegraphClientGetter configures a way to use a custom graphql client
 func WithSourcegraphClientGetter(getter func() *graphql.Client) OptionFn {
 	return func(o *Options) { o.SourcegraphClientGetter = getter }
+}
+
+// WithNPM configures the extension to also register the NPM related tables and funcs
+func WithNPM() OptionFn {
+	return func(o *Options) { o.NPM = true }
+}
+
+// WithNPMHttpClient sets *http.Client used by the NPM tables/funcs
+func WithNPMHttpClient(client *http.Client) OptionFn {
+	return func(o *Options) { o.NPMHttpClient = client }
 }
 
 // RepoLocatorFn is an adapter type that adapts any function with compatible
