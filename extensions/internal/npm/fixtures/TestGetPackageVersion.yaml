@@ -1,0 +1,44 @@
+---
+version: 1
+interactions:
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://registry.npmjs.org//jquery/latest
+    method: GET
+  response:
+    body: '{"name":"jquery","title":"jQuery","description":"JavaScript library for
+      DOM operations","version":"3.6.0","main":"dist/jquery.js","homepage":"https://jquery.com","author":{"name":"OpenJS
+      Foundation and other contributors","url":"https://github.com/jquery/jquery/blob/3.6.0/AUTHORS.txt"},"repository":{"type":"git","url":"git+https://github.com/jquery/jquery.git"},"keywords":["jquery","javascript","browser","library"],"bugs":{"url":"https://github.com/jquery/jquery/issues"},"license":"MIT","devDependencies":{"@babel/core":"7.3.3","@babel/plugin-transform-for-of":"7.2.0","commitplease":"3.2.0","core-js":"2.6.5","eslint-config-jquery":"3.0.0","grunt":"1.3.0","grunt-babel":"8.0.0","grunt-cli":"1.3.2","grunt-compare-size":"0.4.2","grunt-contrib-uglify":"3.4.0","grunt-contrib-watch":"1.1.0","grunt-eslint":"22.0.0","grunt-git-authors":"3.2.0","grunt-jsonlint":"1.1.0","grunt-karma":"4.0.0","grunt-newer":"1.3.0","grunt-npmcopy":"0.2.0","gzip-js":"0.3.2","husky":"1.3.1","insight":"0.10.1","jsdom":"13.2.0","karma":"5.2.3","karma-browserstack-launcher":"1.4.0","karma-chrome-launcher":"2.2.0","karma-firefox-launcher":"1.1.0","karma-ie-launcher":"1.0.0","karma-jsdom-launcher":"8.0.2","karma-qunit":"3.0.0","load-grunt-tasks":"5.1.0","native-promise-only":"0.8.1","promises-aplus-tests":"2.1.2","q":"1.5.1","qunit":"2.9.2","raw-body":"2.3.3","requirejs":"2.3.6","sinon":"2.3.7","sizzle":"2.3.6","strip-json-comments":"2.0.1","testswarm":"1.1.2","uglify-js":"3.4.7"},"scripts":{"build":"npm
+      install && grunt","start":"grunt watch","test:browserless":"grunt && grunt test:slow","test:browser":"grunt
+      && grunt karma:main","test:amd":"grunt && grunt karma:amd","test:no-deprecated":"grunt
+      test:prepare && grunt custom:-deprecated && grunt karma:main","test:no-sizzle":"grunt
+      test:prepare && grunt custom:-sizzle && grunt karma:main","test:slim":"grunt
+      test:prepare && grunt custom:slim && grunt karma:main","test":"npm run test:slim
+      && npm run test:no-deprecated && npm run test:no-sizzle && grunt && grunt test:slow
+      && grunt karma:main && grunt karma:amd","jenkins":"npm run test:browserless"},"commitplease":{"nohook":true,"components":["Docs","Tests","Build","Support","Release","Core","Ajax","Attributes","Callbacks","CSS","Data","Deferred","Deprecated","Dimensions","Effects","Event","Manipulation","Offset","Queue","Selector","Serialize","Traversing","Wrap"],"markerPattern":"^((clos|fix|resolv)(e[sd]|ing))|^(refs?)","ticketPattern":"^((Closes|Fixes)
+      ([a-zA-Z]{2,}-)[0-9]+)|^(Refs? [^#])"},"husky":{"hooks":{"commit-msg":"commitplease
+      .git/COMMIT_EDITMSG","pre-commit":"grunt lint:newer qunit_fixture"}},"gitHead":"e786e3d9707ffd9b0dd330ca135b66344dcef85a","_id":"jquery@3.6.0","_nodeVersion":"14.16.0","_npmVersion":"6.14.11","dist":{"integrity":"sha512-JVzAR/AjBvVt2BmYhxRCSYysDsPcssdmTFnzyLEts9qNwmjmu4JTAMYubEfwVOSwpQ1I1sKKFcxhZCI2buerfw==","shasum":"c72a09f15c1bdce142f49dbf1170bdf8adac2470","tarball":"https://registry.npmjs.org/jquery/-/jquery-3.6.0.tgz","fileCount":123,"unpackedSize":1318507,"npm-signature":"-----BEGIN
+      PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJgPnHsCRA9TVsSAnZWagAA3tQP/i738n4AHT4QJxYnLamb\nvQEB9yjcsipiGgV2nY/eNbXtljhGZ+vARJk1Sa4j3vGWmGSKgMRW+k2chtsZ\nnDJ91MXzjP4uJwgTTTn+bWWWmINwYqnLIxbYEpsBt1ugmFcv1AsyZQUCTu/G\naPzwsJWdxzDCRige0PC3NTT8ImeUonXnM6OBZ65ICXfi+BzZMWm50DSzzkA2\n/jdURwOiLNHtrJgilWfLqVVW6WWxfCOXcaTPD4K8J+1twLdrTAaA9/ECsX/c\nrb+pp7JLbqdAHFIHjl5R4nlsF2CsJmLI+dYSDCPql9ivkWcWXX+b0EHUOtBZ\nHDP4NjtYCIP11xdtmKqhTkC0JkOvUUI+nhCOOLWitH9W5AhJQAWrbroOptuv\nEKzc4Cvh2yEZvGX92zcFnbZlGDw7jRNgME8xyxbgK/zOPyoKBciqT2aFn9xI\nuDKj6hDonMSwqhoOuYcAFY2YfbR45uuJLKBC04oxjbrIF7o+WxbmAehjFxDH\nfiECruH9aCr7loRHOKcoo9Xp1y90B1JXiSJBARI/Jfq+6g2crZFvlBvFIX5P\nhSxvTdlb1/kBjxjcRtfgSmaUBUBQqKJEkB5YCh6FZ9XoGHRdcc0PocXFbXHh\nvyE63iiqk1rQYnDf/lPAp+Om8RSzyUCGCajGrCWsSzpt3EHapnqVY8OfT90p\nofL1\r\n=b8nm\r\n-----END
+      PGP SIGNATURE-----\r\n"},"_npmUser":{"name":"timmywil","email":"4timmywil@gmail.com"},"directories":{},"maintainers":[{"name":"scott.gonzalez","email":"scott.gonzalez@gmail.com"},{"name":"dmethvin","email":"dave.methvin@gmail.com"},{"name":"timmywil","email":"4timmywil@gmail.com"},{"name":"mgol","email":"m.goleb@gmail.com"}],"_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/jquery_3.6.0_1614705131780_0.39064720927102825"},"_hasShrinkwrap":false}'
+    headers:
+      Cache-Control:
+      - max-age=300
+      Cf-Cache-Status:
+      - DYNAMIC
+      Cf-Ray:
+      - 685155cda9f51906-EWR
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 27 Aug 2021 00:55:35 GMT
+      Expect-Ct:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Server:
+      - cloudflare
+      Vary:
+      - accept-encoding, accept
+    status: 200 OK
+    code: 200
+    duration: 437.76226ms
