@@ -26,7 +26,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shurcooL/githubv4 v0.0.0-20210725200734-83ba7b4c9228
-	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
+	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a
 	github.com/spf13/cobra v1.2.1
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	go.mongodb.org/mongo-driver v1.7.1 // indirect
