@@ -115,8 +115,8 @@ type searchResultAlert struct {
 		ProposedQueries []struct {
 			Description graphql.String `json:"proposedQueryDescription"`
 			Query       graphql.String `json:"proposedQuery"`
-		}
-	}
+		} `json:"proposedQueries"`
+	} `json:"alert"`
 }
 
 type fetchSourcegraphOptions struct {
