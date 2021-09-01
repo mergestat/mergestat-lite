@@ -9,6 +9,8 @@ import (
 	"github.com/askgitdev/askgit/pkg/display"
 	. "github.com/askgitdev/askgit/pkg/query"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var format string                                     // output format flag
@@ -16,6 +18,7 @@ var presetQuery string                                // named / preset query fl
 var repo string                                       // path to repo on disk
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
+var logger = zap.NewNop()                             // By default use a NOOP logger
 
 func init() {
 	// local (root command only) flags
@@ -36,6 +39,19 @@ func init() {
 	if os.Getenv("PGSYNC") != "" {
 		rootCmd.AddCommand(pgsyncCmd)
 	}
+
+	if os.Getenv("DEBUG") != "" {
+		conf := zap.NewDevelopmentConfig()
+		conf.DisableCaller = true
+		conf.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		conf.Sampling = nil
+		// conf.Level = zap.NewAtomicLevelAt(zapcore.ErrorLevel)
+		if l, err := conf.Build(); err != nil {
+			log.Fatal(err)
+		} else {
+			logger = l
+		}
+	}
 }
 
 var rootCmd = &cobra.Command{
@@ -46,6 +62,11 @@ var rootCmd = &cobra.Command{
   Example queries can be found in the GitHub repo: https://github.com/askgitdev/askgit`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
+		defer func() {
+			// TODO(patrickdevivo) See here: https://github.com/uber-go/zap/issues/880
+			_ = logger.Sync()
+		}()
+
 		var err error
 
 		var info os.FileInfo

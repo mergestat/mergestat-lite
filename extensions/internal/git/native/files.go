@@ -8,7 +8,6 @@ import (
 	"path"
 
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	libgit2 "github.com/libgit2/git2go/v31"
@@ -47,11 +46,16 @@ func NewFilesModule(options *utils.ModuleOptions) sqlite.Module {
 			}
 		}
 
-		return newFilesIter(options.Locator, repoPath, rev)
+		return newFilesIter(options, repoPath, rev)
 	})
 }
 
-func newFilesIter(locator services.RepoLocator, repoPath, rev string) (*filesIter, error) {
+func newFilesIter(options *utils.ModuleOptions, repoPath, rev string) (*filesIter, error) {
+	logger := options.Logger.Sugar().With("module", "git-files", "repo-path", repoPath)
+	defer func() {
+		logger.Debugf("creating files iterator")
+	}()
+
 	iter := &filesIter{
 		repoPath: repoPath,
 		rev:      rev,
@@ -66,7 +70,7 @@ func newFilesIter(locator services.RepoLocator, repoPath, rev string) (*filesIte
 		}
 	}
 
-	r, err := locator.Open(context.Background(), repoPath)
+	r, err := options.Locator.Open(context.Background(), repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +113,8 @@ func newFilesIter(locator services.RepoLocator, repoPath, rev string) (*filesIte
 		return nil, err
 	}
 	defer commit.Free()
+
+	logger = logger.With("revision", commit.Id().String())
 
 	tree, err := commit.Tree()
 	if err != nil {

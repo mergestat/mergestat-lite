@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -41,18 +40,17 @@ func (mod *logModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) e
 			PRIMARY KEY ( hash )
 		) WITHOUT ROWID`
 
-	return &gitLogTable{repoLocator: mod.Locator, ctx: mod.Context}, declare(schema)
+	return &gitLogTable{ModuleOptions: mod.ModuleOptions}, declare(schema)
 }
 
 type gitLogTable struct {
-	repoLocator services.RepoLocator
-	ctx         services.Context
+	*utils.ModuleOptions
 }
 
 func (tab *gitLogTable) Disconnect() error { return nil }
 func (tab *gitLogTable) Destroy() error    { return nil }
 func (tab *gitLogTable) Open() (sqlite.VirtualCursor, error) {
-	return &gitLogCursor{locator: tab.repoLocator, ctx: tab.ctx}, nil
+	return &gitLogCursor{ModuleOptions: tab.ModuleOptions}, nil
 }
 
 // BestIndex analyses the input constraint and generates the best possible query plan for sqlite3.
@@ -156,8 +154,7 @@ func (tab *gitLogTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 }
 
 type gitLogCursor struct {
-	ctx     services.Context
-	locator services.RepoLocator
+	*utils.ModuleOptions
 
 	repo *git.Repository
 	rev  *plumbing.Revision
@@ -167,6 +164,11 @@ type gitLogCursor struct {
 }
 
 func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err error) {
+	logger := cur.Logger.Sugar().With("module", "git-log")
+	defer func() {
+		logger.Debugf("executing filter")
+	}()
+
 	// values extracted from constraints
 	var hash, path, refName string
 	var start, end string
@@ -190,22 +192,24 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	var repo *git.Repository
 	{ // open the git repository
 		if path == "" {
-			path, err = utils.GetDefaultRepoFromCtx(cur.ctx)
+			path, err = utils.GetDefaultRepoFromCtx(cur.Context)
 			if err != nil {
 				return err
 			}
 		}
 
-		if repo, err = cur.locator.Open(context.Background(), path); err != nil {
+		if repo, err = cur.Locator.Open(context.Background(), path); err != nil {
 			return errors.Wrapf(err, "failed to open %q", path)
 		}
 		cur.repo = repo
+		logger = logger.With("repo-disk-path", path)
 	}
 
 	if hash != "" {
 		// we only need to get a single commit
 		cur.commits = object.NewCommitIter(repo.Storer, storer.NewEncodedObjectLookupIter(
 			repo.Storer, plumbing.CommitObject, []plumbing.Hash{plumbing.NewHash(hash)}))
+		logger = logger.With("hash", hash)
 		return cur.Next()
 	}
 
@@ -227,10 +231,13 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 		opts.From = ref.Hash()
 	}
 
+	logger = logger.With("revision", opts.From.String())
+
 	if start != "" {
 		var t time.Time
 		if t, err = time.Parse(time.RFC3339, start); err == nil {
 			opts.Since = &t
+			logger = logger.With("since", opts.Since.String())
 		}
 	}
 
@@ -238,6 +245,7 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 		var t time.Time
 		if t, err = time.Parse(time.RFC3339, end); err == nil {
 			opts.Until = &t
+			logger = logger.With("until", opts.Until.String())
 		}
 	}
 
