@@ -166,7 +166,7 @@ type gitLogCursor struct {
 func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err error) {
 	logger := cur.Logger.Sugar().With("module", "git-log")
 	defer func() {
-		logger.Debugf("executing filter")
+		logger.Debugf("running git log filter")
 	}()
 
 	// values extracted from constraints

@@ -89,7 +89,7 @@ type gitRefCursor struct {
 func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err error) {
 	logger := cur.Logger.Sugar().With("module", "git-ref")
 	defer func() {
-		logger.Debugf("executing filter")
+		logger.Debugf("running git refs filter")
 	}()
 
 	// values extracted from constraints
