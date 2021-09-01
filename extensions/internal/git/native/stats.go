@@ -24,7 +24,7 @@ var statsCols = []vtab.Column{
 }
 
 // NewStatsModule returns the implementation of a table-valued-function for git stats
-func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
+func NewStatsModule(options *utils.ModuleOptions) sqlite.Module {
 	return vtab.NewTableFunc("stats", statsCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var repoPath, rev, toRev string
 		for _, constraint := range constraints {
@@ -42,13 +42,13 @@ func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 
 		if repoPath == "" {
 			var err error
-			repoPath, err = utils.GetDefaultRepoFromCtx(ctx)
+			repoPath, err = utils.GetDefaultRepoFromCtx(options.Context)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		return newStatsIter(locator, repoPath, rev, toRev)
+		return newStatsIter(options.Locator, repoPath, rev, toRev)
 	})
 }
 

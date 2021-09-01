@@ -25,7 +25,7 @@ var filesCols = []vtab.Column{
 }
 
 // NewFilesModule returns the implementation of a table-valued-function for accessing the content of files in git
-func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
+func NewFilesModule(options *utils.ModuleOptions) sqlite.Module {
 	return vtab.NewTableFunc("files", filesCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var repoPath, rev string
 		for _, constraint := range constraints {
@@ -41,13 +41,13 @@ func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 
 		if repoPath == "" {
 			var err error
-			repoPath, err = utils.GetDefaultRepoFromCtx(ctx)
+			repoPath, err = utils.GetDefaultRepoFromCtx(options.Context)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		return newFilesIter(locator, repoPath, rev)
+		return newFilesIter(options.Locator, repoPath, rev)
 	})
 }
 

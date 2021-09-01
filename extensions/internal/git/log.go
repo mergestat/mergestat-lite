@@ -14,12 +14,16 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
-type LogModule struct {
-	Locator services.RepoLocator
-	Context services.Context
+// NewLogModule returns a new `git log` virtual table
+func NewLogModule(opt *utils.ModuleOptions) sqlite.Module {
+	return &logModule{opt}
 }
 
-func (mod *LogModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
+type logModule struct {
+	*utils.ModuleOptions
+}
+
+func (mod *logModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	const schema = `
 		CREATE TABLE commits (
 			hash 			TEXT,

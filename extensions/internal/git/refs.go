@@ -15,12 +15,16 @@ import (
 
 var remoteName = regexp.MustCompile(`(?m)refs\/remotes\/([^\/]*)\/.+`)
 
-type RefModule struct {
-	Locator services.RepoLocator
-	Context services.Context
+// NewRefModule returns a new virtual table for listing git refs
+func NewRefModule(opt *utils.ModuleOptions) sqlite.Module {
+	return &refModule{opt}
 }
 
-func (mod *RefModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
+type refModule struct {
+	*utils.ModuleOptions
+}
+
+func (mod *refModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	const schema = `
 		CREATE TABLE refs (
 			name		TEXT,

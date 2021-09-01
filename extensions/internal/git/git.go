@@ -2,6 +2,7 @@ package git
 
 import (
 	"github.com/askgitdev/askgit/extensions/internal/git/native"
+	"github.com/askgitdev/askgit/extensions/internal/git/utils"
 	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
@@ -9,13 +10,20 @@ import (
 
 // Register registers git related functionality as a SQLite extension
 func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCode, err error) {
+
+	moduleOpts := &utils.ModuleOptions{
+		Locator: opt.Locator,
+		Context: opt.Context,
+		Logger:  opt.Logger,
+	}
+
 	// register virtual table modules
 	var modules = map[string]sqlite.Module{
-		"commits": &LogModule{Locator: opt.Locator, Context: opt.Context},
-		"refs":    &RefModule{Locator: opt.Locator, Context: opt.Context},
-		"stats":   native.NewStatsModule(opt.Locator, opt.Context),
-		"files":   native.NewFilesModule(opt.Locator, opt.Context),
-		"blame":   native.NewBlameModule(opt.Locator, opt.Context),
+		"commits": NewLogModule(moduleOpts),
+		"refs":    NewRefModule(moduleOpts),
+		"stats":   native.NewStatsModule(moduleOpts),
+		"files":   native.NewFilesModule(moduleOpts),
+		"blame":   native.NewBlameModule(moduleOpts),
 	}
 
 	for name, mod := range modules {

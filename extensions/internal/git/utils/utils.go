@@ -4,7 +4,15 @@ import (
 	"os"
 
 	"github.com/askgitdev/askgit/extensions/services"
+	"go.uber.org/zap"
 )
+
+// ModuleOptions holds common options for all git related modules
+type ModuleOptions struct {
+	Locator services.RepoLocator
+	Context services.Context
+	Logger  *zap.Logger
+}
 
 // GetDefaultRepoFromCtx looks up the defaultRepoPath key in the supplied context and returns it if set,
 // otherwise it returns the current working directory
