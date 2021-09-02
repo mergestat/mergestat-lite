@@ -18,6 +18,7 @@ var presetQuery string                                // named / preset query fl
 var repo string                                       // path to repo on disk
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
+var verbose bool                                      // whether or not to print logs to stderr
 var logger = zap.NewNop()                             // By default use a NOOP logger
 
 func init() {
@@ -25,9 +26,13 @@ func init() {
 	rootCmd.Flags().StringVarP(&format, "format", "f", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' and 'json'")
 	rootCmd.Flags().StringVarP(&presetQuery, "preset", "p", "", "used to pick a preset query")
 	rootCmd.Flags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
+	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
 
 	// register the sqlite extension ahead of any command
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if err := setupLogger(); err != nil {
+			log.Fatalf("could not create logger: %v", err)
+		}
 		registerExt()
 	}
 
@@ -39,19 +44,28 @@ func init() {
 	if os.Getenv("PGSYNC") != "" {
 		rootCmd.AddCommand(pgsyncCmd)
 	}
+}
 
-	if os.Getenv("DEBUG") != "" {
+// setupLogger sets the global logger variable according to whether the verbose flag is used
+// or if the DEBUG environment variable is set to anything
+func setupLogger() error {
+	if debug := os.Getenv("DEBUG") != ""; verbose || debug {
 		conf := zap.NewDevelopmentConfig()
 		conf.DisableCaller = true
 		conf.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		conf.Sampling = nil
-		// conf.Level = zap.NewAtomicLevelAt(zapcore.ErrorLevel)
+
+		conf.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
+		if debug {
+			conf.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+		}
 		if l, err := conf.Build(); err != nil {
-			log.Fatal(err)
+			return err
 		} else {
 			logger = l
 		}
 	}
+	return nil
 }
 
 var rootCmd = &cobra.Command{
@@ -62,12 +76,11 @@ var rootCmd = &cobra.Command{
   Example queries can be found in the GitHub repo: https://github.com/askgitdev/askgit`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
 		defer func() {
 			// TODO(patrickdevivo) See here: https://github.com/uber-go/zap/issues/880
 			_ = logger.Sync()
 		}()
-
-		var err error
 
 		var info os.FileInfo
 		if info, err = os.Stdin.Stat(); err != nil {
