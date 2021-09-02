@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shurcooL/graphql"
 	"go.riyazali.net/sqlite"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
 
@@ -22,10 +23,15 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 			client := graphql.NewClient(sourcegraphUrl, httpClient)
 			return client
 		},
+		Logger: opt.Logger,
 	}
 
 	if opt.SourcegraphClientGetter != nil {
 		sourcegraphOpts.Client = opt.SourcegraphClientGetter
+	}
+
+	if sourcegraphOpts.Logger == nil {
+		sourcegraphOpts.Logger = zap.NewNop()
 	}
 
 	var modules = map[string]sqlite.Module{
