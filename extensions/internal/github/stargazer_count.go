@@ -46,7 +46,7 @@ func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		name = values[1].Text()
 	}
 
-	s.opts.Logger.Sugar().With("owner", owner, "name", name).Infof("fetching number of stargazers for: %s/%s", owner, name)
+	s.opts.Logger.Sugar().With("owner", owner, "name", name).Infof("fetching number of GitHub stargazers for: %s/%s", owner, name)
 
 	variables := map[string]interface{}{
 		"owner": githubv4.String(owner),

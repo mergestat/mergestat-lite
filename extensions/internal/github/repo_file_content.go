@@ -60,6 +60,8 @@ func (f *repoFileContent) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		expression = fmt.Sprintf("HEAD:%s", expression)
 	}
 
+	f.opts.Logger.Sugar().With("owner", owner, "name", name, "expression", expression).Infof("fetching GitHub file contents for %s", expression)
+
 	variables := map[string]interface{}{
 		"owner":      githubv4.String(owner),
 		"name":       githubv4.String(name),
