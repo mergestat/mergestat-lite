@@ -9,7 +9,7 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/time/rate"
+	"go.uber.org/zap"
 )
 
 type issue struct {
@@ -52,15 +52,6 @@ type issue struct {
 	Url       githubv4.URI
 }
 
-type fetchIssuesOptions struct {
-	Client      *githubv4.Client
-	Owner       string
-	Name        string
-	PerPage     int
-	StartCursor *githubv4.String
-	IssueOrder  *githubv4.IssueOrder
-}
-
 type fetchIssuesResults struct {
 	Edges       []*issueEdge
 	HasNextPage bool
@@ -72,7 +63,7 @@ type issueEdge struct {
 	Node   issue
 }
 
-func fetchIssues(ctx context.Context, input *fetchIssuesOptions) (*fetchIssuesResults, error) {
+func (i *iterIssues) fetchIssues(ctx context.Context, startCursor *githubv4.String) (*fetchIssuesResults, error) {
 	var issuesQuery struct {
 		Repository struct {
 			Owner struct {
@@ -89,14 +80,14 @@ func fetchIssues(ctx context.Context, input *fetchIssuesOptions) (*fetchIssuesRe
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	variables := map[string]interface{}{
-		"owner":       githubv4.String(input.Owner),
-		"name":        githubv4.String(input.Name),
-		"perpage":     githubv4.Int(input.PerPage),
-		"issuecursor": (*githubv4.String)(input.StartCursor),
-		"issueorder":  input.IssueOrder,
+		"owner":       githubv4.String(i.owner),
+		"name":        githubv4.String(i.name),
+		"perpage":     githubv4.Int(i.PerPage),
+		"issuecursor": startCursor,
+		"issueorder":  i.issueOrder,
 	}
 
-	err := input.Client.Query(ctx, &issuesQuery, variables)
+	err := i.Client().Query(ctx, &issuesQuery, variables)
 
 	if err != nil {
 		return nil, err
@@ -110,14 +101,20 @@ func fetchIssues(ctx context.Context, input *fetchIssuesOptions) (*fetchIssuesRe
 }
 
 type iterIssues struct {
-	fullNameOrOwner string
-	name            string
-	client          *githubv4.Client
-	current         int
-	results         *fetchIssuesResults
-	rateLimiter     *rate.Limiter
-	issueOrder      *githubv4.IssueOrder
-	perPage         int
+	*Options
+	owner      string
+	name       string
+	current    int
+	results    *fetchIssuesResults
+	issueOrder *githubv4.IssueOrder
+}
+
+func (i *iterIssues) logger() *zap.SugaredLogger {
+	logger := i.Logger.Sugar().With("per-page", i.PerPage, "owner", i.owner, "name", i.name)
+	if i.issueOrder != nil {
+		logger = logger.With("order_by", i.issueOrder.Field, "order_dir", i.issueOrder.Direction)
+	}
+	return logger
 }
 
 func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
@@ -125,10 +122,6 @@ func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
 	col := issuesCols[c]
 
 	switch col.Name {
-	case "owner":
-		ctx.ResultText(i.fullNameOrOwner)
-	case "reponame":
-		ctx.ResultText(i.name)
 	case "author_login":
 		ctx.ResultText(current.Node.Author.Login)
 	case "body":
@@ -207,12 +200,7 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 
 	if i.results == nil || i.current >= len(i.results.Edges) {
 		if i.results == nil || i.results.HasNextPage {
-			err := i.rateLimiter.Wait(context.Background())
-			if err != nil {
-				return nil, err
-			}
-
-			owner, name, err := repoOwnerAndName(i.name, i.fullNameOrOwner)
+			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
 				return nil, err
 			}
@@ -222,7 +210,8 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchIssues(context.Background(), &fetchIssuesOptions{i.client, owner, name, i.perPage, cursor, i.issueOrder})
+			i.logger().With("cursor", cursor).Infof("fetching page of repo_issues for %s/%s", i.owner, i.name)
+			results, err := i.fetchIssues(context.Background(), cursor)
 			if err != nil {
 				return nil, err
 			}
@@ -240,7 +229,7 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 
 var issuesCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "author_login", Type: "TEXT"},
 	{Name: "body", Type: "TEXT"},
 	{Name: "closed", Type: "BOOLEAN"},
@@ -279,6 +268,11 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 			}
 		}
 
+		owner, name, err := repoOwnerAndName(name, fullNameOrOwner)
+		if err != nil {
+			return nil, err
+		}
+
 		var issueOrder *githubv4.IssueOrder
 		if len(orders) == 1 {
 			order := orders[0]
@@ -295,6 +289,8 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 			issueOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterIssues{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, issueOrder, opts.PerPage}, nil
+		iter := &iterIssues{opts, owner, name, -1, nil, issueOrder}
+		iter.logger().Infof("starting GitHub repo_issues iterator for %s/%s", owner, name)
+		return iter, nil
 	})
 }
