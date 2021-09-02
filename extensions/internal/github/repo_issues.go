@@ -88,7 +88,6 @@ func (i *iterIssues) fetchIssues(ctx context.Context, startCursor *githubv4.Stri
 	}
 
 	err := i.Client().Query(ctx, &issuesQuery, variables)
-
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +275,6 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 		var issueOrder *githubv4.IssueOrder
 		if len(orders) == 1 {
 			order := orders[0]
-
 			issueOrder = &githubv4.IssueOrder{}
 			switch issuesCols[order.ColumnIndex].Name {
 			case "comment_count":
