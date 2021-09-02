@@ -211,7 +211,6 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 		}
 
 		iter := &iterStargazers{opts, owner, name, -1, nil, starOrder}
-
 		iter.logger().Infof("starting GitHub stargazers iterator for %s/%s", owner, name)
 		return iter, nil
 	})
