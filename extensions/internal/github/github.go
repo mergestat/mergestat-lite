@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 	"golang.org/x/time/rate"
 )
@@ -17,6 +18,10 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 	rateLimiter := GetGitHubRateLimitFromCtx(opt.Context)
 	if rateLimiter == nil {
 		rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), 2)
+	}
+
+	if opt.Logger == nil {
+		opt.Logger = zap.NewNop()
 	}
 
 	githubOpts := &Options{
@@ -29,6 +34,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 			return client
 		},
 		PerPage: GetGitHubPerPageFromCtx(opt.Context),
+		Logger:  opt.Logger,
 	}
 
 	if opt.GitHubClientGetter != nil {

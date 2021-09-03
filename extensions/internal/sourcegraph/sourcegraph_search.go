@@ -144,8 +144,8 @@ func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*searchRe
 }
 
 type iterResults struct {
+	*Options
 	query   string
-	client  *graphql.Client
 	current int
 	results *searchResults
 }
@@ -222,7 +222,7 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 func (i *iterResults) Next() (vtab.Row, error) {
 	var err error
 	if i.current == -1 {
-		i.results, err = fetchSearch(context.Background(), &fetchSourcegraphOptions{i.client, i.query})
+		i.results, err = fetchSearch(context.Background(), &fetchSourcegraphOptions{i.Client(), i.query})
 		if err != nil {
 			return nil, err
 		}
@@ -260,7 +260,7 @@ func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
 				}
 			}
 		}
-
-		return &iterResults{query, opts.Client(), -1, nil}, nil
+		opts.Logger.Sugar().Infof("running Sourcegraph search: %s", query)
+		return &iterResults{opts, query, -1, nil}, nil
 	})
 }

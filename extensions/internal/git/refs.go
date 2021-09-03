@@ -5,7 +5,6 @@ import (
 	"regexp"
 
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/storer"
@@ -15,12 +14,16 @@ import (
 
 var remoteName = regexp.MustCompile(`(?m)refs\/remotes\/([^\/]*)\/.+`)
 
-type RefModule struct {
-	Locator services.RepoLocator
-	Context services.Context
+// NewRefModule returns a new virtual table for listing git refs
+func NewRefModule(opt *utils.ModuleOptions) sqlite.Module {
+	return &refModule{opt}
 }
 
-func (mod *RefModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
+type refModule struct {
+	*utils.ModuleOptions
+}
+
+func (mod *refModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) error) (sqlite.VirtualTable, error) {
 	const schema = `
 		CREATE TABLE refs (
 			name		TEXT,
@@ -35,18 +38,17 @@ func (mod *RefModule) Connect(_ *sqlite.Conn, _ []string, declare func(string) e
 			PRIMARY KEY ( name )
 		) WITHOUT ROWID`
 
-	return &gitRefTable{Locator: mod.Locator, Context: mod.Context}, declare(schema)
+	return &gitRefTable{ModuleOptions: mod.ModuleOptions}, declare(schema)
 }
 
 type gitRefTable struct {
-	Locator services.RepoLocator
-	Context services.Context
+	*utils.ModuleOptions
 }
 
 func (tab *gitRefTable) Disconnect() error { return nil }
 func (tab *gitRefTable) Destroy() error    { return nil }
 func (tab *gitRefTable) Open() (sqlite.VirtualCursor, error) {
-	return &gitRefCursor{Locator: tab.Locator, Context: tab.Context}, nil
+	return &gitRefCursor{ModuleOptions: tab.ModuleOptions}, nil
 }
 
 func (tab *gitRefTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexInfoOutput, error) {
@@ -76,8 +78,7 @@ func (tab *gitRefTable) BestIndex(input *sqlite.IndexInfoInput) (*sqlite.IndexIn
 }
 
 type gitRefCursor struct {
-	Locator services.RepoLocator
-	Context services.Context
+	*utils.ModuleOptions
 
 	repo *git.Repository
 
@@ -86,6 +87,11 @@ type gitRefCursor struct {
 }
 
 func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err error) {
+	logger := cur.Logger.Sugar().With("module", "git-ref")
+	defer func() {
+		logger.Debugf("running git refs filter")
+	}()
+
 	// values extracted from constraints
 	var path string
 
@@ -110,6 +116,7 @@ func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 			return errors.Wrapf(err, "failed to open %q", path)
 		}
 		cur.repo = repo
+		logger = logger.With("repo-disk-path", path)
 	}
 
 	if cur.refs, err = repo.References(); err != nil {

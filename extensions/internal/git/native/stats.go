@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	libgit2 "github.com/libgit2/git2go/v31"
@@ -24,7 +23,7 @@ var statsCols = []vtab.Column{
 }
 
 // NewStatsModule returns the implementation of a table-valued-function for git stats
-func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
+func NewStatsModule(options *utils.ModuleOptions) sqlite.Module {
 	return vtab.NewTableFunc("stats", statsCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var repoPath, rev, toRev string
 		for _, constraint := range constraints {
@@ -42,23 +41,28 @@ func NewStatsModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 
 		if repoPath == "" {
 			var err error
-			repoPath, err = utils.GetDefaultRepoFromCtx(ctx)
+			repoPath, err = utils.GetDefaultRepoFromCtx(options.Context)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		return newStatsIter(locator, repoPath, rev, toRev)
+		return newStatsIter(options, repoPath, rev, toRev)
 	})
 }
 
-func newStatsIter(locator services.RepoLocator, repoPath, rev, toRev string) (*statsIter, error) {
+func newStatsIter(options *utils.ModuleOptions, repoPath, rev, toRev string) (*statsIter, error) {
+	logger := options.Logger.Sugar().With("module", "git-stats", "repo-path", repoPath)
+	defer func() {
+		logger.Debugf("creating stats iterator")
+	}()
+
 	iter := &statsIter{
 		repoPath: repoPath,
 		index:    -1,
 	}
 
-	r, err := locator.Open(context.Background(), repoPath)
+	r, err := options.Locator.Open(context.Background(), repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +106,7 @@ func newStatsIter(locator services.RepoLocator, repoPath, rev, toRev string) (*s
 		}
 	}
 	defer fromCommit.Free()
+	logger = logger.With("from-revision", fromCommit.Id().String())
 
 	tree, err := fromCommit.Tree()
 	if err != nil {
@@ -127,12 +132,14 @@ func newStatsIter(locator services.RepoLocator, repoPath, rev, toRev string) (*s
 	var toTree *libgit2.Tree
 	if toCommit == nil {
 		toTree = &libgit2.Tree{}
+		logger = logger.With("to-revision", "")
 	} else {
 		toTree, err = toCommit.Tree()
 		if err != nil {
 			return nil, err
 		}
 		defer toCommit.Free()
+		logger = logger.With("to-revision", toCommit.Id().String())
 	}
 	defer toTree.Free()
 

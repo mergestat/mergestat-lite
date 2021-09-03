@@ -8,7 +8,7 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/time/rate"
+	"go.uber.org/zap"
 )
 
 type pullRequest struct {
@@ -71,22 +71,13 @@ type pullRequest struct {
 	Url            githubv4.URI
 }
 
-type fetchPROptions struct {
-	Client      *githubv4.Client
-	Owner       string
-	Name        string
-	PerPage     int
-	StartCursor *githubv4.String
-	PROrder     *githubv4.IssueOrder
-}
-
 type fetchPRResults struct {
 	Edges       []*pullRequest
 	HasNextPage bool
 	EndCursor   *githubv4.String
 }
 
-func fetchPR(ctx context.Context, input *fetchPROptions) (*fetchPRResults, error) {
+func (i *iterPRs) fetchPRs(ctx context.Context, startCursor *githubv4.String) (*fetchPRResults, error) {
 	var PRQuery struct {
 		Repository struct {
 			Owner struct {
@@ -103,15 +94,14 @@ func fetchPR(ctx context.Context, input *fetchPROptions) (*fetchPRResults, error
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	variables := map[string]interface{}{
-		"owner":    githubv4.String(input.Owner),
-		"name":     githubv4.String(input.Name),
-		"perpage":  githubv4.Int(input.PerPage),
-		"prcursor": (*githubv4.String)(input.StartCursor),
-		"prorder":  input.PROrder,
+		"owner":    githubv4.String(i.owner),
+		"name":     githubv4.String(i.name),
+		"perpage":  githubv4.Int(i.PerPage),
+		"prcursor": startCursor,
+		"prorder":  i.prOrder,
 	}
 
-	err := input.Client.Query(ctx, &PRQuery, variables)
-
+	err := i.Client().Query(ctx, &PRQuery, variables)
 	if err != nil {
 		return nil, err
 	}
@@ -123,26 +113,28 @@ func fetchPR(ctx context.Context, input *fetchPROptions) (*fetchPRResults, error
 	}, nil
 }
 
-type iterPR struct {
-	fullNameOrOwner string
-	name            string
-	client          *githubv4.Client
-	current         int
-	results         *fetchPRResults
-	rateLimiter     *rate.Limiter
-	prOrder         *githubv4.IssueOrder
-	perPage         int
+type iterPRs struct {
+	*Options
+	owner   string
+	name    string
+	current int
+	results *fetchPRResults
+	prOrder *githubv4.IssueOrder
 }
 
-func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
+func (i *iterPRs) logger() *zap.SugaredLogger {
+	logger := i.Logger.Sugar().With("per-page", i.PerPage, "owner", i.owner, "name", i.name)
+	if i.prOrder != nil {
+		logger = logger.With("order_by", i.prOrder.Field, "order_dir", i.prOrder.Direction)
+	}
+	return logger
+}
+
+func (i *iterPRs) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Edges[i.current]
 	col := prCols[c]
 
 	switch col.Name {
-	case "owner":
-		ctx.ResultText(i.fullNameOrOwner)
-	case "reponame":
-		ctx.ResultText(i.name)
 	case "additions":
 		ctx.ResultInt(int(current.Additions))
 	case "author_login":
@@ -251,17 +243,12 @@ func (i *iterPR) Column(ctx *sqlite.Context, c int) error {
 	return nil
 }
 
-func (i *iterPR) Next() (vtab.Row, error) {
+func (i *iterPRs) Next() (vtab.Row, error) {
 	i.current += 1
 
 	if i.results == nil || i.current >= len(i.results.Edges) {
 		if i.results == nil || i.results.HasNextPage {
-			err := i.rateLimiter.Wait(context.Background())
-			if err != nil {
-				return nil, err
-			}
-
-			owner, name, err := repoOwnerAndName(i.name, i.fullNameOrOwner)
+			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
 				return nil, err
 			}
@@ -271,7 +258,8 @@ func (i *iterPR) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchPR(context.Background(), &fetchPROptions{i.client, owner, name, i.perPage, cursor, i.prOrder})
+			i.logger().With("cursor", cursor).Infof("fetching page of repo_pull_requests for %s/%s", i.owner, i.name)
+			results, err := i.fetchPRs(context.Background(), cursor)
 			if err != nil {
 				return nil, err
 			}
@@ -289,7 +277,7 @@ func (i *iterPR) Next() (vtab.Row, error) {
 
 var prCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "additions", Type: "INT"},
 	{Name: "author_login", Type: "TEXT"},
 	{Name: "author_association", Type: "TEXT"},
@@ -342,6 +330,12 @@ func NewPRModule(opts *Options) sqlite.Module {
 				}
 			}
 		}
+
+		owner, name, err := repoOwnerAndName(name, fullNameOrOwner)
+		if err != nil {
+			return nil, err
+		}
+
 		var prOrder *githubv4.IssueOrder
 		if len(orders) == 1 {
 			order := orders[0]
@@ -357,6 +351,8 @@ func NewPRModule(opts *Options) sqlite.Module {
 			prOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterPR{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, prOrder, opts.PerPage}, nil
+		iter := &iterPRs{opts, owner, name, -1, nil, prOrder}
+		iter.logger().Infof("starting GitHub repo_pull_requests iterator for %s/%s", owner, name)
+		return iter, nil
 	})
 }

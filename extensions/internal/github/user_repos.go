@@ -8,16 +8,8 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/time/rate"
+	"go.uber.org/zap"
 )
-
-type fetchUserReposOptions struct {
-	Client          *githubv4.Client
-	Login           string
-	PerPage         int
-	UserReposCursor *githubv4.String
-	RepositoryOrder *githubv4.RepositoryOrder
-}
 
 type fetchUserReposResults struct {
 	UserRepos   []*userRepo
@@ -76,7 +68,7 @@ type userRepo struct {
 	}
 }
 
-func fetchUserRepos(ctx context.Context, input *fetchUserReposOptions) (*fetchUserReposResults, error) {
+func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv4.String) (*fetchUserReposResults, error) {
 	var reposQuery struct {
 		User struct {
 			Login        string
@@ -91,13 +83,13 @@ func fetchUserRepos(ctx context.Context, input *fetchUserReposOptions) (*fetchUs
 	}
 
 	variables := map[string]interface{}{
-		"login":           githubv4.String(input.Login),
-		"perPage":         githubv4.Int(input.PerPage),
-		"userReposCursor": (*githubv4.String)(input.UserReposCursor),
-		"repositoryOrder": input.RepositoryOrder,
+		"login":           githubv4.String(i.login),
+		"perPage":         githubv4.Int(i.PerPage),
+		"userReposCursor": startCursor,
+		"repositoryOrder": i.repoOrder,
 	}
 
-	err := input.Client.Query(ctx, &reposQuery, variables)
+	err := i.Client().Query(ctx, &reposQuery, variables)
 	if err != nil {
 		return nil, err
 	}
@@ -110,12 +102,19 @@ func fetchUserRepos(ctx context.Context, input *fetchUserReposOptions) (*fetchUs
 }
 
 type iterUserRepos struct {
-	login       string
-	client      *githubv4.Client
-	current     int
-	results     *fetchUserReposResults
-	rateLimiter *rate.Limiter
-	repoOrder   *githubv4.RepositoryOrder
+	*Options
+	login     string
+	current   int
+	results   *fetchUserReposResults
+	repoOrder *githubv4.RepositoryOrder
+}
+
+func (i *iterUserRepos) logger() *zap.SugaredLogger {
+	logger := i.Logger.Sugar().With("per-page", i.PerPage, "login", i.login)
+	if i.repoOrder != nil {
+		logger = logger.With("order_by", i.repoOrder.Field, "order_dir", i.repoOrder.Direction)
+	}
+	return logger
 }
 
 func (i *iterUserRepos) Column(ctx *sqlite.Context, c int) error {
@@ -215,7 +214,7 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 
 	if i.results == nil || i.current >= len(i.results.UserRepos) {
 		if i.results == nil || i.results.HasNextPage {
-			err := i.rateLimiter.Wait(context.Background())
+			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
 				return nil, err
 			}
@@ -224,7 +223,9 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 			if i.results != nil {
 				cursor = i.results.EndCursor
 			}
-			results, err := fetchUserRepos(context.Background(), &fetchUserReposOptions{i.client, i.login, 100, cursor, i.repoOrder})
+
+			i.logger().With("cursor", cursor).Infof("fetching page of user_repos for %s", i.login)
+			results, err := i.fetchUserRepos(context.Background(), cursor)
 			if err != nil {
 				return nil, err
 			}
@@ -305,6 +306,8 @@ func NewUserReposModule(opts *Options) sqlite.Module {
 			repoOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterUserRepos{login, opts.Client(), -1, nil, opts.RateLimiter, repoOrder}, nil
+		iter := &iterUserRepos{opts, login, -1, nil, repoOrder}
+		iter.logger().Infof("starting GitHub user_repos iterator for %s", login)
+		return iter, nil
 	})
 }
