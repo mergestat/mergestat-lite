@@ -10,7 +10,7 @@ import (
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
-	libgit2 "github.com/libgit2/git2go/v31"
+	libgit2 "github.com/libgit2/git2go/v32"
 	"go.riyazali.net/sqlite"
 )
 
@@ -125,16 +125,16 @@ func newFilesIter(options *utils.ModuleOptions, repoPath, rev string) (*filesIte
 	}
 
 	iter.files = make([]*file, 0, tree.EntryCount())
-	err = tree.Walk(func(p string, treeEntry *libgit2.TreeEntry) int {
+	err = tree.Walk(func(p string, treeEntry *libgit2.TreeEntry) error {
 		if treeEntry.Type != libgit2.ObjectBlob {
-			return 0
+			return nil
 		}
 		iter.files = append(iter.files, &file{
 			id:         treeEntry.Id,
 			path:       path.Join(p, treeEntry.Name),
 			executable: treeEntry.Filemode == libgit2.FilemodeBlobExecutable,
 		})
-		return 0
+		return nil
 	})
 	if err != nil {
 		return nil, err
