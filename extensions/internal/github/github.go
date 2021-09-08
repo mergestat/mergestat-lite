@@ -42,16 +42,19 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 		"github_org_repos":          NewOrgReposModule(githubOpts),
 		"github_repo_issues":        NewIssuesModule(githubOpts),
 		"github_repo_pull_requests": NewPRModule(githubOpts),
+		"github_repo_check_suites":  NewCheckSuiteModule(githubOpts),
 	}
 
 	modules["github_issues"] = modules["github_repo_issues"]
 	modules["github_pull_requests"] = modules["github_repo_pull_requests"]
 	modules["github_prs"] = modules["github_repo_pull_requests"]
 	modules["github_repo_prs"] = modules["github_repo_pull_requests"]
+	modules["github_check_suites"] = modules["github_repo_check_suites"]
 
 	// register GitHub tables
 	for name, mod := range modules {
 		if err = ext.CreateModule(name, mod); err != nil {
+			println(err.Error())
 			return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register GitHub %q module", name)
 		}
 	}
