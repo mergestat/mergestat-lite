@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/augmentable-dev/vtab"
@@ -98,18 +99,37 @@ type fetchCheckSuiteOptions struct {
 	Name        string
 	PerPage     int
 	StartCursor *githubv4.String
-	PROrder     *githubv4.IssueOrder
+	PRnumber    int
+	number      int
 }
 
 type fetchCheckSuiteResults struct {
-	Edges       []*csPullRequest
-	HasNextPage bool
-	EndCursor   *githubv4.String
+	Edges []commitNode
+	// HasNextPage bool
+	// EndCursor   *githubv4.String
 }
 
 type CheckSuiteEdge struct {
 	Cursor string
-	Node   *[]csPullRequest
+	Node   *[]struct{}
+}
+type commitNode struct {
+	Commit struct {
+		CheckSuites struct {
+			Nodes []struct {
+				App struct {
+					Name string
+				}
+				Conclusion string
+				CreatedAt  githubv4.DateTime
+				Creator    struct {
+					Login string
+					Name  string
+				}
+				Id string
+			}
+		} `graphql:"checkSuites(last: $number)"`
+	}
 }
 
 func fetchCheckSuite(ctx context.Context, input *fetchCheckSuiteOptions) (*fetchCheckSuiteResults, error) {
@@ -118,23 +138,25 @@ func fetchCheckSuite(ctx context.Context, input *fetchCheckSuiteOptions) (*fetch
 			Owner struct {
 				Login string
 			}
-			Name         string
-			PullRequests struct {
-				Nodes    []*csPullRequest
-				PageInfo struct {
-					EndCursor   githubv4.String
-					HasNextPage bool
-				}
-			} `graphql:"pullRequests(first: $perpage, after: $prcursor, orderBy: $prorder)"`
+			Name        string
+			PullRequest struct {
+				Commits struct {
+					Nodes []commitNode
+				} `graphql:"commits(last: 100)"`
+				// PageInfo struct {
+				// 	EndCursor   githubv4.String
+				// 	HasNextPage bool
+				// }
+			} `graphql:"pullRequest(number: $prnumber)"`
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	variables := map[string]interface{}{
 		"owner":    githubv4.String(input.Owner),
 		"name":     githubv4.String(input.Name),
-		"perpage":  githubv4.Int(input.PerPage),
-		"prcursor": (*githubv4.String)(input.StartCursor),
-		"prorder":  input.PROrder,
+		"prnumber": githubv4.Int(input.PRnumber),
+		"number":   githubv4.Int(input.number),
 	}
+	println(fmt.Sprint(variables))
 
 	err := input.Client.Query(ctx, &issuesQuery, variables)
 
@@ -143,23 +165,22 @@ func fetchCheckSuite(ctx context.Context, input *fetchCheckSuiteOptions) (*fetch
 	}
 
 	return &fetchCheckSuiteResults{
-		issuesQuery.Repository.PullRequests.Nodes,
-		issuesQuery.Repository.PullRequests.PageInfo.HasNextPage,
-		&issuesQuery.Repository.PullRequests.PageInfo.EndCursor,
+		issuesQuery.Repository.PullRequest.Commits.Nodes,
+		// issuesQuery.Repository.PullRequest.PageInfo.HasNextPage,
+		// &issuesQuery.Repository.PullRequest.PageInfo.EndCursor,
 	}, nil
 }
 
 type iterCheckSuites struct {
-	fullNameOrOwner              string
-	name                         string
-	client                       *githubv4.Client
-	currentCsPr                  int
-	currentCsPrCommitEdge        int
-	currentCsPrEdgeCommitCsEdges int
-	results                      *fetchCheckSuiteResults
-	rateLimiter                  *rate.Limiter
-	issueOrder                   *githubv4.IssueOrder
-	perPage                      int
+	fullNameOrOwner   string
+	name              string
+	client            *githubv4.Client
+	currentCommitNode int
+	results           *fetchCheckSuiteResults
+	rateLimiter       *rate.Limiter
+	issueOrder        *githubv4.IssueOrder
+	PRnumber          int
+	number            int
 }
 
 func (i *iterCheckSuites) Column(ctx *sqlite.Context, c int) error {
@@ -169,20 +190,24 @@ func (i *iterCheckSuites) Column(ctx *sqlite.Context, c int) error {
 	// 	return err
 	// }
 	// println(x)
-	println("top: ", i.currentCsPr, " middle: ", i.currentCsPrCommitEdge, " bottom: ", i.currentCsPrEdgeCommitCsEdges)
-	current := i.results.Edges[i.currentCsPr].Commits.Edges[i.currentCsPrCommitEdge].Node.Commit.CheckSuites.Edges[i.currentCsPrEdgeCommitCsEdges]
+	println(i.currentCommitNode)
+	current := i.results.Edges[i.currentCommitNode].Commit.CheckSuites.Nodes
 	col := checkSuiteCols[c]
+	println(col.Name)
 
 	switch col.Name {
 	case "results":
 		result, err := json.Marshal(current)
-		if err != nil {
+		if err == nil {
 			ctx.ResultText(string(result))
 		} else {
 			ctx.ResultText(err.Error())
+			return err
 		}
 		// case "reponame":
 		// 	ctx.ResultText(i.name)
+		// case "owner":
+		// 	ctx.ResultText(i.)
 		// case "author_login":
 		// 	ctx.ResultText(current.Node.Author.Login)
 		// case "body":
@@ -257,24 +282,26 @@ func (i *iterCheckSuites) Column(ctx *sqlite.Context, c int) error {
 }
 
 func (i *iterCheckSuites) Next() (vtab.Row, error) {
-	i.currentCsPrEdgeCommitCsEdges++
+	i.currentCommitNode++
 	// check to see if need to iterate to next commitEdge in current PR
-	if i.results == nil || i.currentCsPrEdgeCommitCsEdges >= len(i.results.Edges[i.currentCsPr].Commits.Edges[i.currentCsPrCommitEdge].Node.Commit.CheckSuites.Edges) {
-		if i.results != nil && i.currentCsPrCommitEdge+1 < len(i.results.Edges[i.currentCsPr].Commits.Edges) {
-			//iterate to next commit and reset checksuiteEdges counter
-			i.currentCsPrCommitEdge++
-			i.currentCsPrEdgeCommitCsEdges = 0
-			//return i, nil
-		}
-		// if the above does not trigger check the topmost pull request layer and increment counter if appropriate
-		if i.results != nil && i.currentCsPr+1 < len(i.results.Edges) {
-			i.currentCsPr++
-			i.currentCsPrCommitEdge = 0
-			i.currentCsPrEdgeCommitCsEdges = 0
-			//return i, nil
-		}
+	if i.results == nil || i.currentCommitNode >= len(i.results.Edges) {
+		/*
+			if i.results != nil && i.currentCsPrCommitEdge+1 < len(i.results.Edges[i.currentCsPr].Commits.Edges) {
+				//iterate to next commit and reset checksuiteEdges counter
+				i.currentCsPrCommitEdge++
+				i.currentCsPrEdgeCommitCsEdges = 0
+				//return i, nil
+			}
+			// if the above does not trigger check the topmost pull request layer and increment counter if appropriate
+			if i.results != nil && i.currentCsPr+1 < len(i.results.Edges) {
+				i.currentCsPr++
+				i.currentCsPrCommitEdge = 0
+				i.currentCsPrEdgeCommitCsEdges = 0
+				//return i, nil
+			}
+		*/
 		// if both the above are false then check if there is a next page to pull
-		if i.results == nil || i.results.HasNextPage {
+		if i.results == nil { //|| i.results.HasNextPage {
 			err := i.rateLimiter.Wait(context.Background())
 			if err != nil {
 				return nil, err
@@ -285,43 +312,41 @@ func (i *iterCheckSuites) Next() (vtab.Row, error) {
 				return nil, err
 			}
 
-			var cursor *githubv4.String
-			if i.results != nil {
-				cursor = i.results.EndCursor
-			}
+			// var cursor *githubv4.String
+			// if i.results != nil {
+			// 	cursor = i.results.EndCursor
+			// }
 
-			results, err := fetchCheckSuite(context.Background(), &fetchCheckSuiteOptions{i.client, owner, name, i.perPage, cursor, i.issueOrder})
+			results, err := fetchCheckSuite(context.Background(), &fetchCheckSuiteOptions{i.client, owner, name, 10, githubv4.NewString(""), i.PRnumber, i.number})
 			if err != nil {
 				return nil, err
 			}
 
 			i.results = results
 			println("got results")
-			x, err := json.Marshal(i.results)
+			x, err := json.Marshal(i.results.Edges)
 			if err != nil {
 				println(err.Error())
 			}
 			println(string(x))
-			println("num topmost edges", len(results.Edges))
-			println("num next edges: ", len(results.Edges[0].Commits.Edges))
-			println("and one deeper: ", len(results.Edges[0].Commits.Edges[0].Node.Commit.CheckSuites.Edges))
-			i.currentCsPr = 0
-			i.currentCsPrCommitEdge = 0
-			i.currentCsPrEdgeCommitCsEdges = 0
+			println(len(results.Edges))
+			i.currentCommitNode = 0
 
 		} else {
 			return nil, io.EOF
 		}
 	}
-	if i.currentCsPr >= len(i.results.Edges) || i.currentCsPrCommitEdge >= len(i.results.Edges[i.currentCsPr].Commits.Edges) || i.currentCsPrEdgeCommitCsEdges >= len(i.results.Edges[i.currentCsPr].Commits.Edges[i.currentCsPrCommitEdge].Node.Commit.CheckSuites.Edges) {
-		return i.Next()
-	}
+	// if i.currentCsPr >= len(i.results.Edges) || i.currentCsPrCommitEdge >= len(i.results.Edges[i.currentCsPr].Commits.Edges) || i.currentCsPrEdgeCommitCsEdges >= len(i.results.Edges[i.currentCsPr].Commits.Edges[i.currentCsPrCommitEdge].Node.Commit.CheckSuites.Edges) {
+	// 	return i.Next()
+	// }
 	return i, nil
 }
 
 var checkSuiteCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "prnumber", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "number", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
 	{Name: "results", Type: "TEXT"},
 	// {Name: "body", Type: "TEXT"},
 	// {Name: "closed", Type: "BOOLEAN"},
@@ -349,6 +374,7 @@ var checkSuiteCols = []vtab.Column{
 func NewCheckSuiteModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_repo_issues", checkSuiteCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name string
+		var PRnumber, number int
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
@@ -356,10 +382,14 @@ func NewCheckSuiteModule(opts *Options) sqlite.Module {
 					fullNameOrOwner = constraint.Value.Text()
 				case 1:
 					name = constraint.Value.Text()
+				case 2:
+					PRnumber = constraint.Value.Int()
+				case 3:
+					number = constraint.Value.Int()
 				}
 			}
 		}
-
+		println("prNumber: ", PRnumber, "number: ", number)
 		// var issueOrder *githubv4.IssueOrder
 		// if len(orders) == 1 {
 		// 	order := orders[0]
@@ -376,6 +406,6 @@ func NewCheckSuiteModule(opts *Options) sqlite.Module {
 		// 	issueOrder.Direction = orderByToGitHubOrder(order.Desc)
 		// }
 
-		return &iterCheckSuites{fullNameOrOwner, name, opts.Client(), 0, 0, 0, nil, opts.RateLimiter, &githubv4.IssueOrder{Field: githubv4.IssueOrderFieldCreatedAt, Direction: githubv4.OrderDirectionAsc}, opts.PerPage}, nil
+		return &iterCheckSuites{fullNameOrOwner, name, opts.Client(), 0, nil, opts.RateLimiter, &githubv4.IssueOrder{Field: githubv4.IssueOrderFieldCreatedAt, Direction: githubv4.OrderDirectionAsc}, PRnumber, number}, nil
 	})
 }
