@@ -10,30 +10,38 @@ import (
 	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
+	"go.uber.org/zap"
 )
 
 const (
-	BaseURL = "https://registry.npmjs.org/"
+	BaseURL = "https://registry.npmjs.org"
 )
 
 type Client struct {
 	httpClient *http.Client
+	logger     *zap.Logger
 }
 
 // NewClient creates a new API client from an *http.Client. Pass nil to use http.DefaultClient
-func NewClient(httpClient *http.Client) *Client {
+func NewClient(httpClient *http.Client, logger *zap.Logger) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	return &Client{httpClient}
+	if logger == nil {
+		logger = zap.NewNop()
+	}
+	return &Client{httpClient, logger}
 }
 
 // GetPackage makes an HTTP request to https://registry.npmjs.org/<<packageName>> and returns the JSON response
 func (c *Client) GetPackage(ctx context.Context, packageName string) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s", BaseURL, packageName), nil)
+	path := fmt.Sprintf("%s/%s", BaseURL, packageName)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	c.logger.Sugar().Infof("making GET request: %s", path)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -50,10 +58,13 @@ func (c *Client) GetPackage(ctx context.Context, packageName string) ([]byte, er
 
 // GetPackageVersion makes an HTTP request to https://registry.npmjs.org/<<packageName>>/<<version>> and returns the JSON response
 func (c *Client) GetPackageVersion(ctx context.Context, packageName, version string) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s/%s", BaseURL, packageName, version), nil)
+	path := fmt.Sprintf("%s/%s/%s", BaseURL, packageName, version)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	c.logger.Sugar().Infof("making GET request: %s", path)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -71,7 +82,7 @@ func (c *Client) GetPackageVersion(ctx context.Context, packageName, version str
 // Register registers npm API related functionality as a SQLite extension
 func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCode, err error) {
 	var fns = map[string]sqlite.Function{
-		"npm_get_package": &GetPackage{NewClient(opt.NPMHttpClient)},
+		"npm_get_package": &GetPackage{NewClient(opt.NPMHttpClient, opt.Logger)},
 	}
 
 	for name, fn := range fns {

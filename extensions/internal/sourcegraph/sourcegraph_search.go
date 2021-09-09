@@ -29,6 +29,7 @@ type searchResults struct {
 	}
 	MatchCount          graphql.Int
 	ElapsedMilliseconds graphql.Int
+	Alert               searchResultAlert `graphql:"... on SearchResults"`
 }
 
 type fileMatch struct {
@@ -107,6 +108,17 @@ type repositoryFields struct {
 	} `json:"label"`
 }
 
+type searchResultAlert struct {
+	Alert struct {
+		Title           graphql.String `json:"alertTitle"`
+		Description     graphql.String `json:"alertDescription"`
+		ProposedQueries []struct {
+			Description graphql.String `json:"proposedQueryDescription"`
+			Query       graphql.String `json:"proposedQuery"`
+		} `json:"proposedQueries"`
+	} `json:"alert"`
+}
+
 type fetchSourcegraphOptions struct {
 	Client *graphql.Client
 	Query  string
@@ -132,14 +144,22 @@ func fetchSearch(ctx context.Context, input *fetchSourcegraphOptions) (*searchRe
 }
 
 type iterResults struct {
+	*Options
 	query   string
-	client  *graphql.Client
 	current int
 	results *searchResults
 }
 
 func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
-	current := i.results.Results[i.current]
+	var current struct {
+		Typename                 graphql.String      "graphql:\"__typename\""
+		FileMatchFields          fileMatch           "graphql:\"... on FileMatch\""
+		CommitSearchResultFields commitSearchResults "graphql:\"... on CommitSearchResult\""
+		RepositoryFields         repositoryFields    "graphql:\"... on Repository\""
+	}
+	if i.current < len(i.results.Results) {
+		current = i.results.Results[i.current]
+	}
 	col := searchCols[c]
 	switch col.Name {
 	case "__typename":
@@ -161,6 +181,13 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 		case "FileMatch":
 			res, err := json.Marshal(current.FileMatchFields)
 			if err != nil {
+				return err
+			}
+			ctx.ResultText(string(res))
+		default:
+			res, err := json.Marshal(i.results.Alert)
+			if err != nil {
+				ctx.ResultError(err)
 				return err
 			}
 			ctx.ResultText(string(res))
@@ -195,7 +222,7 @@ func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
 func (i *iterResults) Next() (vtab.Row, error) {
 	var err error
 	if i.current == -1 {
-		i.results, err = fetchSearch(context.Background(), &fetchSourcegraphOptions{i.client, i.query})
+		i.results, err = fetchSearch(context.Background(), &fetchSourcegraphOptions{i.Client(), i.query})
 		if err != nil {
 			return nil, err
 		}
@@ -204,7 +231,7 @@ func (i *iterResults) Next() (vtab.Row, error) {
 	i.current += 1
 	length := len(i.results.Results)
 
-	if i.results == nil || i.current >= length {
+	if i.results == nil || (i.current >= length && i.current > 0) {
 		return nil, io.EOF
 	}
 
@@ -233,7 +260,7 @@ func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
 				}
 			}
 		}
-
-		return &iterResults{query, opts.Client(), -1, nil}, nil
+		opts.Logger.Sugar().Infof("running Sourcegraph search: %s", query)
+		return &iterResults{opts, query, -1, nil}, nil
 	})
 }

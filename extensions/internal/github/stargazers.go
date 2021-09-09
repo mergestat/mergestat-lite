@@ -8,7 +8,7 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/time/rate"
+	"go.uber.org/zap"
 )
 
 type stargazer struct {
@@ -25,13 +25,9 @@ type stargazer struct {
 	Location        string
 }
 
-type fetchStarsOptions struct {
-	Client      *githubv4.Client
-	Owner       string
-	Name        string
-	PerPage     int
-	StartCursor *githubv4.String
-	StarOrder   *githubv4.StarOrder
+type stargazerEdge struct {
+	StarredAt string
+	Node      stargazer
 }
 
 type fetchStarsResults struct {
@@ -40,12 +36,7 @@ type fetchStarsResults struct {
 	EndCursor   *githubv4.String
 }
 
-type stargazerEdge struct {
-	StarredAt string
-	Node      stargazer
-}
-
-func fetchStars(ctx context.Context, input *fetchStarsOptions) (*fetchStarsResults, error) {
+func (i *iterStargazers) fetchStars(ctx context.Context, startCursor *githubv4.String) (*fetchStarsResults, error) {
 	var starsQuery struct {
 		Repository struct {
 			Owner struct {
@@ -62,15 +53,14 @@ func fetchStars(ctx context.Context, input *fetchStarsOptions) (*fetchStarsResul
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	variables := map[string]interface{}{
-		"owner":            githubv4.String(input.Owner),
-		"name":             githubv4.String(input.Name),
-		"perpage":          githubv4.Int(input.PerPage),
-		"stargazersCursor": (*githubv4.String)(input.StartCursor),
-		"starorder":        input.StarOrder,
+		"owner":            githubv4.String(i.owner),
+		"name":             githubv4.String(i.name),
+		"perpage":          githubv4.Int(i.PerPage),
+		"stargazersCursor": startCursor,
+		"starorder":        i.starOrder,
 	}
 
-	err := input.Client.Query(ctx, &starsQuery, variables)
-
+	err := i.Client().Query(ctx, &starsQuery, variables)
 	if err != nil {
 		return nil, err
 	}
@@ -83,23 +73,25 @@ func fetchStars(ctx context.Context, input *fetchStarsOptions) (*fetchStarsResul
 }
 
 type iterStargazers struct {
-	fullNameOrOwner string
-	name            string
-	client          *githubv4.Client
-	current         int
-	results         *fetchStarsResults
-	rateLimiter     *rate.Limiter
-	starOrder       *githubv4.StarOrder
-	perPage         int
+	*Options
+	owner     string
+	name      string
+	current   int
+	results   *fetchStarsResults
+	starOrder *githubv4.StarOrder
+}
+
+func (i *iterStargazers) logger() *zap.SugaredLogger {
+	logger := i.Logger.Sugar().With("per-page", i.PerPage, "owner", i.owner, "name", i.name)
+	if i.starOrder != nil {
+		logger = logger.With("order_by", i.starOrder.Field, "order_dir", i.starOrder.Direction)
+	}
+	return logger
 }
 
 func (i *iterStargazers) Column(ctx *sqlite.Context, c int) error {
 	current := i.results.Edges[i.current]
 	switch stargazersCols[c].Name {
-	case "owner":
-		ctx.ResultText(i.fullNameOrOwner)
-	case "reponame":
-		ctx.ResultText(i.name)
 	case "login":
 		ctx.ResultText(current.Node.Login)
 	case "email":
@@ -143,12 +135,7 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 
 	if i.results == nil || i.current >= len(i.results.Edges) {
 		if i.results == nil || i.results.HasNextPage {
-			err := i.rateLimiter.Wait(context.Background())
-			if err != nil {
-				return nil, err
-			}
-
-			owner, name, err := repoOwnerAndName(i.name, i.fullNameOrOwner)
+			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
 				return nil, err
 			}
@@ -158,7 +145,8 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			results, err := fetchStars(context.Background(), &fetchStarsOptions{i.client, owner, name, i.perPage, cursor, i.starOrder})
+			i.logger().With("cursor", cursor).Infof("fetching page of stargazers for %s/%s", i.owner, i.name)
+			results, err := i.fetchStars(context.Background(), cursor)
 			if err != nil {
 				return nil, err
 			}
@@ -176,7 +164,7 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 
 var stargazersCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
-	{Name: "reponame", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ}}},
+	{Name: "reponame", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "login", Type: "TEXT"},
 	{Name: "email", Type: "TEXT"},
 	{Name: "name", Type: "TEXT"},
@@ -205,6 +193,11 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 			}
 		}
 
+		owner, name, err := repoOwnerAndName(name, fullNameOrOwner)
+		if err != nil {
+			return nil, err
+		}
+
 		var starOrder *githubv4.StarOrder
 		// for now we can only support single field order bys
 		if len(orders) == 1 {
@@ -217,6 +210,8 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 			starOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterStargazers{fullNameOrOwner, name, opts.Client(), -1, nil, opts.RateLimiter, starOrder, opts.PerPage}, nil
+		iter := &iterStargazers{opts, owner, name, -1, nil, starOrder}
+		iter.logger().Infof("starting GitHub stargazers iterator for %s/%s", owner, name)
+		return iter, nil
 	})
 }

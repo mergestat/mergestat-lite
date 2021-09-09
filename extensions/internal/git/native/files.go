@@ -8,7 +8,6 @@ import (
 	"path"
 
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	libgit2 "github.com/libgit2/git2go/v31"
@@ -25,7 +24,7 @@ var filesCols = []vtab.Column{
 }
 
 // NewFilesModule returns the implementation of a table-valued-function for accessing the content of files in git
-func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
+func NewFilesModule(options *utils.ModuleOptions) sqlite.Module {
 	return vtab.NewTableFunc("files", filesCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var repoPath, rev string
 		for _, constraint := range constraints {
@@ -41,17 +40,22 @@ func NewFilesModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 
 		if repoPath == "" {
 			var err error
-			repoPath, err = utils.GetDefaultRepoFromCtx(ctx)
+			repoPath, err = utils.GetDefaultRepoFromCtx(options.Context)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		return newFilesIter(locator, repoPath, rev)
+		return newFilesIter(options, repoPath, rev)
 	})
 }
 
-func newFilesIter(locator services.RepoLocator, repoPath, rev string) (*filesIter, error) {
+func newFilesIter(options *utils.ModuleOptions, repoPath, rev string) (*filesIter, error) {
+	logger := options.Logger.Sugar().With("module", "git-files", "repo-path", repoPath)
+	defer func() {
+		logger.Debugf("creating files iterator")
+	}()
+
 	iter := &filesIter{
 		repoPath: repoPath,
 		rev:      rev,
@@ -66,7 +70,7 @@ func newFilesIter(locator services.RepoLocator, repoPath, rev string) (*filesIte
 		}
 	}
 
-	r, err := locator.Open(context.Background(), repoPath)
+	r, err := options.Locator.Open(context.Background(), repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +113,8 @@ func newFilesIter(locator services.RepoLocator, repoPath, rev string) (*filesIte
 		return nil, err
 	}
 	defer commit.Free()
+
+	logger = logger.With("revision", commit.Id().String())
 
 	tree, err := commit.Tree()
 	if err != nil {

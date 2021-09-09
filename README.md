@@ -119,6 +119,8 @@ cat query.sql | askgit
 
 By default, output will be an ASCII table.
 Use `--format json` or `--format csv` for alternatives.
+Use `-v` to print execution logs to `stderr`.
+This can be useful for understanding what API calls a query may be making, or similar runtime information.
 See `-h` for all the options.
 
 ### Tables and Functions

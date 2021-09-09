@@ -8,16 +8,8 @@ import (
 	"github.com/augmentable-dev/vtab"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"golang.org/x/time/rate"
+	"go.uber.org/zap"
 )
-
-type fetchStarredReposOptions struct {
-	Client      *githubv4.Client
-	Login       string
-	PerPage     int
-	StartCursor *githubv4.String
-	Order       *githubv4.StarOrder
-}
 
 type fetchStarredReposResults struct {
 	Edges       []*starredRepoEdge
@@ -41,7 +33,7 @@ type starredRepoNode struct {
 	NameWithOwner  string
 }
 
-func fetchStarredRepos(ctx context.Context, input *fetchStarredReposOptions) (*fetchStarredReposResults, error) {
+func (i *iterStarredRepos) fetchStarredRepos(ctx context.Context, startCursor *githubv4.String) (*fetchStarredReposResults, error) {
 	var reposQuery struct {
 		User struct {
 			Login               string
@@ -56,13 +48,13 @@ func fetchStarredRepos(ctx context.Context, input *fetchStarredReposOptions) (*f
 	}
 
 	variables := map[string]interface{}{
-		"perpage":     githubv4.Int(input.PerPage),
-		"startcursor": input.StartCursor,
-		"login":       githubv4.String(input.Login),
-		"orderBy":     input.Order,
+		"perpage":     githubv4.Int(i.PerPage),
+		"startcursor": startCursor,
+		"login":       githubv4.String(i.login),
+		"orderBy":     i.starOrder,
 	}
 
-	err := input.Client.Query(ctx, &reposQuery, variables)
+	err := i.Client().Query(ctx, &reposQuery, variables)
 	if err != nil {
 		return nil, err
 	}
@@ -76,13 +68,19 @@ func fetchStarredRepos(ctx context.Context, input *fetchStarredReposOptions) (*f
 }
 
 type iterStarredRepos struct {
-	login       string
-	client      *githubv4.Client
-	current     int
-	results     *fetchStarredReposResults
-	rateLimiter *rate.Limiter
-	starOrder   *githubv4.StarOrder
-	perPage     int
+	*Options
+	login     string
+	current   int
+	results   *fetchStarredReposResults
+	starOrder *githubv4.StarOrder
+}
+
+func (i *iterStarredRepos) logger() *zap.SugaredLogger {
+	logger := i.Logger.Sugar().With("per-page", i.PerPage, "login", i.login)
+	if i.starOrder != nil {
+		logger = logger.With("order_by", i.starOrder.Field, "order_dir", i.starOrder.Direction)
+	}
+	return logger
 }
 
 func (i *iterStarredRepos) Column(ctx *sqlite.Context, c int) error {
@@ -132,7 +130,7 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 
 	if i.results == nil || i.current >= len(i.results.Edges) {
 		if i.results == nil || i.results.HasNextPage {
-			err := i.rateLimiter.Wait(context.Background())
+			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
 				return nil, err
 			}
@@ -141,7 +139,9 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 			if i.results != nil {
 				cursor = i.results.EndCursor
 			}
-			results, err := fetchStarredRepos(context.Background(), &fetchStarredReposOptions{i.client, i.login, i.perPage, cursor, i.starOrder})
+
+			i.logger().With("cursor", cursor).Infof("fetching page of starred_repos for %s", i.login)
+			results, err := i.fetchStarredRepos(context.Background(), cursor)
 			if err != nil {
 				return nil, err
 			}
@@ -194,6 +194,8 @@ func NewStarredReposModule(opts *Options) sqlite.Module {
 			starOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		return &iterStarredRepos{login, opts.Client(), -1, nil, opts.RateLimiter, starOrder, opts.PerPage}, nil
+		iter := &iterStarredRepos{opts, login, -1, nil, starOrder}
+		iter.logger().Infof("starting GitHub starred_repos iterator for %s", login)
+		return iter, nil
 	})
 }

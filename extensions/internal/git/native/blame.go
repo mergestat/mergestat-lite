@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	libgit2 "github.com/libgit2/git2go/v31"
@@ -25,7 +24,7 @@ var blameCols = []vtab.Column{
 }
 
 // NewBlameModule returns the implementation of a table-valued-function for accessing git blame
-func NewBlameModule(locator services.RepoLocator, ctx services.Context) sqlite.Module {
+func NewBlameModule(options *utils.ModuleOptions) sqlite.Module {
 	return vtab.NewTableFunc("blame", blameCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var repoPath, rev, filePath string
 		for _, constraint := range constraints {
@@ -47,17 +46,22 @@ func NewBlameModule(locator services.RepoLocator, ctx services.Context) sqlite.M
 
 		if repoPath == "" {
 			var err error
-			repoPath, err = utils.GetDefaultRepoFromCtx(ctx)
+			repoPath, err = utils.GetDefaultRepoFromCtx(options.Context)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		return newBlameIter(locator, repoPath, rev, filePath)
+		return newBlameIter(options, repoPath, rev, filePath)
 	})
 }
 
-func newBlameIter(locator services.RepoLocator, repoPath, rev, filePath string) (*blameIter, error) {
+func newBlameIter(options *utils.ModuleOptions, repoPath, rev, filePath string) (*blameIter, error) {
+	logger := options.Logger.Sugar().With("module", "git-blame", "repo-path", repoPath, "file-path", filePath)
+	defer func() {
+		logger.Debugf("creating blame iterator")
+	}()
+
 	iter := &blameIter{
 		repoPath: repoPath,
 		rev:      rev,
@@ -73,7 +77,7 @@ func newBlameIter(locator services.RepoLocator, repoPath, rev, filePath string) 
 		}
 	}
 
-	r, err := locator.Open(context.Background(), repoPath)
+	r, err := options.Locator.Open(context.Background(), repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +114,7 @@ func newBlameIter(locator services.RepoLocator, repoPath, rev, filePath string) 
 
 		commitID = obj.Id()
 	}
+	logger = logger.With("revision", commitID.String())
 
 	opts, err := libgit2.DefaultBlameOptions()
 	if err != nil {

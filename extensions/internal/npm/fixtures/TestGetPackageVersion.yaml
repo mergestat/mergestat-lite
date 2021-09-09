@@ -5,7 +5,7 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://registry.npmjs.org//jquery/latest
+    url: https://registry.npmjs.org/jquery/latest
     method: GET
   response:
     body: '{"name":"jquery","title":"jQuery","description":"JavaScript library for
@@ -28,11 +28,11 @@ interactions:
       Cf-Cache-Status:
       - DYNAMIC
       Cf-Ray:
-      - 685155cda9f51906-EWR
+      - 68826c7b2e113035-BOS
       Content-Type:
       - application/json
       Date:
-      - Fri, 27 Aug 2021 00:55:35 GMT
+      - Wed, 01 Sep 2021 23:54:26 GMT
       Expect-Ct:
       - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
       Server:
@@ -41,4 +41,4 @@ interactions:
       - accept-encoding, accept
     status: 200 OK
     code: 200
-    duration: 437.76226ms
+    duration: 180.603054ms

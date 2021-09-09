@@ -8,6 +8,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/shurcooL/githubv4"
 	"github.com/shurcooL/graphql"
+	"go.uber.org/zap"
 )
 
 // Options is the container for various different options
@@ -40,6 +41,9 @@ type Options struct {
 
 	// Context is a key-value store to pass along values to the underlying extensions
 	Context services.Context
+
+	// Logger is a logger to pass along to the underlying extensions
+	Logger *zap.Logger
 }
 
 // OptionFn represents any function capable of customising or providing options
@@ -104,4 +108,9 @@ func WithContextValue(key, value string) OptionFn {
 		}
 		o.Context[key] = value
 	}
+}
+
+// WithLogger sets a logger for the underlying extensions to use
+func WithLogger(logger *zap.Logger) OptionFn {
+	return func(o *Options) { o.Logger = logger }
 }

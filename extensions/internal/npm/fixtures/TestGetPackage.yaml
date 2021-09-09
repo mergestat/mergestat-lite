@@ -5,7 +5,7 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://registry.npmjs.org//jquery
+    url: https://registry.npmjs.org/jquery
     method: GET
   response:
     body: '{"_id":"jquery","_rev":"658-bab43115926da759f84155537c8dc888","name":"jquery","description":"JavaScript
@@ -267,17 +267,17 @@ interactions:
       $ = require( \"jquery\" )( window );\n```\n","readmeFilename":"README.md","homepage":"https://jquery.com","keywords":["jquery","javascript","browser","library"],"bugs":{"url":"https://github.com/jquery/jquery/issues"},"license":"MIT"}'
     headers:
       Age:
-      - "213"
+      - "275"
       Cache-Control:
       - public, max-age=300
       Cf-Cache-Status:
       - HIT
       Cf-Ray:
-      - 68514613bb44192c-EWR
+      - 68826c7abd3b3035-BOS
       Content-Type:
       - application/json
       Date:
-      - Fri, 27 Aug 2021 00:44:51 GMT
+      - Wed, 01 Sep 2021 23:54:26 GMT
       Etag:
       - W/"9eedb78aae67c9efe84e7d896453cd24"
       Expect-Ct:
@@ -292,4 +292,4 @@ interactions:
       - COMPLETED
     status: 200 OK
     code: 200
-    duration: 160.58938ms
+    duration: 302.742378ms
