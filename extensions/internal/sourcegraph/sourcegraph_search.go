@@ -260,7 +260,7 @@ func NewSourcegraphSearchModule(opts *Options) sqlite.Module {
 				}
 			}
 		}
-		opts.Logger.Sugar().Infof("running Sourcegraph search: %s", query)
+		opts.Logger.Info().Msgf("running Sourcegraph search: %s", query)
 		return &iterResults{opts, query, -1, nil}, nil
 	})
 }

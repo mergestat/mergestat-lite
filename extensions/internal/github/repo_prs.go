@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 )
 
 type pullRequest struct {
@@ -122,12 +122,12 @@ type iterPRs struct {
 	prOrder *githubv4.IssueOrder
 }
 
-func (i *iterPRs) logger() *zap.SugaredLogger {
-	logger := i.Logger.Sugar().With("per-page", i.PerPage, "owner", i.owner, "name", i.name)
+func (i *iterPRs) logger() *zerolog.Logger {
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Logger()
 	if i.prOrder != nil {
-		logger = logger.With("order_by", i.prOrder.Field, "order_dir", i.prOrder.Direction)
+		logger = logger.With().Str("order_by", string(i.prOrder.Field)).Str("order_dir", string(i.prOrder.Direction)).Logger()
 	}
-	return logger
+	return &logger
 }
 
 func (i *iterPRs) Column(ctx *sqlite.Context, c int) error {
@@ -258,7 +258,8 @@ func (i *iterPRs) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			i.logger().With("cursor", cursor).Infof("fetching page of repo_pull_requests for %s/%s", i.owner, i.name)
+			l := i.logger().With().Interface("cursor", cursor).Logger()
+			l.Info().Msgf("fetching page of repo_pull_requests for %s/%s", i.owner, i.name)
 			results, err := i.fetchPRs(context.Background(), cursor)
 			if err != nil {
 				return nil, err
@@ -352,7 +353,7 @@ func NewPRModule(opts *Options) sqlite.Module {
 		}
 
 		iter := &iterPRs{opts, owner, name, -1, nil, prOrder}
-		iter.logger().Infof("starting GitHub repo_pull_requests iterator for %s/%s", owner, name)
+		iter.logger().Info().Msgf("starting GitHub repo_pull_requests iterator for %s/%s", owner, name)
 		return iter, nil
 	})
 }

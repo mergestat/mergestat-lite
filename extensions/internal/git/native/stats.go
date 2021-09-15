@@ -52,9 +52,12 @@ func NewStatsModule(options *utils.ModuleOptions) sqlite.Module {
 }
 
 func newStatsIter(options *utils.ModuleOptions, repoPath, rev, toRev string) (*statsIter, error) {
-	logger := options.Logger.Sugar().With("module", "git-stats", "repo-path", repoPath)
+	logger := options.Logger.With().
+		Str("module", "git-stats").
+		Str("repo-path", repoPath).
+		Logger()
 	defer func() {
-		logger.Debugf("creating stats iterator")
+		logger.Debug().Msg("creating stats iterator")
 	}()
 
 	iter := &statsIter{
@@ -106,7 +109,7 @@ func newStatsIter(options *utils.ModuleOptions, repoPath, rev, toRev string) (*s
 		}
 	}
 	defer fromCommit.Free()
-	logger = logger.With("from-revision", fromCommit.Id().String())
+	logger = logger.With().Str("from-revision", fromCommit.Id().String()).Logger()
 
 	tree, err := fromCommit.Tree()
 	if err != nil {
@@ -132,14 +135,14 @@ func newStatsIter(options *utils.ModuleOptions, repoPath, rev, toRev string) (*s
 	var toTree *libgit2.Tree
 	if toCommit == nil {
 		toTree = &libgit2.Tree{}
-		logger = logger.With("to-revision", "")
+		logger = logger.With().Str("to-revision", "").Logger()
 	} else {
 		toTree, err = toCommit.Tree()
 		if err != nil {
 			return nil, err
 		}
 		defer toCommit.Free()
-		logger = logger.With("to-revision", toCommit.Id().String())
+		logger = logger.With().Str("to-revision", toCommit.Id().String()).Logger()
 	}
 	defer toTree.Free()
 

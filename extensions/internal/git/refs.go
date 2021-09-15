@@ -87,9 +87,9 @@ type gitRefCursor struct {
 }
 
 func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err error) {
-	logger := cur.Logger.Sugar().With("module", "git-ref")
+	logger := cur.Logger.With().Str("module", "git-ref").Logger()
 	defer func() {
-		logger.Debugf("running git refs filter")
+		logger.Debug().Msg("running git refs filter")
 	}()
 
 	// values extracted from constraints
@@ -116,7 +116,7 @@ func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 			return errors.Wrapf(err, "failed to open %q", path)
 		}
 		cur.repo = repo
-		logger = logger.With("repo-disk-path", path)
+		logger = logger.With().Str("repo-disk-path", path).Logger()
 	}
 
 	if cur.refs, err = repo.References(); err != nil {

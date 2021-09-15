@@ -51,9 +51,12 @@ func NewFilesModule(options *utils.ModuleOptions) sqlite.Module {
 }
 
 func newFilesIter(options *utils.ModuleOptions, repoPath, rev string) (*filesIter, error) {
-	logger := options.Logger.Sugar().With("module", "git-files", "repo-path", repoPath)
+	logger := options.Logger.With().
+		Str("module", "git-files").
+		Str("repo-path", repoPath).
+		Logger()
 	defer func() {
-		logger.Debugf("creating files iterator")
+		logger.Debug().Msg("creating files iterator")
 	}()
 
 	iter := &filesIter{
@@ -114,7 +117,7 @@ func newFilesIter(options *utils.ModuleOptions, repoPath, rev string) (*filesIte
 	}
 	defer commit.Free()
 
-	logger = logger.With("revision", commit.Id().String())
+	logger = logger.With().Str("revision", commit.Id().String()).Logger()
 
 	tree, err := commit.Tree()
 	if err != nil {

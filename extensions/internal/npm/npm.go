@@ -9,8 +9,8 @@ import (
 
 	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 )
 
 const (
@@ -19,16 +19,17 @@ const (
 
 type Client struct {
 	httpClient *http.Client
-	logger     *zap.Logger
+	logger     *zerolog.Logger
 }
 
 // NewClient creates a new API client from an *http.Client. Pass nil to use http.DefaultClient
-func NewClient(httpClient *http.Client, logger *zap.Logger) *Client {
+func NewClient(httpClient *http.Client, logger *zerolog.Logger) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 	if logger == nil {
-		logger = zap.NewNop()
+		l := zerolog.Nop()
+		logger = &l
 	}
 	return &Client{httpClient, logger}
 }
@@ -41,7 +42,7 @@ func (c *Client) GetPackage(ctx context.Context, packageName string) ([]byte, er
 		return nil, err
 	}
 
-	c.logger.Sugar().Infof("making GET request: %s", path)
+	c.logger.Info().Msgf("making GET request: %s", path)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -64,7 +65,7 @@ func (c *Client) GetPackageVersion(ctx context.Context, packageName, version str
 		return nil, err
 	}
 
-	c.logger.Sugar().Infof("making GET request: %s", path)
+	c.logger.Info().Msgf("making GET request: %s", path)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {

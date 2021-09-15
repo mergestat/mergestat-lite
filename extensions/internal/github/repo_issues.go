@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 )
 
 type issue struct {
@@ -108,12 +108,12 @@ type iterIssues struct {
 	issueOrder *githubv4.IssueOrder
 }
 
-func (i *iterIssues) logger() *zap.SugaredLogger {
-	logger := i.Logger.Sugar().With("per-page", i.PerPage, "owner", i.owner, "name", i.name)
+func (i *iterIssues) logger() *zerolog.Logger {
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Logger()
 	if i.issueOrder != nil {
-		logger = logger.With("order_by", i.issueOrder.Field, "order_dir", i.issueOrder.Direction)
+		logger = logger.With().Str("order_by", string(i.issueOrder.Field)).Str("order_dir", string(i.issueOrder.Direction)).Logger()
 	}
-	return logger
+	return &logger
 }
 
 func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
@@ -209,7 +209,8 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			i.logger().With("cursor", cursor).Infof("fetching page of repo_issues for %s/%s", i.owner, i.name)
+			l := i.logger().With().Interface("cursor", cursor).Logger()
+			l.Info().Msgf("fetching page of repo_issues for %s/%s", i.owner, i.name)
 			results, err := i.fetchIssues(context.Background(), cursor)
 			if err != nil {
 				return nil, err
@@ -288,7 +289,7 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 		}
 
 		iter := &iterIssues{opts, owner, name, -1, nil, issueOrder}
-		iter.logger().Infof("starting GitHub repo_issues iterator for %s/%s", owner, name)
+		iter.logger().Info().Msgf("starting GitHub repo_issues iterator for %s/%s", owner, name)
 		return iter, nil
 	})
 }

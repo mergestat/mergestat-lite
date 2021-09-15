@@ -6,9 +6,9 @@ import (
 
 	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 	"golang.org/x/time/rate"
 )
@@ -21,7 +21,8 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 	}
 
 	if opt.Logger == nil {
-		opt.Logger = zap.NewNop()
+		l := zerolog.Nop()
+		opt.Logger = &l
 	}
 
 	githubOpts := &Options{
