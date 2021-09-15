@@ -20,7 +20,7 @@ var filesCols = []vtab.Column{
 	{Name: "contents", Type: "BLOB", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
 	{Name: "repository", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 // NewFilesModule returns the implementation of a table-valued-function for accessing the content of files in git
@@ -157,7 +157,7 @@ type filesIter struct {
 	repo     *libgit2.Repository
 }
 
-func (i *filesIter) Column(ctx *sqlite.Context, c int) error {
+func (i *filesIter) Column(ctx vtab.Context, c int) error {
 	currentFile := i.files[i.index]
 	switch c {
 	case 0:

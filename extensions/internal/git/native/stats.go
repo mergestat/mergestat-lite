@@ -18,7 +18,7 @@ var statsCols = []vtab.Column{
 	{Name: "deletions", Type: "INT", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
 	{Name: "repository", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "to_rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
@@ -208,7 +208,7 @@ type statsIter struct {
 	index    int
 }
 
-func (i *statsIter) Column(ctx *sqlite.Context, c int) error {
+func (i *statsIter) Column(ctx vtab.Context, c int) error {
 	currentStat := i.stats[i.index]
 	switch c {
 	case 0:

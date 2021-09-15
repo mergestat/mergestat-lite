@@ -89,7 +89,7 @@ func (i *iterStargazers) logger() *zerolog.Logger {
 	return &logger
 }
 
-func (i *iterStargazers) Column(ctx *sqlite.Context, c int) error {
+func (i *iterStargazers) Column(ctx vtab.Context, c int) error {
 	current := i.results.Edges[i.current]
 	switch stargazersCols[c].Name {
 	case "login":
@@ -164,7 +164,7 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 }
 
 var stargazersCols = []vtab.Column{
-	{Name: "owner", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "owner", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "login", Type: "TEXT"},
 	{Name: "email", Type: "TEXT"},
@@ -177,7 +177,10 @@ var stargazersCols = []vtab.Column{
 	{Name: "twitter", Type: "TEXT"},
 	{Name: "website", Type: "TEXT"},
 	{Name: "location", Type: "TEXT"},
-	{Name: "starred_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "starred_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC, Filters: []*vtab.ColumnFilter{
+		{Op: sqlite.INDEX_CONSTRAINT_GT}, {Op: sqlite.INDEX_CONSTRAINT_GE},
+		{Op: sqlite.INDEX_CONSTRAINT_LT}, {Op: sqlite.INDEX_CONSTRAINT_LE},
+	}},
 }
 
 func NewStargazersModule(opts *Options) sqlite.Module {
@@ -214,5 +217,5 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 		iter := &iterStargazers{opts, owner, name, -1, nil, starOrder}
 		iter.logger().Info().Msgf("starting GitHub stargazers iterator for %s/%s", owner, name)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

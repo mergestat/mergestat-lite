@@ -117,7 +117,7 @@ func (i *iterUserRepos) logger() *zerolog.Logger {
 	return &logger
 }
 
-func (i *iterUserRepos) Column(ctx *sqlite.Context, c int) error {
+func (i *iterUserRepos) Column(ctx vtab.Context, c int) error {
 	current := i.results.UserRepos[i.current]
 	switch userReposCols[c].Name {
 	case "login":
@@ -243,7 +243,7 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 }
 
 var userReposCols = []vtab.Column{
-	{Name: "login", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "login", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "created_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "database_id", Type: "INT"},
 	{Name: "default_branch_ref_name", Type: "TEXT"},
