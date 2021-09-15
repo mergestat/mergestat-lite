@@ -291,5 +291,5 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 		iter := &iterIssues{opts, owner, name, -1, nil, issueOrder}
 		iter.logger().Info().Msgf("starting GitHub repo_issues iterator for %s/%s", owner, name)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

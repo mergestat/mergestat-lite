@@ -310,5 +310,5 @@ func NewOrgReposModule(opts *Options) sqlite.Module {
 		iter := &iterOrgRepos{opts, login, -1, nil, repoOrder}
 		iter.logger().Info().Msgf("starting GitHub org_repos iterator for %s", login)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

@@ -198,5 +198,5 @@ func NewStarredReposModule(opts *Options) sqlite.Module {
 		iter := &iterStarredRepos{opts, login, -1, nil, starOrder}
 		iter.logger().Info().Msgf("starting GitHub starred_repos iterator for %s", login)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

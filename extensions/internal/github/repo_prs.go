@@ -355,5 +355,5 @@ func NewPRModule(opts *Options) sqlite.Module {
 		iter := &iterPRs{opts, owner, name, -1, nil, prOrder}
 		iter.logger().Info().Msgf("starting GitHub repo_pull_requests iterator for %s/%s", owner, name)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }
