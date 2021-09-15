@@ -164,9 +164,9 @@ type gitLogCursor struct {
 }
 
 func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err error) {
-	logger := cur.Logger.Sugar().With("module", "git-log")
+	logger := cur.Logger.With().Str("module", "git-log").Logger()
 	defer func() {
-		logger.Debugf("running git log filter")
+		logger.Debug().Msg("running git log filter")
 	}()
 
 	// values extracted from constraints
@@ -202,14 +202,14 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 			return errors.Wrapf(err, "failed to open %q", path)
 		}
 		cur.repo = repo
-		logger = logger.With("repo-disk-path", path)
+		logger = logger.With().Str("repo-disk-path", path).Logger()
 	}
 
 	if hash != "" {
 		// we only need to get a single commit
 		cur.commits = object.NewCommitIter(repo.Storer, storer.NewEncodedObjectLookupIter(
 			repo.Storer, plumbing.CommitObject, []plumbing.Hash{plumbing.NewHash(hash)}))
-		logger = logger.With("hash", hash)
+		logger = logger.With().Str("hash", hash).Logger()
 		return cur.Next()
 	}
 
@@ -231,13 +231,13 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 		opts.From = ref.Hash()
 	}
 
-	logger = logger.With("revision", opts.From.String())
+	logger = logger.With().Str("revision", opts.From.String()).Logger()
 
 	if start != "" {
 		var t time.Time
 		if t, err = time.Parse(time.RFC3339, start); err == nil {
 			opts.Since = &t
-			logger = logger.With("since", opts.Since.String())
+			logger = logger.With().Str("since", opts.Since.String()).Logger()
 		}
 	}
 
@@ -245,7 +245,7 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 		var t time.Time
 		if t, err = time.Parse(time.RFC3339, end); err == nil {
 			opts.Until = &t
-			logger = logger.With("until", opts.Until.String())
+			logger = logger.With().Str("until", opts.Until.String()).Logger()
 		}
 	}
 

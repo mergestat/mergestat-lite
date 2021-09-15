@@ -8,7 +8,7 @@ import (
 	"text/template"
 
 	"github.com/lib/pq"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog"
 
 	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,13 +19,13 @@ type SyncOptions struct {
 	AskGit    *sql.DB
 	TableName string
 	Query     string
-	Logger    *zap.Logger
+	Logger    *zerolog.Logger
 }
 
 // Sync imports the results of an askgit query into a postgres table.
 // CAUTION: will overwrite (DROP!) the specified table and replace it.
 func Sync(ctx context.Context, options *SyncOptions) error {
-	l := options.Logger.Sugar().With(zap.String("pgTable", options.TableName))
+	l := options.Logger.With().Str("pgTable", options.TableName).Logger()
 
 	select {
 	default:
@@ -64,9 +64,9 @@ func Sync(ctx context.Context, options *SyncOptions) error {
 		if err == nil {
 			return
 		}
-		l.Error(err)
+		l.Error().AnErr("error", err).Msg("error")
 		if err := tx.Rollback(); err != nil {
-			l.Error(err)
+			l.Error().AnErr("error", err).Msg("error")
 		}
 	}
 

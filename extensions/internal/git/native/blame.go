@@ -57,9 +57,14 @@ func NewBlameModule(options *utils.ModuleOptions) sqlite.Module {
 }
 
 func newBlameIter(options *utils.ModuleOptions, repoPath, rev, filePath string) (*blameIter, error) {
-	logger := options.Logger.Sugar().With("module", "git-blame", "repo-path", repoPath, "file-path", filePath)
+	logger := options.Logger.With().
+		Str("module", "git-blame").
+		Str("repo-path", repoPath).
+		Str("file-path", filePath).
+		Logger()
+
 	defer func() {
-		logger.Debugf("creating blame iterator")
+		logger.Debug().Msg("creating blame iterator")
 	}()
 
 	iter := &blameIter{
@@ -114,7 +119,7 @@ func newBlameIter(options *utils.ModuleOptions, repoPath, rev, filePath string) 
 
 		commitID = obj.Id()
 	}
-	logger = logger.With("revision", commitID.String())
+	logger = logger.With().Str("revision", commitID.String()).Logger()
 
 	opts, err := libgit2.DefaultBlameOptions()
 	if err != nil {

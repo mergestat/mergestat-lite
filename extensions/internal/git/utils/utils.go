@@ -4,14 +4,14 @@ import (
 	"os"
 
 	"github.com/askgitdev/askgit/extensions/services"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog"
 )
 
 // ModuleOptions holds common options for all git related modules
 type ModuleOptions struct {
 	Locator services.RepoLocator
 	Context services.Context
-	Logger  *zap.Logger
+	Logger  *zerolog.Logger
 }
 
 // GetDefaultRepoFromCtx looks up the defaultRepoPath key in the supplied context and returns it if set,

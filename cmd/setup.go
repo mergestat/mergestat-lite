@@ -26,7 +26,7 @@ func registerExt() {
 			options.WithSourcegraph(),
 			options.WithContextValue("sourcegraphToken", sourcegraphToken),
 			options.WithNPM(),
-			options.WithLogger(logger),
+			options.WithLogger(&logger),
 		),
 	)
 }

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/askgitdev/askgit/extensions/services"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
-	"go.uber.org/zap"
 	"golang.org/x/time/rate"
 )
 
@@ -17,7 +17,7 @@ type Options struct {
 	RateLimiter *rate.Limiter
 	// PerPage is the default number of items per page to use when making a paginated GitHub API request
 	PerPage int
-	Logger  *zap.Logger
+	Logger  *zerolog.Logger
 }
 
 // GetGitHubTokenFromCtx looks up the githubToken key in the supplied context and returns it if set

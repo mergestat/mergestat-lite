@@ -5,9 +5,9 @@ import (
 
 	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/graphql"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
 
@@ -31,7 +31,8 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 	}
 
 	if sourcegraphOpts.Logger == nil {
-		sourcegraphOpts.Logger = zap.NewNop()
+		l := zerolog.Nop()
+		sourcegraphOpts.Logger = &l
 	}
 
 	var modules = map[string]sqlite.Module{

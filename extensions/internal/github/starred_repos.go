@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 )
 
 type fetchStarredReposResults struct {
@@ -75,12 +75,12 @@ type iterStarredRepos struct {
 	starOrder *githubv4.StarOrder
 }
 
-func (i *iterStarredRepos) logger() *zap.SugaredLogger {
-	logger := i.Logger.Sugar().With("per-page", i.PerPage, "login", i.login)
+func (i *iterStarredRepos) logger() *zerolog.Logger {
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("login", i.login).Logger()
 	if i.starOrder != nil {
-		logger = logger.With("order_by", i.starOrder.Field, "order_dir", i.starOrder.Direction)
+		logger = logger.With().Str("order_by", string(i.starOrder.Field)).Str("order_dir", string(i.starOrder.Direction)).Logger()
 	}
-	return logger
+	return &logger
 }
 
 func (i *iterStarredRepos) Column(ctx *sqlite.Context, c int) error {
@@ -140,7 +140,8 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			i.logger().With("cursor", cursor).Infof("fetching page of starred_repos for %s", i.login)
+			l := i.logger().With().Interface("cursor", cursor).Logger()
+			l.Info().Msgf("fetching page of starred_repos for %s", i.login)
 			results, err := i.fetchStarredRepos(context.Background(), cursor)
 			if err != nil {
 				return nil, err
@@ -195,7 +196,7 @@ func NewStarredReposModule(opts *Options) sqlite.Module {
 		}
 
 		iter := &iterStarredRepos{opts, login, -1, nil, starOrder}
-		iter.logger().Infof("starting GitHub starred_repos iterator for %s", login)
+		iter.logger().Info().Msgf("starting GitHub starred_repos iterator for %s", login)
 		return iter, nil
 	})
 }

@@ -4,16 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"os"
 
 	"github.com/askgitdev/askgit/extensions"
 	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/askgitdev/askgit/pkg/locator"
 	"github.com/askgitdev/askgit/pkg/pgsync"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 
 	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
@@ -24,10 +23,7 @@ var pgsyncCmd = &cobra.Command{
 	Long: `Use this command to sync the results of an askgit query into a Postgres table`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := zap.NewDevelopment()
-		if err != nil {
-			log.Fatal(err)
-		}
+		l := zerolog.New(os.Stderr)
 
 		// TODO(patrickdevivo) maybe there should be a "RegisterDefault" method that handles this boilerplate.
 		// Basically, register all the default functionality.
@@ -45,28 +41,27 @@ var pgsyncCmd = &cobra.Command{
 		tableName := args[0]
 		query := args[1]
 
+		var err error
 		var postgres *sql.DB
 		var askgit *sql.DB
 
-		l := logger.Sugar()
-
 		if postgres, err = sql.Open("postgres", os.Getenv("POSTGRES_CONNECTION")); err != nil {
-			l.Errorf("could not open postgres connection: %v", err)
+			l.Error().Msgf("could not open postgres connection: %v", err)
 			return
 		}
 		defer func() {
 			if err := postgres.Close(); err != nil {
-				l.Errorf("could not close postgres connection: %v", err)
+				l.Error().Msgf("could not close postgres connection: %v", err)
 			}
 		}()
 
 		if askgit, err = sql.Open("sqlite3", ":memory:"); err != nil {
-			l.Errorf("could not initialize askgit: %v", err)
+			l.Error().Msgf("could not initialize askgit: %v", err)
 			return
 		}
 		defer func() {
 			if err := askgit.Close(); err != nil {
-				l.Errorf("could not close askgit: %v", err)
+				l.Error().Msgf("could not close askgit: %v", err)
 			}
 		}()
 
@@ -78,13 +73,13 @@ var pgsyncCmd = &cobra.Command{
 			AskGit:    askgit,
 			TableName: tableName,
 			Query:     query,
-			Logger:    logger,
+			Logger:    &logger,
 		}
 
 		err = pgsync.Sync(ctx, options)
 		if err != nil {
 			if !errors.Is(err, sql.ErrTxDone) {
-				logger.Sugar().Fatal(err)
+				logger.Error().AnErr("could not sync", err).Msg("error")
 			}
 		}
 	},

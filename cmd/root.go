@@ -5,12 +5,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/askgitdev/askgit/pkg/display"
 	. "github.com/askgitdev/askgit/pkg/query"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 var format string                                     // output format flag
@@ -19,7 +19,7 @@ var repo string                                       // path to repo on disk
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
 var verbose bool                                      // whether or not to print logs to stderr
-var logger = zap.NewNop()                             // By default use a NOOP logger
+var logger = zerolog.Nop()                            // By default use a NOOP logger
 
 func init() {
 	// local (root command only) flags
@@ -30,9 +30,7 @@ func init() {
 
 	// register the sqlite extension ahead of any command
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		if err := setupLogger(); err != nil {
-			log.Fatalf("could not create logger: %v", err)
-		}
+		setupLogger()
 		registerExt()
 	}
 
@@ -48,24 +46,19 @@ func init() {
 
 // setupLogger sets the global logger variable according to whether the verbose flag is used
 // or if the DEBUG environment variable is set to anything
-func setupLogger() error {
+func setupLogger() {
+	l := zerolog.New(os.Stderr).
+		Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.Stamp}).
+		Level(zerolog.ErrorLevel).
+		With().
+		Timestamp().Logger()
 	if debug := os.Getenv("DEBUG") != ""; verbose || debug {
-		conf := zap.NewDevelopmentConfig()
-		conf.DisableCaller = true
-		conf.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		conf.Sampling = nil
-
-		conf.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
+		l = l.Level(zerolog.InfoLevel)
 		if debug {
-			conf.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
-		}
-		if l, err := conf.Build(); err != nil {
-			return err
-		} else {
-			logger = l
+			l = l.Level(zerolog.DebugLevel)
 		}
 	}
-	return nil
+	logger = l
 }
 
 var rootCmd = &cobra.Command{
@@ -77,10 +70,6 @@ var rootCmd = &cobra.Command{
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
-		defer func() {
-			// TODO(patrickdevivo) See here: https://github.com/uber-go/zap/issues/880
-			_ = logger.Sync()
-		}()
 
 		var info os.FileInfo
 		if info, err = os.Stdin.Stat(); err != nil {

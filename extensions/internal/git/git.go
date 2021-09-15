@@ -5,8 +5,8 @@ import (
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
 	"github.com/askgitdev/askgit/extensions/options"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 )
 
 // Register registers git related functionality as a SQLite extension
@@ -19,7 +19,8 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 
 	// by default use a NOOP logger so we don't need nil checks within the modules
 	if moduleOpts.Logger == nil {
-		moduleOpts.Logger = zap.NewNop()
+		l := zerolog.Nop()
+		moduleOpts.Logger = &l
 	}
 
 	// register virtual table modules

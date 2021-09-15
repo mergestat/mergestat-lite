@@ -6,9 +6,9 @@ import (
 
 	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"github.com/shurcooL/graphql"
-	"go.uber.org/zap"
 )
 
 // Options is the container for various different options
@@ -43,7 +43,7 @@ type Options struct {
 	Context services.Context
 
 	// Logger is a logger to pass along to the underlying extensions
-	Logger *zap.Logger
+	Logger *zerolog.Logger
 }
 
 // OptionFn represents any function capable of customising or providing options
@@ -111,6 +111,6 @@ func WithContextValue(key, value string) OptionFn {
 }
 
 // WithLogger sets a logger for the underlying extensions to use
-func WithLogger(logger *zap.Logger) OptionFn {
+func WithLogger(logger *zerolog.Logger) OptionFn {
 	return func(o *Options) { o.Logger = logger }
 }

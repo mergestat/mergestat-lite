@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 )
 
 type stargazer struct {
@@ -81,12 +81,12 @@ type iterStargazers struct {
 	starOrder *githubv4.StarOrder
 }
 
-func (i *iterStargazers) logger() *zap.SugaredLogger {
-	logger := i.Logger.Sugar().With("per-page", i.PerPage, "owner", i.owner, "name", i.name)
+func (i *iterStargazers) logger() *zerolog.Logger {
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Logger()
 	if i.starOrder != nil {
-		logger = logger.With("order_by", i.starOrder.Field, "order_dir", i.starOrder.Direction)
+		logger = logger.With().Str("order_by", string(i.starOrder.Field)).Str("order_dir", string(i.starOrder.Direction)).Logger()
 	}
-	return logger
+	return &logger
 }
 
 func (i *iterStargazers) Column(ctx *sqlite.Context, c int) error {
@@ -145,7 +145,8 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			i.logger().With("cursor", cursor).Infof("fetching page of stargazers for %s/%s", i.owner, i.name)
+			l := i.logger().With().Interface("cursor", cursor).Logger()
+			l.Info().Msgf("fetching page of stargazers for %s/%s", i.owner, i.name)
 			results, err := i.fetchStars(context.Background(), cursor)
 			if err != nil {
 				return nil, err
@@ -211,7 +212,7 @@ func NewStargazersModule(opts *Options) sqlite.Module {
 		}
 
 		iter := &iterStargazers{opts, owner, name, -1, nil, starOrder}
-		iter.logger().Infof("starting GitHub stargazers iterator for %s/%s", owner, name)
+		iter.logger().Info().Msgf("starting GitHub stargazers iterator for %s/%s", owner, name)
 		return iter, nil
 	})
 }
