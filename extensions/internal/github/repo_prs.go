@@ -130,7 +130,7 @@ func (i *iterPRs) logger() *zerolog.Logger {
 	return &logger
 }
 
-func (i *iterPRs) Column(ctx *sqlite.Context, c int) error {
+func (i *iterPRs) Column(ctx vtab.Context, c int) error {
 	current := i.results.Edges[i.current]
 	col := prCols[c]
 
@@ -277,7 +277,7 @@ func (i *iterPRs) Next() (vtab.Row, error) {
 }
 
 var prCols = []vtab.Column{
-	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "additions", Type: "INT"},
 	{Name: "author_login", Type: "TEXT"},
@@ -355,5 +355,5 @@ func NewPRModule(opts *Options) sqlite.Module {
 		iter := &iterPRs{opts, owner, name, -1, nil, prOrder}
 		iter.logger().Info().Msgf("starting GitHub repo_pull_requests iterator for %s/%s", owner, name)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

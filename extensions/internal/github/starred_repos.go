@@ -83,7 +83,7 @@ func (i *iterStarredRepos) logger() *zerolog.Logger {
 	return &logger
 }
 
-func (i *iterStarredRepos) Column(ctx *sqlite.Context, c int) error {
+func (i *iterStarredRepos) Column(ctx vtab.Context, c int) error {
 	current := i.results.Edges[i.current]
 	switch starredReposCols[c].Name {
 	case "login":
@@ -159,7 +159,7 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 }
 
 var starredReposCols = []vtab.Column{
-	{Name: "login", Type: "TEXT", NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "login", Type: "TEXT", NotNull: false, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "name", Type: "TEXT"},
 	{Name: "url", Type: "TEXT"},
 	{Name: "description", Type: "TEXT"},
@@ -198,5 +198,5 @@ func NewStarredReposModule(opts *Options) sqlite.Module {
 		iter := &iterStarredRepos{opts, login, -1, nil, starOrder}
 		iter.logger().Info().Msgf("starting GitHub starred_repos iterator for %s", login)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

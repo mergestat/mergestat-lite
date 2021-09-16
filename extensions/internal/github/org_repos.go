@@ -117,7 +117,7 @@ func (i *iterOrgRepos) logger() *zerolog.Logger {
 	return &logger
 }
 
-func (i *iterOrgRepos) Column(ctx *sqlite.Context, c int) error {
+func (i *iterOrgRepos) Column(ctx vtab.Context, c int) error {
 	current := i.results.OrgRepos[i.current]
 	switch userReposCols[c].Name {
 	case "login":
@@ -243,7 +243,7 @@ func (i *iterOrgRepos) Next() (vtab.Row, error) {
 }
 
 var orgReposCols = []vtab.Column{
-	{Name: "login", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "login", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "created_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "database_id", Type: "INT"},
 	{Name: "default_branch_ref_name", Type: "TEXT"},
@@ -310,5 +310,5 @@ func NewOrgReposModule(opts *Options) sqlite.Module {
 		iter := &iterOrgRepos{opts, login, -1, nil, repoOrder}
 		iter.logger().Info().Msgf("starting GitHub org_repos iterator for %s", login)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

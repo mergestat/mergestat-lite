@@ -116,7 +116,7 @@ func (i *iterIssues) logger() *zerolog.Logger {
 	return &logger
 }
 
-func (i *iterIssues) Column(ctx *sqlite.Context, c int) error {
+func (i *iterIssues) Column(ctx vtab.Context, c int) error {
 	current := i.results.Edges[i.current]
 	col := issuesCols[c]
 
@@ -228,7 +228,7 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 }
 
 var issuesCols = []vtab.Column{
-	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "author_login", Type: "TEXT"},
 	{Name: "body", Type: "TEXT"},
@@ -291,5 +291,5 @@ func NewIssuesModule(opts *Options) sqlite.Module {
 		iter := &iterIssues{opts, owner, name, -1, nil, issueOrder}
 		iter.logger().Info().Msgf("starting GitHub repo_issues iterator for %s/%s", owner, name)
 		return iter, nil
-	})
+	}, vtab.EarlyOrderByConstraintExit(true))
 }

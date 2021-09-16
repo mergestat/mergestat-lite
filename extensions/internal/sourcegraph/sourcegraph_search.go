@@ -150,7 +150,7 @@ type iterResults struct {
 	results *searchResults
 }
 
-func (i *iterResults) Column(ctx *sqlite.Context, c int) error {
+func (i *iterResults) Column(ctx vtab.Context, c int) error {
 	var current struct {
 		Typename                 graphql.String      "graphql:\"__typename\""
 		FileMatchFields          fileMatch           "graphql:\"... on FileMatch\""
@@ -239,7 +239,7 @@ func (i *iterResults) Next() (vtab.Row, error) {
 }
 
 var searchCols = []vtab.Column{
-	{Name: "query", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "query", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "__typename", Type: "TEXT"},
 	{Name: "cloning", Type: "TEXT", Hidden: true},
 	{Name: "elapsed_milliseconds", Type: "INT", Hidden: true},

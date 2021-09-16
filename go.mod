@@ -7,7 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
-	github.com/augmentable-dev/vtab v0.0.0-20210818144031-5c7659b723dd
+	github.com/augmentable-dev/vtab v0.0.0-20210911030829-312442c75a27
 	github.com/clbanning/mxj/v2 v2.5.5
 	github.com/dnaeon/go-vcr/v2 v2.0.1
 	github.com/ghodss/yaml v1.0.0
@@ -31,7 +31,7 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	go.mongodb.org/mongo-driver v1.7.1 // indirect
-	go.riyazali.net/sqlite v0.0.0-20210803070208-9d9dbac3dd38
+	go.riyazali.net/sqlite v0.0.0-20210830064319-b3ba44e2587a
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
