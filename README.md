@@ -615,6 +615,37 @@ Params:
 SELECT * FROM github_repo_prs('askgitdev/askgit');
 SELECT * FROM github_repo_prs('askgitdev', 'askgit'); -- both are equivalent
 ```
+##### `github_repo_protections`
+
+Table-valued-function that returns all the protections of a GitHub repository.(requires requestor to have admin privileges)
+
+| Column                           | Type     |
+|----------------------------------|----------|
+| allow_deletions                  | BOOLEAN  |
+| allows_force_pushes              | BOOLEAN  |
+| creator_login                    | TEXT     |
+| database_id                      | INT      |
+| dismisses_stale_reviews          | BOOLEAN  |
+| is_admin_enforced                | BOOLEAN  |
+| pattern                          | TEXT     |
+| required_approving_review_count  | INT      |
+| required_status_check_contexts   | BOOLEAN  |
+| requires_approving_reviews       | DATETIME |
+| requires_code_owners_reviews     | BOOLEAN  |
+| requires_commit_signature        | BOOLEAN  |
+| requires_conversation_resolution | BOOLEAN  |
+| requires_linear_history          | BOOLEAN  |
+| requires_status_checks           | BOOLEAN  |
+| requires_strict_status_checks    | BOOLEAN  |
+| restricts_pushes                 | BOOLEAN  |
+| restricts_review_dismissal       | BOOLEAN  |
+
+```sql
+SELECT * FROM github_repo_permissions('askgitdev/askgit');
+SELECT * FROM github_repo_permissions('askgitdev', 'askgit');
+SELECT * FROM github_permissions('askgitdev/askgit');
+SELECT * FROM github_permissions('askgitdev', 'askgit'); -- all are equivalent
+```
 
 ##### `github_repo_file_content`
 
