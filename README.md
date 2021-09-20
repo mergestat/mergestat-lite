@@ -522,6 +522,8 @@ Params:
 ```sql
 SELECT * FROM github_user_repos('patrickdevivo')
 SELECT * FROM github_org_repos('askgitdev')
+SELECT * FROM github_user_repos('patrickdevivo','OWNER')
+SELECT * FROM github_org_repos('askgitdev','OWNER,COLLABORATOR')
 ```
 
 ##### `github_repo_issues`
