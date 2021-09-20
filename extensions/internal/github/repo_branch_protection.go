@@ -186,7 +186,7 @@ var protectionCols = []vtab.Column{
 	{Name: "is_admin_enforced", Type: "BOOLEAN"},
 	{Name: "pattern", Type: "TEXT"},
 	{Name: "required_approving_review_count", Type: "INT"},
-	{Name: "required_status_check_contexts", Type: "TEXT"},
+	{Name: "required_status_check_contexts", Type: "BOOLEAN"},
 	{Name: "requires_approving_reviews", Type: "BOOLEAN"},
 	{Name: "requires_code_owners_reviews", Type: "BOOLEAN"},
 	{Name: "requires_commit_signature", Type: "BOOLEAN"},
