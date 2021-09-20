@@ -11,19 +11,22 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
+/* TODO: Consider adding
+* BranchProtectionRuleConflicts
+* MatchingRefs
+* PushAllowances
+* ReviewDismissalAllowances
+ */
 type protectionRules struct {
 	AllowsDeletions   bool
 	AllowsForcePushes bool
-	//BranchProtectionRuleConflicts
-	Creator struct {
+	Creator           struct {
 		Login string
 	}
-	DatabaseId            int
-	DismissesStaleReviews bool
-	IsAdminEnforced       bool
-	// matchingRefs
-	Pattern string
-	// PushAllowances
+	DatabaseId                     int
+	DismissesStaleReviews          bool
+	IsAdminEnforced                bool
+	Pattern                        string
 	RequiredApprovingReviewCount   int
 	RequiredStatusCheckContexts    []string
 	RequiresApprovingReviews       bool
@@ -35,7 +38,6 @@ type protectionRules struct {
 	RequiresStrictStatusChecks     bool
 	RestrictsPushes                bool
 	RestrictsReviewDismissals      bool
-	//ReviewDismissalAllowances
 }
 
 type fetchBranchProtectionResults struct {
