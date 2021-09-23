@@ -145,7 +145,13 @@ func Sync(ctx context.Context, options *SyncOptions) error {
 	ALTER TABLE IF EXISTS %s RENAME TO %s;
 	ALTER TABLE IF EXISTS %s RENAME TO %s;
 	DROP TABLE IF EXISTS %s;
-`, pq.QuoteIdentifier(options.TableName), pq.QuoteIdentifier(tempNameDrop), pq.QuoteIdentifier(tempNameNew), pq.QuoteIdentifier(options.TableName), pq.QuoteIdentifier(tempNameDrop))
+`,
+		fmt.Sprintf("%s.%s", pq.QuoteIdentifier(schemaName), pq.QuoteIdentifier(options.TableName)),
+		pq.QuoteIdentifier(tempNameDrop),
+		fmt.Sprintf("%s.%s", pq.QuoteIdentifier(schemaName), pq.QuoteIdentifier(tempNameNew)),
+		pq.QuoteIdentifier(options.TableName),
+		fmt.Sprintf("%s.%s", pq.QuoteIdentifier(schemaName), pq.QuoteIdentifier(tempNameDrop)),
+	)
 
 	l.Info().Msg(s)
 
