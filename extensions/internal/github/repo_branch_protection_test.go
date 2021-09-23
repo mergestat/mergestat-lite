@@ -12,13 +12,13 @@ func TestRepoProtections(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT * FROM github_protections('askgitdev','askgit') LIMIT 10")
+	rows, err := db.Query("SELECT * FROM github_protections('askgitdev', 'askgit') LIMIT 10")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
 	defer rows.Close()
 
-	colCount, _ /*content*/, err := tools.RowContent(rows)
+	colCount, content, err := tools.RowContent(rows)
 	if err != nil {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
@@ -26,8 +26,9 @@ func TestRepoProtections(t *testing.T) {
 	if colCount != 18 {
 		t.Fatalf("expected 18 columns, got: %d", colCount)
 	}
-	// TODO Find a repo that returns 10+ rows so we can limit it
-	// if len(content) != 10 {
-	// 	t.Fatalf("expected 10 rows, got: %d", len(content))
-	// }
+
+	// TODO(patrickdevivo) setup a fixture repo for more branch protection rules?
+	if len(content) != 1 {
+		t.Fatalf("expected 1 rows, got: %d", len(content))
+	}
 }

@@ -1,0 +1,63 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($name:String!$owner:String!$perpage:Int!$protectionCursor:String){repository(owner: $owner, name: $name){owner{login},name,branchProtectionRules(first: $perpage, after: $protectionCursor){nodes{allowsDeletions,allowsForcePushes,creator{login},databaseId,dismissesStaleReviews,isAdminEnforced,pattern,requiredApprovingReviewCount,requiredStatusCheckContexts,requiresApprovingReviews,requiresCodeOwnerReviews,requiresCommitSignatures,requiresConversationResolution,requiresLinearHistory,requiresStatusChecks,requiresStrictStatusChecks,restrictsPushes,restrictsReviewDismissals},pageInfo{endCursor,hasNextPage}}}}","variables":{"name":"askgit","owner":"askgitdev","perpage":100,"protectionCursor":null}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","branchProtectionRules":{"nodes":[{"allowsDeletions":false,"allowsForcePushes":false,"creator":{"login":"patrickdevivo"},"databaseId":16666673,"dismissesStaleReviews":true,"isAdminEnforced":false,"pattern":"main","requiredApprovingReviewCount":1,"requiredStatusCheckContexts":["Build"],"requiresApprovingReviews":true,"requiresCodeOwnerReviews":false,"requiresCommitSignatures":false,"requiresConversationResolution":false,"requiresLinearHistory":false,"requiresStatusChecks":true,"requiresStrictStatusChecks":false,"restrictsPushes":false,"restrictsReviewDismissals":false}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK0MjAyMC0wNy0wM1QyMDoxODo0NVrOAP5QMQ==","hasNextPage":false}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 23 Sep 2021 23:03:49 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - E157:1575:2F1E772:5197A5C:614D07D5
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4944"
+      X-Ratelimit-Reset:
+      - "1632438682"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "56"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 373.097606ms
