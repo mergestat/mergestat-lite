@@ -9,7 +9,7 @@ import (
 	"github.com/askgitdev/askgit/extensions/internal/git/utils"
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
-	libgit2 "github.com/libgit2/git2go/v31"
+	libgit2 "github.com/libgit2/git2go/v32"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )

@@ -14,13 +14,13 @@ require (
 	github.com/go-enry/go-enry/v2 v2.7.1
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
-	github.com/go-openapi/errors v0.20.0 // indirect
-	github.com/go-openapi/strfmt v0.20.1 // indirect
+	github.com/go-openapi/errors v0.20.1 // indirect
+	github.com/go-openapi/strfmt v0.20.2 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
-	github.com/lib/pq v1.10.2
-	github.com/libgit2/git2go/v31 v31.4.14
+	github.com/lib/pq v1.10.3
+	github.com/libgit2/git2go/v32 v32.0.4
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8
 	github.com/pkg/errors v0.9.1
@@ -30,13 +30,13 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a
 	github.com/spf13/cobra v1.2.1
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
-	go.mongodb.org/mongo-driver v1.7.1 // indirect
+	go.mongodb.org/mongo-driver v1.7.2 // indirect
 	go.riyazali.net/sqlite v0.0.0-20210830064319-b3ba44e2587a
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0
-	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
+	golang.org/x/net v0.0.0-20210907225631-ff17edfbf26d // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
-	golang.org/x/sys v0.0.0-20210820121016-41cdb8703e55 // indirect
+	golang.org/x/sys v0.0.0-20210908160347-a851e7ddeee0 // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	google.golang.org/protobuf v1.27.1 // indirect
