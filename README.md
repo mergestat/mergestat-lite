@@ -518,6 +518,7 @@ Table-valued function that returns all the repositories belonging to a user or a
 
 Params:
   1. `login` - the `login` of a GitHub user or organization
+  2. `affiliations` - a comma-separated list of [repository affiliations](https://docs.github.com/en/graphql/reference/enums#repositoryaffiliation). Can be: `OWNER`, `COLLABORATOR` or `ORGANIZATION_MEMBER`
 
 ```sql
 SELECT * FROM github_user_repos('patrickdevivo')

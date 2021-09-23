@@ -85,21 +85,11 @@ func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv
 
 	variables := map[string]interface{}{
 		"login":           githubv4.String(i.login),
+		"affiliations":    affiliationsFromString(i.affiliations),
 		"perPage":         githubv4.Int(i.PerPage),
 		"userReposCursor": startCursor,
 		"repositoryOrder": i.repoOrder,
 	}
-	affiliations := []githubv4.RepositoryAffiliation{}
-	if strings.Contains(i.affiliations, "COLLABORATOR") {
-		affiliations = append(affiliations, githubv4.RepositoryAffiliationCollaborator)
-	}
-	if strings.Contains(i.affiliations, "OWNER") {
-		affiliations = append(affiliations, githubv4.RepositoryAffiliationOwner)
-	}
-	if strings.Contains(i.affiliations, "ORGANIZATION_MEMBER") {
-		affiliations = append(affiliations, githubv4.RepositoryAffiliationOrganizationMember)
-	}
-	variables["affiliations"] = affiliations
 
 	err := i.Client().Query(ctx, &reposQuery, variables)
 	if err != nil {
@@ -116,14 +106,14 @@ func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv
 type iterUserRepos struct {
 	*Options
 	login        string
+	affiliations string
 	current      int
 	results      *fetchUserReposResults
 	repoOrder    *githubv4.RepositoryOrder
-	affiliations string
 }
 
 func (i *iterUserRepos) logger() *zerolog.Logger {
-	logger := i.Logger.With().Int("per-page", i.PerPage).Str("login", i.login).Logger()
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("login", i.login).Str("affiliations", i.affiliations).Logger()
 	if i.repoOrder != nil {
 		logger = logger.With().Str("order_by", string(i.repoOrder.Field)).Str("order_dir", string(i.repoOrder.Direction)).Logger()
 	}
@@ -323,7 +313,7 @@ func NewUserReposModule(opts *Options) sqlite.Module {
 			repoOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		iter := &iterUserRepos{opts, login, -1, nil, repoOrder, affiliations}
+		iter := &iterUserRepos{opts, login, affiliations, -1, nil, repoOrder}
 		iter.logger().Info().Msgf("starting GitHub user_repos iterator for %s", login)
 		return iter, nil
 	}, vtab.EarlyOrderByConstraintExit(true))
