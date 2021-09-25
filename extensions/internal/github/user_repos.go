@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/augmentable-dev/vtab"
@@ -78,12 +79,13 @@ func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv
 					EndCursor   githubv4.String
 					HasNextPage bool
 				}
-			} `graphql:"repositories(first: $perPage, after: $userReposCursor, orderBy: $repositoryOrder)"`
+			} `graphql:"repositories(first: $perPage, after: $userReposCursor, orderBy: $repositoryOrder, affiliations: $affiliations)"`
 		} `graphql:"user(login: $login)"`
 	}
 
 	variables := map[string]interface{}{
 		"login":           githubv4.String(i.login),
+		"affiliations":    affiliationsFromString(i.affiliations),
 		"perPage":         githubv4.Int(i.PerPage),
 		"userReposCursor": startCursor,
 		"repositoryOrder": i.repoOrder,
@@ -103,14 +105,15 @@ func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv
 
 type iterUserRepos struct {
 	*Options
-	login     string
-	current   int
-	results   *fetchUserReposResults
-	repoOrder *githubv4.RepositoryOrder
+	login        string
+	affiliations string
+	current      int
+	results      *fetchUserReposResults
+	repoOrder    *githubv4.RepositoryOrder
 }
 
 func (i *iterUserRepos) logger() *zerolog.Logger {
-	logger := i.Logger.With().Int("per-page", i.PerPage).Str("login", i.login).Logger()
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("login", i.login).Str("affiliations", i.affiliations).Logger()
 	if i.repoOrder != nil {
 		logger = logger.With().Str("order_by", string(i.repoOrder.Field)).Str("order_dir", string(i.repoOrder.Direction)).Logger()
 	}
@@ -244,6 +247,7 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 
 var userReposCols = []vtab.Column{
 	{Name: "login", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
+	{Name: "affiliations", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "created_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "database_id", Type: "INT"},
 	{Name: "default_branch_ref_name", Type: "TEXT"},
@@ -277,12 +281,14 @@ var userReposCols = []vtab.Column{
 
 func NewUserReposModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_user_repos", userReposCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var login string
+		var login, affiliations string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
 				case 0:
 					login = constraint.Value.Text()
+				case 1:
+					affiliations = strings.ToUpper(constraint.Value.Text())
 				}
 			}
 		}
@@ -307,7 +313,7 @@ func NewUserReposModule(opts *Options) sqlite.Module {
 			repoOrder.Direction = orderByToGitHubOrder(order.Desc)
 		}
 
-		iter := &iterUserRepos{opts, login, -1, nil, repoOrder}
+		iter := &iterUserRepos{opts, login, affiliations, -1, nil, repoOrder}
 		iter.logger().Info().Msgf("starting GitHub user_repos iterator for %s", login)
 		return iter, nil
 	}, vtab.EarlyOrderByConstraintExit(true))

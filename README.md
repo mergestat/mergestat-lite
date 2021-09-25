@@ -436,7 +436,7 @@ Table-valued-function that returns a list of users who have starred a repository
 | starred_at | DATETIME |
 
 Params:
-  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
   2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
 
 ```sql
@@ -472,7 +472,7 @@ SELECT * FROM github_starred_repos('patrickdevivo')
 Scalar function that returns the number of stars a GitHub repository has.
 
 Params:
-  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
   2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
 
 ```sql
@@ -518,10 +518,13 @@ Table-valued function that returns all the repositories belonging to a user or a
 
 Params:
   1. `login` - the `login` of a GitHub user or organization
+  2. `affiliations` - a comma-separated list of [repository affiliations](https://docs.github.com/en/graphql/reference/enums#repositoryaffiliation). Can be: `OWNER`, `COLLABORATOR` or `ORGANIZATION_MEMBER`
 
 ```sql
 SELECT * FROM github_user_repos('patrickdevivo')
 SELECT * FROM github_org_repos('askgitdev')
+SELECT * FROM github_user_repos('patrickdevivo', 'OWNER')
+SELECT * FROM github_org_repos('askgitdev', 'OWNER,COLLABORATOR')
 ```
 
 ##### `github_repo_issues`
@@ -556,7 +559,7 @@ Table-valued-function that returns all the issues of a GitHub repository.
 | url                   | TEXT      |
 
 Params:
-  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
   2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
 
 ```sql
@@ -608,16 +611,17 @@ Table-valued-function that returns all the pull requests of a GitHub repository.
 | url                      | TEXT     |
 
 Params:
-  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
   2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
 
 ```sql
 SELECT * FROM github_repo_prs('askgitdev/askgit');
 SELECT * FROM github_repo_prs('askgitdev', 'askgit'); -- both are equivalent
 ```
-##### `github_repo_protections`
 
-Table-valued-function that returns all the protections of a GitHub repository.(requires requestor to have admin privileges)
+##### `github_repo_branch_protections`
+
+Table-valued-function that returns all the branch protection rules set on a GitHub repository (requires GitHub access token to have admin privileges).
 
 | Column                           | Type     |
 |----------------------------------|----------|
@@ -640,11 +644,15 @@ Table-valued-function that returns all the protections of a GitHub repository.(r
 | restricts_pushes                 | BOOLEAN  |
 | restricts_review_dismissal       | BOOLEAN  |
 
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+
 ```sql
-SELECT * FROM github_repo_permissions('askgitdev/askgit');
-SELECT * FROM github_repo_permissions('askgitdev', 'askgit');
-SELECT * FROM github_permissions('askgitdev/askgit');
-SELECT * FROM github_permissions('askgitdev', 'askgit'); -- all are equivalent
+SELECT * FROM github_repo_branch_protections('askgitdev/askgit');
+SELECT * FROM github_repo_branch_protections('askgitdev', 'askgit');
+SELECT * FROM github_branch_protections('askgitdev/askgit');
+SELECT * FROM github_branch_protections('askgitdev', 'askgit'); -- all are equivalent
 ```
 
 ##### `github_repo_file_content`
@@ -652,7 +660,7 @@ SELECT * FROM github_permissions('askgitdev', 'askgit'); -- all are equivalent
 Scalar function that returns the contents of a file in a GitHub repository
 
 Params:
-  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which would require the second argument)
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
   2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
   3. `expression` - either a simple file path (`README.md`) or a rev-parse suitable expression that includes a path (`HEAD:README.md` or `<some-sha>:README.md`)
 
