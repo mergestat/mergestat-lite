@@ -12,7 +12,7 @@ func TestRepoProtections(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT * FROM github_protections('askgitdev', 'askgit') LIMIT 10")
+	rows, err := db.Query("SELECT * FROM github_repo_branch_protections('askgitdev', 'askgit') LIMIT 10")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
