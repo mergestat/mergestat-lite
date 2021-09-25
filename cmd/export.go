@@ -3,7 +3,6 @@ package cmd
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -30,11 +29,11 @@ var exportCmd = &cobra.Command{
 		var err error
 
 		if len(exports) == 0 {
-			log.Fatal("please supply at least one export pair")
+			handleExitError(fmt.Errorf("please supply at least one export pair"))
 		}
 
 		if len(exports)%2 != 0 {
-			log.Fatalf("expected even number of export pairs, got %d", len(exports))
+			handleExitError(fmt.Errorf("expected even number of export pairs, got %d", len(exports)))
 		}
 
 		pairs := make([]export, len(exports)/2)
@@ -48,18 +47,19 @@ var exportCmd = &cobra.Command{
 
 		var fileName string
 		if fileName, err = filepath.Abs(args[0]); err != nil {
-			log.Fatalf("failed to resolve file path: %v", err)
+			handleExitError(fmt.Errorf("failed to resolve file path: %v", err))
 		}
 
 		var db *sql.DB
 		if db, err = sql.Open("sqlite3", fileName); err != nil {
-			log.Fatalf("failed to open sqlite database: %v", err)
+			handleExitError(fmt.Errorf("failed to open sqlite database: %v", err))
 		}
 
 		for _, pair := range pairs {
 			var query = fmt.Sprintf("CREATE TABLE %s AS %s", pair.table, pair.query)
 			if _, err = db.Exec(query); err != nil {
-				log.Fatalf("failed to execute query: %v", err)
+				handleExitError(fmt.Errorf("failed to execute query: %v", err))
+
 			}
 		}
 
