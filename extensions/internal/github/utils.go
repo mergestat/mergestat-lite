@@ -105,3 +105,17 @@ func repoOwnerAndName(name, fullNameOrOwner string) (string, string, error) {
 		return fullNameOrOwner, name, nil
 	}
 }
+
+// affiliationsFromString takes a CSV list of repository affiliations as text
+// and returns a list for use in the GraphQL request
+func affiliationsFromString(affiliations string) []githubv4.RepositoryAffiliation {
+	if affiliations == "" {
+		return make([]githubv4.RepositoryAffiliation, 0)
+	}
+	split := strings.Split(affiliations, ",")
+	output := make([]githubv4.RepositoryAffiliation, len(split))
+	for s, aff := range split {
+		output[s] = githubv4.RepositoryAffiliation(aff)
+	}
+	return output
+}

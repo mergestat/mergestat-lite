@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"database/sql"
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"time"
 
@@ -61,6 +61,15 @@ func setupLogger() {
 	logger = l
 }
 
+// handleExitError should be used for any errors that should stop execution of the CLI (exit)
+// it will report an error with the logger and exit with code 1
+func handleExitError(err error) {
+	if err != nil {
+		logger.Error().Msgf(err.Error())
+		os.Exit(1)
+	}
+}
+
 var rootCmd = &cobra.Command{
 	Use:  `display "SELECT * FROM commits"`,
 	Args: cobra.MaximumNArgs(2),
@@ -73,7 +82,7 @@ var rootCmd = &cobra.Command{
 
 		var info os.FileInfo
 		if info, err = os.Stdin.Stat(); err != nil {
-			log.Fatalf("failed to read stdin stat: %v", err)
+			handleExitError(fmt.Errorf("failed to read stdin stat: %v", err))
 		}
 
 		var query string
@@ -82,34 +91,34 @@ var rootCmd = &cobra.Command{
 		} else if isPiped(info) {
 			var stdin []byte
 			if stdin, err = ioutil.ReadAll(os.Stdin); err != nil {
-				log.Fatalf("failed to read from stdin: %v", err)
+				handleExitError(fmt.Errorf("failed to read from stdin: %v", err))
 			}
 			query = string(stdin)
 		} else if presetQuery != "" {
 			var found bool
 			if query, found = Find(presetQuery); !found {
-				log.Fatalf("unknown preset query: %s", presetQuery)
+				handleExitError(fmt.Errorf("unknown preset query: %s", presetQuery))
 			}
 		} else {
 			if err = cmd.Help(); err != nil {
-				log.Fatal(err.Error())
+				handleExitError(err)
 			}
 			os.Exit(0)
 		}
 
 		var db *sql.DB
 		if db, err = sql.Open("sqlite3", ":memory:"); err != nil {
-			log.Fatalf("failed to initialize database connection: %v", err)
+			handleExitError(fmt.Errorf("failed to initialize database connection: %v", err))
 		}
 
 		var rows *sql.Rows
 		if rows, err = db.Query(query); err != nil {
-			log.Fatalf("query execution failed: %v", err)
+			handleExitError(fmt.Errorf("query execution failed: %v", err))
 		}
 		defer rows.Close()
 
 		if err = display.WriteTo(rows, os.Stdout, format, false); err != nil {
-			log.Fatalf("failed to output resultset: %v", err)
+			handleExitError(fmt.Errorf("failed to output resultset: %v", err))
 		}
 	},
 }
@@ -119,6 +128,6 @@ func isPiped(info os.FileInfo) bool { return info.Mode()&os.ModeCharDevice == 0 
 // Execute executes the root command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalf("execution failed: %v", err)
+		handleExitError(fmt.Errorf("execution failed: %v", err))
 	}
 }

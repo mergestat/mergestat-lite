@@ -17,7 +17,7 @@ func registerExt() {
 	sqlite.Register(
 		extensions.RegisterFn(
 			options.WithExtraFunctions(),
-			options.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
+			options.WithRepoLocator(locator.CachedLocator(locator.LoggingLocator(&logger, locator.MultiLocator()))),
 			options.WithContextValue("defaultRepoPath", repo),
 			options.WithGitHub(),
 			options.WithContextValue("githubToken", githubToken),
