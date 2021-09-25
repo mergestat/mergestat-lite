@@ -19,8 +19,10 @@ import (
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 )
 
 // DiskLocator is a repo locator implementation that opens on-disk repository at the specified path.
@@ -72,11 +74,48 @@ func HttpLocator() services.RepoLocator {
 	})
 }
 
+// SSHLocator returns a repo locator capable of cloning remote
+// ssh repositories on-demand into temporary storage. It is recommended
+// that you club it with something like CachedLocator to improve performance
+// and remove the need to clone a single repository multiple times.
+func SSHLocator() services.RepoLocator {
+	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+		path = strings.TrimPrefix(path, "ssh://")
+
+		// TODO(patrickdevivo) maybe a little hacky instead of properly parsing the url, strip out the username first
+		// if it's set, otherwise default to "git"
+		var user string
+		split := strings.SplitN(path, "@", 2)
+		switch len(split) {
+		case 1:
+			user = "git"
+			path = split[0]
+		case 2:
+			user = split[0]
+			path = split[1]
+		}
+
+		var dir string
+		var err error
+		if dir, err = ioutil.TempDir(os.TempDir(), "askgit"); err != nil {
+			return nil, errors.Wrap(err, "failed to create a temporary directory")
+		}
+
+		var storer = filesystem.NewStorage(osfs.New(dir), cache.NewObjectLRUDefault())
+		var auth ssh.AuthMethod
+		if auth, err = ssh.DefaultAuthBuilder(user); err != nil {
+			return nil, errors.Wrap(err, "failed to create an SSH authentication method")
+		}
+		return git.CloneContext(ctx, storer, storer.Filesystem(), &git.CloneOptions{URL: path, NoCheckout: true, Auth: auth})
+	})
+}
+
 // MultiLocator returns a locator service that work with multiple git protocols
 // and is able to pick the correct underlying locator based on path provided.
 func MultiLocator() services.RepoLocator {
 	var locators = map[string]func() services.RepoLocator{
 		"http": HttpLocator,
+		"ssh":  SSHLocator,
 		"file": DiskLocator,
 	}
 
@@ -85,6 +124,17 @@ func MultiLocator() services.RepoLocator {
 		if strings.HasPrefix(path, "http") || strings.HasPrefix(path, "https") {
 			fn = locators["http"]
 		}
+		if strings.HasPrefix(path, "ssh") {
+			fn = locators["ssh"]
+		}
 		return fn().Open(ctx, path)
+	})
+}
+
+// LoggingLocator returns a locator that logs
+func LoggingLocator(logger *zerolog.Logger, rl services.RepoLocator) services.RepoLocator {
+	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+		logger.Info().Str("path", path).Msgf("opening repo")
+		return rl.Open(ctx, path)
 	})
 }
