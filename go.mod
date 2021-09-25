@@ -5,9 +5,9 @@ go 1.13
 require (
 	github.com/BurntSushi/toml v0.4.1
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
+	github.com/ProtonMail/go-crypto v0.0.0-20210920160938-87db9fbc61c7 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
-	github.com/augmentable-dev/vtab v0.0.0-20210911030829-312442c75a27
+	github.com/augmentable-dev/vtab v0.0.0-20210915151038-6572bfc4e313
 	github.com/clbanning/mxj/v2 v2.5.5
 	github.com/dnaeon/go-vcr/v2 v2.0.1
 	github.com/ghodss/yaml v1.0.0
@@ -23,21 +23,22 @@ require (
 	github.com/libgit2/git2go/v32 v32.0.4
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8
+	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.25.0
 	github.com/sergi/go-diff v1.2.0 // indirect
-	github.com/shurcooL/githubv4 v0.0.0-20210725200734-83ba7b4c9228
+	github.com/shurcooL/githubv4 v0.0.0-20210922025249-6831e00d857f
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a
 	github.com/spf13/cobra v1.2.1
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	go.mongodb.org/mongo-driver v1.7.2 // indirect
 	go.riyazali.net/sqlite v0.0.0-20210830064319-b3ba44e2587a
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/mod v0.5.0
-	golang.org/x/net v0.0.0-20210907225631-ff17edfbf26d // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/mod v0.5.1
+	golang.org/x/net v0.0.0-20210924151903-3ad01bbaa167 // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
-	golang.org/x/sys v0.0.0-20210908160347-a851e7ddeee0 // indirect
-	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b
+	golang.org/x/sys v0.0.0-20210925032602-92d5a993a665 // indirect
+	golang.org/x/term v0.0.0-20210916214954-140adaaadfaf
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	google.golang.org/protobuf v1.27.1 // indirect
 )
