@@ -82,6 +82,19 @@ func SSHLocator() services.RepoLocator {
 	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
 		path = strings.TrimPrefix(path, "ssh://")
 
+		// TODO(patrickdevivo) maybe a little hacky instead of properly parsing the url, strip out the username first
+		// if it's set, otherwise default to "git"
+		var user string
+		split := strings.SplitN(path, "@", 2)
+		switch len(split) {
+		case 1:
+			user = "git"
+			path = split[0]
+		case 2:
+			user = split[0]
+			path = split[1]
+		}
+
 		var dir string
 		var err error
 		if dir, err = ioutil.TempDir(os.TempDir(), "askgit"); err != nil {
@@ -90,7 +103,7 @@ func SSHLocator() services.RepoLocator {
 
 		var storer = filesystem.NewStorage(osfs.New(dir), cache.NewObjectLRUDefault())
 		var auth ssh.AuthMethod
-		if auth, err = ssh.DefaultAuthBuilder("git"); err != nil {
+		if auth, err = ssh.DefaultAuthBuilder(user); err != nil {
 			return nil, errors.Wrap(err, "failed to create an SSH authentication method")
 		}
 		return git.CloneContext(ctx, storer, storer.Filesystem(), &git.CloneOptions{URL: path, NoCheckout: true, Auth: auth})
