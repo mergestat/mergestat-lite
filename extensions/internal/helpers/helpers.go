@@ -23,6 +23,14 @@ func Register(ext *sqlite.ExtensionApi, _ *options.Options) (_ sqlite.ErrorCode,
 			return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register %q function", name)
 		}
 	}
+	var mods = map[string]sqlite.Module{
+		"grep": NewGrepModule(),
+	}
+	for name, mod := range mods {
+		if err = ext.CreateModule(name, mod); err != nil {
+			return sqlite.SQLITE_ERROR, errors.Wrapf(err, "failed to register %q module", name)
+		}
+	}
 
 	return sqlite.SQLITE_OK, nil
 }
