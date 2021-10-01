@@ -236,6 +236,7 @@ Params:
 
 A table-valued function that searches text by line for a string match.
 Meant to behave somewhat similarly to the `grep` command line tool.
+The search time is a [regular expression](https://pkg.go.dev/regexp/syntax).
 
 | Column      | Type     |
 |-------------|----------|
@@ -243,8 +244,8 @@ Meant to behave somewhat similarly to the `grep` command line tool.
 | line        | TEXT     |
 
 ```SQL
-SELECT * FROM grep(<contents>, <search_string>, <before>, <after>)
-SELECT * FROM grep(<contents>, <search_string>) -- before and after default to 0
+SELECT * FROM grep(<contents>, <search-term>, <before>, <after>)
+SELECT * FROM grep(<contents>, <search-term>) -- before and after default to 0
 ```
 
 
