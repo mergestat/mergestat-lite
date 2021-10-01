@@ -232,6 +232,23 @@ Params:
 
 #### Utilities
 
+##### grep
+
+A table-valued function that searches text by line for a string match.
+Meant to behave somewhat similarly to the `grep` command line tool.
+The search time is a [regular expression](https://pkg.go.dev/regexp/syntax).
+
+| Column      | Type     |
+|-------------|----------|
+| line_no     | INT      |
+| line        | TEXT     |
+
+```SQL
+SELECT * FROM grep(<contents>, <search-term>, <before>, <after>)
+SELECT * FROM grep(<contents>, <search-term>) -- before and after default to 0
+```
+
+
 ##### JSON
 
 The [SQLite JSON1 extension](https://www.sqlite.org/json1.html) is included for working with JSON data.
