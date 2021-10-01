@@ -16,7 +16,7 @@ var grepCols = []vtab.Column{
 	{Name: "contents", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "search", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "preceeding", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "preceeding", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "proceeding", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 // NewStatsModule returns the implementation of a table-valued-function for grep
@@ -97,11 +97,11 @@ func (i *grepIter) Column(ctx vtab.Context, c int) error {
 
 func (i *grepIter) Next() (vtab.Row, error) {
 	i.index++
-	for i.index >= len(i.splitString) && !(strings.Contains(i.splitString[i.index], i.search)) {
+	for i.index < len(i.splitString) && !(strings.Contains(i.splitString[i.index], i.search)) {
 		i.index++
-		if i.index >= len(i.splitString) {
-			return nil, io.EOF
-		}
+	}
+	if i.index >= len(i.splitString) {
+		return nil, io.EOF
 	}
 	return i, nil
 }
