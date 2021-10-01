@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 
 	"github.com/augmentable-dev/vtab"
@@ -10,20 +11,20 @@ import (
 )
 
 var grepCols = []vtab.Column{
-	{Name: "line_no", Type: "INT", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
-	{Name: "line", Type: "TEXT", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "line_no", Type: "INT", OrderBy: vtab.NONE},
+	{Name: "line", Type: "TEXT", OrderBy: vtab.NONE},
 
-	{Name: "contents", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "search", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "preceeding", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
-	{Name: "proceeding", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "contents", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "search", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "preceeding", Type: "INT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+	{Name: "proceeding", Type: "INT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
 // NewStatsModule returns the implementation of a table-valued-function for grep
 func NewGrepModule() sqlite.Module {
 	return vtab.NewTableFunc("grep", grepCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var contents, search string
-		preceeding, proceeding := 0, 0
+		before, after := 0, 0
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
@@ -32,41 +33,46 @@ func NewGrepModule() sqlite.Module {
 				case 3:
 					search = constraint.Value.Text()
 				case 4:
-					preceeding = constraint.Value.Int()
+					before = constraint.Value.Int()
 				case 5:
-					proceeding = constraint.Value.Int()
+					after = constraint.Value.Int()
 				}
 			}
 		}
 
 		if contents == "" {
-			return nil, fmt.Errorf("No Contents Provided")
-		}
-		if search == "" {
-			return nil, fmt.Errorf("No search string provided")
+			return nil, fmt.Errorf("no contents Provided")
 		}
 
-		return newGrepIter(contents, search, preceeding, proceeding)
+		if search == "" {
+			return nil, fmt.Errorf("no search string provided")
+		}
+
+		return newGrepIter(contents, search, before, after)
 	})
 }
 
 func newGrepIter(contents, search string, preceeding, proceeding int) (*grepIter, error) {
-
 	iter := &grepIter{
-		contents:   contents,
-		search:     search,
-		preceeding: preceeding,
-		proceeding: proceeding,
-		index:      -1,
+		contents:    contents,
+		preceeding:  preceeding,
+		proceeding:  proceeding,
+		splitString: strings.Split(contents, "\n"),
+		index:       -1,
 	}
-	iter.splitString = strings.Split(contents, "\n")
+
+	if r, err := regexp.Compile(search); err != nil {
+		return nil, err
+	} else {
+		iter.search = r
+	}
 
 	return iter, nil
 }
 
 type grepIter struct {
 	contents    string
-	search      string
+	search      *regexp.Regexp
 	preceeding  int
 	proceeding  int
 	splitString []string
@@ -76,7 +82,7 @@ type grepIter struct {
 func (i *grepIter) Column(ctx vtab.Context, c int) error {
 	switch c {
 	case 0:
-		ctx.ResultInt(i.index)
+		ctx.ResultInt(i.index + 1)
 	case 1:
 		min := 0
 		if min < i.index-i.preceeding {
@@ -86,18 +92,14 @@ func (i *grepIter) Column(ctx vtab.Context, c int) error {
 		if max > i.index+i.proceeding {
 			max = i.index + i.proceeding
 		}
-		ret := ""
-		for g := min; g <= max; g++ {
-			ret += i.splitString[g] + "\n"
-		}
-		ctx.ResultText(ret)
+		ctx.ResultText(strings.Join(i.splitString[min:max+1], "\n"))
 	}
 	return nil
 }
 
 func (i *grepIter) Next() (vtab.Row, error) {
 	i.index++
-	for i.index < len(i.splitString) && !(strings.Contains(i.splitString[i.index], i.search)) {
+	for i.index < len(i.splitString) && !(i.search.MatchString(i.splitString[i.index])) {
 		i.index++
 	}
 	if i.index >= len(i.splitString) {

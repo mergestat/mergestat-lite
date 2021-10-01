@@ -232,9 +232,10 @@ Params:
 
 #### Utilities
 
-##### GREP
+##### grep
 
-Table valued function that searches on a string
+A table-valued function that searches text by line for a string match.
+Meant to behave somewhat similarly to the `grep` command line tool.
 
 | Column      | Type     |
 |-------------|----------|
@@ -242,8 +243,8 @@ Table valued function that searches on a string
 | line        | TEXT     |
 
 ```SQL
-SELECT * FROM grep(<contents>,<search_string>,<preceeding_lines>,<proceeding_lines>)
-SELECT * FROM grep(<contents>,<search_string>) -- preceeding_lines and proceeding_lines default to 0
+SELECT * FROM grep(<contents>, <search_string>, <before>, <after>)
+SELECT * FROM grep(<contents>, <search_string>) -- before and after default to 0
 ```
 
 
