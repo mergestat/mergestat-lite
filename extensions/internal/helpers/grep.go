@@ -19,7 +19,7 @@ var grepCols = []vtab.Column{
 	{Name: "preceeding", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
-// NewStatsModule returns the implementation of a table-valued-function for git stats
+// NewStatsModule returns the implementation of a table-valued-function for grep
 func NewGrepModule() sqlite.Module {
 	return vtab.NewTableFunc("grep", grepCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var contents, search string
@@ -50,9 +50,9 @@ func NewGrepModule() sqlite.Module {
 	})
 }
 
-func newGrepIter(contents string, search string, preceeding int, proceeding int) (*grepAllIter, error) {
+func newGrepIter(contents, search string, preceeding, proceeding int) (*grepIter, error) {
 
-	iter := &grepAllIter{
+	iter := &grepIter{
 		contents:   contents,
 		search:     search,
 		preceeding: preceeding,
@@ -64,7 +64,7 @@ func newGrepIter(contents string, search string, preceeding int, proceeding int)
 	return iter, nil
 }
 
-type grepAllIter struct {
+type grepIter struct {
 	contents    string
 	search      string
 	preceeding  int
@@ -73,7 +73,7 @@ type grepAllIter struct {
 	index       int
 }
 
-func (i *grepAllIter) Column(ctx vtab.Context, c int) error {
+func (i *grepIter) Column(ctx vtab.Context, c int) error {
 	switch c {
 	case 0:
 		ctx.ResultInt(i.index)
@@ -89,14 +89,14 @@ func (i *grepAllIter) Column(ctx vtab.Context, c int) error {
 		ret := ""
 		for g := min; g <= max; g++ {
 			ret += i.splitString[g] + "\n"
-
 		}
 		ctx.ResultText(ret)
 	}
 	return nil
 }
 
-func (i *grepAllIter) Next() (vtab.Row, error) {
+func (i *grepIter) Next() (vtab.Row, error) {
+	i.index++
 	for i.index >= len(i.splitString) && !(strings.Contains(i.splitString[i.index], i.search)) {
 		i.index++
 		if i.index >= len(i.splitString) {
