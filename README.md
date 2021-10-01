@@ -232,6 +232,21 @@ Params:
 
 #### Utilities
 
+##### GREP
+
+Table valued function that searches on a string
+
+| Column      | Type     |
+|-------------|----------|
+| line_no     | INT      |
+| line        | TEXT     |
+
+```SQL
+SELECT * FROM grep(<contents>,<search_string>,<preceeding_lines>,<proceeding_lines>)
+SELECT * FROM grep(<contents>,<search_string>) -- preceeding_lines and proceeding_lines default to 0
+```
+
+
 ##### JSON
 
 The [SQLite JSON1 extension](https://www.sqlite.org/json1.html) is included for working with JSON data.
