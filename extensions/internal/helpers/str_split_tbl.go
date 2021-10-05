@@ -18,9 +18,9 @@ var strSplitCols = []vtab.Column{
 	{Name: "delimiter", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 }
 
-// NewStatsModule returns the implementation of a table-valued-function for git stats
+// NewStrSplitModule returns the implementation of a table-valued-function for splitting string contents on a delimiter (default "\n")
 func NewStrSplitModule() sqlite.Module {
-	return vtab.NewTableFunc("str_split_all", strSplitCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("str_split", strSplitCols, func(constraints []*vtab.Constraint, order []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var contents, delimiter string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
@@ -40,11 +40,11 @@ func NewStrSplitModule() sqlite.Module {
 			delimiter = "\n"
 		}
 
-		return newStatsIter(contents, delimiter)
+		return newStrSplitIter(contents, delimiter)
 	})
 }
 
-func newStatsIter(contents string, delimiter string) (*strSplitAllIter, error) {
+func newStrSplitIter(contents string, delimiter string) (*strSplitAllIter, error) {
 	scanner := bufio.NewScanner(strings.NewReader(contents))
 
 	// if a delimiter is provided, see here: https://stackoverflow.com/questions/33068644/how-a-scanner-can-be-implemented-with-a-custom-split/33069759
@@ -71,12 +71,11 @@ func newStatsIter(contents string, delimiter string) (*strSplitAllIter, error) {
 	// TODO make the buffer size settable
 	buf := make([]byte, 0, 1024*1024*512)
 	scanner.Buffer(buf, 0)
-	iter := &strSplitAllIter{
+
+	return &strSplitAllIter{
 		contents: *scanner,
 		index:    0,
-	}
-
-	return iter, nil
+	}, nil
 }
 
 type strSplitAllIter struct {
