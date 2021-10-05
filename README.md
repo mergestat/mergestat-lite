@@ -248,6 +248,18 @@ SELECT * FROM grep(<contents>, <search-term>, <before>, <after>)
 SELECT * FROM grep(<contents>, <search-term>) -- before and after default to 0
 ```
 
+##### `str_split_all`
+
+A table-valued function that splits string contents into rows based on a delimiter (default '\n')
+
+| Column      | Type     |
+|-------------|----------|
+| line_no     | INT      |
+| line        | TEXT     |
+
+```SQL
+SELECT * FROM str_split_all(<contents>, <delimiter>)
+```
 
 ##### JSON
 
