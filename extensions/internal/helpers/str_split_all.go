@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"strings"
@@ -36,7 +37,7 @@ func NewStrSplitModule() sqlite.Module {
 			return nil, fmt.Errorf("No Contents Provided")
 		}
 		if delimiter == "" {
-			return nil, fmt.Errorf("No delimiter Provided")
+			delimiter = "\n"
 		}
 
 		return newStatsIter(contents, delimiter)
@@ -44,22 +45,43 @@ func NewStrSplitModule() sqlite.Module {
 }
 
 func newStatsIter(contents string, delimiter string) (*strSplitAllIter, error) {
+	scanner := bufio.NewScanner(strings.NewReader(contents))
 
-	iter := &strSplitAllIter{
-		contents:  contents,
-		delimiter: delimiter,
-		index:     -1,
+	// if a delimiter is provided, see here: https://stackoverflow.com/questions/33068644/how-a-scanner-can-be-implemented-with-a-custom-split/33069759
+	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		// Return nothing if at end of file and no data passed
+		if atEOF && len(data) == 0 {
+			return 0, nil, nil
+		}
+
+		// Find the index of the delimiter
+		if i := strings.Index(string(data), delimiter); i >= 0 {
+			return i + 1, data[0:i], nil
+		}
+
+		// If at end of file with data return the data
+		if atEOF {
+			return len(data), data, nil
+		}
+
+		return
 	}
-	iter.splitString = strings.Split(contents, delimiter)
+	scanner.Split(split)
+
+	// TODO make the buffer size settable
+	buf := make([]byte, 0, 1024*1024*512)
+	scanner.Buffer(buf, 0)
+	iter := &strSplitAllIter{
+		contents: *scanner,
+		index:    0,
+	}
 
 	return iter, nil
 }
 
 type strSplitAllIter struct {
-	contents    string
-	delimiter   string
-	splitString []string
-	index       int
+	contents bufio.Scanner
+	index    int
 }
 
 func (i *strSplitAllIter) Column(ctx vtab.Context, c int) error {
@@ -67,14 +89,16 @@ func (i *strSplitAllIter) Column(ctx vtab.Context, c int) error {
 	case 0:
 		ctx.ResultInt(i.index)
 	case 1:
-		ctx.ResultText(i.splitString[i.index])
+		ctx.ResultText(i.contents.Text())
 	}
 	return nil
 }
 
 func (i *strSplitAllIter) Next() (vtab.Row, error) {
+
 	i.index++
-	if i.index >= len(i.splitString) {
+	keepGoing := i.contents.Scan()
+	if !keepGoing {
 		return nil, io.EOF
 	}
 	return i, nil
