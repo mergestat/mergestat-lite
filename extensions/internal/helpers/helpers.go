@@ -25,8 +25,8 @@ func Register(ext *sqlite.ExtensionApi, _ *options.Options) (_ sqlite.ErrorCode,
 	}
 
 	var modules = map[string]sqlite.Module{
-		"grep":          NewGrepModule(),
-		"str_split_all": NewStrSplitModule(),
+		"grep":      NewGrepModule(),
+		"str_split": NewStrSplitModule(),
 	}
 
 	for name, mod := range modules {
