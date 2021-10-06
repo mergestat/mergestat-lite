@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/askgitdev/askgit/extensions"
 	"github.com/askgitdev/askgit/extensions/options"
@@ -24,7 +25,11 @@ var pgsyncCmd = &cobra.Command{
 	Long: `Use this command to sync the results of an askgit query into a Postgres table`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		l := zerolog.New(os.Stderr)
+		l := zerolog.New(os.Stderr).
+			Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.Stamp}).
+			Level(zerolog.ErrorLevel).
+			With().
+			Timestamp().Logger()
 
 		// TODO(patrickdevivo) maybe there should be a "RegisterDefault" method that handles this boilerplate.
 		// Basically, register all the default functionality.
