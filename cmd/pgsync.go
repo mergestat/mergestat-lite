@@ -36,6 +36,7 @@ var pgsyncCmd = &cobra.Command{
 				options.WithContextValue("githubToken", os.Getenv("GITHUB_TOKEN")),
 				options.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
 				options.WithContextValue("githubRateLimit", os.Getenv("GITHUB_RATE_LIMIT")),
+				options.WithLogger(&l),
 			),
 		)
 
