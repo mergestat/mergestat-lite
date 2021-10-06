@@ -248,7 +248,7 @@ SELECT * FROM grep(<contents>, <search-term>, <before>, <after>)
 SELECT * FROM grep(<contents>, <search-term>) -- before and after default to 0
 ```
 
-##### `str_split_all`
+##### `str_split`
 
 A table-valued function that splits string contents into rows based on a delimiter (default '\n')
 
