@@ -77,6 +77,14 @@ var pgsyncCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
+		// TODO(patrickdevivo) hacky way of adding a SQL statement to run ahead of sync...
+		// added mainly so we can run `SET statement_timeout 0` for connections to bit.io
+		if preamble := os.Getenv("PGSYNC_PREAMBLE"); preamble != "" {
+			if _, err := postgres.ExecContext(ctx, preamble); err != nil {
+				l.Error().Msgf("could not execute preamble: %v", err)
+			}
+		}
+
 		options := &pgsync.SyncOptions{
 			Postgres:   postgres,
 			AskGit:     askgit,
