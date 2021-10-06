@@ -34,7 +34,7 @@ func NewStrSplitModule() sqlite.Module {
 		}
 
 		if contents == "" {
-			return nil, fmt.Errorf("No Contents Provided")
+			return nil, fmt.Errorf("no Contents Provided")
 		}
 		if delimiter == "" {
 			delimiter = "\n"
