@@ -1,3 +1,4 @@
+//go:build shared
 // +build shared
 
 // This file provides a build target while building the dynamically loadable shared object library.
