@@ -243,11 +243,32 @@ The search time is a [regular expression](https://pkg.go.dev/regexp/syntax).
 | line_no     | INT      |
 | line        | TEXT     |
 
-```SQL
+```sql
 SELECT * FROM grep(<contents>, <search-term>, <before>, <after>)
 SELECT * FROM grep(<contents>, <search-term>) -- before and after default to 0
 ```
 
+Params:
+  1. `contents` - text to search in
+  2. `search-term` - search term (regular expression)
+
+##### `str_split`
+
+A table-valued function that splits string contents into rows based on a delimiter (default `\n`)
+
+| Column      | Type     |
+|-------------|----------|
+| line_no     | INT      |
+| line        | TEXT     |
+
+```sql
+SELECT * FROM str_split(<contents>, <delimiter>)
+SELECT * FROM str_split(<contents>) -- splits on new lines
+```
+
+Params:
+  1. `contents` - text to split
+  2. `delimiter` - delimiter to split on
 
 ##### JSON
 
