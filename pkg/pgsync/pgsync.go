@@ -15,11 +15,12 @@ import (
 )
 
 type SyncOptions struct {
-	Postgres  *sql.DB
-	AskGit    *sql.DB
-	TableName string
-	Query     string
-	Logger    *zerolog.Logger
+	Postgres   *sql.DB
+	AskGit     *sql.DB
+	SchemaName string
+	TableName  string
+	Query      string
+	Logger     *zerolog.Logger
 }
 
 // Sync imports the results of an askgit query into a postgres table.
@@ -70,11 +71,15 @@ func Sync(ctx context.Context, options *SyncOptions) error {
 		}
 	}
 
+	schemaName := options.SchemaName
+	if schemaName == "" {
+		schemaName = "public"
+	}
 	tempNameNew := fmt.Sprintf("%s_temp", options.TableName)
 	tempNameDrop := fmt.Sprintf("%s_drop", options.TableName)
 
 	// create a new temp table
-	createSQL, err := createTableFromSQLiteTypes(tempNameNew, colTypes)
+	createSQL, err := createTableFromSQLiteTypes(schemaName, tempNameNew, colTypes)
 	handleErr(err)
 
 	select {
@@ -82,6 +87,8 @@ func Sync(ctx context.Context, options *SyncOptions) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+
+	l.Info().Msg(createSQL)
 
 	_, err = tx.ExecContext(ctx, createSQL)
 	handleErr(err)
@@ -92,7 +99,7 @@ func Sync(ctx context.Context, options *SyncOptions) error {
 		return ctx.Err()
 	}
 
-	stmt, err := tx.PrepareContext(ctx, pq.CopyIn(tempNameNew, colNames...))
+	stmt, err := tx.PrepareContext(ctx, pq.CopyInSchema(schemaName, tempNameNew, colNames...))
 	handleErr(err)
 
 	for rows.Next() {
@@ -134,11 +141,21 @@ func Sync(ctx context.Context, options *SyncOptions) error {
 		return ctx.Err()
 	}
 
-	_, err = tx.ExecContext(ctx, fmt.Sprintf(`
-		ALTER TABLE IF EXISTS "%s" RENAME to %s;
-		ALTER TABLE IF EXISTS "%s" RENAME TO "%s";
-		DROP TABLE IF EXISTS "%s";
-	`, options.TableName, tempNameDrop, tempNameNew, options.TableName, tempNameDrop))
+	s := fmt.Sprintf(`
+	ALTER TABLE IF EXISTS %s RENAME TO %s;
+	ALTER TABLE IF EXISTS %s RENAME TO %s;
+	DROP TABLE IF EXISTS %s;
+`,
+		fmt.Sprintf("%s.%s", pq.QuoteIdentifier(schemaName), pq.QuoteIdentifier(options.TableName)),
+		pq.QuoteIdentifier(tempNameDrop),
+		fmt.Sprintf("%s.%s", pq.QuoteIdentifier(schemaName), pq.QuoteIdentifier(tempNameNew)),
+		pq.QuoteIdentifier(options.TableName),
+		fmt.Sprintf("%s.%s", pq.QuoteIdentifier(schemaName), pq.QuoteIdentifier(tempNameDrop)),
+	)
+
+	l.Info().Msg(s)
+
+	_, err = tx.ExecContext(ctx, s)
 	handleErr(err)
 
 	select {
@@ -179,8 +196,8 @@ func sqliteTypeToPostgresType(col *sql.ColumnType) string {
 }
 
 // createTableFromSQLiteTypes produces a postgres CREATE TABLE statement from a set of SQLite columns
-func createTableFromSQLiteTypes(tableName string, columns []*sql.ColumnType) (string, error) {
-	const declare = `CREATE TABLE {{ .TableName }} (
+func createTableFromSQLiteTypes(schemaName, tableName string, columns []*sql.ColumnType) (string, error) {
+	const declare = `CREATE TABLE {{ .SchemaName }}.{{ .TableName }} (
 		{{- range $c, $col := .Columns }}
 			{{ quoteIdentifier .Name }} {{ colType $c }}{{ if columnComma $c }},{{ end }}
 		{{- end }}
@@ -204,9 +221,11 @@ func createTableFromSQLiteTypes(tableName string, columns []*sql.ColumnType) (st
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, struct {
-		TableName string
-		Columns   []*sql.ColumnType
+		SchemaName string
+		TableName  string
+		Columns    []*sql.ColumnType
 	}{
+		pq.QuoteIdentifier(schemaName),
 		pq.QuoteIdentifier(tableName),
 		columns,
 	})
