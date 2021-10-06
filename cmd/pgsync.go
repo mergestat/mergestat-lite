@@ -27,7 +27,7 @@ var pgsyncCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		l := zerolog.New(os.Stderr).
 			Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.Stamp}).
-			Level(zerolog.ErrorLevel).
+			Level(zerolog.DebugLevel).
 			With().
 			Timestamp().Logger()
 
