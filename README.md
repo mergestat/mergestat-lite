@@ -655,6 +655,30 @@ SELECT * FROM github_branch_protections('askgitdev/askgit');
 SELECT * FROM github_branch_protections('askgitdev', 'askgit'); -- all are equivalent
 ```
 
+##### `github_audit_org`
+
+Table-valued-function that returns the audit log of a GitHub organization (requires GitHub access token to have admin privileges).
+
+| Column                           | Type     |
+|----------------------------------|----------|
+| login                            | TEXT     |
+| audit_entry_action               | TEXT     |
+| audit_entry_id                   | TEXT     |
+| audit_entry_type                 | TEXT     |
+| audit_entry_user_company         | TEXT     |
+| audit_entry_user_email           | TEXT     |
+| audit_entry_user_id              | TEXT     |
+| audit_entry_user_login           | TEXT     |
+| audit_entry_user_name            | TEXT     |
+| audit_log_count                  | INT      |
+
+Params:
+  1. `org` - name of the organization
+
+```sql
+SELECT * FROM github_audit_org('askgitdev');
+```
+
 ##### `github_repo_file_content`
 
 Scalar function that returns the contents of a file in a GitHub repository
