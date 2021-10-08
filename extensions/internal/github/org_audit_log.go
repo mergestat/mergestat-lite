@@ -18,7 +18,61 @@ type fetchOrgAuditLogResults struct {
 	EndCursor   *githubv4.String
 }
 type auditLogEntry struct {
-	Typename   string `graphql:"__typename"`
+	Typename                                                string        `graphql:"__typename"`
+	MembersCanDeleteReposClearAuditEntry                    entryContents `graphql:"... on MembersCanDeleteReposClearAuditEntry"`
+	MembersCanDeleteReposDisableAuditEntry                  entryContents `graphql:"... on MembersCanDeleteReposDisableAuditEntry"`
+	MembersCanDeleteReposEnableAuditEntry                   entryContents `graphql:"... on MembersCanDeleteReposEnableAuditEntry"`
+	TeamRemoveRepositoryAuditEntry                          entryContents `graphql:"... on TeamRemoveRepositoryAuditEntry"`
+	TeamRemoveMemberAuditEntry                              entryContents `graphql:"... on TeamRemoveMemberAuditEntry"`
+	TeamChangeParentTeamAuditEntry                          entryContents `graphql:"... on TeamChangeParentTeamAuditEntry"`
+	TeamAddRepositoryAuditEntry                             entryContents `graphql:"... on TeamAddRepositoryAuditEntry"`
+	TeamAddMemberAuditEntry                                 entryContents `graphql:"... on TeamAddMemberAuditEntry"`
+	RepositoryVisibilityChangeEnableAuditEntry              entryContents `graphql:"... on RepositoryVisibilityChangeEnableAuditEntry"`
+	RepositoryVisibilityChangeDisableAuditEntry             entryContents `graphql:"... on RepositoryVisibilityChangeDisableAuditEntry"`
+	RepoRemoveTopicAuditEntry                               entryContents `graphql:"... on RepoRemoveTopicAuditEntry"`
+	RepoRemoveMemberAuditEntry                              entryContents `graphql:"... on RepoRemoveMemberAuditEntry"`
+	RepoDestroyAuditEntry                                   entryContents `graphql:"... on RepoDestroyAuditEntry"`
+	RepoCreateAuditEntry                                    entryContents `graphql:"... on RepoCreateAuditEntry"`
+	RepoConfigUnlockAnonymousGitAccessAuditEntry            entryContents `graphql:"... on RepoConfigUnlockAnonymousGitAccessAuditEntry"`
+	RepoConfigLockAnonymousGitAccessAuditEntry              entryContents `graphql:"... on RepoConfigLockAnonymousGitAccessAuditEntry"`
+	RepoConfigEnableContributorsOnlyAuditEntry              entryContents `graphql:"... on RepoConfigEnableContributorsOnlyAuditEntry"`
+	RepoConfigEnableCollaboratorsOnlyAuditEntry             entryContents `graphql:"... on RepoConfigEnableCollaboratorsOnlyAuditEntry"`
+	RepoConfigEnableAnonymousGitAccessAuditEntry            entryContents `graphql:"... on RepoConfigEnableAnonymousGitAccessAuditEntry"`
+	RepoConfigDisableSockpuppetDisallowedAuditEntry         entryContents `graphql:"... on RepoConfigDisableSockpuppetDisallowedAuditEntry"`
+	RepoConfigDisableContributorsOnlyAuditEntry             entryContents `graphql:"... on RepoConfigDisableContributorsOnlyAuditEntry"`
+	RepoConfigDisableAnonymousGitAccessAuditEntry           entryContents `graphql:"... on RepoConfigDisableAnonymousGitAccessAuditEntry"`
+	RepoChangeMergeSettingAuditEntry                        entryContents `graphql:"... on RepoChangeMergeSettingAuditEntry"`
+	RepoArchivedAuditEntry                                  entryContents `graphql:"... on RepoArchivedAuditEntry"`
+	RepoAddTopicAuditEntry                                  entryContents `graphql:"... on RepoAddTopicAuditEntry"`
+	RepoAddMemberAuditEntry                                 entryContents `graphql:"... on RepoAddMemberAuditEntry"`
+	RepoAccessAuditEntry                                    entryContents `graphql:"... on RepoAccessAuditEntry"`
+	PrivateRepositoryForkingDisableAuditEntry               entryContents `graphql:"... on PrivateRepositoryForkingDisableAuditEntry"`
+	OrgUpdateMemberRepositoryInvitationPermissionAuditEntry entryContents `graphql:"... on OrgUpdateMemberRepositoryInvitationPermissionAuditEntry"`
+	OrgUpdateMemberRepositoryCreationPermissionAuditEntry   entryContents `graphql:"... on OrgUpdateMemberRepositoryCreationPermissionAuditEntry"`
+	OrgUpdateMemberAuditEntry                               entryContents `graphql:"... on OrgUpdateMemberAuditEntry"`
+	OrgUpdateDefaultRepositoryPermissionAuditEntry          entryContents `graphql:"... on OrgUpdateDefaultRepositoryPermissionAuditEntry"`
+	OrgUnblockUserAuditEntry                                entryContents `graphql:"... on OrgUnblockUserAuditEntry"`
+	OrgRemoveOutsideCollaboratorAuditEntry                  entryContents `graphql:"... on OrgRemoveOutsideCollaboratorAuditEntry"`
+	OrgRemoveMemberAuditEntry                               entryContents `graphql:"... on OrgRemoveMemberAuditEntry"`
+	OrgRemoveBillingManagerAuditEntry                       entryContents `graphql:"... on OrgRemoveBillingManagerAuditEntry"`
+	OrgOauthAppAccessRequestedAuditEntry                    entryContents `graphql:"... on OrgOauthAppAccessRequestedAuditEntry"`
+	OrgOauthAppAccessDeniedAuditEntry                       entryContents `graphql:"... on OrgOauthAppAccessDeniedAuditEntry"`
+	OrgInviteToBusinessAuditEntry                           entryContents `graphql:"... on OrgInviteToBusinessAuditEntry"`
+	OrgInviteMemberAuditEntry                               entryContents `graphql:"... on OrgInviteMemberAuditEntry"`
+	OrgEnableTwoFactorRequirementAuditEntry                 entryContents `graphql:"... on OrgEnableTwoFactorRequirementAuditEntry"`
+	OrgEnableSamlAuditEntry                                 entryContents `graphql:"... on OrgEnableSamlAuditEntry"`
+	OrgEnableOauthAppRestrictionsAuditEntry                 entryContents `graphql:"... on OrgEnableOauthAppRestrictionsAuditEntry"`
+	OrgDisableSamlAuditEntry                                entryContents `graphql:"... on OrgDisableSamlAuditEntry"`
+	OrgCreateAuditEntry                                     entryContents `graphql:"... on OrgCreateAuditEntry"`
+	OrgConfigEnableCollaboratorsOnlyAuditEntry              entryContents `graphql:"... on OrgConfigEnableCollaboratorsOnlyAuditEntry"`
+	OrgConfigDisableCollaboratorsOnlyAuditEntry             entryContents `graphql:"... on OrgConfigDisableCollaboratorsOnlyAuditEntry"`
+	OrgBlockUserAuditEntry                                  entryContents `graphql:"... on OrgBlockUserAuditEntry"`
+	OrgAddMemberAuditEntry                                  entryContents `graphql:"... on OrgAddMemberAuditEntry"`
+	OrgAddBillingManagerAuditEntry                          entryContents `graphql:"... on OrgAddBillingManagerAuditEntry"`
+	OauthApplicationCreateAuditEntry                        entryContents `graphql:"... on OauthApplicationCreateAuditEntry"`
+	OrgDisableOauthAppRestrictionsAuditEntry                entryContents `graphql:"... on OrgDisableOauthAppRestrictionsAuditEntry"`
+}
+type entryContents struct {
 	Id         githubv4.ID
 	Action     githubv4.String
 	ActorLogin string
@@ -36,7 +90,7 @@ type auditLogEntries struct {
 	Node auditLogEntry
 }
 
-func (i *iterOrgAuditLogs) fetchOrgRepos(ctx context.Context, startCursor *githubv4.String) (*fetchOrgAuditLogResults, error) {
+func (i *iterOrgAuditLogs) fetchOrgAuditRepos(ctx context.Context, startCursor *githubv4.String) (*fetchOrgAuditLogResults, error) {
 	var reposQuery struct {
 		Organization struct {
 			Login    string
@@ -92,25 +146,132 @@ func (i *iterOrgAuditLogs) logger() *zerolog.Logger {
 
 func (i *iterOrgAuditLogs) Column(ctx vtab.Context, c int) error {
 	current := i.results.AuditLogs[i.current]
-	switch orgReposCols[c].Name {
+	var currentContents entryContents
+	switch current.Node.Typename {
+	case "MembersCanDeleteReposClearAuditEntry":
+		currentContents = current.Node.MembersCanDeleteReposClearAuditEntry
+	case "MembersCanDeleteReposDisableAuditEntry":
+		currentContents = current.Node.MembersCanDeleteReposDisableAuditEntry
+	case "MembersCanDeleteReposEnableAuditEntry":
+		currentContents = current.Node.MembersCanDeleteReposEnableAuditEntry
+	case "TeamRemoveRepositoryAuditEntry":
+		currentContents = current.Node.TeamRemoveRepositoryAuditEntry
+	case "TeamRemoveMemberAuditEntry":
+		currentContents = current.Node.TeamRemoveMemberAuditEntry
+	case "TeamChangeParentTeamAuditEntry":
+		currentContents = current.Node.TeamChangeParentTeamAuditEntry
+	case "TeamAddRepositoryAuditEntry":
+		currentContents = current.Node.TeamAddRepositoryAuditEntry
+	case "TeamAddMemberAuditEntry":
+		currentContents = current.Node.TeamAddMemberAuditEntry
+	case "RepositoryVisibilityChangeEnableAuditEntry":
+		currentContents = current.Node.RepositoryVisibilityChangeEnableAuditEntry
+	case "RepositoryVisibilityChangeDisableAuditEntry":
+		currentContents = current.Node.RepositoryVisibilityChangeDisableAuditEntry
+	case "RepoRemoveTopicAuditEntry":
+		currentContents = current.Node.RepoRemoveTopicAuditEntry
+	case "RepoRemoveMemberAuditEntry":
+		currentContents = current.Node.RepoRemoveMemberAuditEntry
+	case "RepoDestroyAuditEntry":
+		currentContents = current.Node.RepoDestroyAuditEntry
+	case "RepoCreateAuditEntry":
+		currentContents = current.Node.RepoCreateAuditEntry
+	case "RepoConfigUnlockAnonymousGitAccessAuditEntry":
+		currentContents = current.Node.RepoConfigUnlockAnonymousGitAccessAuditEntry
+	case "RepoConfigLockAnonymousGitAccessAuditEntry":
+		currentContents = current.Node.RepoConfigLockAnonymousGitAccessAuditEntry
+	case "RepoConfigEnableContributorsOnlyAuditEntry":
+		currentContents = current.Node.RepoConfigEnableContributorsOnlyAuditEntry
+	case "RepoConfigEnableCollaboratorsOnlyAuditEntry":
+		currentContents = current.Node.RepoConfigEnableCollaboratorsOnlyAuditEntry
+	case "RepoConfigEnableAnonymousGitAccessAuditEntry":
+		currentContents = current.Node.RepoConfigEnableAnonymousGitAccessAuditEntry
+	case "RepoConfigDisableSockpuppetDisallowedAuditEntry":
+		currentContents = current.Node.RepoConfigDisableSockpuppetDisallowedAuditEntry
+	case "RepoConfigDisableContributorsOnlyAuditEntry":
+		currentContents = current.Node.RepoConfigDisableContributorsOnlyAuditEntry
+	case "RepoConfigDisableAnonymousGitAccessAuditEntry":
+		currentContents = current.Node.RepoConfigDisableAnonymousGitAccessAuditEntry
+	case "RepoChangeMergeSettingAuditEntry":
+		currentContents = current.Node.RepoChangeMergeSettingAuditEntry
+	case "RepoArchivedAuditEntry":
+		currentContents = current.Node.RepoArchivedAuditEntry
+	case "RepoAddTopicAuditEntry":
+		currentContents = current.Node.RepoAddTopicAuditEntry
+	case "RepoAddMemberAuditEntry":
+		currentContents = current.Node.RepoAddMemberAuditEntry
+	case "RepoAccessAuditEntry":
+		currentContents = current.Node.RepoAccessAuditEntry
+	case "PrivateRepositoryForkingDisableAuditEntry":
+		currentContents = current.Node.PrivateRepositoryForkingDisableAuditEntry
+	case "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry":
+		currentContents = current.Node.OrgUpdateMemberRepositoryInvitationPermissionAuditEntry
+	case "OrgUpdateMemberRepositoryCreationPermissionAuditEntry":
+		currentContents = current.Node.OrgUpdateMemberRepositoryCreationPermissionAuditEntry
+	case "OrgUpdateMemberAuditEntry":
+		currentContents = current.Node.OrgUpdateMemberAuditEntry
+	case "OrgUpdateDefaultRepositoryPermissionAuditEntry":
+		currentContents = current.Node.OrgUpdateDefaultRepositoryPermissionAuditEntry
+	case "OrgUnblockUserAuditEntry":
+		currentContents = current.Node.OrgUnblockUserAuditEntry
+	case "OrgRemoveOutsideCollaboratorAuditEntry":
+		currentContents = current.Node.OrgRemoveOutsideCollaboratorAuditEntry
+	case "OrgRemoveMemberAuditEntry":
+		currentContents = current.Node.OrgRemoveMemberAuditEntry
+	case "OrgRemoveBillingManagerAuditEntry":
+		currentContents = current.Node.OrgRemoveBillingManagerAuditEntry
+	case "OrgOauthAppAccessRequestedAuditEntry":
+		currentContents = current.Node.OrgOauthAppAccessRequestedAuditEntry
+	case "OrgOauthAppAccessDeniedAuditEntry":
+		currentContents = current.Node.OrgOauthAppAccessDeniedAuditEntry
+	case "OrgInviteToBusinessAuditEntry":
+		currentContents = current.Node.OrgInviteToBusinessAuditEntry
+	case "OrgInviteMemberAuditEntry":
+		currentContents = current.Node.OrgInviteMemberAuditEntry
+	case "OrgEnableTwoFactorRequirementAuditEntry":
+		currentContents = current.Node.OrgEnableTwoFactorRequirementAuditEntry
+	case "OrgEnableSamlAuditEntry":
+		currentContents = current.Node.OrgEnableSamlAuditEntry
+	case "OrgEnableOauthAppRestrictionsAuditEntry":
+		currentContents = current.Node.OrgEnableOauthAppRestrictionsAuditEntry
+	case "OrgDisableSamlAuditEntry":
+		currentContents = current.Node.OrgDisableSamlAuditEntry
+	case "OrgCreateAuditEntry":
+		currentContents = current.Node.OrgCreateAuditEntry
+	case "OrgConfigEnableCollaboratorsOnlyAuditEntry":
+		currentContents = current.Node.OrgConfigEnableCollaboratorsOnlyAuditEntry
+	case "OrgConfigDisableCollaboratorsOnlyAuditEntry":
+		currentContents = current.Node.OrgConfigDisableCollaboratorsOnlyAuditEntry
+	case "OrgBlockUserAuditEntry":
+		currentContents = current.Node.OrgBlockUserAuditEntry
+	case "OrgAddMemberAuditEntry":
+		currentContents = current.Node.OrgAddMemberAuditEntry
+	case "OrgAddBillingManagerAuditEntry":
+		currentContents = current.Node.OrgAddBillingManagerAuditEntry
+	case "OauthApplicationCreateAuditEntry":
+		currentContents = current.Node.OauthApplicationCreateAuditEntry
+	case "OrgDisableOauthAppRestrictionsAuditEntry":
+		currentContents = current.Node.OrgDisableOauthAppRestrictionsAuditEntry
+	}
+	switch orgAuditCols[c].Name {
 	case "login":
 		ctx.ResultText(i.login)
 	case "audit_entry_action":
-		ctx.ResultText(string(current.Node.Action))
+		ctx.ResultText(string(currentContents.Action))
 	case "audit_entry_id":
-		ctx.ResultText(fmt.Sprint(current.Node.Id))
+		ctx.ResultText(fmt.Sprint(currentContents.Id))
 	case "audit_entry_type":
 		ctx.ResultText(current.Node.Typename)
 	case "audit_entry_user_company":
-		ctx.ResultText(current.Node.User.Company)
+		ctx.ResultText(currentContents.User.Company)
 	case "audit_entry_user_email":
-		ctx.ResultText(current.Node.User.Email)
+		ctx.ResultText(currentContents.User.Email)
 	case "audit_entry_user_id":
-		ctx.ResultText(fmt.Sprint(current.Node.User.Id))
+		ctx.ResultText(fmt.Sprint(currentContents.User.Id))
 	case "audit_entry_user_login":
-		ctx.ResultText(current.Node.User.Login)
+		ctx.ResultText(currentContents.User.Login)
 	case "audit_entry_user_name":
-		ctx.ResultText(current.Node.User.Name)
+		ctx.ResultText(currentContents.User.Name)
 	case "audit_log_count":
 		ctx.ResultInt(i.current)
 	}
@@ -134,7 +295,7 @@ func (i *iterOrgAuditLogs) Next() (vtab.Row, error) {
 
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of org audit entries for %s", i.login)
-			results, err := i.fetchOrgRepos(context.Background(), cursor)
+			results, err := i.fetchOrgAuditRepos(context.Background(), cursor)
 			if err != nil {
 				return nil, err
 			}
@@ -150,7 +311,7 @@ func (i *iterOrgAuditLogs) Next() (vtab.Row, error) {
 	return i, nil
 }
 
-var orgReposCols = []vtab.Column{
+var orgAuditCols = []vtab.Column{
 	{Name: "login", Type: "TEXT", Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "audit_entry_action", Type: "TEXT"},
 	{Name: "audit_entry_actor_login", Type: "TEXT"},
@@ -165,8 +326,8 @@ var orgReposCols = []vtab.Column{
 	{Name: "user_login", Type: "TEXT"},
 }
 
-func NewOrgReposModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_org_repos", orgReposCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+func NewOrgAuditModule(opts *Options) sqlite.Module {
+	return vtab.NewTableFunc("github_audit_repos", orgAuditCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var login, affiliations string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
