@@ -6,7 +6,7 @@ import (
 	"github.com/askgitdev/askgit/extensions/internal/tools"
 )
 
-func TestStrSplit(t *testing.T) {
+func TestStrSplitFunc(t *testing.T) {
 	rows, err := FixtureDatabase.Query("SELECT str_split('hello world', ' ', 0)")
 	if err != nil {
 		t.Fatal(err)
