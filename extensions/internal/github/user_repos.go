@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"strings"
 	"time"
@@ -63,8 +64,15 @@ type userRepo struct {
 		TotalCount int
 	}
 	StargazerCount int
-	UpdatedAt      time.Time
-	Watchers       struct {
+	Topics         struct {
+		Nodes []struct {
+			Topic struct {
+				Name string
+			}
+		}
+	} `graphql:"repositoryTopics(first: 10)"`
+	UpdatedAt time.Time
+	Watchers  struct {
 		TotalCount int
 	}
 }
@@ -199,6 +207,16 @@ func (i *iterUserRepos) Column(ctx vtab.Context, c int) error {
 		ctx.ResultInt(current.Releases.TotalCount)
 	case "stargazer_count":
 		ctx.ResultInt(current.StargazerCount)
+	case "topics":
+		topics := make([]string, len(current.Topics.Nodes))
+		for t, topic := range current.Topics.Nodes {
+			topics[t] = topic.Topic.Name
+		}
+		jsonStr, err := json.Marshal(topics)
+		if err != nil {
+			return err
+		}
+		ctx.ResultText(string(jsonStr))
 	case "updated_at":
 		t := current.UpdatedAt
 		if t.IsZero() {
@@ -275,6 +293,7 @@ var userReposCols = []vtab.Column{
 	{Name: "pushed_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "release_count", Type: "INT"},
 	{Name: "stargazer_count", Type: "INT", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "topics", Type: "JSON"},
 	{Name: "updated_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "watcher_count", Type: "INT"},
 }

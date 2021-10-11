@@ -587,6 +587,7 @@ Table-valued function that returns all the repositories belonging to a user or a
 | pushed_at                   | DATETIME |
 | release_count               | INT      |
 | stargazer_count             | INT      |
+| topics                      | JSON     |
 | updated_at                  | DATETIME |
 | watcher_count               | INT      |
 
