@@ -255,6 +255,9 @@ func (i *iterOrgRepos) Next() (vtab.Row, error) {
 			i.results = results
 			i.current = 0
 
+			if len(results.OrgRepos) == 0 {
+				return nil, io.EOF
+			}
 		} else {
 			return nil, io.EOF
 		}

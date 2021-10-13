@@ -163,10 +163,10 @@ func (i *iterProtections) Next() (vtab.Row, error) {
 
 			i.results = results
 			i.current = 0
-			if len(i.results.Edges) == 0 {
-				return i.Next()
-			}
 
+			if len(i.results.Edges) == 0 {
+				return nil, io.EOF
+			}
 		} else {
 			return nil, io.EOF
 		}
