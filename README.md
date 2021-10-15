@@ -650,7 +650,7 @@ Table-valued-function that returns all the pull requests of a GitHub repository.
 | additions                | INT      |
 | author_login             | TEXT     |
 | author_association       | TEXT     |
-| author_url               | TEXT     |
+| author_avatar_url        | TEXT     |
 | author_name              | TEXT     |
 | base_ref_oid             | TEXT     |
 | base_ref_name            | TEXT     |
