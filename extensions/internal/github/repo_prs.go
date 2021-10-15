@@ -15,7 +15,11 @@ type pullRequest struct {
 	ActiveLockReason githubv4.LockReason
 	Additions        int
 	Author           struct {
-		Login string
+		Login     string
+		AvatarUrl githubv4.URI
+		User      struct {
+			Name string
+		} `graphql:"... on User"`
 	}
 	AuthorAssociation githubv4.CommentAuthorAssociation
 	BaseRefOid        githubv4.GitObjectID
@@ -139,6 +143,10 @@ func (i *iterPRs) Column(ctx vtab.Context, c int) error {
 		ctx.ResultInt(int(current.Additions))
 	case "author_login":
 		ctx.ResultText(current.Author.Login)
+	case "author_avatar_url":
+		ctx.ResultText(current.Author.AvatarUrl.String())
+	case "author_name":
+		ctx.ResultText(current.Author.User.Name)
 	case "author_association":
 		ctx.ResultText(string(current.AuthorAssociation))
 	case "base_ref_oid":
@@ -285,6 +293,8 @@ var prCols = []vtab.Column{
 	{Name: "additions", Type: "INT"},
 	{Name: "author_login", Type: "TEXT"},
 	{Name: "author_association", Type: "TEXT"},
+	{Name: "author_avatar_url", Type: "TEXT"},
+	{Name: "author_name", Type: "TEXT"},
 	{Name: "base_ref_oid", Type: "TEXT"},
 	{Name: "base_ref_name", Type: "TEXT"},
 	{Name: "base_repository_name", Type: "TEXT"},
