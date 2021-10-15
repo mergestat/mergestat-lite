@@ -25,8 +25,8 @@ func init() {
 	// local (root command only) flags
 	rootCmd.Flags().StringVarP(&format, "format", "f", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' and 'json'")
 	rootCmd.Flags().StringVarP(&presetQuery, "preset", "p", "", "used to pick a preset query")
-	rootCmd.Flags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
-	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
+	rootCmd.PersistentFlags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
 
 	// register the sqlite extension ahead of any command
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
