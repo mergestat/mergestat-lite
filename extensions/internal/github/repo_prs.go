@@ -143,7 +143,7 @@ func (i *iterPRs) Column(ctx vtab.Context, c int) error {
 		ctx.ResultInt(int(current.Additions))
 	case "author_login":
 		ctx.ResultText(current.Author.Login)
-	case "author_url":
+	case "author_avatar_url":
 		ctx.ResultText(current.Author.AvatarUrl.String())
 	case "author_name":
 		ctx.ResultText(current.Author.User.Name)
@@ -293,7 +293,7 @@ var prCols = []vtab.Column{
 	{Name: "additions", Type: "INT"},
 	{Name: "author_login", Type: "TEXT"},
 	{Name: "author_association", Type: "TEXT"},
-	{Name: "author_url", Type: "TEXT"},
+	{Name: "author_avatar_url", Type: "TEXT"},
 	{Name: "author_name", Type: "TEXT"},
 	{Name: "base_ref_oid", Type: "TEXT"},
 	{Name: "base_ref_name", Type: "TEXT"},
