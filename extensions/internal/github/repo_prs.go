@@ -17,7 +17,9 @@ type pullRequest struct {
 	Author           struct {
 		Login     string
 		AvatarUrl githubv4.URI
-		Name      string `graphql:"... on User"`
+		User      struct {
+			Name string
+		} `graphql:"... on User"`
 	}
 	AuthorAssociation githubv4.CommentAuthorAssociation
 	BaseRefOid        githubv4.GitObjectID
@@ -144,7 +146,7 @@ func (i *iterPRs) Column(ctx vtab.Context, c int) error {
 	case "author_url":
 		ctx.ResultText(current.Author.AvatarUrl.String())
 	case "author_name":
-		ctx.ResultText(current.Author.Name)
+		ctx.ResultText(current.Author.User.Name)
 	case "author_association":
 		ctx.ResultText(string(current.AuthorAssociation))
 	case "base_ref_oid":
