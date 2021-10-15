@@ -20,7 +20,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/lib/pq v1.10.3
-	github.com/libgit2/git2go/v32 v32.0.4
+	github.com/libgit2/git2go/v33 v33.0.0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
