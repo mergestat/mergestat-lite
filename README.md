@@ -125,6 +125,42 @@ See `-h` for all the options.
 
 ### Tables and Functions
 
+To retrieve a table schema using the CLI, you can run:
+
+```sql
+PRAGMA table_info(<table-name>) -- replace <table-name>
+```
+
+```
+askgit "PRAGMA table_info(commits)"
+```
+
+to see an output like:
+
+```
++-----+-----------------+----------+---------+------------+----+
+| CID | NAME            | TYPE     | NOTNULL | DFLT_VALUE | PK |
++-----+-----------------+----------+---------+------------+----+
+| 0   | hash            | TEXT     | 1       | NULL       | 1  |
++-----+-----------------+----------+---------+------------+----+
+| 1   | message         | TEXT     | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+| 2   | author_name     | TEXT     | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+| 3   | author_email    | TEXT     | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+| 4   | author_when     | DATETIME | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+| 5   | committer_name  | TEXT     | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+| 6   | committer_email | TEXT     | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+| 7   | committer_when  | DATETIME | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+| 8   | parents         | INT      | 0       | NULL       | 0  |
++-----+-----------------+----------+---------+------------+----+
+```
+
 #### Local Git Repository
 
 The following tables access a git repository in the current directory by default.
@@ -551,6 +587,7 @@ Table-valued function that returns all the repositories belonging to a user or a
 | pushed_at                   | DATETIME |
 | release_count               | INT      |
 | stargazer_count             | INT      |
+| topics                      | JSON     |
 | updated_at                  | DATETIME |
 | watcher_count               | INT      |
 
@@ -613,6 +650,8 @@ Table-valued-function that returns all the pull requests of a GitHub repository.
 | additions                | INT      |
 | author_login             | TEXT     |
 | author_association       | TEXT     |
+| author_avatar_url        | TEXT     |
+| author_name              | TEXT     |
 | base_ref_oid             | TEXT     |
 | base_ref_name            | TEXT     |
 | base_repository_name     | TEXT     |

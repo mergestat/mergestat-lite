@@ -219,6 +219,9 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 			i.results = results
 			i.current = 0
 
+			if len(results.Edges) == 0 {
+				return nil, io.EOF
+			}
 		} else {
 			return nil, io.EOF
 		}
