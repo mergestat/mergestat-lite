@@ -16,7 +16,7 @@ type pullRequest struct {
 	Additions        int
 	Author           struct {
 		Login     string
-		AvatarUrl githubv4.URI
+		AvatarUrl *githubv4.URI
 		User      struct {
 			Name string
 		} `graphql:"... on User"`
@@ -144,7 +144,11 @@ func (i *iterPRs) Column(ctx vtab.Context, c int) error {
 	case "author_login":
 		ctx.ResultText(current.Author.Login)
 	case "author_avatar_url":
-		ctx.ResultText(current.Author.AvatarUrl.String())
+		if current.Author.AvatarUrl != nil {
+			ctx.ResultText(current.Author.AvatarUrl.String())
+		} else {
+			ctx.ResultNull()
+		}
 	case "author_name":
 		ctx.ResultText(current.Author.User.Name)
 	case "author_association":
