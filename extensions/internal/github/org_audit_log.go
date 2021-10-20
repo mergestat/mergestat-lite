@@ -256,6 +256,8 @@ func (i *iterOrgAuditLogs) Column(ctx vtab.Context, c int) error {
 	switch orgAuditCols[c].Name {
 	case "login":
 		ctx.ResultText(i.login)
+	case "audit_entry_actor_login":
+		ctx.ResultText(currentContents.ActorLogin)
 	case "audit_entry_action":
 		ctx.ResultText(string(currentContents.Action))
 	case "audit_entry_id":
@@ -269,9 +271,11 @@ func (i *iterOrgAuditLogs) Column(ctx vtab.Context, c int) error {
 	case "audit_entry_user_id":
 		ctx.ResultText(fmt.Sprint(currentContents.User.Id))
 	case "audit_entry_user_login":
-		ctx.ResultText(currentContents.User.Login)
+		ctx.ResultText(fmt.Sprint(currentContents.User.Login))
 	case "audit_entry_user_name":
 		ctx.ResultText(currentContents.User.Name)
+	case "audit_entry_when":
+		ctx.ResultText(currentContents.CreatedAt.String())
 	case "audit_log_count":
 		ctx.ResultInt(i.current)
 	}
@@ -322,8 +326,8 @@ var orgAuditCols = []vtab.Column{
 	{Name: "audit_entry_user_id", Type: "TEXT"},
 	{Name: "audit_entry_user_login", Type: "TEXT"},
 	{Name: "audit_entry_user_name", Type: "TEXT"},
+	{Name: "audit_entry_when", Type: "TEXT"},
 	{Name: "audit_log_count", Type: "INT"},
-	{Name: "user_login", Type: "TEXT"},
 }
 
 func NewOrgAuditModule(opts *Options) sqlite.Module {
