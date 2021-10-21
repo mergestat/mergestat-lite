@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"strings"
 
@@ -33,9 +32,6 @@ func NewStrSplitModule() sqlite.Module {
 			}
 		}
 
-		if contents == "" {
-			return nil, fmt.Errorf("no Contents Provided")
-		}
 		if delimiter == "" {
 			delimiter = "\n"
 		}
