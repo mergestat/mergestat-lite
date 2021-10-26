@@ -106,6 +106,8 @@ func (i *iterPRComments) Column(ctx vtab.Context, c int) error {
 		ctx.ResultText(current.Author.Login)
 	case "c_author_url":
 		ctx.ResultText(current.Author.Url)
+	case "c_body":
+		ctx.ResultText(current.Body)
 	case "c_created_at":
 		ctx.ResultText(current.CreatedAt.String())
 	case "c_database_id":
@@ -222,6 +224,7 @@ var prCommentCols = []vtab.Column{
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "c_author_login", Type: "TEXT"},
 	{Name: "c_author_url", Type: "TEXT"},
+	{Name: "c_body", Type: "TEXT"},
 	{Name: "c_created_at", Type: "TEXT"},
 	{Name: "c_database_id", Type: "TEXT"},
 	{Name: "c_id", Type: "TEXT"},
