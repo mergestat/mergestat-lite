@@ -50,6 +50,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 		"github_repo_issues":             NewIssuesModule(githubOpts),
 		"github_repo_pull_requests":      NewPRModule(githubOpts),
 		"github_repo_branch_protections": NewProtectionsModule(githubOpts),
+		"github_issue_comments":          NewIssuesModule(githubOpts),
 	}
 
 	modules["github_issues"] = modules["github_repo_issues"]
