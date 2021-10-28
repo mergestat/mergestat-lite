@@ -111,7 +111,7 @@ func (i *iterPRComments) Column(ctx vtab.Context, c int) error {
 	case "c_created_at":
 		ctx.ResultText(current.CreatedAt.String())
 	case "c_database_id":
-		ctx.ResultText(string(current.DatabaseId))
+		ctx.ResultInt(current.DatabaseId)
 	case "c_id":
 		ctx.ResultText(string(current.Id))
 	case "c_updated_at":
@@ -127,7 +127,7 @@ func (i *iterPRComments) Column(ctx vtab.Context, c int) error {
 }
 
 func (i *iterPRComments) Next() (vtab.Row, error) {
-	// if no results have been pulled... pull them
+	// if no results have been pulled pull them
 	if i.results == nil {
 		err := i.RateLimiter.Wait(context.Background())
 		if err != nil {
@@ -148,7 +148,7 @@ func (i *iterPRComments) Next() (vtab.Row, error) {
 		i.currentComment = -1
 
 		if len(results.Edges) == 0 {
-			l.Info().Msgf("no pull requests found", i.owner, i.name)
+			l.Info().Msgf("no pull requests found %s/%s", i.owner, i.name)
 			return nil, io.EOF
 		}
 	}
@@ -181,7 +181,7 @@ func (i *iterPRComments) Next() (vtab.Row, error) {
 			return i, nil
 		}
 	}
-	// if there are no more pull requests then pull the next set of pull requests
+	// if there are no more pull requests in current edges then pull the next set of pull requests
 	for i.results.HasNextPage {
 		err := i.RateLimiter.Wait(context.Background())
 		if err != nil {
@@ -226,7 +226,7 @@ var prCommentCols = []vtab.Column{
 	{Name: "c_author_url", Type: "TEXT"},
 	{Name: "c_body", Type: "TEXT"},
 	{Name: "c_created_at", Type: "TEXT"},
-	{Name: "c_database_id", Type: "TEXT"},
+	{Name: "c_database_id", Type: "INT"},
 	{Name: "c_id", Type: "TEXT"},
 	{Name: "c_updated_at", Type: "TEXT"},
 	{Name: "c_url", Type: "TEXT"},
