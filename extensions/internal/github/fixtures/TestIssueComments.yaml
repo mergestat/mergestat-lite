@@ -1,0 +1,304 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($issuecursor:String$issueorder:IssueOrder$name:String!$owner:String!$perpage:Int!){repository(owner: $owner, name: $name){owner{login},name,issues(first: $perpage, after: $issuecursor, orderBy: $issueorder){edges{cursor,node{author{login},body,closed,closedAt,comments{totalCount},createdAt,createdViaEmail,databaseId,editor{login},includesCreatedEdit,isReadByViewer,labels{totalCount},lastEditedAt,locked,milestone{number},number,participants{totalCount},publishedAt,reactions{totalCount},state,title,updatedAt,url}},pageInfo{endCursor,hasNextPage}}}}","variables":{"issuecursor":null,"issueorder":null,"name":"askgit","owner":"askgitdev","perpage":100}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","issues":{"edges":[{"cursor":"Y3Vyc29yOnYyOpHOJs4z-A==","node":{"author":{"login":"erezsh"},"body":"I''m
+      not very familiar with Go, so perhaps I''m doing something wrong?\r\n\r\n```bash\r\n$
+      go install -v -tags=sqlite_vtable github.com/augmentable-dev/gitqlite\r\ncan''t
+      load package: package github.com/augmentable-dev/gitqlite: cannot find package
+      \"github.com/augmentable-dev/gitqlite\" in any of:\r\n        /usr/lib/go-1.10/src/github.com/augmentable-dev/gitqlite
+      (from $GOROOT)\r\n        /home/erez/go/src/github.com/augmentable-dev/gitqlite
+      (from $GOPATH)\r\n```\r\n","closed":true,"closedAt":"2020-07-05T18:01:42Z","comments":{"totalCount":12},"createdAt":"2020-07-05T11:00:44Z","createdViaEmail":false,"databaseId":651047928,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":3,"participants":{"totalCount":3},"publishedAt":"2020-07-05T11:00:44Z","reactions":{"totalCount":1},"state":"CLOSED","title":"Following
+      installation instructions doesn''t work?","updatedAt":"2020-07-05T18:01:42Z","url":"https://github.com/askgitdev/askgit/issues/3"}},{"cursor":"Y3Vyc29yOnYyOpHOJtui8g==","node":{"author":{"login":"joni2back"},"body":"","closed":true,"closedAt":"2020-07-07T02:08:51Z","comments":{"totalCount":1},"createdAt":"2020-07-07T01:50:24Z","createdViaEmail":false,"databaseId":651928306,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":9,"participants":{"totalCount":2},"publishedAt":"2020-07-07T01:50:24Z","reactions":{"totalCount":0},"state":"CLOSED","title":"It
+      is necessary?","updatedAt":"2020-07-07T02:08:51Z","url":"https://github.com/askgitdev/askgit/issues/9"}},{"cursor":"Y3Vyc29yOnYyOpHOJuDdaA==","node":{"author":{"login":"klauern"},"body":"It
+      would be nice to release this as a downloadable set of binaries.  I have had
+      some experience with [GoReleaser](https://goreleaser.com/) and I have to say
+      it''s a pretty nice little tool, especially if you''re working in Go.  I''d
+      prefer to be able to just `brew install gitqlite`, which GoReleaser has good
+      support for: https://goreleaser.com/customization/homebrew/","closed":true,"closedAt":"2020-09-03T02:08:40Z","comments":{"totalCount":4},"createdAt":"2020-07-07T12:10:47Z","createdViaEmail":false,"databaseId":652270952,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":10,"participants":{"totalCount":4},"publishedAt":"2020-07-07T12:10:47Z","reactions":{"totalCount":2},"state":"CLOSED","title":"provide
+      releases for non-Go developers","updatedAt":"2020-09-03T02:08:40Z","url":"https://github.com/askgitdev/askgit/issues/10"}},{"cursor":"Y3Vyc29yOnYyOpHOJuEhqA==","node":{"author":{"login":"mwarkentin"},"body":"It''d
+      be nice if we could just run `docker run -v `pwd`:/repo:ro gitqlite \"SELECT
+      * FROM commits\"` without needing to clone and build the docker image locally.","closed":true,"closedAt":"2020-07-17T03:17:40Z","comments":{"totalCount":3},"createdAt":"2020-07-07T12:38:12Z","createdViaEmail":false,"databaseId":652288424,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":11,"participants":{"totalCount":3},"publishedAt":"2020-07-07T12:38:12Z","reactions":{"totalCount":3},"state":"CLOSED","title":"Publish
+      image to dockerhub?","updatedAt":"2020-07-17T03:17:40Z","url":"https://github.com/askgitdev/askgit/issues/11"}},{"cursor":"Y3Vyc29yOnYyOpHOJvAC8A==","node":{"author":{"login":"lycclsltt"},"body":"请教一下，SQL语法的解析如何实现的？又是如何和git查询接口对接上的呢","closed":true,"closedAt":"2020-07-25T06:54:59Z","comments":{"totalCount":2},"createdAt":"2020-07-08T12:38:36Z","createdViaEmail":false,"databaseId":653263600,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":17,"participants":{"totalCount":2},"publishedAt":"2020-07-08T12:38:36Z","reactions":{"totalCount":0},"state":"CLOSED","title":"请教一下，SQL语法的解析如何实现的？","updatedAt":"2020-07-25T06:54:59Z","url":"https://github.com/askgitdev/askgit/issues/17"}},{"cursor":"Y3Vyc29yOnYyOpHOJ0R9aw==","node":{"author":{"login":"patrickdevivo"},"body":"Info
+      about the recently implemented `branches` and `tags` tables should be added
+      to the documentation in the README, similar to what''s done for `commits` and
+      `files`","closed":true,"closedAt":"2020-09-12T00:47:55Z","comments":{"totalCount":0},"createdAt":"2020-07-17T03:19:12Z","createdViaEmail":false,"databaseId":658799979,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":24,"participants":{"totalCount":1},"publishedAt":"2020-07-17T03:19:12Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Document
+      the branches and tags tables","updatedAt":"2020-09-12T00:47:55Z","url":"https://github.com/askgitdev/askgit/issues/24"}},{"cursor":"Y3Vyc29yOnYyOpHOJ6seQA==","node":{"author":{"login":"pjebs"},"body":"I
+      was wondering where in the repo is the SQL getting parsed? How is it being parse?","closed":true,"closedAt":"2020-08-29T15:00:12Z","comments":{"totalCount":1},"createdAt":"2020-07-25T06:12:26Z","createdViaEmail":false,"databaseId":665525824,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":32,"participants":{"totalCount":3},"publishedAt":"2020-07-25T06:12:26Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Parsing
+      SQL","updatedAt":"2020-08-29T15:00:12Z","url":"https://github.com/askgitdev/askgit/issues/32"}},{"cursor":"Y3Vyc29yOnYyOpHOKIP93g==","node":{"author":{"login":"simon-brooke"},"body":"Build
+      log as follows:\r\n\r\n```\r\nsimon@mason:~/tmp$ go get -v -tags=sqlite_vtable
+      github.com/augmentable-dev/askgit\r\ngithub.com/augmentable-dev/askgit (download)\r\ngithub.com/go-git/go-git
+      (download)\r\ngithub.com/go-git/go-billy (download)\r\nFetching https://golang.org/x/sys/unix?go-get=1\r\nParsing
+      meta tags from https://golang.org/x/sys/unix?go-get=1 (status code 200)\r\nget
+      \"golang.org/x/sys/unix\": found meta tag get.metaImport{Prefix:\"golang.org/x/sys\",
+      VCS:\"git\", RepoRoot:\"https://go.googlesource.com/sys\"} at https://golang.org/x/sys/unix?go-get=1\r\nget
+      \"golang.org/x/sys/unix\": verifying non-authoritative meta tag\r\nFetching
+      https://golang.org/x/sys?go-get=1\r\nParsing meta tags from https://golang.org/x/sys?go-get=1
+      (status code 200)\r\ngolang.org/x/sys (download)\r\ngithub.com/go-git/gcfg (download)\r\nFetching
+      https://gopkg.in/warnings.v0?go-get=1\r\nParsing meta tags from https://gopkg.in/warnings.v0?go-get=1
+      (status code 200)\r\nget \"gopkg.in/warnings.v0\": found meta tag get.metaImport{Prefix:\"gopkg.in/warnings.v0\",
+      VCS:\"git\", RepoRoot:\"https://gopkg.in/warnings.v0\"} at https://gopkg.in/warnings.v0?go-get=1\r\ngopkg.in/warnings.v0
+      (download)\r\ngithub.com/mitchellh/go-homedir (download)\r\ngithub.com/jbenet/go-context
+      (download)\r\nFetching https://golang.org/x/net/context?go-get=1\r\nParsing
+      meta tags from https://golang.org/x/net/context?go-get=1 (status code 200)\r\nget
+      \"golang.org/x/net/context\": found meta tag get.metaImport{Prefix:\"golang.org/x/net\",
+      VCS:\"git\", RepoRoot:\"https://go.googlesource.com/net\"} at https://golang.org/x/net/context?go-get=1\r\nget
+      \"golang.org/x/net/context\": verifying non-authoritative meta tag\r\nFetching
+      https://golang.org/x/net?go-get=1\r\nParsing meta tags from https://golang.org/x/net?go-get=1
+      (status code 200)\r\ngolang.org/x/net (download)\r\ngithub.com/emirpasic/gods
+      (download)\r\ngithub.com/sergi/go-diff (download)\r\nFetching https://golang.org/x/crypto/openpgp?go-get=1\r\nParsing
+      meta tags from https://golang.org/x/crypto/openpgp?go-get=1 (status code 200)\r\nget
+      \"golang.org/x/crypto/openpgp\": found meta tag get.metaImport{Prefix:\"golang.org/x/crypto\",
+      VCS:\"git\", RepoRoot:\"https://go.googlesource.com/crypto\"} at https://golang.org/x/crypto/openpgp?go-get=1\r\nget
+      \"golang.org/x/crypto/openpgp\": verifying non-authoritative meta tag\r\nFetching
+      https://golang.org/x/crypto?go-get=1\r\nParsing meta tags from https://golang.org/x/crypto?go-get=1
+      (status code 200)\r\ngolang.org/x/crypto (download)\r\ngithub.com/kevinburke/ssh_config
+      (download)\r\ngithub.com/xanzy/ssh-agent (download)\r\nFetching https://golang.org/x/crypto/ssh?go-get=1\r\nParsing
+      meta tags from https://golang.org/x/crypto/ssh?go-get=1 (status code 200)\r\nget
+      \"golang.org/x/crypto/ssh\": found meta tag get.metaImport{Prefix:\"golang.org/x/crypto\",
+      VCS:\"git\", RepoRoot:\"https://go.googlesource.com/crypto\"} at https://golang.org/x/crypto/ssh?go-get=1\r\nget
+      \"golang.org/x/crypto/ssh\": verifying non-authoritative meta tag\r\nFetching
+      https://golang.org/x/crypto/ssh/knownhosts?go-get=1\r\nParsing meta tags from
+      https://golang.org/x/crypto/ssh/knownhosts?go-get=1 (status code 200)\r\nget
+      \"golang.org/x/crypto/ssh/knownhosts\": found meta tag get.metaImport{Prefix:\"golang.org/x/crypto\",
+      VCS:\"git\", RepoRoot:\"https://go.googlesource.com/crypto\"} at https://golang.org/x/crypto/ssh/knownhosts?go-get=1\r\nget
+      \"golang.org/x/crypto/ssh/knownhosts\": verifying non-authoritative meta tag\r\nFetching
+      https://golang.org/x/net/proxy?go-get=1\r\nParsing meta tags from https://golang.org/x/net/proxy?go-get=1
+      (status code 200)\r\nget \"golang.org/x/net/proxy\": found meta tag get.metaImport{Prefix:\"golang.org/x/net\",
+      VCS:\"git\", RepoRoot:\"https://go.googlesource.com/net\"} at https://golang.org/x/net/proxy?go-get=1\r\nget
+      \"golang.org/x/net/proxy\": verifying non-authoritative meta tag\r\ngithub.com/imdario/mergo
+      (download)\r\ngithub.com/mattn/go-sqlite3 (download)\r\ngithub.com/gitsight/go-vcsurl
+      (download)\r\ngithub.com/olekukonko/tablewriter (download)\r\ngithub.com/mattn/go-runewidth
+      (download)\r\ngithub.com/spf13/cobra (download)\r\ngithub.com/spf13/pflag (download)\r\n../go/src/github.com/go-git/go-git/remote.go:9:2:
+      code in directory /home/simon/go/src/github.com/go-git/go-billy/osfs expects
+      import \"github.com/go-git/go-billy/v5/osfs\"\r\n```\r\n\r\nOn investigation,
+      `https://github.com/go-git/go-billy/v5/osfs` does not exist but `https://github.com/go-git/go-billy/osfs`
+      does. Suggest this is bit-rot caused by the upstream package changing its directory
+      structure?","closed":true,"closedAt":"2020-09-18T01:00:42Z","comments":{"totalCount":4},"createdAt":"2020-08-16T11:33:39Z","createdViaEmail":false,"databaseId":679738846,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":37,"participants":{"totalCount":4},"publishedAt":"2020-08-16T11:33:39Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Build
+      fails looking for ''github.com/go-git/go-billy/v5/osfs''","updatedAt":"2020-09-18T01:00:43Z","url":"https://github.com/askgitdev/askgit/issues/37"}},{"cursor":"Y3Vyc29yOnYyOpHOKIQSzQ==","node":{"author":{"login":"muhmud"},"body":"Would
+      be nice to have PAGER support so that the produced table results are more easily
+      browseable.\r\n\r\nMost SQL command line clients support this. I could pipe
+      the results into `less -SinFX`, but would be nice if I didn''t have to on each
+      query.\r\n","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2020-08-16T12:14:25Z","createdViaEmail":false,"databaseId":679744205,"editor":{"login":"muhmud"},"includesCreatedEdit":true,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":"2020-08-16T12:16:23Z","locked":false,"milestone":null,"number":38,"participants":{"totalCount":1},"publishedAt":"2020-08-16T12:14:25Z","reactions":{"totalCount":0},"state":"OPEN","title":"Support
+      for a PAGER","updatedAt":"2020-08-16T12:16:23Z","url":"https://github.com/askgitdev/askgit/issues/38"}},{"cursor":"Y3Vyc29yOnYyOpHOKMOFWw==","node":{"author":{"login":"nhinds"},"body":"`askgit`
+      has trouble with repository directories that contain characters that are either
+      special to Go''s `%q` string encoding or special to sqlite. Some characters
+      cause `askgit` to exit with \"unrecognized token\" trying to create the virtual
+      table, while others make it further and fail (or produce no data) when executing
+      SQL statements.\r\n\r\nSome special characters do not render well on github,
+      so I''ve included equivalent shell commands for making these directories.\r\n\r\nThe
+      following directories behave the same. `select count(*) from commits` returns
+      no results (not the number 0 - it returns an empty resultset), while `select
+      count(*) from files` panics with \"panic: invalid handle\":\r\n* `back\\slash`
+      (`mkdir ''back\\slash''`)\r\n* `thing﷐` (`mkdir ''thing''$''\\357\\267\\220''`)\r\n*
+      `new\r\nline` (`mkdir ''new''$''\\n''''line''`)\r\n* `doublequotes\");--injection`
+      (`mkdir ''doublequotes\");--injection''`)\r\n\r\nThe following directories all
+      fail without running the SQL query, with an error like `unrecognized token:
+      \"\");\"`:\r\n* `quotation\"marks` (`mkdir ''quotation\"marks''`)\r\n* `comma\",separated\"`
+      (`mkdir ''comma\",separated\"''`)\r\n\r\nThis seems to be caused by building
+      a SQL string using `fmt.Sprintf` and `%q`, which quotes/escapes strings in a
+      way that Go understands rather than in a way that sqlite understands.\r\nGo
+      will format `\"` in the middle of a string as `\\\"`, which Sqlite considers
+      to be a literal backslash character followed by the end of a string, which is
+      why most directories with the double quote character result in \"unrecognized
+      token\".\r\nFor other characters it seems like Go will escape them (e.g. `\\`
+      becomes `\\\\`, newline becomes `\\n`), and Sqlite happily passes the escaped
+      versions to the modules'' `Create` functions, which presumably try and fail
+      to open a directory named e.g. `back\\\\slash` instead of `back\\slash`\r\n\r\nThis
+      can be reproduced in the tests by changing the fixture repo from `\"repo\"`
+      to e.g. `\"repo\\\\\"` or `\"repo\\\"\"`","closed":true,"closedAt":"2020-09-02T02:51:45Z","comments":{"totalCount":5},"createdAt":"2020-08-22T01:34:47Z","createdViaEmail":false,"databaseId":683902299,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":41,"participants":{"totalCount":4},"publishedAt":"2020-08-22T01:34:47Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Issues
+      with repository directories with special characters","updatedAt":"2020-09-02T02:51:45Z","url":"https://github.com/askgitdev/askgit/issues/41"}},{"cursor":"Y3Vyc29yOnYyOpHOKQxaqw==","node":{"author":{"login":"borekb"},"body":"Is
+      it expected that the basic command from README is so heavy? I initially thought
+      that there''s something wrong with my invocation, I did this:\r\n\r\n```\r\ndocker
+      run --rm -v `pwd`:/repo:ro augmentable/askgit \"SELECT * FROM commits\"\r\n```\r\n\r\nThen
+      my computer just seemed to be stuck. I was seeing resource usage like this for
+      over a minute:\r\n\r\n<img width=\"1152\" alt=\"Screenshot 2020-08-30 at 10
+      02 57\" src=\"https://user-images.githubusercontent.com/101152/91654422-c6dd0400-eaa8-11ea-911f-8a133a5a9966.png\">\r\n\r\nThen
+      it eventually finished after about 2.5 minutes but I was seriously worried that
+      I''m doing something wrong, e.g., not escaping the SQL query correctly.\r\n\r\nWhat
+      does it do on the first run? Is it building some sort of database behind the
+      scenes? Would even \"simpler\" queries like `SELECT count(*) FROM commits` take
+      similarly long?","closed":true,"closedAt":"2021-08-12T14:05:06Z","comments":{"totalCount":6},"createdAt":"2020-08-30T08:10:10Z","createdViaEmail":false,"databaseId":688675499,"editor":null,"includesCreatedEdit":false,"isReadByViewer":false,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":46,"participants":{"totalCount":2},"publishedAt":"2020-08-30T08:10:10Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Took
+      very long time on the first run","updatedAt":"2021-08-12T14:05:06Z","url":"https://github.com/askgitdev/askgit/issues/46"}},{"cursor":"Y3Vyc29yOnYyOpHOKQ4rUg==","node":{"author":{"login":"federico-razzoli"},"body":"$
+      go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\r\ngo/src/github.com/go-git/go-git/remote.go:9:2:
+      code in directory /home/federico/go/src/github.com/go-git/go-billy/osfs expects
+      import \"github.com/go-git/go-billy/v5/osfs\"\r\n","closed":true,"closedAt":"2020-09-02T01:24:23Z","comments":{"totalCount":1},"createdAt":"2020-08-30T21:25:35Z","createdViaEmail":false,"databaseId":688794450,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":49,"participants":{"totalCount":2},"publishedAt":"2020-08-30T21:25:35Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Incorrect/incomplete
+      install instructions","updatedAt":"2020-09-02T01:24:23Z","url":"https://github.com/askgitdev/askgit/issues/49"}},{"cursor":"Y3Vyc29yOnYyOpHOLGhivg==","node":{"author":{"login":"dflock"},"body":"When
+      trying to install by running this:\r\n\r\n```\r\ngo get -v -tags=sqlite_vtable
+      github.com/augmentable-dev/askgit\r\n```\r\n\r\nI get this:\r\n\r\n```\r\n➜
+      go get -v -tags=sqlite_vtable github.com/augmentable-dev/askgit\r\n\r\ngithub.com/libgit2/git2go
+      (download)\r\ncannot find package \"github.com/libgit2/git2go/v30\" in any of:\r\n\t/usr/local/go/src/github.com/libgit2/git2go/v30
+      (from $GOROOT)\r\n\t/home/duncan/.go/src/github.com/libgit2/git2go/v30 (from
+      $GOPATH)\r\n```\r\n\r\nMy environment is as follows:\r\n\r\n```\r\n ➜ go version\r\ngo
+      version go1.15.5 linux/amd64\r\n\r\n➜ go env\r\nGO111MODULE=\"\"\r\nGOARCH=\"amd64\"\r\nGOBIN=\"\"\r\nGOCACHE=\"/home/duncan/.cache/go-build\"\r\nGOENV=\"/home/duncan/.config/go/env\"\r\nGOEXE=\"\"\r\nGOFLAGS=\"\"\r\nGOHOSTARCH=\"amd64\"\r\nGOHOSTOS=\"linux\"\r\nGOINSECURE=\"\"\r\nGOMODCACHE=\"/home/duncan/.go/pkg/mod\"\r\nGONOPROXY=\"\"\r\nGONOSUMDB=\"\"\r\nGOOS=\"linux\"\r\nGOPATH=\"/home/duncan/.go\"\r\nGOPRIVATE=\"\"\r\nGOPROXY=\"https://proxy.golang.org,direct\"\r\nGOROOT=\"/usr/local/go\"\r\nGOSUMDB=\"sum.golang.org\"\r\nGOTMPDIR=\"\"\r\nGOTOOLDIR=\"/usr/local/go/pkg/tool/linux_amd64\"\r\nGCCGO=\"gccgo\"\r\nAR=\"ar\"\r\nCC=\"gcc\"\r\nCXX=\"g++\"\r\nCGO_ENABLED=\"1\"\r\nGOMOD=\"\"\r\nCGO_CFLAGS=\"-g
+      -O2\"\r\nCGO_CPPFLAGS=\"\"\r\nCGO_CXXFLAGS=\"-g -O2\"\r\nCGO_FFLAGS=\"-g -O2\"\r\nCGO_LDFLAGS=\"-g
+      -O2\"\r\nPKG_CONFIG=\"pkg-config\"\r\nGOGCCFLAGS=\"-fPIC -m64 -pthread -fmessage-length=0
+      -fdebug-prefix-map=/tmp/go-build228718343=/tmp/go-build -gno-record-gcc-switches\"\r\n\r\n
+      ➜ neofetch --backend off\r\n\r\nOS: Ubuntu 20.04.1 LTS x86_64 \r\nKernel: 5.4.0-52-generic
+      \r\nShell: bash 5.0.17 \r\nDE: Xfce \r\nMemory: 38419MiB / 64206MiB \r\n```\r\n","closed":false,"closedAt":null,"comments":{"totalCount":3},"createdAt":"2020-11-17T19:48:59Z","createdViaEmail":false,"databaseId":745038526,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":72,"participants":{"totalCount":3},"publishedAt":"2020-11-17T19:48:59Z","reactions":{"totalCount":0},"state":"OPEN","title":"Install
+      error: cannot find package \"github.com/libgit2/git2go/v30\"","updatedAt":"2020-12-13T04:07:18Z","url":"https://github.com/askgitdev/askgit/issues/72"}},{"cursor":"Y3Vyc29yOnYyOpHOLIZd9w==","node":{"author":{"login":"iwasherefirst2"},"body":"I
+      don''t get that query:\r\n\r\n`SELECT count(*) AS commits, SUM(additions) AS
+      additions, SUM(deletions) AS  deletions, author_email FROM commits GROUP BY
+      author_email ORDER BY commits` \r\n\r\nAccording to the docs there is no  `additions`
+      and `deletions` column for the `commits` table.\r\nAre they missing in the docs?\r\n\r\n![image](https://user-images.githubusercontent.com/1765602/99736489-c01dc600-2ac6-11eb-9000-65a50ee1f709.png)\r\n\r\n\r\n","closed":true,"closedAt":"2020-11-22T17:17:28Z","comments":{"totalCount":1},"createdAt":"2020-11-19T23:24:37Z","createdViaEmail":false,"databaseId":747003383,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":73,"participants":{"totalCount":2},"publishedAt":"2020-11-19T23:24:37Z","reactions":{"totalCount":0},"state":"CLOSED","title":"commits
+      has no `additions` column?","updatedAt":"2020-11-22T17:17:28Z","url":"https://github.com/askgitdev/askgit/issues/73"}},{"cursor":"Y3Vyc29yOnYyOpHOLSSJSw==","node":{"author":{"login":"kevin-cantwell"},"body":"I''m
+      running OSX Catalina with libgit2 v1.1.0:\r\n```\r\n$ brew info --installed
+      --json | jq ''.[] | select(.name == \"libgit2\") | .versions''\r\n{\r\n  \"stable\":
+      \"1.1.0\",\r\n  \"head\": \"HEAD\",\r\n  \"bottle\": true\r\n}\r\n```\r\n\r\nI
+      cannot build askgit due to a git2go version incompatibility with my libgit2
+      version:\r\n```\r\n$ make build\r\ngo build -v -tags=\"sqlite_vtable,static,system_libgit2\"
+      askgit.go\r\ngithub.com/augmentable-dev/askgit/pkg/gitlog\r\ngithub.com/libgit2/git2go/v30\r\n#
+      github.com/libgit2/git2go/v30\r\n../../../../go/pkg/mod/github.com/libgit2/git2go/v30@v30.2.2/git_system_static.go:11:3:
+      error: \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\r\n# error
+      \"Invalid libgit2 version; this git2go supports libgit2 v1.0\"\r\n  ^\r\n1 error
+      generated.\r\nmake: *** [build] Error 1\r\n```\r\n\r\nThe git2go module has
+      very strict libgit2 version dependencies: https://github.com/libgit2/git2go#which-go-version-to-use\r\n\r\nI
+      was able to successfully build askgit by replacing `github.com/libgit2/git2go/v30`
+      with `github.com/libgit2/git2go/v31`, but I imagine this would break things
+      for those with older libgit2 versions.","closed":true,"closedAt":"2020-12-13T00:58:37Z","comments":{"totalCount":1},"createdAt":"2020-12-04T20:03:37Z","createdViaEmail":false,"databaseId":757369163,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":81,"participants":{"totalCount":2},"publishedAt":"2020-12-04T20:03:37Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Build
+      fails with any libgit2 version other than v1.0","updatedAt":"2020-12-13T00:58:37Z","url":"https://github.com/askgitdev/askgit/issues/81"}},{"cursor":"Y3Vyc29yOnYyOpHOLe2QCg==","node":{"author":{"login":"jingkai1"},"body":"askgit:
+      error while loading shared libraries: libgit2.so.1.1","closed":false,"closedAt":null,"comments":{"totalCount":1},"createdAt":"2020-12-18T03:46:47Z","createdViaEmail":false,"databaseId":770543626,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":85,"participants":{"totalCount":1},"publishedAt":"2020-12-18T03:46:47Z","reactions":{"totalCount":0},"state":"OPEN","title":"can''t
+      loading libgit2.so","updatedAt":"2020-12-18T03:47:38Z","url":"https://github.com/askgitdev/askgit/issues/85"}},{"cursor":"Y3Vyc29yOnYyOpHOLjsT7Q==","node":{"author":{"login":"pjebs"},"body":"Is
+      there someway to update for example to committer email address etc or a commit
+      message using SQL.","closed":false,"closedAt":null,"comments":{"totalCount":5},"createdAt":"2020-12-28T23:17:36Z","createdViaEmail":false,"databaseId":775623661,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":95,"participants":{"totalCount":3},"publishedAt":"2020-12-28T23:17:36Z","reactions":{"totalCount":1},"state":"OPEN","title":"UPDATE
+      functionality","updatedAt":"2021-04-17T14:30:18Z","url":"https://github.com/askgitdev/askgit/issues/95"}},{"cursor":"Y3Vyc29yOnYyOpHOL7mYyQ==","node":{"author":{"login":"mikermcneil"},"body":"would
+      be neat!\r\n\r\nLike \r\n![image](https://user-images.githubusercontent.com/618009/106808199-b3bdf980-662f-11eb-8e2c-f065a25366f1.png)\r\n\r\n…but
+      for GitLab","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2021-02-03T20:56:07Z","createdViaEmail":false,"databaseId":800692425,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":118,"participants":{"totalCount":1},"publishedAt":"2021-02-03T20:56:07Z","reactions":{"totalCount":0},"state":"OPEN","title":"GitLab
+      tables","updatedAt":"2021-02-03T20:56:07Z","url":"https://github.com/askgitdev/askgit/issues/118"}},{"cursor":"Y3Vyc29yOnYyOpHOOG4PiA==","node":{"author":{"login":"nordicdyno"},"body":"`go
+      get` becomes a deprecated way to install binaries https://golang.org/doc/go-get-install-deprecation,
+      but go install fails with error:\r\n```\r\ngo install github.com/augmentable-dev/askgit@latest:
+      github.com/augmentable-dev/askgit@v0.3.7\r\n\tThe go.mod file for the module
+      providing named packages contains one or\r\n\tmore replace directives. It must
+      not contain directives that would cause\r\n\tit to be interpreted differently
+      than if it were the main module.\r\n```\r\n\r\n","closed":true,"closedAt":"2021-08-12T14:03:52Z","comments":{"totalCount":2},"createdAt":"2021-07-17T06:42:29Z","createdViaEmail":false,"databaseId":946737032,"editor":null,"includesCreatedEdit":false,"isReadByViewer":false,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":130,"participants":{"totalCount":2},"publishedAt":"2021-07-17T06:42:29Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Go
+      install doesn''t work","updatedAt":"2021-08-12T14:03:52Z","url":"https://github.com/askgitdev/askgit/issues/130"}},{"cursor":"Y3Vyc29yOnYyOpHOOG4RCQ==","node":{"author":{"login":"nordicdyno"},"body":"it
+      would be nice to mention libgit2 requirement in README\r\n\r\nMy environment:
+      macOS Big Sur, go1.16.5 darwin/amd64","closed":true,"closedAt":"2021-07-20T23:04:09Z","comments":{"totalCount":1},"createdAt":"2021-07-17T06:45:10Z","createdViaEmail":false,"databaseId":946737417,"editor":null,"includesCreatedEdit":false,"isReadByViewer":false,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":131,"participants":{"totalCount":2},"publishedAt":"2021-07-17T06:45:10Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Go
+      get doesn''t work without libgit2 dependency","updatedAt":"2021-07-20T23:04:09Z","url":"https://github.com/askgitdev/askgit/issues/131"}},{"cursor":"Y3Vyc29yOnYyOpHOOMRG5Q==","node":{"author":{"login":"patrickdevivo"},"body":"#136
+      re-adds support for GitHub tables again. We should add some tests to validate
+      the behavior in these tables, ideally ones that don''t make actual calls to
+      the GitHub API as was done before (let''s mock the responses as we should)","closed":true,"closedAt":"2021-08-02T19:42:06Z","comments":{"totalCount":0},"createdAt":"2021-07-26T00:17:03Z","createdViaEmail":false,"databaseId":952387301,"editor":null,"includesCreatedEdit":false,"isReadByViewer":false,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":137,"participants":{"totalCount":1},"publishedAt":"2021-07-26T00:17:03Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Add
+      tests for new GitHub tables","updatedAt":"2021-08-02T19:42:06Z","url":"https://github.com/askgitdev/askgit/issues/137"}},{"cursor":"Y3Vyc29yOnYyOpHOOMdk6Q==","node":{"author":{"login":"wi1dcard"},"body":"Hey
+      team, thank you for providing this awesome tool which helps me a lot traversing
+      the data in git repos. I''m wondering that do we have any plan to add binaries
+      in the GitHub releases (for example, on GitHub Actions)? It seems not so friendly
+      to the new users who have to build from source to install and try.","closed":true,"closedAt":"2021-07-26T18:45:18Z","comments":{"totalCount":1},"createdAt":"2021-07-26T07:24:04Z","createdViaEmail":false,"databaseId":952591593,"editor":null,"includesCreatedEdit":false,"isReadByViewer":false,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":138,"participants":{"totalCount":2},"publishedAt":"2021-07-26T07:24:04Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Binary
+      release?","updatedAt":"2021-07-26T18:45:18Z","url":"https://github.com/askgitdev/askgit/issues/138"}},{"cursor":"Y3Vyc29yOnYyOpHOOdfiFA==","node":{"author":{"login":"patrickdevivo"},"body":"Some
+      functionality, like the GitHub functions, requires a configuration value (`GITHUB_TOKEN`)
+      set via an env variable. It''s a bit clumsy to specify this every time (`GITHUB_TOKEN=123
+      askgit \"SELECT ....\"`) and would be great if there were a way to store the
+      token (or any other config value) in a \"cache\" or managed config area on disk,
+      so that a user doesn''t need to specify it on every run of the command","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2021-08-13T14:25:57Z","createdViaEmail":false,"databaseId":970449428,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":1},"lastEditedAt":null,"locked":false,"milestone":null,"number":158,"participants":{"totalCount":1},"publishedAt":"2021-08-13T14:25:57Z","reactions":{"totalCount":0},"state":"OPEN","title":"Add
+      way to store credentials/config locally, rather than using env vars every time","updatedAt":"2021-08-13T14:25:57Z","url":"https://github.com/askgitdev/askgit/issues/158"}},{"cursor":"Y3Vyc29yOnYyOpHOOl_Icg==","node":{"author":{"login":"patrickdevivo"},"body":"See
+      [this page](https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection) for
+      more information. Basically, it would be useful if the `commits` table could
+      allow for something like:\r\n\r\n```sql\r\nSELECT * FROM commits(''some-repo'',
+      ''v4.0.0..v5.0.0'')\r\n```\r\n\r\nto select only the commits that occurred after
+      `v4.0.0` up to `v5.0.0`\r\n\r\nSee [this issue](https://github.com/go-git/go-git/issues/36)
+      for some context as well","closed":false,"closedAt":null,"comments":{"totalCount":0},"createdAt":"2021-08-25T15:53:26Z","createdViaEmail":false,"databaseId":979355762,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":1},"lastEditedAt":null,"locked":false,"milestone":null,"number":167,"participants":{"totalCount":1},"publishedAt":"2021-08-25T15:53:26Z","reactions":{"totalCount":0},"state":"OPEN","title":"Support
+      commit range notation (`..` or `...`) in the `commits` table","updatedAt":"2021-08-25T15:53:26Z","url":"https://github.com/askgitdev/askgit/issues/167"}},{"cursor":"Y3Vyc29yOnYyOpHOOmqVrA==","node":{"author":{"login":"ichengchao"},"body":"in
+      mysql, we can use \"show tables\" ,\"desc table_name\". \r\nreally looking forward
+      meet this feature","closed":true,"closedAt":"2021-10-09T15:58:28Z","comments":{"totalCount":3},"createdAt":"2021-08-26T10:03:46Z","createdViaEmail":false,"databaseId":980063660,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":168,"participants":{"totalCount":2},"publishedAt":"2021-08-26T10:03:46Z","reactions":{"totalCount":0},"state":"CLOSED","title":"add
+      \"show tables\"","updatedAt":"2021-10-09T15:58:28Z","url":"https://github.com/askgitdev/askgit/issues/168"}},{"cursor":"Y3Vyc29yOnYyOpHOO3bbpA==","node":{"author":{"login":"patrickdevivo"},"body":"We
+      should allow a user to supply `OWNER`, `COLLABORATOR` or `ORGANIZATION_MEMBER`
+      association values to the `github_org_repos` and `github_user_repos` tables
+      as an optional argument.\r\n\r\n![image](https://user-images.githubusercontent.com/57259/133532079-763e67c4-9d45-468b-bddc-44674bdb53cb.png)\r\n","closed":true,"closedAt":"2021-09-23T22:50:04Z","comments":{"totalCount":0},"createdAt":"2021-09-16T00:55:39Z","createdViaEmail":false,"databaseId":997645220,"editor":null,"includesCreatedEdit":false,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":177,"participants":{"totalCount":1},"publishedAt":"2021-09-16T00:55:39Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Specify
+      repo association in `github_org_repos` and `github_user_repos` tables","updatedAt":"2021-09-23T22:50:04Z","url":"https://github.com/askgitdev/askgit/issues/177"}},{"cursor":"Y3Vyc29yOnYyOpHOO_Sj9Q==","node":{"author":{"login":"patrickdevivo"},"body":"The
+      `locator` package currently only specifies an `HTTP` locator, we should add
+      support for an `SSH` one as well: https://github.com/askgitdev/askgit/blob/main/pkg/locator/locator.go#L58","closed":true,"closedAt":"2021-09-25T04:46:11Z","comments":{"totalCount":1},"createdAt":"2021-09-23T22:10:42Z","createdViaEmail":false,"databaseId":1005888501,"editor":null,"includesCreatedEdit":false,"isReadByViewer":false,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":181,"participants":{"totalCount":1},"publishedAt":"2021-09-23T22:10:42Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Add
+      support for an `ssh` repo locator","updatedAt":"2021-09-25T04:46:11Z","url":"https://github.com/askgitdev/askgit/issues/181"}},{"cursor":"Y3Vyc29yOnYyOpHOPSuGLA==","node":{"author":{"login":"yermulnik"},"body":"Upgrading
+      `askgitdev/askgit/askgit` with Homebrew on Linux (Ubuntu 20.04) is failing:\r\n```\r\n>
+      uname -srm\r\nLinux 5.14.11-051411-generic x86_64\r\n\r\n> lsb_release -d\r\nDescription:    Ubuntu
+      20.04.3 LTS\r\n\r\n> brew outdated\r\naskgitdev/askgit/askgit (v0.4.7) < v0.4.8\r\n\r\n>
+      brew upgrade\r\n==> Auto-updated Homebrew!\r\nUpdated 1 tap (homebrew/cask).\r\n==>
+      Updated Casks\r\nUpdated 1 cask.\r\n\r\nUpdating Homebrew...\r\n==> Upgrading
+      1 outdated package:\r\naskgitdev/askgit/askgit v0.4.7 -> v0.4.8\r\n==> Downloading
+      https://github.com/askgitdev/askgit/archive/v0.4.8.tar.gz\r\nAlready downloaded:
+      /home/giermulnik/.cache/Homebrew/downloads/bc83f30eb7ec1aa03e0e8e020c5cd9006e5ccb1da98eb05d36d61777e2d14864--askgit-0.4.8.tar.gz\r\n==>
+      Upgrading askgitdev/askgit/askgit\r\n  v0.4.7 -> v0.4.8\r\n\r\n==> make\r\nLast
+      15 lines from /home/giermulnik/.cache/Homebrew/Logs/askgit/01.make:\r\n\r\n--
+      nuking .build/\r\n-- building .build/libaskgit.so\r\n-- building .build/askgit\r\n#
+      github.com/libgit2/git2go/v32\r\n/home/giermulnik/.cache/Homebrew/go_mod_cache/pkg/mod/github.com/libgit2/git2go/v32@v32.0.4/Build_system_dynamic.go:12:3:
+      error: #error \"Invalid libgit2 version; this git2go supports libgit2 between
+      v1.2.0 and v1.2.0\"\r\n   12 | # error \"Invalid libgit2 version; this git2go
+      supports libgit2 between v1.2.0 and v1.2.0\"\r\n      |   ^~~~~\r\n# github.com/libgit2/git2go/v32\r\n/home/giermulnik/.cache/Homebrew/go_mod_cache/pkg/mod/github.com/libgit2/git2go/v32@v32.0.4/Build_system_static.go:12:3:
+      error: #error \"Invalid libgit2 version; this git2go supports libgit2 between
+      v1.2.0 and v1.2.0\"\r\n   12 | # error \"Invalid libgit2 version; this git2go
+      supports libgit2 between v1.2.0 and v1.2.0\"\r\n      |   ^~~~~\r\nmake: ***
+      [Makefile:17: .build/libaskgit.so] Error 2\r\nmake: *** Waiting for unfinished
+      jobs....\r\nmake: *** [Makefile:23: .build/askgit] Error 2\r\n\r\nIf reporting
+      this issue please do so at (not Homebrew/brew or Homebrew/core):\r\n  https://github.com/askgitdev/homebrew-askgit/issues\r\n\r\n>
+      brew info libgit2\r\nlibgit2: stable 1.3.0 (bottled), HEAD\r\nC library of Git
+      core methods that is re-entrant and linkable\r\nhttps://libgit2.github.com/\r\n/home/linuxbrew/.linuxbrew/Cellar/libgit2/1.3.0
+      (102 files, 4.8MB) *\r\n  Poured from bottle on 2021-10-01 at 00:16:35\r\nFrom:
+      https://github.com/Homebrew/linuxbrew-core/blob/HEAD/Formula/libgit2.rb\r\nLicense:
+      GPL-2.0-only\r\n==> Dependencies\r\nBuild: cmake ✔, pkg-config ✔\r\nRequired:
+      libssh2 ✔\r\n==> Options\r\n--HEAD\r\n        Install HEAD version\r\n==> Analytics\r\ninstall:
+      1,052 (30 days), 1,994 (90 days), 6,492 (365 days)\r\ninstall-on-request: 140
+      (30 days), 193 (90 days), 598 (365 days)\r\nbuild-error: 0 (30 days)\r\n```","closed":true,"closedAt":"2021-10-15T01:57:03Z","comments":{"totalCount":5},"createdAt":"2021-10-14T11:06:16Z","createdViaEmail":false,"databaseId":1026262572,"editor":{"login":"yermulnik"},"includesCreatedEdit":true,"isReadByViewer":true,"labels":{"totalCount":0},"lastEditedAt":"2021-10-14T11:08:27Z","locked":false,"milestone":null,"number":197,"participants":{"totalCount":3},"publishedAt":"2021-10-14T11:06:16Z","reactions":{"totalCount":0},"state":"CLOSED","title":"Installation
+      is broken with Homebrew","updatedAt":"2021-10-15T12:22:51Z","url":"https://github.com/askgitdev/askgit/issues/197"}},{"cursor":"Y3Vyc29yOnYyOpHOPTORjw==","node":{"author":{"login":"Alessandro-Barbieri"},"body":"Could
+      you upgrade to the latest libgit2? With the current one I have issues of missing
+      symbols","closed":true,"closedAt":"2021-10-15T01:33:36Z","comments":{"totalCount":0},"createdAt":"2021-10-14T20:24:07Z","createdViaEmail":false,"databaseId":1026789775,"editor":null,"includesCreatedEdit":false,"isReadByViewer":false,"labels":{"totalCount":0},"lastEditedAt":null,"locked":false,"milestone":null,"number":198,"participants":{"totalCount":1},"publishedAt":"2021-10-14T20:24:07Z","reactions":{"totalCount":1},"state":"CLOSED","title":"upgrade
+      to libgit2 1.3.0","updatedAt":"2021-10-15T01:33:37Z","url":"https://github.com/askgitdev/askgit/issues/198"}}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpHOPTORjw==","hasNextPage":false}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 28 Oct 2021 01:09:40 GMT
+      Github-Authentication-Token-Expiration:
+      - 2021-11-25 01:33:05 UTC
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - B01E:4ED2:C85BA3:17EDA09:6179F853
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
+        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
+        user, workflow, write:discussion, write:packages
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4996"
+      X-Ratelimit-Reset:
+      - "1635384560"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "4"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 1.310120752s
