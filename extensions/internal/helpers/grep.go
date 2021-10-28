@@ -40,10 +40,7 @@ func NewGrepModule() sqlite.Module {
 			}
 		}
 
-		if contents == "" {
-			return nil, fmt.Errorf("no contents Provided")
-		}
-
+		// TODO(patrickdevivo) not entirely sure if we should fail/error on this or let it be
 		if search == "" {
 			return nil, fmt.Errorf("no search string provided")
 		}
