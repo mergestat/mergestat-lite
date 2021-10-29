@@ -125,6 +125,32 @@ See `-h` for all the options.
 
 ### Tables and Functions
 
+To see what tables exist using the CLI, you can run:
+
+```sql
+SELECT name FROM sqlite_master WHERE type IN ('table','view');
+```
+
+to see an output like:
+
+```
++----------+
+| NAME     |
++----------+
+| commits  |
++----------+
+| branches |
++----------+
+| blame    |
++----------+
+| files    |
++----------+
+| stats    |
++----------+
+| tags     |
++----------+
+```
+
 To retrieve a table schema using the CLI, you can run:
 
 ```sql
