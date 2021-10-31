@@ -174,7 +174,7 @@ var issuesCommentCols = []vtab.Column{
 }
 
 func NewIssueCommentsModule(opts *Options) sqlite.Module {
-	return vtab.NewTableFunc("github_repo_issues", issuesCommentCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
+	return vtab.NewTableFunc("github_repo_issue_comments", issuesCommentCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name, owner string
 		var number int
 		flag := false
