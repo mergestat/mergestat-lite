@@ -1,0 +1,167 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($commentcursor:String$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!$prNumber:Int!){repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"name":"askgit","orderBy":{"field":"UPDATED_AT","direction":"ASC"},"owner":"askgitdev","perPage":100,"prNumber":193}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","pullRequest":{"id":"PR_kwDOEIJSDM4s_pJJ","number":193,"comments":{"nodes":[{"body":"#
+      [Codecov](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=h1&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      Report\n> Merging [#193](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=desc&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      (cf8ca56) into [main](https://codecov.io/gh/askgitdev/askgit/commit/e3ada899f99c256b039c67aadd73edc37849e0ca?el=desc&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      (e3ada89) will **decrease** coverage by `0.03%`.\n> The diff coverage is `64.28%`.\n\n[![Impacted
+      file tree graph](https://codecov.io/gh/askgitdev/askgit/pull/193/graphs/tree.svg?width=650&height=150&src=pr&token=QZWRUC9QFR&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)\n\n```diff\n@@            Coverage
+      Diff             @@\n##             main     #193      +/-   ##\n==========================================\n-
+      Coverage   69.88%   69.84%   -0.04%     \n==========================================\n  Files          44       44              \n  Lines        2198     2212      +14     \n==========================================\n+
+      Hits         1536     1545       +9     \n- Misses        427      430       +3     \n-
+      Partials      235      237       +2     \n```\n\n\n| [Impacted Files](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      | Coverage Δ | |\n|---|---|---|\n| [extensions/internal/github/user\\_repos.go](https://codecov.io/gh/askgitdev/askgit/pull/193/diff?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None#diff-ZXh0ZW5zaW9ucy9pbnRlcm5hbC9naXRodWIvdXNlcl9yZXBvcy5nbw==)
+      | `71.34% <57.14%> (-0.64%)` | :arrow_down: |\n| [extensions/internal/github/org\\_repos.go](https://codecov.io/gh/askgitdev/askgit/pull/193/diff?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None#diff-ZXh0ZW5zaW9ucy9pbnRlcm5hbC9naXRodWIvb3JnX3JlcG9zLmdv)
+      | `74.39% <71.42%> (-0.14%)` | :arrow_down: |\n\n------\n\n[Continue to review
+      full report at Codecov](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=continue&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).\n>
+      **Legend** - [Click here to learn more](https://docs.codecov.io/docs/codecov-delta?utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)\n>
+      `Δ = absolute <relative> (impact)`, `ø = not affected`, `? = missing data`\n>
+      Powered by [Codecov](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=footer&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).
+      Last update [e3ada89...cf8ca56](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=lastupdated&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).
+      Read the [comment docs](https://docs.codecov.io/docs/pull-request-comments?utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).\n","author":{"login":"codecov-commenter","url":"https://github.com/codecov-commenter"},"createdAt":"2021-10-11T03:34:04Z","databaseId":939651359,"id":"IC_kwDOEIJSDM44AfEf","updatedAt":"2021-10-11T03:34:56Z","url":"https://github.com/askgitdev/askgit/pull/193#issuecomment-939651359"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMS0xMC0xMFQyMjozNDo1Ni0wNTowMM44AfEf","hasNextPage":false}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 31 Oct 2021 18:47:04 GMT
+      Github-Authentication-Token-Expiration:
+      - 2021-11-30 18:12:25 UTC
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - B7F8:6145:341C6BB:84DB1AE:617EE4A8
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
+        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
+        user, workflow, write:discussion, write:packages
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4990"
+      X-Ratelimit-Reset:
+      - "1635708098"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "10"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 445.873619ms
+- request:
+    body: |
+      {"query":"query($commentcursor:String$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!$prNumber:Int!){repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"name":"askgit","orderBy":{"field":"UPDATED_AT","direction":"ASC"},"owner":"askgitdev","perPage":100,"prNumber":193}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","pullRequest":{"id":"PR_kwDOEIJSDM4s_pJJ","number":193,"comments":{"nodes":[{"body":"#
+      [Codecov](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=h1&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      Report\n> Merging [#193](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=desc&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      (cf8ca56) into [main](https://codecov.io/gh/askgitdev/askgit/commit/e3ada899f99c256b039c67aadd73edc37849e0ca?el=desc&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      (e3ada89) will **decrease** coverage by `0.03%`.\n> The diff coverage is `64.28%`.\n\n[![Impacted
+      file tree graph](https://codecov.io/gh/askgitdev/askgit/pull/193/graphs/tree.svg?width=650&height=150&src=pr&token=QZWRUC9QFR&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)\n\n```diff\n@@            Coverage
+      Diff             @@\n##             main     #193      +/-   ##\n==========================================\n-
+      Coverage   69.88%   69.84%   -0.04%     \n==========================================\n  Files          44       44              \n  Lines        2198     2212      +14     \n==========================================\n+
+      Hits         1536     1545       +9     \n- Misses        427      430       +3     \n-
+      Partials      235      237       +2     \n```\n\n\n| [Impacted Files](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)
+      | Coverage Δ | |\n|---|---|---|\n| [extensions/internal/github/user\\_repos.go](https://codecov.io/gh/askgitdev/askgit/pull/193/diff?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None#diff-ZXh0ZW5zaW9ucy9pbnRlcm5hbC9naXRodWIvdXNlcl9yZXBvcy5nbw==)
+      | `71.34% <57.14%> (-0.64%)` | :arrow_down: |\n| [extensions/internal/github/org\\_repos.go](https://codecov.io/gh/askgitdev/askgit/pull/193/diff?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None#diff-ZXh0ZW5zaW9ucy9pbnRlcm5hbC9naXRodWIvb3JnX3JlcG9zLmdv)
+      | `74.39% <71.42%> (-0.14%)` | :arrow_down: |\n\n------\n\n[Continue to review
+      full report at Codecov](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=continue&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).\n>
+      **Legend** - [Click here to learn more](https://docs.codecov.io/docs/codecov-delta?utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None)\n>
+      `Δ = absolute <relative> (impact)`, `ø = not affected`, `? = missing data`\n>
+      Powered by [Codecov](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=footer&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).
+      Last update [e3ada89...cf8ca56](https://codecov.io/gh/askgitdev/askgit/pull/193?src=pr&el=lastupdated&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).
+      Read the [comment docs](https://docs.codecov.io/docs/pull-request-comments?utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=None).\n","author":{"login":"codecov-commenter","url":"https://github.com/codecov-commenter"},"createdAt":"2021-10-11T03:34:04Z","databaseId":939651359,"id":"IC_kwDOEIJSDM44AfEf","updatedAt":"2021-10-11T03:34:56Z","url":"https://github.com/askgitdev/askgit/pull/193#issuecomment-939651359"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMS0xMC0xMFQyMjozNDo1Ni0wNTowMM44AfEf","hasNextPage":false}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 31 Oct 2021 18:47:04 GMT
+      Github-Authentication-Token-Expiration:
+      - 2021-11-30 18:12:25 UTC
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - B7F8:6145:341C6DA:84DB1FE:617EE4A8
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
+        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
+        user, workflow, write:discussion, write:packages
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4989"
+      X-Ratelimit-Reset:
+      - "1635708098"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "11"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 211.302001ms
