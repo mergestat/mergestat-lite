@@ -763,9 +763,18 @@ Table valued function that returns all comments on each pull request in a reposi
 | pr_id                        | TEXT |
 | pr_number                    | INT  |
 
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+  3. `prNumber` - the pull request number to pull comments from
+
 ```sql
-SELECT github_repo_pr_comments('askgitdev/askgit');
-SELECT github_pr_comments('askgitdev/askgit');
+SELECT github_repo_pr_comments('askgitdev/askgit',200);
+SELECT github_repo_pr_comments('askgitdev','askgit',200);
+SELECT github_pr_comments('askgitdev/askgit',200);
+SELECT github_pr_comments('askgitdev','askgit',200);
+
 ```
 
 #### Sourcegraph API (`experimental`!)
