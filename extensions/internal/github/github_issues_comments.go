@@ -2,7 +2,9 @@ package github
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/augmentable-dev/vtab"
 	"github.com/rs/zerolog"
@@ -19,7 +21,7 @@ type issueForComments struct {
 			EndCursor   githubv4.String
 			HasNextPage bool
 		}
-	} `graphql:"comments(first: $perpage, after: $commentcursor)"`
+	} `graphql:"comments(first: $perPage, after: $commentcursor,orderBy: $orderBy)"`
 }
 type comment struct {
 	Body   string
@@ -34,36 +36,29 @@ type comment struct {
 	Url        githubv4.URI
 }
 type fetchIssuesCommentsResults struct {
-	Edges       []*issueForComments
+	Comments    *issueForComments
+	OrderBy     *githubv4.IssueCommentOrder
 	HasNextPage bool
 	EndCursor   *githubv4.String
-	StartCursor *githubv4.String
 }
 
-func (i *iterIssuesComments) fetchIssueComments(ctx context.Context, startCursor *githubv4.String, endCursor *githubv4.String) (*fetchIssuesCommentsResults, error) {
+func (i *iterIssuesComments) fetchIssueComments(ctx context.Context, endCursor *githubv4.String) (*fetchIssuesCommentsResults, error) {
 	var IssueQuery struct {
 		Repository struct {
 			Owner struct {
 				Login string
 			}
-			Name   string
-			Issues struct {
-				Nodes    []*issueForComments
-				PageInfo struct {
-					StartCursor githubv4.String
-					EndCursor   githubv4.String
-					HasNextPage bool
-				}
-			} `graphql:"issues(first: $perpage, after: $issuecursor, orderBy: $issueorder)"`
+			Name  string
+			Issue issueForComments `graphql:"issue(number: $issueNumber)"`
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	variables := map[string]interface{}{
 		"owner":         githubv4.String(i.owner),
 		"name":          githubv4.String(i.name),
-		"perpage":       githubv4.Int(i.PerPage),
+		"issueNumber":   githubv4.Int(i.issueNumber),
+		"perPage":       githubv4.Int(i.PerPage),
+		"orderBy":       i.orderBy,
 		"commentcursor": endCursor,
-		"issuecursor":   startCursor,
-		"issueorder":    i.issueOrder,
 	}
 
 	err := i.Client().Query(ctx, &IssueQuery, variables)
@@ -72,10 +67,10 @@ func (i *iterIssuesComments) fetchIssueComments(ctx context.Context, startCursor
 	}
 
 	return &fetchIssuesCommentsResults{
-		IssueQuery.Repository.Issues.Nodes,
-		IssueQuery.Repository.Issues.PageInfo.HasNextPage,
-		&IssueQuery.Repository.Issues.PageInfo.EndCursor,
-		&IssueQuery.Repository.Issues.PageInfo.StartCursor,
+		&IssueQuery.Repository.Issue,
+		i.orderBy,
+		IssueQuery.Repository.Issue.Comments.PageInfo.HasNextPage,
+		&IssueQuery.Repository.Issue.Comments.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -83,22 +78,22 @@ type iterIssuesComments struct {
 	*Options
 	owner          string
 	name           string
-	currentIssue   int
+	issueNumber    int
 	currentComment int
+	orderBy        *githubv4.IssueCommentOrder
 	results        *fetchIssuesCommentsResults
-	issueOrder     *githubv4.IssueOrder
 }
 
 func (i *iterIssuesComments) logger() *zerolog.Logger {
-	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Logger()
-	if i.issueOrder != nil {
-		logger = logger.With().Str("order_by", string(i.issueOrder.Field)).Str("order_dir", string(i.issueOrder.Direction)).Logger()
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Int("issue-number", i.issueNumber).Int("current-comment", i.currentComment).Logger()
+	if i.orderBy != nil {
+		logger = logger.With().Str("order_by", string(i.orderBy.Field)).Str("order_dir", string(i.orderBy.Direction)).Logger()
 	}
 	return &logger
 }
 
 func (i *iterIssuesComments) Column(ctx vtab.Context, c int) error {
-	current := i.results.Edges[i.currentIssue].Comments.Nodes[i.currentComment]
+	current := i.results.Comments.Comments.Nodes[i.currentComment]
 	col := issuesCommentCols[c]
 
 	switch col.Name {
@@ -118,125 +113,71 @@ func (i *iterIssuesComments) Column(ctx vtab.Context, c int) error {
 		ctx.ResultText(current.UpdatedAt.String())
 	case "c_url":
 		ctx.ResultText(current.Url.String())
-	case "pr_id":
-		ctx.ResultText(string(i.results.Edges[i.currentIssue].Id))
-	case "pr_number":
-		ctx.ResultInt(i.results.Edges[i.currentIssue].Number)
+	case "issue_id":
+		ctx.ResultText(string(i.results.Comments.Id))
+	case "issue_number":
+		ctx.ResultInt(i.results.Comments.Number)
 	}
 	return nil
 }
 
 func (i *iterIssuesComments) Next() (vtab.Row, error) {
-	// if no results have been pulled pull them
-	if i.results == nil {
-		err := i.RateLimiter.Wait(context.Background())
-		if err != nil {
-			return nil, err
-		}
+	i.currentComment += 1
 
-		var cursor, commentCursor *githubv4.String
-
-		l := i.logger().With().Interface("cursor", cursor).Logger()
-		l.Info().Msgf("fetching page of repo_issues for %s/%s", i.owner, i.name)
-		results, err := i.fetchIssueComments(context.Background(), cursor, commentCursor)
-		if err != nil {
-			return nil, err
-		}
-
-		i.results = results
-		i.currentIssue = 0
-		i.currentComment = -1
-
-		if len(results.Edges) == 0 {
-			l.Info().Msgf("no issues found %s/%s", i.owner, i.name)
-			return nil, io.EOF
-		}
-	}
-
-	// if there are more comments to be had on a issue then iterate on them
-	if len(i.results.Edges[i.currentIssue].Comments.Nodes)-1 > i.currentComment {
-		i.currentComment++
-		return i, nil
-	} else if i.results.Edges[i.currentIssue].Comments.PageInfo.HasNextPage {
-		currentComments := i.results.Edges[i.currentIssue].Comments
-		commentCursor := &currentComments.PageInfo.EndCursor
-		prCursor := i.results.StartCursor
-
-		l := i.logger().With().Interface("commentCursor", commentCursor).Interface("prCursor", prCursor).Logger()
-		l.Info().Msgf("fetching page of comments for %s/%s", i.owner, i.name)
-
-		results, err := i.fetchIssueComments(context.Background(), prCursor, commentCursor)
-		if err != nil {
-			return nil, err
-		}
-		i.results = results
-		i.currentComment = 0
-		return i, nil
-	}
-	// while there are no more comments on a issue go to the next issue
-	for len(i.results.Edges)-1 > i.currentIssue {
-		i.currentIssue++
-		if len(i.results.Edges[i.currentIssue].Comments.Nodes) != 0 {
-			i.currentComment = 0
-			return i, nil
-		}
-	}
-	// if there are no more issues in current edges then pull the next set of issues
-	for i.results.HasNextPage {
-		err := i.RateLimiter.Wait(context.Background())
-		if err != nil {
-			return nil, err
-		}
-
-		var cursor, commentCursor *githubv4.String
-		if i.results != nil {
-			cursor = i.results.EndCursor
-		}
-
-		l := i.logger().With().Interface("commentCursor", commentCursor).Interface("issueCursor", cursor).Logger()
-		l.Info().Msgf("fetching page of repo_issues for %s/%s", i.owner, i.name)
-		results, err := i.fetchIssueComments(context.Background(), cursor, commentCursor)
-		if err != nil {
-			return nil, err
-		}
-
-		i.results = results
-		i.currentIssue = -1
-		i.currentComment = 0
-
-		if len(results.Edges) == 0 {
-			return nil, io.EOF
-		}
-		for len(i.results.Edges)-1 > i.currentIssue {
-			i.currentIssue++
-			if len(i.results.Edges[i.currentIssue].Comments.Nodes) != 0 {
-				i.currentComment = 0
-				return i, nil
+	if i.results == nil || i.currentComment >= len(i.results.Comments.Comments.Nodes) {
+		if i.results == nil || i.results.HasNextPage {
+			err := i.RateLimiter.Wait(context.Background())
+			if err != nil {
+				return nil, err
 			}
+
+			var cursor *githubv4.String
+			if i.results != nil {
+				cursor = i.results.EndCursor
+			}
+
+			l := i.logger().With().Interface("cursor", cursor).Logger()
+			l.Info().Msgf("fetching page of issue_comments for %s/%s", i.owner, i.name)
+			results, err := i.fetchIssueComments(context.Background(), cursor)
+			if err != nil {
+				return nil, err
+			}
+
+			i.results = results
+			i.currentComment = 0
+
+			if len(results.Comments.Comments.Nodes) == 0 {
+				return nil, io.EOF
+			}
+		} else {
+			return nil, io.EOF
 		}
 	}
-	return nil, io.EOF
+
+	return i, nil
 
 }
 
 var issuesCommentCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
+	{Name: "issue_number", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "c_author_login", Type: "TEXT"},
 	{Name: "c_author_url", Type: "TEXT"},
 	{Name: "c_body", Type: "TEXT"},
 	{Name: "c_created_at", Type: "TEXT"},
 	{Name: "c_database_id", Type: "INT"},
 	{Name: "c_id", Type: "TEXT"},
-	{Name: "c_updated_at", Type: "TEXT"},
+	{Name: "c_updated_at", Type: "TEXT", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "c_url", Type: "TEXT"},
 	{Name: "issue_id", Type: "TEXT"},
-	{Name: "issue_number", Type: "INT"},
 }
 
 func NewIssueCommentsModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_repo_issues", issuesCommentCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var fullNameOrOwner, name string
+		var fullNameOrOwner, name, owner string
+		var number int
+		flag := false
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
@@ -244,32 +185,45 @@ func NewIssueCommentsModule(opts *Options) sqlite.Module {
 					fullNameOrOwner = constraint.Value.Text()
 				case 1:
 					name = constraint.Value.Text()
+				case 2:
+					if constraint.Value.Int() <= 0 {
+						return nil, fmt.Errorf("please pass an issue number greater than 0")
+					}
+					number = constraint.Value.Int()
+					flag = true
 				}
+
 			}
 		}
+		if !flag {
+			var err error
+			number, err = strconv.Atoi(name)
+			if err != nil {
+				return nil, err
+			}
+			owner, name, err = repoOwnerAndName("", fullNameOrOwner)
+			if err != nil {
+				return nil, err
+			}
 
-		owner, name, err := repoOwnerAndName(name, fullNameOrOwner)
-		if err != nil {
-			return nil, err
+			if number <= 0 {
+				return nil, fmt.Errorf("please input a valid issue number greater than 0")
+			}
+		} else {
+			owner = fullNameOrOwner
 		}
-
-		var issueOrder *githubv4.IssueOrder
+		var commentOrder githubv4.IssueCommentOrder
 		if len(orders) == 1 {
 			order := orders[0]
-			issueOrder = &githubv4.IssueOrder{}
-			switch issuesCommentCols[order.ColumnIndex].Name {
-			case "comment_count":
-				issueOrder.Field = githubv4.IssueOrderFieldComments
-			case "created_at":
-				issueOrder.Field = githubv4.IssueOrderFieldCreatedAt
-			case "updated_at":
-				issueOrder.Field = githubv4.IssueOrderFieldUpdatedAt
-			}
-			issueOrder.Direction = orderByToGitHubOrder(order.Desc)
+			commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
+			commentOrder.Direction = orderByToGitHubOrder(order.Desc)
+		} else {
+			commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
+			commentOrder.Direction = githubv4.OrderDirectionAsc
 		}
 
-		iter := &iterIssuesComments{opts, owner, name, -1, -1, nil, issueOrder}
-		iter.logger().Info().Msgf("starting GitHub repo_issues iterator for %s/%s", owner, name)
+		iter := &iterIssuesComments{opts, owner, name, number, -1, &commentOrder, nil}
+		iter.logger().Info().Msgf("starting GitHub repo_issues_comment iterator for %s/%s issue : %d", owner, name, number)
 		return iter, nil
 	}, vtab.EarlyOrderByConstraintExit(true))
 }
