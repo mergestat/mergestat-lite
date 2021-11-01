@@ -6,13 +6,13 @@ import (
 	"github.com/askgitdev/askgit/extensions/internal/tools"
 )
 
-func TestPrComments(t *testing.T) {
+func TestPRComments(t *testing.T) {
 	cleanup := newRecorder(t)
 	defer cleanup()
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT * FROM github_repo_pr_comments('askgitdev/askgit',193) LIMIT 5")
+	rows, err := db.Query("SELECT * FROM github_repo_pr_comments('askgitdev/askgit', 193) LIMIT 5")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
@@ -27,7 +27,7 @@ func TestPrComments(t *testing.T) {
 		t.Fatalf("expected %d columns, got: %d", expected, colCount)
 	}
 
-	rows, err = db.Query("SELECT * FROM github_repo_pr_comments('askgitdev','askgit',193) LIMIT 5")
+	rows, err = db.Query("SELECT * FROM github_repo_pr_comments('askgitdev', 'askgit', 193) LIMIT 5")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
