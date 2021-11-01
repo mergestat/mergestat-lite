@@ -16,14 +16,15 @@ type pullRequestForComments struct {
 	Id       githubv4.String
 	Number   int
 	Comments struct {
-		Nodes    []*comment
+		Nodes    []*prComment
 		PageInfo struct {
 			EndCursor   githubv4.String
 			HasNextPage bool
 		}
 	} `graphql:"comments(first: $perPage, after: $commentcursor,orderBy: $orderBy)"`
 }
-type comment struct {
+
+type prComment struct {
 	Body   string
 	Author struct {
 		Login string
@@ -35,6 +36,7 @@ type comment struct {
 	UpdatedAt  githubv4.DateTime
 	Url        githubv4.URI
 }
+
 type fetchPRCommentsResults struct {
 	Comments    *pullRequestForComments
 	OrderBy     *githubv4.IssueCommentOrder

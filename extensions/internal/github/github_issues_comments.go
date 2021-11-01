@@ -15,7 +15,7 @@ type issueForComments struct {
 	Id       githubv4.String
 	Number   int
 	Comments struct {
-		Nodes    []*comment
+		Nodes    []*issueComment
 		PageInfo struct {
 			EndCursor   githubv4.String
 			HasNextPage bool
@@ -23,7 +23,7 @@ type issueForComments struct {
 	} `graphql:"comments(first: $perPage, after: $commentcursor,orderBy: $orderBy)"`
 }
 
-type comment struct {
+type issueComment struct {
 	Body   string
 	Author struct {
 		Login string
