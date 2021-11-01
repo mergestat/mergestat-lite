@@ -216,18 +216,19 @@ func NewIssueCommentsModule(opts *Options) sqlite.Module {
 			name = nameOrNumber.Text()
 		}
 
-		var commentOrder githubv4.IssueCommentOrder
+		var commentOrder *githubv4.IssueCommentOrder
 		if len(orders) == 1 {
 			order := orders[0]
-			commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
+			commentOrder = &githubv4.IssueCommentOrder{Field: githubv4.IssueCommentOrderFieldUpdatedAt}
+			switch issuesCols[order.ColumnIndex].Name {
+			case "updated_at":
+				commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
+			}
 			commentOrder.Direction = orderByToGitHubOrder(order.Desc)
-		} else {
-			commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
-			commentOrder.Direction = githubv4.OrderDirectionAsc
 		}
 
-		iter := &iterIssuesComments{opts, owner, name, number, -1, &commentOrder, nil}
-		iter.logger().Info().Msgf("starting GitHub repo_issues_comment iterator for %s/%s issue : %d", owner, name, number)
+		iter := &iterIssuesComments{opts, owner, name, number, -1, commentOrder, nil}
+		iter.logger().Info().Msgf("starting GitHub repo_issues_comment iterator for %s/%s issue: %d", owner, name, number)
 		return iter, nil
 	}, vtab.EarlyOrderByConstraintExit(true))
 }

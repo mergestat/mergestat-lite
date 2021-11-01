@@ -748,7 +748,7 @@ SELECT github_stargazer_count('askgitdev/askgit', 'README.md'); -- both are equi
 
 ##### `github_repo_issue_comments`
 
-Table valued function that returns all comments on each pull request in a repository
+Table valued function that returns comments on a given issue.
 
 | Column                       | Type |
 |------------------------------|------|
