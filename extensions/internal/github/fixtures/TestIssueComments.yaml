@@ -1,0 +1,161 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($commentcursor:String$issueNumber:Int!$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!){repository(owner: $owner, name: $name){owner{login},name,issue(number: $issueNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"issueNumber":10,"name":"askgit","orderBy":{"field":"UPDATED_AT","direction":"ASC"},"owner":"askgitdev","perPage":100}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","issue":{"id":"MDU6SXNzdWU2NTIyNzA5NTI=","number":10,"comments":{"nodes":[{"body":"Unfortunately
+      GoReleaser does not work with CGO which is necessary for accessing the git objects.
+      This seems to be something that is common throughout pre-built go binary builders
+      as I know xgo also has issues compiling projects with CGO. If you happen to
+      know of a different releaser that doesn''t have the aforementioned issue @patrickdevivo
+      and I would love to hear about it","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-07T13:03:48Z","databaseId":654842143,"id":"MDEyOklzc3VlQ29tbWVudDY1NDg0MjE0Mw==","updatedAt":"2020-07-07T13:03:48Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-654842143"},{"body":"Have
+      you considered AWS Codebuild? You should be able to access git objects in there.\r\n\r\nI''m
+      not sure about Go specifics but this example project seems to be using cgo.\r\n\r\nhttps://github.com/shawnxlw/go-k8s-cicd\r\n\r\nAt
+      line 13 we can read:\r\nhttps://github.com/shawnxlw/go-k8s-cicd/blob/master/buildspec/build.yml\r\n\r\n```\r\ndocker
+      run --rm -v \"$PWD\":/usr/src/myapp -w /usr/src/myapp -e CGO_ENABLED=0 -e GOOS=linux
+      golang:alpine go build -a -installsuffix cgo -o main -v .\r\n```","author":{"login":"jeshan","url":"https://github.com/jeshan"},"createdAt":"2020-07-09T07:47:25Z","databaseId":655965188,"id":"MDEyOklzc3VlQ29tbWVudDY1NTk2NTE4OA==","updatedAt":"2020-07-09T07:47:25Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-655965188"},{"body":"If
+      you look under releases I uploaded tar.gz files for linux and OS x86-64 binaries(compiled
+      in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-656118539"},{"body":"#50
+      adds some instructions to the README on how to install via `homebrew`, which
+      will now be maintained. Running via Docker has also been documented, as such
+      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 31 Oct 2021 18:25:33 GMT
+      Github-Authentication-Token-Expiration:
+      - 2021-11-30 18:12:25 UTC
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - B6D2:0489:3014470:84A500A:617EDF9D
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
+        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
+        user, workflow, write:discussion, write:packages
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4996"
+      X-Ratelimit-Reset:
+      - "1635708098"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "4"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 496.32475ms
+- request:
+    body: |
+      {"query":"query($commentcursor:String$issueNumber:Int!$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!){repository(owner: $owner, name: $name){owner{login},name,issue(number: $issueNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"issueNumber":10,"name":"askgit","orderBy":{"field":"UPDATED_AT","direction":"ASC"},"owner":"askgitdev","perPage":100}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","issue":{"id":"MDU6SXNzdWU2NTIyNzA5NTI=","number":10,"comments":{"nodes":[{"body":"Unfortunately
+      GoReleaser does not work with CGO which is necessary for accessing the git objects.
+      This seems to be something that is common throughout pre-built go binary builders
+      as I know xgo also has issues compiling projects with CGO. If you happen to
+      know of a different releaser that doesn''t have the aforementioned issue @patrickdevivo
+      and I would love to hear about it","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-07T13:03:48Z","databaseId":654842143,"id":"MDEyOklzc3VlQ29tbWVudDY1NDg0MjE0Mw==","updatedAt":"2020-07-07T13:03:48Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-654842143"},{"body":"Have
+      you considered AWS Codebuild? You should be able to access git objects in there.\r\n\r\nI''m
+      not sure about Go specifics but this example project seems to be using cgo.\r\n\r\nhttps://github.com/shawnxlw/go-k8s-cicd\r\n\r\nAt
+      line 13 we can read:\r\nhttps://github.com/shawnxlw/go-k8s-cicd/blob/master/buildspec/build.yml\r\n\r\n```\r\ndocker
+      run --rm -v \"$PWD\":/usr/src/myapp -w /usr/src/myapp -e CGO_ENABLED=0 -e GOOS=linux
+      golang:alpine go build -a -installsuffix cgo -o main -v .\r\n```","author":{"login":"jeshan","url":"https://github.com/jeshan"},"createdAt":"2020-07-09T07:47:25Z","databaseId":655965188,"id":"MDEyOklzc3VlQ29tbWVudDY1NTk2NTE4OA==","updatedAt":"2020-07-09T07:47:25Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-655965188"},{"body":"If
+      you look under releases I uploaded tar.gz files for linux and OS x86-64 binaries(compiled
+      in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-656118539"},{"body":"#50
+      adds some instructions to the README on how to install via `homebrew`, which
+      will now be maintained. Running via Docker has also been documented, as such
+      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 31 Oct 2021 18:25:34 GMT
+      Github-Authentication-Token-Expiration:
+      - 2021-11-30 18:12:25 UTC
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - B6D2:0489:3014481:84A5048:617EDF9D
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
+        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
+        user, workflow, write:discussion, write:packages
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4995"
+      X-Ratelimit-Reset:
+      - "1635708098"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "5"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 203.271208ms

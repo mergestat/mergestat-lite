@@ -746,6 +746,33 @@ SELECT github_stargazer_count('askgitdev', 'askgit', 'README.md');
 SELECT github_stargazer_count('askgitdev/askgit', 'README.md'); -- both are equivalent
 ```
 
+##### `github_repo_issue_comments`
+
+Table valued function that returns comments on a given issue.
+
+| Column                       | Type |
+|------------------------------|------|
+| author_login                 | TEXT |
+| author_url                   | TEXT |
+| body                         | TEXT |
+| created_at                   | TEXT |
+| database_id                  | INT  |
+| id                           | TEXT |
+| updated_at                   | TEXT |
+| url                          | TEXT |
+| issue_id                     | TEXT |
+| issue_number                 | INT  |
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+  3. `issue_number` - the issue number
+
+```sql
+SELECT github_repo_issue_comments('askgitdev/askgit', 100);
+SELECT github_issue_comments('askgitdev/askgit', 100);
+```
+
 #### Sourcegraph API (`experimental`!)
 
 You can use `askgit` to query the [Sourcegraph API](https://sourcegraph.com/api/console).
