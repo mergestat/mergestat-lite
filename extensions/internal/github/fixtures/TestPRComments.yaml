@@ -43,7 +43,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 01 Nov 2021 13:16:54 GMT
+      - Mon, 01 Nov 2021 13:33:09 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -61,24 +61,24 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - CC22:1260D:1601115:16A23A1:617FE8C6
+      - DE34:9428:18A8998:1935D3A:617FEC94
       X-Oauth-Scopes:
       - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4999"
+      - "4994"
       X-Ratelimit-Reset:
       - "1635776214"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "1"
+      - "6"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 1.012808077s
+    duration: 522.604293ms
 - request:
     body: |
       {"query":"query($commentcursor:String$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!$prNumber:Int!){repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"name":"askgit","orderBy":null,"owner":"askgitdev","perPage":100,"prNumber":193}}
@@ -121,7 +121,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 01 Nov 2021 13:16:55 GMT
+      - Mon, 01 Nov 2021 13:33:09 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -139,21 +139,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - CC22:1260D:16011D5:16A2467:617FE8C6
+      - DE34:9428:18A8A12:1935D97:617FEC95
       X-Oauth-Scopes:
       - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4998"
+      - "4993"
       X-Ratelimit-Reset:
       - "1635776214"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "2"
+      - "7"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 646.73317ms
+    duration: 310.855739ms
