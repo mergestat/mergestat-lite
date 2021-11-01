@@ -176,10 +176,9 @@ var issuesCommentCols = []vtab.Column{
 
 func NewIssueCommentsModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_repo_issue_comments", issuesCommentCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var fullNameOrOwner, owner string
+		var fullNameOrOwner, name, owner string
 		var nameOrNumber *sqlite.Value
 		var number int
-		var name string
 		threeArgs := false // if true, user supplied 3 args, 1st is org name, 2nd is repo name, 3rd is issue number
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {

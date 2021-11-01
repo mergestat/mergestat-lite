@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"strconv"
 
 	"github.com/augmentable-dev/vtab"
 	"github.com/rs/zerolog"
@@ -99,21 +98,21 @@ func (i *iterPRComments) Column(ctx vtab.Context, c int) error {
 	col := prCommentCols[c]
 
 	switch col.Name {
-	case "c_author_login":
+	case "author_login":
 		ctx.ResultText(current.Author.Login)
-	case "c_author_url":
+	case "author_url":
 		ctx.ResultText(current.Author.Url)
-	case "c_body":
+	case "body":
 		ctx.ResultText(current.Body)
-	case "c_created_at":
+	case "created_at":
 		ctx.ResultText(current.CreatedAt.String())
-	case "c_database_id":
+	case "database_id":
 		ctx.ResultInt(current.DatabaseId)
-	case "c_id":
+	case "id":
 		ctx.ResultText(string(current.Id))
-	case "c_updated_at":
+	case "updated_at":
 		ctx.ResultText(current.UpdatedAt.String())
-	case "c_url":
+	case "url":
 		ctx.ResultText(current.Url.String())
 	case "pr_id":
 		ctx.ResultText(string(i.results.Comments.Id))
@@ -164,67 +163,71 @@ var prCommentCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "pr_number", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
-	{Name: "c_author_login", Type: "TEXT"},
-	{Name: "c_author_url", Type: "TEXT"},
-	{Name: "c_body", Type: "TEXT"},
-	{Name: "c_created_at", Type: "TEXT"},
-	{Name: "c_database_id", Type: "INT"},
-	{Name: "c_id", Type: "TEXT"},
-	{Name: "c_updated_at", Type: "TEXT", OrderBy: vtab.ASC | vtab.DESC},
-	{Name: "c_url", Type: "TEXT"},
+	{Name: "author_login", Type: "TEXT"},
+	{Name: "author_url", Type: "TEXT"},
+	{Name: "body", Type: "TEXT"},
+	{Name: "created_at", Type: "TEXT"},
+	{Name: "database_id", Type: "INT"},
+	{Name: "id", Type: "TEXT"},
+	{Name: "updated_at", Type: "TEXT", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "url", Type: "TEXT"},
 	{Name: "pr_id", Type: "TEXT"},
 }
 
 func NewPRCommentsModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_repo_pr_comments", prCommentCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
 		var fullNameOrOwner, name, owner string
+		var nameOrNumber *sqlite.Value
 		var number int
-		flag := false
+		threeArgs := false // if true, user supplied 3 args, 1st is org name, 2nd is repo name, 3rd is pr number
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
 				case 0:
 					fullNameOrOwner = constraint.Value.Text()
 				case 1:
-					name = constraint.Value.Text()
+					nameOrNumber = constraint.Value
 				case 2:
 					if constraint.Value.Int() <= 0 {
-						return nil, fmt.Errorf("please pass a pull request number greater than 0")
+						return nil, fmt.Errorf("please supply a pull request number")
 					}
 					number = constraint.Value.Int()
-					flag = true
+					threeArgs = true
 				}
 
 			}
 		}
-		if !flag {
-			var err error
-			number, err = strconv.Atoi(name)
-			if err != nil {
-				return nil, err
+		if !threeArgs {
+			if nameOrNumber == nil || nameOrNumber.Type() != sqlite.SQLITE_INTEGER {
+				return nil, fmt.Errorf("please supply a valid pr number")
 			}
+			number = nameOrNumber.Int()
+			var err error
 			owner, name, err = repoOwnerAndName("", fullNameOrOwner)
 			if err != nil {
 				return nil, err
 			}
 
 			if number <= 0 {
-				return nil, fmt.Errorf("please input a valid pull request number greater than 0")
+				return nil, fmt.Errorf("please supply a valid pull request number")
 			}
 		} else {
 			owner = fullNameOrOwner
-		}
-		var commentOrder githubv4.IssueCommentOrder
-		if len(orders) == 1 {
-			order := orders[0]
-			commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
-			commentOrder.Direction = orderByToGitHubOrder(order.Desc)
-		} else {
-			commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
-			commentOrder.Direction = githubv4.OrderDirectionAsc
+			name = nameOrNumber.Text()
 		}
 
-		iter := &iterPRComments{opts, owner, name, number, -1, &commentOrder, nil}
+		var commentOrder *githubv4.IssueCommentOrder
+		if len(orders) == 1 {
+			order := orders[0]
+			commentOrder = &githubv4.IssueCommentOrder{Field: githubv4.IssueCommentOrderFieldUpdatedAt}
+			switch issuesCols[order.ColumnIndex].Name {
+			case "updated_at":
+				commentOrder.Field = githubv4.IssueCommentOrderFieldUpdatedAt
+			}
+			commentOrder.Direction = orderByToGitHubOrder(order.Desc)
+		}
+
+		iter := &iterPRComments{opts, owner, name, number, -1, commentOrder, nil}
 		iter.logger().Info().Msgf("starting GitHub repo_pr_comment iterator for %s/%s pr : %d", owner, name, number)
 		return iter, nil
 	}, vtab.EarlyOrderByConstraintExit(true))
