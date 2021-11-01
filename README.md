@@ -748,7 +748,7 @@ SELECT github_stargazer_count('askgitdev/askgit', 'README.md'); -- both are equi
 
 ##### `github_repo_pr_comments`
 
-Table valued function that returns all comments on each pull request in a repository
+Table valued function that returns all comments on a given pull request.
 
 | Column                       | Type |
 |------------------------------|------|
@@ -763,18 +763,43 @@ Table valued function that returns all comments on each pull request in a reposi
 | pr_id                        | TEXT |
 | pr_number                    | INT  |
 
-
 Params:
   1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
   2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
   3. `prNumber` - the pull request number to pull comments from
 
 ```sql
-SELECT github_repo_pr_comments('askgitdev/askgit',200);
-SELECT github_repo_pr_comments('askgitdev','askgit',200);
-SELECT github_pr_comments('askgitdev/askgit',200);
-SELECT github_pr_comments('askgitdev','askgit',200);
+SELECT github_repo_pr_comments('askgitdev/askgit', 200);
+SELECT github_repo_pr_comments('askgitdev', 'askgit', 200);
+SELECT github_pr_comments('askgitdev/askgit', 200);
+SELECT github_pr_comments('askgitdev',' askgit', 200);
+```
 
+##### `github_repo_issue_comments`
+
+Table valued function that returns comments on a given issue.
+
+| Column                       | Type |
+|------------------------------|------|
+| author_login                 | TEXT |
+| author_url                   | TEXT |
+| body                         | TEXT |
+| created_at                   | TEXT |
+| database_id                  | INT  |
+| id                           | TEXT |
+| updated_at                   | TEXT |
+| url                          | TEXT |
+| issue_id                     | TEXT |
+| issue_number                 | INT  |
+
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+  3. `issue_number` - the issue number
+
+```sql
+SELECT github_repo_issue_comments('askgitdev/askgit', 100);
+SELECT github_issue_comments('askgitdev/askgit', 100);
 ```
 
 #### Sourcegraph API (`experimental`!)
