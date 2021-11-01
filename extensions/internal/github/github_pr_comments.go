@@ -86,7 +86,7 @@ type iterPRComments struct {
 }
 
 func (i *iterPRComments) logger() *zerolog.Logger {
-	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Int("pr-number", i.prNumber).Int("current-comment", i.currentComment).Logger()
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Int("pr-number", i.prNumber).Logger()
 	if i.orderBy != nil {
 		logger = logger.With().Str("order_by", string(i.orderBy.Field)).Str("order_dir", string(i.orderBy.Direction)).Logger()
 	}
