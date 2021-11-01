@@ -752,20 +752,25 @@ Table valued function that returns all comments on each pull request in a reposi
 
 | Column                       | Type |
 |------------------------------|------|
-| c_author_login               | TEXT |
-| c_author_url                 | TEXT |
-| c_body                       | TEXT |
-| c_created_at                 | TEXT |
-| c_database_id                | INT  |
-| c_id                         | TEXT |
-| c_updated_at                 | TEXT |
-| c_url                        | TEXT |
+| author_login                 | TEXT |
+| author_url                   | TEXT |
+| body                         | TEXT |
+| created_at                   | TEXT |
+| database_id                  | INT  |
+| id                           | TEXT |
+| updated_at                   | TEXT |
+| url                          | TEXT |
 | issue_id                     | TEXT |
 | issue_number                 | INT  |
 
+Params:
+  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit` or just the owner `askgitdev` (which would require the second argument)
+  2. `name` - optional if the first argument is a "full" name, otherwise required - the name of the repo
+  3. `issue_number` - the issue number
+
 ```sql
-SELECT github_repo_issue_comments('askgitdev/askgit');
-SELECT github_issue_comments('askgitdev/askgit');
+SELECT github_repo_issue_comments('askgitdev/askgit', 100);
+SELECT github_issue_comments('askgitdev/askgit', 100);
 ```
 
 #### Sourcegraph API (`experimental`!)

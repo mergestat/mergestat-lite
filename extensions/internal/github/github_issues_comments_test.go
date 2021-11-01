@@ -12,7 +12,7 @@ func TestIssueComments(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT * FROM github_repo_issue_comments('askgitdev/askgit',10) LIMIT 10")
+	rows, err := db.Query("SELECT * FROM github_repo_issue_comments('askgitdev/askgit', 10) LIMIT 10")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
@@ -27,7 +27,7 @@ func TestIssueComments(t *testing.T) {
 		t.Fatalf("expected %d columns, got: %d", expected, colCount)
 	}
 
-	rows, err = db.Query("SELECT * FROM github_repo_issue_comments('askgitdev','askgit',10) LIMIT 10")
+	rows, err = db.Query("SELECT * FROM github_repo_issue_comments('askgitdev', 'askgit', 10) LIMIT 10")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}
