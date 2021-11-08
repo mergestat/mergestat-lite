@@ -22,7 +22,7 @@ func TestUserInfo(t *testing.T) {
 		t.Fatalf("could not scan row: %v", err.Error())
 	}
 
-	if !(strings.Contains("2009-02-23T21:42:03Z", output)) {
+	if !(strings.Contains(output, "2009-02-23T21:42:03Z")) {
 		t.Fatalf("recieved incorrect date in result %s", output)
 	}
 }

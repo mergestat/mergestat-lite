@@ -1,0 +1,65 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($login:String!){user(login: $login){bio,avatarUrl,company,createdAt,email,isHireable,isEmployee,name,twitterUsername}}","variables":{"login":"patrickdevivo"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"user":{"bio":"Software engineer in NYC","avatarUrl":"https://avatars.githubusercontent.com/u/57259?u=9f229083d0db9f54add2b0db0bea1d726d6640cd&v=4","company":"@packethost
+      ","createdAt":"2009-02-23T21:42:03Z","email":"patrick.devivo@gmail.com","isHireable":true,"isEmployee":false,"name":"Patrick
+      DeVivo","twitterUsername":null}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Mon, 08 Nov 2021 19:33:54 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - DD4A:7085:101956:2AB454:61897BA2
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4999"
+      X-Ratelimit-Reset:
+      - "1636403634"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "1"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 327.876304ms
