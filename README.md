@@ -556,21 +556,13 @@ SELECT github_stargazer_count('askgitdev/askgit'); -- both are equivalent
 
 ##### `github_user`
 
-Scalar function that returns the information of a github user
+Scalar function that returns information about a GitHub user as JSON.
 
 Params:
-  1. `login` - the login of the github user
-Return: 
-"{""User"":{""Bio"":<< string >>,""AvatarUrl"":< string >,""Company"":< string >,""CreatedAt"":< dateTime >,""Email"":< string >,""IsHireable"":< boolean >,""IsEmployee"":< boolean >,""Name"": < string >,""TwitterUsername"":< string >}}"
+  1. `login` - the user's login
 
 ```sql
-SELECT github_user('torvalds');
-```
-
-
-```sql
-SELECT github_stargazer_count('askgitdev', 'askgit');
-SELECT github_stargazer_count('askgitdev/askgit'); -- both are equivalent
+SELECT github_user('patrickdevivo');
 ```
 
 ##### `github_user_repos` and `github_org_repos`
