@@ -9,7 +9,7 @@ import (
 )
 
 // github_user_info
-// This function takes in a user's login and returns user information in a single block of text
+// This function takes in a user's login and returns user information as JSON
 type userInfo struct {
 	opts *Options
 }
@@ -23,20 +23,21 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 		ctx.ResultError(err)
 		return
 	}
-	var login = value[0].Text()
+	login := value[0].Text()
 	var query struct {
 		User struct {
-			Bio             string
-			AvatarUrl       githubv4.URI
-			Company         string
-			CreatedAt       githubv4.DateTime
-			Email           string
-			IsHireable      bool
-			IsEmployee      bool
-			Name            string
-			TwitterUsername string
-		} `graphql:"user(login: $login)"`
+			Bio             string            `json:"bio"`
+			AvatarUrl       githubv4.URI      `json:"avatarUrl"`
+			Company         string            `json:"company"`
+			CreatedAt       githubv4.DateTime `json:"createdAt"`
+			Email           string            `json:"email"`
+			IsHireable      bool              `json:"isHireable"`
+			IsEmployee      bool              `json:"isEmployee"`
+			Name            string            `json:"name"`
+			TwitterUsername string            `json:"twitterUsername"`
+		} `graphql:"user(login: $login)" json:"user"`
 	}
+
 	variables := map[string]interface{}{
 		"login": githubv4.String(login),
 	}
@@ -44,18 +45,27 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 	l := s.opts.Logger.With().Str("login", login).Logger()
 	l.Info().Msgf("fetching user information for: %s", login)
 
-	err = s.opts.Client().Query(context.Background(), &query, variables)
+	err = s.opts.RateLimiter.Wait(context.TODO())
 	if err != nil {
 		ctx.ResultError(err)
 		return
 	}
-	resultString, err := json.Marshal(query)
+
+	err = s.opts.Client().Query(context.TODO(), &query, variables)
 	if err != nil {
 		ctx.ResultError(err)
 		return
 	}
+
+	resultString, err := json.Marshal(query.User)
+	if err != nil {
+		ctx.ResultError(err)
+		return
+	}
+
 	ctx.ResultText(string(resultString))
 }
-func NewGithubUserFunc(opts *Options) sqlite.Function {
+
+func NewGitHubUserFunc(opts *Options) sqlite.Function {
 	return &userInfo{opts}
 }
