@@ -45,12 +45,6 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 	l := s.opts.Logger.With().Str("login", login).Logger()
 	l.Info().Msgf("fetching user information for: %s", login)
 
-	err = s.opts.RateLimiter.Wait(context.TODO())
-	if err != nil {
-		ctx.ResultError(err)
-		return
-	}
-
 	err = s.opts.Client().Query(context.TODO(), &query, variables)
 	if err != nil {
 		ctx.ResultError(err)
