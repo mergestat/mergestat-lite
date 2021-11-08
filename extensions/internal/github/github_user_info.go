@@ -15,7 +15,7 @@ type userInfo struct {
 }
 
 func (s *userInfo) Args() int           { return 1 }
-func (s *userInfo) Deterministic() bool { return true }
+func (s *userInfo) Deterministic() bool { return false }
 
 func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 	err := s.opts.RateLimiter.Wait(context.Background())
