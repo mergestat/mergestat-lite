@@ -23,6 +23,6 @@ func TestUserInfo(t *testing.T) {
 	}
 
 	if !(strings.Contains(output, "2009-02-23T21:42:03Z")) {
-		t.Fatalf("recieved incorrect date in result %s", output)
+		t.Fatalf("did not receive expected date in result: %s", output)
 	}
 }
