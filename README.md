@@ -554,6 +554,17 @@ SELECT github_stargazer_count('askgitdev', 'askgit');
 SELECT github_stargazer_count('askgitdev/askgit'); -- both are equivalent
 ```
 
+##### `github_user`
+
+Scalar function that returns information about a GitHub user as JSON.
+
+Params:
+  1. `login` - the user's login
+
+```sql
+SELECT github_user('patrickdevivo');
+```
+
 ##### `github_user_repos` and `github_org_repos`
 
 Table-valued function that returns all the repositories belonging to a user or an organization.
