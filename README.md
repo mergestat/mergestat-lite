@@ -15,6 +15,6 @@ It can execute queries that look like:
 SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 ```
 
-You can try queries on public git repositories without installing anything at [https://try.askgit.com/](https://mergestat.com/), in our `Public` workspace.
+You can try queries on public git repositories without installing anything at [try.askgit.com](https://try.askgit.com/), in our `Public` workspace.
 
 More in-depth examples and documentation can be found on our dedicated [documentation site](https://docs.mergestat.com/).
