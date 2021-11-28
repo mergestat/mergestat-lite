@@ -3,7 +3,7 @@ package helpers
 import (
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions/internal/tools"
+	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
 func TestStrSplitFunc(t *testing.T) {

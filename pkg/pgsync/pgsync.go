@@ -10,20 +10,20 @@ import (
 	"github.com/lib/pq"
 	"github.com/rs/zerolog"
 
-	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mergestat/mergestat/pkg/sqlite"
 )
 
 type SyncOptions struct {
 	Postgres   *sql.DB
-	AskGit     *sql.DB
+	MergeStat  *sql.DB
 	SchemaName string
 	TableName  string
 	Query      string
 	Logger     *zerolog.Logger
 }
 
-// Sync imports the results of an askgit query into a postgres table.
+// Sync imports the results of an mergestat query into a postgres table.
 // CAUTION: will overwrite (DROP!) the specified table and replace it.
 func Sync(ctx context.Context, options *SyncOptions) error {
 	l := options.Logger.With().Str("pgTable", options.TableName).Logger()
@@ -34,7 +34,7 @@ func Sync(ctx context.Context, options *SyncOptions) error {
 		return ctx.Err()
 	}
 
-	rows, err := options.AskGit.QueryContext(ctx, options.Query)
+	rows, err := options.MergeStat.QueryContext(ctx, options.Query)
 	if err != nil {
 		return err
 	}

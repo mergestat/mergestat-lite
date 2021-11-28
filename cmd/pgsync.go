@@ -7,16 +7,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/askgitdev/askgit/pkg/pgsync"
+	"github.com/mergestat/mergestat/pkg/pgsync"
 	"github.com/spf13/cobra"
 
-	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mergestat/mergestat/pkg/sqlite"
 )
 
 var pgsyncCmd = &cobra.Command{
 	Use:  "pgsync [tableName] [query]",
-	Long: `Use this command to sync the results of an askgit query into a Postgres table`,
+	Long: `Use this command to sync the results of a mergestat query into a Postgres table`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		registerExt()
@@ -32,7 +32,7 @@ var pgsyncCmd = &cobra.Command{
 		}
 
 		var postgres *sql.DB
-		var askgit *sql.DB
+		var mergestat *sql.DB
 		var err error
 
 		if postgres, err = sql.Open("postgres", os.Getenv("POSTGRES_CONNECTION")); err != nil {
@@ -45,13 +45,13 @@ var pgsyncCmd = &cobra.Command{
 			}
 		}()
 
-		if askgit, err = sql.Open("sqlite3", ":memory:"); err != nil {
-			logger.Error().Msgf("could not initialize askgit: %v", err)
+		if mergestat, err = sql.Open("sqlite3", ":memory:"); err != nil {
+			logger.Error().Msgf("could not initialize mergestat: %v", err)
 			return
 		}
 		defer func() {
-			if err := askgit.Close(); err != nil {
-				logger.Error().Msgf("could not close askgit: %v", err)
+			if err := mergestat.Close(); err != nil {
+				logger.Error().Msgf("could not close mergestat: %v", err)
 			}
 		}()
 
@@ -68,7 +68,7 @@ var pgsyncCmd = &cobra.Command{
 
 		options := &pgsync.SyncOptions{
 			Postgres:   postgres,
-			AskGit:     askgit,
+			MergeStat:  mergestat,
 			SchemaName: schemaName,
 			TableName:  tableName,
 			Query:      query,

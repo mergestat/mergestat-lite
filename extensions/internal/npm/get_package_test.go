@@ -3,7 +3,7 @@ package npm_test
 import (
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions/internal/tools"
+	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
 func TestGetPackage(t *testing.T) {

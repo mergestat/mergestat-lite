@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"github.com/askgitdev/askgit/extensions/options"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )

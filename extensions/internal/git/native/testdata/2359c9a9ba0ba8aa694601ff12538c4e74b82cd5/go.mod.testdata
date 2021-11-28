@@ -1,4 +1,4 @@
-module github.com/askgitdev/askgit
+module github.com/mergestat/mergestat
 
 go 1.13
 

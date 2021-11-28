@@ -1,17 +1,17 @@
 // Package extensions provide implementation of the various underlying sqlite3 virtual tables [https://www.sqlite.org/vtab.html] and user defined functions
-// that askgit uses under-the-hood. This module can be side-effect-imported in other modules to include the functionality
+// that mergestat uses under-the-hood. This module can be side-effect-imported in other modules to include the functionality
 // of the sqlite3 extensions there.
 package extensions
 
 import (
-	"github.com/askgitdev/askgit/extensions/internal/enry"
-	"github.com/askgitdev/askgit/extensions/internal/git"
-	"github.com/askgitdev/askgit/extensions/internal/github"
-	"github.com/askgitdev/askgit/extensions/internal/golang"
-	"github.com/askgitdev/askgit/extensions/internal/helpers"
-	"github.com/askgitdev/askgit/extensions/internal/npm"
-	"github.com/askgitdev/askgit/extensions/internal/sourcegraph"
-	"github.com/askgitdev/askgit/extensions/options"
+	"github.com/mergestat/mergestat/extensions/internal/enry"
+	"github.com/mergestat/mergestat/extensions/internal/git"
+	"github.com/mergestat/mergestat/extensions/internal/github"
+	"github.com/mergestat/mergestat/extensions/internal/golang"
+	"github.com/mergestat/mergestat/extensions/internal/helpers"
+	"github.com/mergestat/mergestat/extensions/internal/npm"
+	"github.com/mergestat/mergestat/extensions/internal/sourcegraph"
+	"github.com/mergestat/mergestat/extensions/options"
 	"go.riyazali.net/sqlite"
 )
 

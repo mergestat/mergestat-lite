@@ -16,17 +16,17 @@ interactions:
       This seems to be something that is common throughout pre-built go binary builders
       as I know xgo also has issues compiling projects with CGO. If you happen to
       know of a different releaser that doesn''t have the aforementioned issue @patrickdevivo
-      and I would love to hear about it","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-07T13:03:48Z","databaseId":654842143,"id":"MDEyOklzc3VlQ29tbWVudDY1NDg0MjE0Mw==","updatedAt":"2020-07-07T13:03:48Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-654842143"},{"body":"Have
+      and I would love to hear about it","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-07T13:03:48Z","databaseId":654842143,"id":"MDEyOklzc3VlQ29tbWVudDY1NDg0MjE0Mw==","updatedAt":"2020-07-07T13:03:48Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-654842143"},{"body":"Have
       you considered AWS Codebuild? You should be able to access git objects in there.\r\n\r\nI''m
       not sure about Go specifics but this example project seems to be using cgo.\r\n\r\nhttps://github.com/shawnxlw/go-k8s-cicd\r\n\r\nAt
       line 13 we can read:\r\nhttps://github.com/shawnxlw/go-k8s-cicd/blob/master/buildspec/build.yml\r\n\r\n```\r\ndocker
       run --rm -v \"$PWD\":/usr/src/myapp -w /usr/src/myapp -e CGO_ENABLED=0 -e GOOS=linux
-      golang:alpine go build -a -installsuffix cgo -o main -v .\r\n```","author":{"login":"jeshan","url":"https://github.com/jeshan"},"createdAt":"2020-07-09T07:47:25Z","databaseId":655965188,"id":"MDEyOklzc3VlQ29tbWVudDY1NTk2NTE4OA==","updatedAt":"2020-07-09T07:47:25Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-655965188"},{"body":"If
+      golang:alpine go build -a -installsuffix cgo -o main -v .\r\n```","author":{"login":"jeshan","url":"https://github.com/jeshan"},"createdAt":"2020-07-09T07:47:25Z","databaseId":655965188,"id":"MDEyOklzc3VlQ29tbWVudDY1NTk2NTE4OA==","updatedAt":"2020-07-09T07:47:25Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-655965188"},{"body":"If
       you look under releases I uploaded tar.gz files for linux and OS x86-64 binaries(compiled
-      in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-656118539"},{"body":"#50
+      in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-656118539"},{"body":"#50
       adds some instructions to the README on how to install via `homebrew`, which
       will now be maintained. Running via Docker has also been documented, as such
-      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
+      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -95,17 +95,17 @@ interactions:
       This seems to be something that is common throughout pre-built go binary builders
       as I know xgo also has issues compiling projects with CGO. If you happen to
       know of a different releaser that doesn''t have the aforementioned issue @patrickdevivo
-      and I would love to hear about it","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-07T13:03:48Z","databaseId":654842143,"id":"MDEyOklzc3VlQ29tbWVudDY1NDg0MjE0Mw==","updatedAt":"2020-07-07T13:03:48Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-654842143"},{"body":"Have
+      and I would love to hear about it","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-07T13:03:48Z","databaseId":654842143,"id":"MDEyOklzc3VlQ29tbWVudDY1NDg0MjE0Mw==","updatedAt":"2020-07-07T13:03:48Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-654842143"},{"body":"Have
       you considered AWS Codebuild? You should be able to access git objects in there.\r\n\r\nI''m
       not sure about Go specifics but this example project seems to be using cgo.\r\n\r\nhttps://github.com/shawnxlw/go-k8s-cicd\r\n\r\nAt
       line 13 we can read:\r\nhttps://github.com/shawnxlw/go-k8s-cicd/blob/master/buildspec/build.yml\r\n\r\n```\r\ndocker
       run --rm -v \"$PWD\":/usr/src/myapp -w /usr/src/myapp -e CGO_ENABLED=0 -e GOOS=linux
-      golang:alpine go build -a -installsuffix cgo -o main -v .\r\n```","author":{"login":"jeshan","url":"https://github.com/jeshan"},"createdAt":"2020-07-09T07:47:25Z","databaseId":655965188,"id":"MDEyOklzc3VlQ29tbWVudDY1NTk2NTE4OA==","updatedAt":"2020-07-09T07:47:25Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-655965188"},{"body":"If
+      golang:alpine go build -a -installsuffix cgo -o main -v .\r\n```","author":{"login":"jeshan","url":"https://github.com/jeshan"},"createdAt":"2020-07-09T07:47:25Z","databaseId":655965188,"id":"MDEyOklzc3VlQ29tbWVudDY1NTk2NTE4OA==","updatedAt":"2020-07-09T07:47:25Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-655965188"},{"body":"If
       you look under releases I uploaded tar.gz files for linux and OS x86-64 binaries(compiled
-      in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-656118539"},{"body":"#50
+      in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-656118539"},{"body":"#50
       adds some instructions to the README on how to install via `homebrew`, which
       will now be maintained. Running via Docker has also been documented, as such
-      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/askgitdev/askgit/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
+      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'

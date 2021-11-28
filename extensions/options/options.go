@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-git/v5"
+	"github.com/mergestat/mergestat/extensions/services"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"github.com/shurcooL/graphql"

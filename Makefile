@@ -52,7 +52,7 @@ vet:
 	go vet -v -tags=$(TAGS) ./...
 
 build:
-	go build -v -tags=$(TAGS) askgit.go
+	go build -v -tags=$(TAGS) mergestat.go
 
 lint:
 	golangci-lint run --build-tags $(TAGS)

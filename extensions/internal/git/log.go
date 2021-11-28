@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/askgitdev/askgit/extensions/internal/git/utils"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/mergestat/mergestat/extensions/internal/git/utils"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/askgitdev/askgit/extensions/services"
+	"github.com/mergestat/mergestat/extensions/services"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/time/rate"
@@ -92,8 +92,8 @@ func orderByToGitHubOrder(desc bool) githubv4.OrderDirection {
 }
 
 // repoOwnerAndName returns the "owner" and "name" (respective return values) or an error
-// given the inputs to the iterator. This allows for both `SELECT * FROM github_table('askgitdev/askgit')`
-// and `SELECT * FROM github_table('askgitdev', 'askgit')
+// given the inputs to the iterator. This allows for both `SELECT * FROM github_table('mergestat/mergestat')`
+// and `SELECT * FROM github_table('mergestat', 'mergestat')
 func repoOwnerAndName(name, fullNameOrOwner string) (string, string, error) {
 	if name == "" {
 		split_string := strings.Split(fullNameOrOwner, "/")

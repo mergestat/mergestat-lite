@@ -11,8 +11,8 @@ RUN make
 FROM debian:buster-slim
 WORKDIR /app/
 RUN mkdir /repo
-COPY --from=builder /app/.build/askgit .
+COPY --from=builder /app/.build/mergestat .
 
 RUN apt-get update && apt-get install -y git
 
-ENTRYPOINT ["./askgit", "--repo", "/repo"]
+ENTRYPOINT ["./mergestat", "--repo", "/repo"]

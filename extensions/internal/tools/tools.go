@@ -1,12 +1,12 @@
-// Package tools provides utilities to hel with writing
-// integration test suites for askgit sqlite module.
+// Package tools provides utilities to help with writing
+// integration test suites for mergestat sqlite module.
 package tools
 
 import (
 	"database/sql"
 
-	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mergestat/mergestat/pkg/sqlite"
 )
 
 func RowContent(rows *sql.Rows) (colCount int, contents [][]string, err error) {

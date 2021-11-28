@@ -2,15 +2,15 @@
 // +build shared
 
 // This file provides a build target while building the dynamically loadable shared object library.
-// It imports github.com/askgitdev/askgit/extensions which provides the actual extension implementation.
+// It imports github.com/mergestat/mergestat/extensions which provides the actual extension implementation.
 package main
 
 import (
 	"os"
 
-	"github.com/askgitdev/askgit/extensions"
-	"github.com/askgitdev/askgit/extensions/options"
-	"github.com/askgitdev/askgit/pkg/locator"
+	"github.com/mergestat/mergestat/extensions"
+	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat/pkg/locator"
 	"go.riyazali.net/sqlite"
 )
 

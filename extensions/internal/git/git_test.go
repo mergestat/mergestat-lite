@@ -5,11 +5,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions"
-	"github.com/askgitdev/askgit/extensions/options"
-	"github.com/askgitdev/askgit/pkg/locator"
-	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/mergestat/mergestat/extensions"
+	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat/pkg/locator"
+	_ "github.com/mergestat/mergestat/pkg/sqlite"
 	"go.riyazali.net/sqlite"
 )
 

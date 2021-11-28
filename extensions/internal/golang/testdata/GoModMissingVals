@@ -1,4 +1,4 @@
-module github.com/askgitdev/askgit
+module github.com/mergestat/mergestat
 
 require (
 	github.com/BurntSushi/toml v0.3.1

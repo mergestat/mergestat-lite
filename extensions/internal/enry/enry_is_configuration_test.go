@@ -3,7 +3,7 @@ package enry
 import (
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions/internal/tools"
+	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
 func TestEnryIsConfiguration(t *testing.T) {

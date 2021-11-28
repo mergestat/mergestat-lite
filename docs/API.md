@@ -1,6 +1,6 @@
-## AskGit Public API
+## MergeStat Public API
 
-The [demo site](https://try.askgit.com/) makes use of a publicly available AskGit HTTP API which can be called directly.
+The [demo site](https://try.askgit.com/) makes use of a publicly available MergeStat HTTP API which can be called directly.
 Queries are executed in an AWS Lambda function and have the following limitations:
 
 1. At most 500 rows can be returned
@@ -24,7 +24,7 @@ The JSON response will have the following fields:
 For example:
 
 ```
-curl -X POST -H "content-type: application/json" https://try.askgit.com/api/query -d '{"query": "select * from commits limit 1", "repo": "https://github.com/askgitdev/askgit"}'
+curl -X POST -H "content-type: application/json" https://try.askgit.com/api/query -d '{"query": "select * from commits limit 1", "repo": "https://github.com/mergestat/mergestat"}'
 ```
 
 Will yield a result like:

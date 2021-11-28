@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions/internal/tools"
+	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
 func TestGrepSimple(t *testing.T) {
