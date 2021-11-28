@@ -13,11 +13,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            asset_name: askgit-linux-amd64
+            asset_name: mergestat-linux-amd64
           # - os: windows-latest
-          #   asset_name: askgit-windows-amd64
+          #   asset_name: mergestat-windows-amd64
           - os: macos-latest
-            asset_name: askgit-macos-amd64
+            asset_name: mergestat-macos-amd64
 
     steps:
     - name: Set up Go 1.15
@@ -36,12 +36,12 @@ jobs:
       run: make
 
     - name: Compress
-      run: tar -czvf askgit.tar.gz -C .build/ .
+      run: tar -czvf mergestat.tar.gz -C .build/ .
 
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: askgit.tar.gz
+        file: mergestat.tar.gz
         asset_name: ${{ matrix.asset_name }}.tar.gz
         tag: ${{ github.ref }}
