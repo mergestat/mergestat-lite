@@ -10,7 +10,7 @@ import (
 
 func TestSelectBlameREADMELines(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/askgitdev/askgit"
+	repo := "https://github.com/mergestat/mergestat"
 
 	rows, err := db.Query("SELECT line_no, commit_hash FROM blame(?, '', 'README.md') LIMIT 10", repo)
 	if err != nil {
@@ -35,7 +35,7 @@ func TestSelectBlameREADMELines(t *testing.T) {
 
 func TestSelectKnownBlame(t *testing.T) {
 	db := Connect(t, Memory)
-	repo, hash := "https://github.com/askgitdev/askgit", "2359c9a9ba0ba8aa694601ff12538c4e74b82cd5"
+	repo, hash := "https://github.com/mergestat/mergestat", "2359c9a9ba0ba8aa694601ff12538c4e74b82cd5"
 
 	rows, err := db.Query("SELECT line_no, commit_hash FROM blame(?, ?, 'README.md')", repo, hash)
 	if err != nil {

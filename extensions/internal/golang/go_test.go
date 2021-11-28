@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/askgitdev/askgit/pkg/sqlite"
+	_ "github.com/mergestat/mergestat/pkg/sqlite"
 	"go.riyazali.net/sqlite"
 )
 

@@ -196,7 +196,7 @@ func NewIssueCommentsModule(opts *Options) sqlite.Module {
 				}
 			}
 		}
-		if !threeArgs { // in this case, the second arg should be the issue number, and the first is the "full" repo name (askgitdev/askgit)
+		if !threeArgs { // in this case, the second arg should be the issue number, and the first is the "full" repo name (mergestat/mergestat)
 			if nameOrNumber == nil || nameOrNumber.Type() != sqlite.SQLITE_INTEGER {
 				return nil, fmt.Errorf("please supply a valid issue number")
 			}

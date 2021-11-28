@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/askgitdev/askgit/pkg/display"
-	. "github.com/askgitdev/askgit/pkg/query"
+	"github.com/mergestat/mergestat/pkg/display"
+	. "github.com/mergestat/mergestat/pkg/query"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -74,8 +74,8 @@ var rootCmd = &cobra.Command{
 	Use:  `display "SELECT * FROM commits"`,
 	Args: cobra.MaximumNArgs(2),
 	Long: `
-  askgit is a CLI for querying git repositories with SQL, using SQLite virtual tables.
-  Example queries can be found in the GitHub repo: https://github.com/askgitdev/askgit`,
+  mergestat is a CLI for querying git repositories with SQL, using SQLite virtual tables.
+  Example queries can be found in the GitHub repo: https://github.com/mergestat/mergestat`,
 	Short: `query your github repos with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error

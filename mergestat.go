@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/askgitdev/askgit/cmd"
+	"github.com/mergestat/mergestat/cmd"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package utils
 import (
 	"os"
 
-	"github.com/askgitdev/askgit/extensions/services"
+	"github.com/mergestat/mergestat/extensions/services"
 	"github.com/rs/zerolog"
 )
 

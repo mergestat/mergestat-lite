@@ -8,7 +8,7 @@ import (
 
 func TestSelect10FilesHEAD(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/askgitdev/askgit"
+	repo := "https://github.com/mergestat/mergestat"
 
 	rows, err := db.Query("SELECT path, executable, contents FROM files(?) LIMIT 10", repo)
 	if err != nil {
@@ -33,7 +33,7 @@ func TestSelect10FilesHEAD(t *testing.T) {
 
 func TestSelectKnownContents(t *testing.T) {
 	db := Connect(t, Memory)
-	repo, hash := "https://github.com/askgitdev/askgit", "2359c9a9ba0ba8aa694601ff12538c4e74b82cd5"
+	repo, hash := "https://github.com/mergestat/mergestat", "2359c9a9ba0ba8aa694601ff12538c4e74b82cd5"
 
 	rows, err := db.Query("SELECT path, contents FROM files(?, ?) WHERE path LIKE 'Makefile' OR path LIKE 'go.mod'", repo, hash)
 	if err != nil {

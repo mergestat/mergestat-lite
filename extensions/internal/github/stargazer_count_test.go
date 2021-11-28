@@ -10,7 +10,7 @@ func TestStargazersCount(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	row := db.QueryRow("SELECT github_stargazer_count('askgitdev/askgit')")
+	row := db.QueryRow("SELECT github_stargazer_count('mergestat/mergestat')")
 	if err := row.Err(); err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}

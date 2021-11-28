@@ -3,7 +3,7 @@ package sourcegraph_test
 import (
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions/internal/tools"
+	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
 func TestSearch(t *testing.T) {

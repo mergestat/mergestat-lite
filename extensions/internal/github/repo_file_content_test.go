@@ -10,7 +10,7 @@ func TestRepoFileContent(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	row := db.QueryRow("SELECT github_repo_file_content('askgitdev/askgit', 'cfdcd109d8582ac7cb5b69c48bb426f31f39e948:README.md')")
+	row := db.QueryRow("SELECT github_repo_file_content('mergestat/mergestat', 'cfdcd109d8582ac7cb5b69c48bb426f31f39e948:README.md')")
 	if err := row.Err(); err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}

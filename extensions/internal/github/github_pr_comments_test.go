@@ -3,7 +3,7 @@ package github_test
 import (
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions/internal/tools"
+	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
 func TestPRComments(t *testing.T) {
@@ -12,7 +12,7 @@ func TestPRComments(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT * FROM github_repo_pr_comments('askgitdev/askgit', 193) LIMIT 5")
+	rows, err := db.Query("SELECT * FROM github_repo_pr_comments('mergestat/mergestat', 193) LIMIT 5")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}

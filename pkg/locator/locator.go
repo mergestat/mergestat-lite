@@ -14,13 +14,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/askgitdev/askgit/extensions/options"
-	"github.com/askgitdev/askgit/extensions/services"
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage/filesystem"
+	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat/extensions/services"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 )
@@ -65,7 +65,7 @@ func HttpLocator() services.RepoLocator {
 		}
 
 		var dir string
-		if dir, err = ioutil.TempDir(os.TempDir(), "askgit"); err != nil {
+		if dir, err = ioutil.TempDir(os.TempDir(), "mergestat"); err != nil {
 			return nil, errors.Wrap(err, "failed to create a temporary directory")
 		}
 
@@ -97,7 +97,7 @@ func SSHLocator() services.RepoLocator {
 
 		var dir string
 		var err error
-		if dir, err = ioutil.TempDir(os.TempDir(), "askgit"); err != nil {
+		if dir, err = ioutil.TempDir(os.TempDir(), "mergestat"); err != nil {
 			return nil, errors.Wrap(err, "failed to create a temporary directory")
 		}
 

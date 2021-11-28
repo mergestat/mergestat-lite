@@ -3,7 +3,7 @@ package github_test
 import (
 	"testing"
 
-	"github.com/askgitdev/askgit/extensions/internal/tools"
+	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
 func TestStargazers(t *testing.T) {
@@ -12,7 +12,7 @@ func TestStargazers(t *testing.T) {
 
 	db := Connect(t, Memory)
 
-	rows, err := db.Query("SELECT * FROM github_stargazers('askgitdev/askgit') LIMIT 500")
+	rows, err := db.Query("SELECT * FROM github_stargazers('mergestat/mergestat') LIMIT 500")
 	if err != nil {
 		t.Fatalf("failed to execute query: %v", err.Error())
 	}

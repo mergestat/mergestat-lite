@@ -3,14 +3,14 @@ package cmd
 import (
 	"os"
 
-	"github.com/askgitdev/askgit/extensions"
-	"github.com/askgitdev/askgit/extensions/options"
-	"github.com/askgitdev/askgit/pkg/locator"
+	"github.com/mergestat/mergestat/extensions"
+	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat/pkg/locator"
 	"go.riyazali.net/sqlite"
 
 	// bring in sqlite 🙌
-	_ "github.com/askgitdev/askgit/pkg/sqlite"
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mergestat/mergestat/pkg/sqlite"
 )
 
 func registerExt() {
