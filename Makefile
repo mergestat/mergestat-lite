@@ -1,7 +1,7 @@
 .PHONY: clean update vet test lint lint-ci test-cover bench
 
 # default task invoked while running make
-all: clean .build/libaskgit.so .build/askgit
+all: clean .build/libmergestat.so .build/mergestat
 
 # pass these flags to linker to suppress missing symbol errors in intermediate artifacts
 export CGO_CFLAGS = -DUSE_LIBSQLITE3
@@ -12,15 +12,15 @@ ifeq ($(shell uname -s),Darwin)
 endif
 
 # target to build a dynamic extension that can be loaded at runtime
-.build/libaskgit.so: $(shell find . -type f -name '*.go' -o -name '*.c')
+.build/libmergestat.so: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
 	@go build -buildmode=c-shared -o $@ -tags="system_libgit2,shared" shared.go
 	$(call log, $(GREEN), "built $@")
 
-# target to compile askgit executable
-.build/askgit: $(shell find . -type f -name '*.go' -o -name '*.c')
+# target to compile mergestat executable
+.build/mergestat: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
-	@go build -o $@ -tags="static,system_libgit2" askgit.go
+	@go build -o $@ -tags="static,system_libgit2" mergestat.go
 	$(call log, $(GREEN), "built $@")
 
 # target to download latest sqlite3 amalgamation code
