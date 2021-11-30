@@ -3,6 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/mergestat/mergestat)](https://goreportcard.com/report/github.com/mergestat/mergestat)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/mergestat/mergestat/main)](https://www.tickgit.com/browse?repo=github.com/mergestat/mergestat&branch=main)
 [![codecov](https://codecov.io/gh/mergestat/mergestat/branch/main/graph/badge.svg)](https://codecov.io/gh/mergestat/mergestat)
+![Twitter Follow](https://img.shields.io/twitter/follow/mergestat)
 
 
 # mergestat <a href="https://try.askgit.com/"><img align="right" src="docs/logo.png" alt="MergeStat Logo" height="100"></a>
@@ -17,4 +18,6 @@ SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 
 You can try queries on public git repositories without installing anything at [try.askgit.com](https://try.askgit.com/), in our `Public` workspace.
 
-More in-depth examples and documentation can be found on our dedicated [documentation site](https://docs.mergestat.com/).
+More in-depth examples and documentation can be found on our dedicated [**documentation site**](https://docs.mergestat.com/).
+
+Join our community on [Slack](https://join.slack.com/t/mergestatcommunity/shared_invite/zt-xvvtvcz9-w3JJVIdhLgEWrVrKKNXOYg) if you have questions, or just to say hi 🎉.
