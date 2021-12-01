@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/augmentable-dev/vtab"
 	"github.com/rs/zerolog"
@@ -105,13 +106,23 @@ func (i *iterIssuesComments) Column(ctx vtab.Context, c int) error {
 	case "body":
 		ctx.ResultText(current.Body)
 	case "created_at":
-		ctx.ResultText(current.CreatedAt.String())
+		t := current.CreatedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case "database_id":
 		ctx.ResultInt(current.DatabaseId)
 	case "id":
 		ctx.ResultText(string(current.Id))
 	case "updated_at":
-		ctx.ResultText(current.UpdatedAt.String())
+		t := current.UpdatedAt
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
 	case "url":
 		ctx.ResultText(current.Url.String())
 	case "issue_id":
