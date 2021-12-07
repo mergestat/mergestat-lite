@@ -11,12 +11,10 @@ import (
 )
 
 type ref struct {
-	Id     githubv4.GitObjectID
 	Name   githubv4.String
 	Prefix githubv4.String
 	Target struct {
 		Commit struct {
-			Id     githubv4.GitObjectID
 			Oid    githubv4.GitObjectID
 			Author struct {
 				Name  githubv4.String
@@ -86,17 +84,13 @@ func (i *iterBranches) Column(ctx vtab.Context, c int) error {
 	col := branchCols[c]
 
 	switch col.Name {
-	case "id":
-		ctx.ResultText(string(current.Id))
 	case "name":
 		ctx.ResultText(string(current.Name))
 	case "author_name":
 		ctx.ResultText(string(current.Target.Commit.Author.Name))
 	case "author_email":
 		ctx.ResultText(string(current.Target.Commit.Author.Email))
-	case "commit_id":
-		ctx.ResultText(string(current.Target.Commit.Id))
-	case "commit_git_id":
+	case "commit_hash":
 		ctx.ResultText(string(current.Target.Commit.Oid))
 	}
 	return nil
@@ -141,12 +135,10 @@ func (i *iterBranches) Next() (vtab.Row, error) {
 var branchCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
-	{Name: "id", Type: "INT"},
 	{Name: "name", Type: "TEXT"},
 	{Name: "author_name", Type: "TEXT"},
 	{Name: "author_email", Type: "TEXT"},
-	{Name: "commit_id", Type: "TEXT"},
-	{Name: "commit_git_id", Type: "TEXT"},
+	{Name: "commit_hash", Type: "TEXT"},
 }
 
 func NewBranchModule(opts *Options) sqlite.Module {
