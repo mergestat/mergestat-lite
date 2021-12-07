@@ -33,9 +33,6 @@ type fetchBranchResults struct {
 func (i *iterBranches) fetchBranches(ctx context.Context, startCursor *githubv4.String) (*fetchBranchResults, error) {
 	var BranchQuery struct {
 		Repository struct {
-			Owner struct {
-				Login string
-			}
 			Name string
 			Refs struct {
 				Nodes    []*ref
