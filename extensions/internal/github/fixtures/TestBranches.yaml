@@ -1,0 +1,137 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($name:String!$owner:String!$perpage:Int!$refcursor:String$refs:String!){repository(owner: $owner, name: $name){owner{login},name,refs(refPrefix: $refs, after: $refcursor, first: $perpage){nodes{name,prefix,target{... on Commit{oid,author{name,email}}}},pageInfo{endCursor,hasNextPage}}}}","variables":{"name":"mergestat","owner":"mergestat","perpage":100,"refcursor":null,"refs":"refs/heads/"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"mergestat"},"name":"mergestat","refs":{"nodes":[{"name":"audit_log","prefix":"refs/heads/","target":{"oid":"e9ef1c6e672becb0cf3da1b956a39a39b43dccb7","author":{"name":"vialeon","email":"dnewberry21@amherst.edu"}}},{"name":"checkSuite","prefix":"refs/heads/","target":{"oid":"6e13893f89c769b4514d6d3e6c396171262c7083","author":{"name":"vialeon","email":"dnewberry21@amherst.edu"}}},{"name":"github_branches","prefix":"refs/heads/","target":{"oid":"78335f7dc627a89af27829794f24655cdd5fcf5f","author":{"name":"dnewberr","email":"derricknewberry2017@gmail.com"}}},{"name":"main","prefix":"refs/heads/","target":{"oid":"8fd8a6ebda2ab8b0c8b7e5c517d1c470a2c4cf51","author":{"name":"Patrick
+      DeVivo","email":"patrick.devivo@gmail.com"}}},{"name":"modify-tag-hash-behavior","prefix":"refs/heads/","target":{"oid":"6144fe8abc64e6105887b2bba3bec47fd3981b96","author":{"name":"Patrick
+      DeVivo","email":"patrick.devivo@gmail.com"}}},{"name":"pgsync","prefix":"refs/heads/","target":{"oid":"e54291f783a8811c47688b5e366deb1de001b6cd","author":{"name":"Patrick
+      DeVivo","email":"patrick.devivo@gmail.com"}}}],"pageInfo":{"endCursor":"Ng","hasNextPage":false}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 07 Dec 2021 01:51:56 GMT
+      Github-Authentication-Token-Expiration:
+      - 2022-01-06 00:55:30 UTC
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - C18F:6866:140D5D9:2A9BD3C:61AEBE3C
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
+        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
+        user, workflow, write:discussion, write:packages
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4933"
+      X-Ratelimit-Reset:
+      - "1638842447"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "67"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 381.3717ms
+- request:
+    body: |
+      {"query":"query($name:String!$owner:String!$perpage:Int!$refcursor:String$refs:String!){repository(owner: $owner, name: $name){owner{login},name,refs(refPrefix: $refs, after: $refcursor, first: $perpage){nodes{name,prefix,target{... on Commit{oid,author{name,email}}}},pageInfo{endCursor,hasNextPage}}}}","variables":{"name":"askgit","owner":"askgitdev","perpage":100,"refcursor":null,"refs":"refs/heads/"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"mergestat"},"name":"mergestat","refs":{"nodes":[{"name":"audit_log","prefix":"refs/heads/","target":{"oid":"e9ef1c6e672becb0cf3da1b956a39a39b43dccb7","author":{"name":"vialeon","email":"dnewberry21@amherst.edu"}}},{"name":"checkSuite","prefix":"refs/heads/","target":{"oid":"6e13893f89c769b4514d6d3e6c396171262c7083","author":{"name":"vialeon","email":"dnewberry21@amherst.edu"}}},{"name":"github_branches","prefix":"refs/heads/","target":{"oid":"78335f7dc627a89af27829794f24655cdd5fcf5f","author":{"name":"dnewberr","email":"derricknewberry2017@gmail.com"}}},{"name":"main","prefix":"refs/heads/","target":{"oid":"8fd8a6ebda2ab8b0c8b7e5c517d1c470a2c4cf51","author":{"name":"Patrick
+      DeVivo","email":"patrick.devivo@gmail.com"}}},{"name":"modify-tag-hash-behavior","prefix":"refs/heads/","target":{"oid":"6144fe8abc64e6105887b2bba3bec47fd3981b96","author":{"name":"Patrick
+      DeVivo","email":"patrick.devivo@gmail.com"}}},{"name":"pgsync","prefix":"refs/heads/","target":{"oid":"e54291f783a8811c47688b5e366deb1de001b6cd","author":{"name":"Patrick
+      DeVivo","email":"patrick.devivo@gmail.com"}}}],"pageInfo":{"endCursor":"Ng","hasNextPage":false}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
+        Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 07 Dec 2021 01:51:56 GMT
+      Github-Authentication-Token-Expiration:
+      - 2022-01-06 00:55:30 UTC
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - C18F:6866:140D5E6:2A9BD57:61AEBE3C
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
+        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
+        user, workflow, write:discussion, write:packages
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4932"
+      X-Ratelimit-Reset:
+      - "1638842447"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "68"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 190.5449ms
