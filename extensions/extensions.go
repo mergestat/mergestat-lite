@@ -23,9 +23,11 @@ func RegisterFn(fns ...options.OptionFn) func(ext *sqlite.ExtensionApi) (_ sqlit
 
 	// return an extension function that register modules with sqlite when this package is loaded
 	return func(ext *sqlite.ExtensionApi) (_ sqlite.ErrorCode, err error) {
-		// register the git tables
-		if sqliteErr, err := git.Register(ext, opt); err != nil {
-			return sqliteErr, err
+		if !opt.ExcludeGit {
+			// register the git tables
+			if sqliteErr, err := git.Register(ext, opt); err != nil {
+				return sqliteErr, err
+			}
 		}
 
 		// only conditionally register the utility functions

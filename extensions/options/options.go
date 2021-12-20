@@ -15,6 +15,10 @@ import (
 // and configurations that can be passed to tables.RegisterFn
 // to conditionally include or tweak the extension module's behaviour
 type Options struct {
+	// ExcludeGit excludes the git functionality if true
+	ExcludeGit bool
+
+	// Locator is how to fetch a repository
 	Locator services.RepoLocator
 
 	// ExtraFunctions is used to determine whether or not to register the extra utility functions
@@ -48,6 +52,11 @@ type Options struct {
 
 // OptionFn represents any function capable of customising or providing options
 type OptionFn func(*Options)
+
+// WithExcludeGit sets whether or not to exclude git functionality
+func WithExcludeGit(exclude bool) OptionFn {
+	return func(o *Options) { o.ExcludeGit = exclude }
+}
 
 // WithExtraFunctions configures the extension to also register the bundled
 // utility sql routines.
