@@ -1,0 +1,131 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($commitcursor:String$name:String!$owner:String!$perPage:Int!$prNumber:Int!){repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,commits(first: $perPage, after: $commitcursor){nodes{commit{additions,author{email,name,date},changedFiles,committer{email,name,date},deletions,oid,message,url}},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commitcursor":null,"name":"mergestat","owner":"mergestat","perPage":100,"prNumber":193}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"mergestat"},"name":"mergestat","pullRequest":{"id":"PR_kwDOEIJSDM4s_pJJ","number":193,"commits":{"nodes":[{"commit":{"additions":252,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"changedFiles":7,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"deletions":215,"oid":"cf8ca56e9e0fa106d42524cc965bbb1780920145","message":"add
+      a `topics` column to `github_user_repos` and `github_org_repos` tables\n\nthat''s
+      a JSON array of the GitHub topics associated with a repo","url":"https://github.com/mergestat/mergestat/commit/cf8ca56e9e0fa106d42524cc965bbb1780920145"}}],"pageInfo":{"endCursor":"MQ","hasNextPage":false}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 06 Jan 2022 18:39:37 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - E81F:4031:290531:4A6CD5:61D73769
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4984"
+      X-Ratelimit-Reset:
+      - "1641496802"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "16"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 449.257581ms
+- request:
+    body: |
+      {"query":"query($commitcursor:String$name:String!$owner:String!$perPage:Int!$prNumber:Int!){repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,commits(first: $perPage, after: $commitcursor){nodes{commit{additions,author{email,name,date},changedFiles,committer{email,name,date},deletions,oid,message,url}},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commitcursor":null,"name":"mergestat","owner":"mergestat","perPage":100,"prNumber":193}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"mergestat"},"name":"mergestat","pullRequest":{"id":"PR_kwDOEIJSDM4s_pJJ","number":193,"commits":{"nodes":[{"commit":{"additions":252,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"changedFiles":7,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"deletions":215,"oid":"cf8ca56e9e0fa106d42524cc965bbb1780920145","message":"add
+      a `topics` column to `github_user_repos` and `github_org_repos` tables\n\nthat''s
+      a JSON array of the GitHub topics associated with a repo","url":"https://github.com/mergestat/mergestat/commit/cf8ca56e9e0fa106d42524cc965bbb1780920145"}}],"pageInfo":{"endCursor":"MQ","hasNextPage":false}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 06 Jan 2022 18:39:37 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - E81F:4031:290563:4A6D30:61D73769
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4983"
+      X-Ratelimit-Reset:
+      - "1641496802"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "17"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 186.242604ms
