@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/augmentable-dev/vtab"
 	"github.com/rs/zerolog"
@@ -26,14 +27,19 @@ type pullRequestForCommits struct {
 }
 
 type prCommit struct {
-	Additions    int
+	Additions int
+	Author    struct {
+		Email string
+		Name  string
+		Date  githubv4.DateTime
+	}
 	ChangedFiles int
 	Committer    struct {
 		Email string
 		Name  string
+		Date  githubv4.DateTime
 	}
 	Deletions int
-	Id        githubv4.GitObjectID
 	Oid       githubv4.GitObjectID
 	Message   string
 	Url       githubv4.URI
@@ -94,28 +100,44 @@ func (i *iterPRCommits) Column(ctx vtab.Context, c int) error {
 	col := prCommitsCols[c]
 
 	switch col.Name {
-	case "commit_additions":
-		ctx.ResultInt(current.Commit.Additions)
-	case "commit_changed_files":
-		ctx.ResultInt(current.Commit.ChangedFiles)
-	case "commiter_email":
-		ctx.ResultText(current.Commit.Committer.Email)
-	case "commit_name":
-		ctx.ResultText(current.Commit.Committer.Name)
-	case "commit_message":
-		ctx.ResultText(current.Commit.Message)
-	case "commit_hash":
-		ctx.ResultText(string(current.Commit.Id))
-	case "commit_deletions":
-		ctx.ResultInt(current.Commit.Deletions)
-	case "commit_url":
-		ctx.ResultText(current.Commit.Url.String())
-	case "commit_oid":
-		ctx.ResultText(string(current.Commit.Oid))
-	case "commit_id":
-		ctx.ResultText(string(current.Commit.Id))
 	case "pr_number":
 		ctx.ResultInt(i.prNumber)
+	case "hash":
+		ctx.ResultText(string(current.Commit.Oid))
+	case "message":
+		ctx.ResultText(current.Commit.Message)
+	case "author_name":
+		ctx.ResultText(current.Commit.Author.Name)
+	case "author_email":
+		ctx.ResultText(current.Commit.Author.Email)
+	case "author_when":
+		t := current.Commit.Author.Date
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
+	case "committer_name":
+		ctx.ResultText(current.Commit.Committer.Name)
+	case "committer_email":
+		ctx.ResultText(current.Commit.Committer.Email)
+	case "committer_when":
+		t := current.Commit.Committer.Date
+		if t.IsZero() {
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(t.Format(time.RFC3339Nano))
+		}
+	case "additions":
+		ctx.ResultInt(current.Commit.Additions)
+	case "deletions":
+		ctx.ResultInt(current.Commit.Deletions)
+	case "changed_files":
+		ctx.ResultInt(current.Commit.ChangedFiles)
+	case "name":
+		ctx.ResultText(current.Commit.Committer.Name)
+	case "url":
+		ctx.ResultText(current.Commit.Url.String())
 	}
 	return nil
 }
@@ -161,14 +183,19 @@ var prCommitsCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "pr_number", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
-	{Name: "commit_hash", Type: "INT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
-	{Name: "commit_url", Type: "TEXT"},
-	{Name: "commit_message", Type: "TEXT"},
-	{Name: "commit_deletions", Type: "INT"},
-	{Name: "commiter_email", Type: "TEXT"},
-	{Name: "commiter_name", Type: "TEXT"},
-	{Name: "commit_additions", Type: "INT"},
-	{Name: "commit_changed_files", Type: "TEXT"},
+
+	{Name: "hash", Type: "TEXT"},
+	{Name: "message", Type: "TEXT"},
+	{Name: "author_name", Type: "TEXT"},
+	{Name: "author_email", Type: "TEXT"},
+	{Name: "author_when", Type: "DATETIME"},
+	{Name: "committer_name", Type: "TEXT"},
+	{Name: "committer_email", Type: "TEXT"},
+	{Name: "committer_when", Type: "DATETIME"},
+	{Name: "additions", Type: "INT"},
+	{Name: "deletions", Type: "INT"},
+	{Name: "changed_files", Type: "INT"},
+	{Name: "url", Type: "TEXT"},
 }
 
 func NewPRCommitsModule(opts *Options) sqlite.Module {
