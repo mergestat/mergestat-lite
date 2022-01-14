@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"time"
 
@@ -10,6 +11,20 @@ import (
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
 )
+
+type repositoryDefaultBranchForCommits struct {
+	Target struct {
+		Commits struct {
+			History struct {
+				Nodes    []*objectCommit
+				PageInfo struct {
+					EndCursor   githubv4.String
+					HasNextPage bool
+				}
+			} `graphql:"history(first:100,after: $commitObjectCursor)"`
+		} `graphql:"... on Commit"`
+	}
+}
 
 type repositoryForCommits struct {
 	Commits struct {
@@ -43,9 +58,10 @@ type objectCommit struct {
 }
 
 type fetchRepositoryCommitsResults struct {
-	Comments    *repositoryForCommits
-	HasNextPage bool
-	EndCursor   *githubv4.String
+	defaultCommits *repositoryDefaultBranchForCommits
+	Commits        *repositoryForCommits
+	HasNextPage    bool
+	EndCursor      *githubv4.String
 }
 
 func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endCursor *githubv4.String) (*fetchRepositoryCommitsResults, error) {
@@ -54,28 +70,57 @@ func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endC
 			Owner struct {
 				Login string
 			}
-			Name   string
-			Object repositoryForCommits `graphql:"object(expression: $branch)"`
+			Name             string
+			DefaultBranchRef repositoryDefaultBranchForCommits
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
-	variables := map[string]interface{}{
-		"owner":  githubv4.String(i.owner),
-		"name":   githubv4.String(i.name),
-		"branch": githubv4.String(i.branch),
-		//"perPage":      githubv4.Int(i.PerPage),
-		"commitObjectCursor": endCursor,
+	var repoBranchQuery struct {
+		Repository struct {
+			Owner struct {
+				Login string
+			}
+			Name   string
+			Target repositoryForCommits `graphql:"object(expression: $branch)"`
+		} `graphql:"repository(owner: $owner, name: $name)"`
+	}
+	var variables map[string]interface{}
+
+	// if branch is passed instantiate it into variables and call the associated struct
+	if i.branch != "" {
+		variables = map[string]interface{}{
+			"owner":              githubv4.String(i.owner),
+			"name":               githubv4.String(i.name),
+			"branch":             githubv4.String(i.branch),
+			"commitObjectCursor": endCursor,
+		}
+		err := i.Client().Query(ctx, &repoBranchQuery, variables)
+		if err != nil {
+			return nil, err
+		}
+		return &fetchRepositoryCommitsResults{
+			nil,
+			&repoBranchQuery.Repository.Target,
+			repoBranchQuery.Repository.Target.Commits.History.PageInfo.HasNextPage,
+			&repoBranchQuery.Repository.Target.Commits.History.PageInfo.EndCursor,
+		}, nil
+	} else {
+		variables = map[string]interface{}{
+			"owner":              githubv4.String(i.owner),
+			"name":               githubv4.String(i.name),
+			"commitObjectCursor": endCursor,
+		}
+		err := i.Client().Query(ctx, &repoQuery, variables)
+		if err != nil {
+			return nil, err
+		}
+		return &fetchRepositoryCommitsResults{
+			&repoQuery.Repository.DefaultBranchRef,
+			nil,
+			repoQuery.Repository.DefaultBranchRef.Target.Commits.History.PageInfo.HasNextPage,
+			&repoQuery.Repository.DefaultBranchRef.Target.Commits.History.PageInfo.EndCursor,
+		}, nil
 	}
 
-	err := i.Client().Query(ctx, &repoQuery, variables)
-	if err != nil {
-		return nil, err
-	}
-
-	return &fetchRepositoryCommitsResults{
-		&repoQuery.Repository.Object,
-		repoQuery.Repository.Object.Commits.History.PageInfo.HasNextPage,
-		&repoQuery.Repository.Object.Commits.History.PageInfo.EndCursor,
-	}, nil
 }
 
 type iterRepositoryCommits struct {
@@ -93,7 +138,13 @@ func (i *iterRepositoryCommits) logger() *zerolog.Logger {
 }
 
 func (i *iterRepositoryCommits) Column(ctx vtab.Context, c int) error {
-	current := i.results.Comments.Commits.History.Nodes[i.currentCommit]
+	var current objectCommit
+	// set current to whichever struct was used ie branch/ref is not passed vs it is
+	if i.results.Commits != nil {
+		current = *i.results.Commits.Commits.History.Nodes[i.currentCommit]
+	} else {
+		current = *i.results.defaultCommits.Target.Commits.History.Nodes[i.currentCommit]
+	}
 	col := repoCommitCols[c]
 
 	switch col.Name {
@@ -139,8 +190,16 @@ func (i *iterRepositoryCommits) Column(ctx vtab.Context, c int) error {
 
 func (i *iterRepositoryCommits) Next() (vtab.Row, error) {
 	i.currentCommit += 1
-
-	if i.results == nil || i.currentCommit >= len(i.results.Comments.Commits.History.Nodes) {
+	var current []*objectCommit
+	// set current to whichever struct was used ie branch/ref is not passed vs it is
+	if i.results != nil {
+		if i.results.Commits != nil {
+			current = i.results.Commits.Commits.History.Nodes
+		} else {
+			current = i.results.defaultCommits.Target.Commits.History.Nodes
+		}
+	}
+	if i.results == nil || i.currentCommit >= len(current) {
 		if i.results == nil || i.results.HasNextPage {
 			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
@@ -162,7 +221,13 @@ func (i *iterRepositoryCommits) Next() (vtab.Row, error) {
 			i.results = results
 			i.currentCommit = 0
 
-			if len(results.Comments.Commits.History.Nodes) == 0 {
+			if i.results.Commits != nil {
+				current = i.results.Commits.Commits.History.Nodes
+			} else {
+				current = i.results.defaultCommits.Target.Commits.History.Nodes
+			}
+
+			if len(current) == 0 {
 				return nil, io.EOF
 			}
 		} else {
@@ -177,6 +242,7 @@ func (i *iterRepositoryCommits) Next() (vtab.Row, error) {
 var repoCommitCols = []vtab.Column{
 	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
+
 	{Name: "hash", Type: "TEXT"},
 	{Name: "message", Type: "TEXT"},
 	{Name: "author_name", Type: "TEXT"},
@@ -193,41 +259,28 @@ var repoCommitCols = []vtab.Column{
 
 func NewRepoCommitsModule(opts *Options) sqlite.Module {
 	return vtab.NewTableFunc("github_repo_commits", repoCommitCols, func(constraints []*vtab.Constraint, orders []*sqlite.OrderBy) (vtab.Iterator, error) {
-		var fullNameOrOwner, name, owner string
-		var nameOrNumber *sqlite.Value
-		branch := "main"
+		var fullNameAndOwner, name, owner, branch string
 		var err error
-		numArgs := 0 // if 1 only fullNameOrOwner is set and default to main if 2 fullNameOrOwner
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
 				switch constraint.ColIndex {
 				case 0:
-					fullNameOrOwner = constraint.Value.Text()
+					fullNameAndOwner = constraint.Value.Text()
 				case 1:
-					nameOrNumber = constraint.Value
-				case 2:
-					if constraint.Value.Text() == "" {
-						branch = "main"
-					} else {
-						branch = constraint.Value.Text()
-						numArgs = 3
-					}
+					branch = constraint.Value.Text()
 				}
-
 			}
 		}
-		if numArgs != 3 {
-			owner, name, err = repoOwnerAndName("", fullNameOrOwner)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			owner = fullNameOrOwner
-			name = nameOrNumber.Text()
-		}
 
+		owner, name, err = repoOwnerAndName("", fullNameAndOwner)
+		if err != nil {
+			return nil, err
+		}
+		if name == "" {
+			return nil, fmt.Errorf("please supply a valid owner and repository name")
+		}
 		iter := &iterRepositoryCommits{opts, owner, name, branch, -1, nil}
-		iter.logger().Info().Msgf("starting GitHub repo_commits iterator for %s/%s pr : %s", owner, name, branch)
+		iter.logger().Info().Msgf("starting GitHub repo_commits iterator for %s/%s branch : %s", owner, name, branch)
 		return iter, nil
 	}, vtab.EarlyOrderByConstraintExit(true))
 }
