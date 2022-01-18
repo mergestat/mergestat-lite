@@ -1,0 +1,645 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($commitObjectCursor:String$name:String!$owner:String!){repository(owner: $owner, name: $name){owner{login},name,defaultBranchRef{target{... on Commit{history(first:100,after: $commitObjectCursor){nodes{additions,author{email,name,date},changedFiles,committer{email,name,date},deletions,oid,message,url},pageInfo{endCursor,hasNextPage}}}}}}}","variables":{"commitObjectCursor":null,"name":"mergestat","owner":"mergestat"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"mergestat"},"name":"mergestat","defaultBranchRef":{"target":{"history":{"nodes":[{"additions":2,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2022-01-07T15:43:32-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2022-01-07T15:43:32-05:00"},"deletions":2,"oid":"a7b0837840ae9ca39d1e3e14adb0b485aafab0d2","message":"fix:
+      update some links in the README","url":"https://github.com/mergestat/mergestat/commit/a7b0837840ae9ca39d1e3e14adb0b485aafab0d2"},{"additions":424,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2022-01-06T13:05:20-06:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2022-01-06T14:05:20-05:00"},"deletions":0,"oid":"a8b15b84e3def7ec4601db072ffdc9893948ae15","message":"Implement
+      `github_repo_pr_commits` table (#226)\n\n* initial implementation\r\n\r\n* fix:
+      some updates to the `github_repo_pr_commits` implementation\r\n\r\n- fix some
+      typos\r\n- add some columns\r\n- add test fixtures\r\n\r\nCo-authored-by: Patrick
+      DeVivo <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/a8b15b84e3def7ec4601db072ffdc9893948ae15"},{"additions":14,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:14:19-05:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-20T16:14:19-05:00"},"deletions":3,"oid":"265355587ad35cd32224fe7eaa47569f4cca7720","message":"Merge
+      pull request #225 from mergestat/exclude-git\n\nfeat: option to _exclude_ git
+      functionality, when used as a library","url":"https://github.com/mergestat/mergestat/commit/265355587ad35cd32224fe7eaa47569f4cca7720"},{"additions":14,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:09:21-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:09:21-05:00"},"deletions":3,"oid":"7a9a8a7ae57ab50d5e5ac878203cfa7989ce3c00","message":"feat:
+      option to **exclude** git functionality, when used as a library","url":"https://github.com/mergestat/mergestat/commit/7a9a8a7ae57ab50d5e5ac878203cfa7989ce3c00"},{"additions":11558,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:05:31-05:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-20T16:05:31-05:00"},"deletions":7835,"oid":"5025aebd47dd8c6a57a97083fd24e7ce70a3b6be","message":"Merge
+      pull request #224 from mergestat/upgrade-deps\n\nchore: upgrade dependencies,
+      including `sqlite`","url":"https://github.com/mergestat/mergestat/commit/5025aebd47dd8c6a57a97083fd24e7ce70a3b6be"},{"additions":2,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:50:08-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:50:08-05:00"},"deletions":52,"oid":"8733694dfd6461ef05a05009c82a2cec6d73ac39","message":"chore:
+      `go mod tidy`","url":"https://github.com/mergestat/mergestat/commit/8733694dfd6461ef05a05009c82a2cec6d73ac39"},{"additions":11559,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:41:58-05:00"},"changedFiles":6,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:41:58-05:00"},"deletions":7786,"oid":"d8c623adf3bcef58329be641bdda6f79ac716bec","message":"chore:
+      upgrade dependencies, including `sqlite`","url":"https://github.com/mergestat/mergestat/commit/d8c623adf3bcef58329be641bdda6f79ac716bec"},{"additions":350,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-12-08T15:40:37-06:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-08T16:40:37-05:00"},"deletions":0,"oid":"b068a48fade28a4055eb1253275bc4a03e2b38a2","message":"feat:
+      GitHub branches table (#220)\n\n* initial implementation github_repo_branches
+      table\r\n\r\n* tweaking output\r\n\r\n* add testing and testing yaml\r\n\r\n*
+      cleanup\r\n\r\n* whoops","url":"https://github.com/mergestat/mergestat/commit/b068a48fade28a4055eb1253275bc4a03e2b38a2"},{"additions":0,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-07T10:01:04-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-07T10:01:04-05:00"},"deletions":71,"oid":"98607642655f64a5ae49247d79e920663a41a7d1","message":"Merge
+      pull request #221 from mergestat/rm-api-doc-page\n\nfix: remove old API documentation","url":"https://github.com/mergestat/mergestat/commit/98607642655f64a5ae49247d79e920663a41a7d1"},{"additions":0,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-07T09:56:29-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-07T09:56:29-05:00"},"deletions":71,"oid":"61cd80178f984fa1fe528b88f8bc2c10ba933743","message":"fix:
+      remove old API documentation\n\nin favor of: https://docs.mergestat.com/api/public","url":"https://github.com/mergestat/mergestat/commit/61cd80178f984fa1fe528b88f8bc2c10ba933743"},{"additions":62,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-05T22:04:44-05:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-05T22:04:44-05:00"},"deletions":106,"oid":"8fd8a6ebda2ab8b0c8b7e5c517d1c470a2c4cf51","message":"Merge
+      pull request #218 from mergestat/upgrade-deps\n\nchore: upgrade go dependencies","url":"https://github.com/mergestat/mergestat/commit/8fd8a6ebda2ab8b0c8b7e5c517d1c470a2c4cf51"},{"additions":62,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-05T22:00:34-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-05T22:00:34-05:00"},"deletions":106,"oid":"eee82eddc270b45bbcda44214fcc4890fafdd8af","message":"chore:
+      upgrade go dependencies","url":"https://github.com/mergestat/mergestat/commit/eee82eddc270b45bbcda44214fcc4890fafdd8af"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:40:33-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-01T00:40:33-05:00"},"deletions":1,"oid":"0407ab971c6a0923b8938128f70a52e8758b3c83","message":"fix:
+      add twitter link to README","url":"https://github.com/mergestat/mergestat/commit/0407ab971c6a0923b8938128f70a52e8758b3c83"},{"additions":26,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:38:57-05:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-01T00:38:57-05:00"},"deletions":4,"oid":"76debca57b3826406d36d09d21955f9ad817a235","message":"Merge
+      pull request #216 from mergestat/github-comments-date-fix\n\nfix: date formatting
+      on `created_at` and `updated_at` columns","url":"https://github.com/mergestat/mergestat/commit/76debca57b3826406d36d09d21955f9ad817a235"},{"additions":26,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:35:42-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:35:42-05:00"},"deletions":4,"oid":"2690f21e8eefa9be835bb3059734e52d1652dd06","message":"fix:
+      date formatting on `created_at` and `updated_at` columns\n\nof `github_issue_comments`
+      and `github_pr_comments` needed to be made consistent","url":"https://github.com/mergestat/mergestat/commit/2690f21e8eefa9be835bb3059734e52d1652dd06"},{"additions":4,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-30T14:00:19-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-30T14:00:19-05:00"},"deletions":1,"oid":"feafa25e8c1c3965336f9f9272d330bb8c58b366","message":"some
+      minor additions to the README","url":"https://github.com/mergestat/mergestat/commit/feafa25e8c1c3965336f9f9272d330bb8c58b366"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T14:16:03-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T14:16:03-05:00"},"deletions":1,"oid":"e54291f783a8811c47688b5e366deb1de001b6cd","message":"fix:
+      incorrect link","url":"https://github.com/mergestat/mergestat/commit/e54291f783a8811c47688b5e366deb1de001b6cd"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T14:15:26-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T14:15:26-05:00"},"deletions":1,"oid":"c80539634843c7efd9917065bf84733c2bd23519","message":"fix:
+      an incorrect link (for now)","url":"https://github.com/mergestat/mergestat/commit/c80539634843c7efd9917065bf84733c2bd23519"},{"additions":484,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T13:47:27-05:00"},"changedFiles":82,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T13:47:27-05:00"},"deletions":484,"oid":"d73842e747c7e897c669fcdd2db64cc5264b48e0","message":"Merge
+      pull request #215 from mergestat/rename-to-mergestat\n\nmore renaming (of all
+      imports) and some points in code/comments","url":"https://github.com/mergestat/mergestat/commit/d73842e747c7e897c669fcdd2db64cc5264b48e0"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T13:43:10-05:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T13:43:10-05:00"},"deletions":1,"oid":"aa52fdf5a53a617264318cff49e14b9e0da46104","message":"fix:
+      make failing test work by updating fixture (wrongly changed)","url":"https://github.com/mergestat/mergestat/commit/aa52fdf5a53a617264318cff49e14b9e0da46104"},{"additions":485,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T12:11:32-05:00"},"changedFiles":83,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T12:11:32-05:00"},"deletions":485,"oid":"70181cc599d0b5bc2d24209f9a979b1ea9daf1eb","message":"more
+      renaming (of all imports) and some points in code/comments","url":"https://github.com/mergestat/mergestat/commit/70181cc599d0b5bc2d24209f9a979b1ea9daf1eb"},{"additions":15,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T11:46:12-05:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T11:46:12-05:00"},"deletions":923,"oid":"bcdead6d2b8c3b823201c8609f25400ef4f62196","message":"Merge
+      pull request #214 from mergestat/rename-to-mergestat\n\nrename to `mergestat`
+      in outward facing artifacts","url":"https://github.com/mergestat/mergestat/commit/bcdead6d2b8c3b823201c8609f25400ef4f62196"},{"additions":15,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T11:28:44-05:00"},"changedFiles":4,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T11:28:44-05:00"},"deletions":923,"oid":"daeedb01f99ab2a7e1e26e81a95179f439bbcd2d","message":"rename
+      to `mergestat` in outward facing artifacts","url":"https://github.com/mergestat/mergestat/commit/daeedb01f99ab2a7e1e26e81a95179f439bbcd2d"},{"additions":170,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T21:10:07-05:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T21:10:07-05:00"},"deletions":0,"oid":"92048d2a2ccca9d7ecd69c028089351b366d9ede","message":"Merge
+      pull request #212 from askgitdev/github_user_info\n\nFeat: Scalar function to
+      pull GitHub user info","url":"https://github.com/mergestat/mergestat/commit/92048d2a2ccca9d7ecd69c028089351b366d9ede"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:54:46-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:54:46-05:00"},"deletions":1,"oid":"ec66caeee917a316bb7a702b4fd91b88ce59550b","message":"fix:
+      tweak wording of test error message","url":"https://github.com/mergestat/mergestat/commit/ec66caeee917a316bb7a702b4fd91b88ce59550b"},{"additions":0,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:54:32-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:54:32-05:00"},"deletions":6,"oid":"7a9fae44b4743b47f7e0dd266dc9be2e882f33f7","message":"fix:
+      rm duplicate rate limit check","url":"https://github.com/mergestat/mergestat/commit/7a9fae44b4743b47f7e0dd266dc9be2e882f33f7"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:54:19-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:54:19-05:00"},"deletions":1,"oid":"a2be3baa0ad74e23065bbfb23daf822b1cb01324","message":"fix:
+      should not be \"deterministic\" (I think)","url":"https://github.com/mergestat/mergestat/commit/a2be3baa0ad74e23065bbfb23daf822b1cb01324"},{"additions":95,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:50:58-05:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:50:58-05:00"},"deletions":28,"oid":"fa5d374831e4f17d5c75378444708d2c5b849faa","message":"Merge
+      pull request #213 from askgitdev/github_user_info-patrick-edits\n\nfix: GitHub
+      user info edits","url":"https://github.com/mergestat/mergestat/commit/fa5d374831e4f17d5c75378444708d2c5b849faa"},{"additions":29,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T16:12:40-05:00"},"changedFiles":3,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T16:12:40-05:00"},"deletions":27,"oid":"16efaf1009a67d6cea864fbe1bb6c670fb0ca0d3","message":"fix:
+      update some naming, formatting and README wording","url":"https://github.com/mergestat/mergestat/commit/16efaf1009a67d6cea864fbe1bb6c670fb0ca0d3"},{"additions":66,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T14:36:46-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T14:36:46-05:00"},"deletions":1,"oid":"fe3878126a0a6a155d20b97083586f556bd62ccf","message":"fix:
+      make tests pass","url":"https://github.com/mergestat/mergestat/commit/fe3878126a0a6a155d20b97083586f556bd62ccf"},{"additions":28,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:50:07-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:50:07-05:00"},"deletions":0,"oid":"fdcae40cd5c17be2bdc6160abdb886ad75919def","message":"add
+      testing","url":"https://github.com/mergestat/mergestat/commit/fdcae40cd5c17be2bdc6160abdb886ad75919def"},{"additions":19,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:17:04-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:17:04-05:00"},"deletions":0,"oid":"76db67c90e9cea8798ba12b5e6d1929bc5406e6d","message":"document
+      in readme","url":"https://github.com/mergestat/mergestat/commit/76db67c90e9cea8798ba12b5e6d1929bc5406e6d"},{"additions":61,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:33-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:33-05:00"},"deletions":0,"oid":"a184ba2ce156ef078395558dbad5645943f1703e","message":"implement
+      github_user function","url":"https://github.com/mergestat/mergestat/commit/a184ba2ce156ef078395558dbad5645943f1703e"},{"additions":1,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:12-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:12-05:00"},"deletions":0,"oid":"92cdc797ae014075d53b5f957f159bc20a902002","message":"register
+      user function","url":"https://github.com/mergestat/mergestat/commit/92cdc797ae014075d53b5f957f159bc20a902002"},{"additions":472,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-11-01T08:53:24-05:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-01T09:53:24-04:00"},"deletions":5,"oid":"85f0cb8a34cabf2d1574580e37b99b9f7642817a","message":"feat:
+      table GitHub pr comments (#206)\n\n* working version with old unused code\r\n\r\n*
+      working code with dead code removed\r\n\r\n* register new function\r\n\r\n*
+      add body text\r\n\r\n* add shortened alias to github modules\r\n\r\n* add testing
+      to github_pr_comments\r\n\r\n* fix some comments\r\n\r\n* add table to readme\r\n\r\n*
+      update to run only on specified pr\r\n\r\n* update testing\r\n\r\n* add testing
+      yaml\r\n\r\n* update readme\r\n\r\n* fix: struct names\r\n\r\n* fix: tweaks
+      to README,  implementation and column names\r\n\r\n* fix: rename and rerun\r\n\r\n*
+      fix: rm some extraneous items from logging\r\n\r\nCo-authored-by: Patrick DeVivo
+      <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/85f0cb8a34cabf2d1574580e37b99b9f7642817a"},{"additions":469,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-11-01T06:33:11-05:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-01T07:33:11-04:00"},"deletions":0,"oid":"11153d5b623fc8ee1dad3ed0e420b0790626ef3c","message":"feat:
+      table GitHub issues comments (#205)\n\n* add github_issues_comments table\r\n\r\n*
+      feat github_repo_issues_comments\r\n\r\n* issue comments yaml\r\n\r\n* add table
+      to readme and rename\r\n\r\n* change registered table name\r\n\r\n* change from
+      all issues to specified issue\r\n\r\n* update testing\r\n\r\n* update testing\r\n\r\n*
+      change table name at module registration\r\n\r\n* rename some columns and other
+      small changes\r\n\r\n* readme fix, tweaks to the ordering behavior\r\n\r\nCo-authored-by:
+      Patrick DeVivo <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/11153d5b623fc8ee1dad3ed0e420b0790626ef3c"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-21T10:42:02+02:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-21T10:42:02+02:00"},"deletions":8,"oid":"38045aed5ca7172a211e97044180a99db5e4563a","message":"Merge
+      pull request #204 from askgitdev/rm-checks\n\nrm some checks","url":"https://github.com/mergestat/mergestat/commit/38045aed5ca7172a211e97044180a99db5e4563a"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-21T10:38:58+02:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-21T10:38:58+02:00"},"deletions":8,"oid":"16e0a44623283dc3217d03f02f95071e8b4b1533","message":"rm
+      some checks\n\nshould be fine to pass an empty string to grep or split, as that''s
+      more like a \"base\" or \"noop\" case. It also prevents errors in queries where
+      the contents are dynamically supplied (a column in another table) and one \"poison\"
+      empty string causes an error in the entire query.","url":"https://github.com/mergestat/mergestat/commit/16e0a44623283dc3217d03f02f95071e8b4b1533"},{"additions":6,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-18T11:37:21+02:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-18T11:37:21+02:00"},"deletions":2,"oid":"4c159941a8096966661b1be3e7b84eebf9d0c700","message":"Merge
+      pull request #203 from askgitdev/prs-author_avatar_url-pointer\n\nmake the `githubv4.URI`
+      -> `*githubv4.URI` on `AvatarUrl`","url":"https://github.com/mergestat/mergestat/commit/4c159941a8096966661b1be3e7b84eebf9d0c700"},{"additions":6,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-18T11:33:55+02:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-18T11:33:55+02:00"},"deletions":2,"oid":"2d048fb9a84a3a0bf54c3af80bc50a78ee73e729","message":"make
+      the `githubv4.URI` -> `*githubv4.URI` on `AvatarUrl`\n\nfixes a nil pointer
+      exception that was occurring on this column","url":"https://github.com/mergestat/mergestat/commit/2d048fb9a84a3a0bf54c3af80bc50a78ee73e729"},{"additions":229,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-10-15T10:21:13-05:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-15T11:21:13-04:00"},"deletions":120,"oid":"f965a1cdd5ac5c85bced0300e7f6a501fd633307","message":"Feat:
+      add author_avatar_url and author_name to  repo pull requests table (#201)\n\n*
+      add author  url and name to github pr table\r\n\r\n* add name when actor is
+      of type user\r\n\r\n* document added columns in readme\r\n\r\n* update tests
+      to include new columns\r\n\r\n* fix up tests, `author_url` -> `author_avatar_url`\r\n\r\neventually
+      we may want to reduce some scope in this table (remove these columns) and add
+      a `github_user(''login'')` scalar func to access this type of info\r\n\r\n*
+      Update README.md\r\n\r\nCo-authored-by: Patrick DeVivo <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/f965a1cdd5ac5c85bced0300e7f6a501fd633307"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:44:33-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-14T21:44:33-04:00"},"deletions":32,"oid":"3e7e5d1d3ae9e07a081a7816418f50353cd0fe3e","message":"Merge
+      pull request #200 from askgitdev/global-flags\n\nmake some flags \"global\"
+      (`PersistentFlags`)","url":"https://github.com/mergestat/mergestat/commit/3e7e5d1d3ae9e07a081a7816418f50353cd0fe3e"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:41:09-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:41:09-04:00"},"deletions":32,"oid":"cd9e16920f7394dd6089e7c425892ff1e5145ae3","message":"make
+      some flags \"global\" (`PersistentFlags`)","url":"https://github.com/mergestat/mergestat/commit/cd9e16920f7394dd6089e7c425892ff1e5145ae3"},{"additions":7,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:33:36-04:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-14T21:33:36-04:00"},"deletions":7,"oid":"11828e85788eaeffd7fc9a89d8315871ad56a699","message":"Merge
+      pull request #199 from askgitdev/upgrade-git2go-v33\n\nupgrade `git2go`/`libgit2`
+      dependency to `v33`/`v1.3.0`","url":"https://github.com/mergestat/mergestat/commit/11828e85788eaeffd7fc9a89d8315871ad56a699"},{"additions":7,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:28:19-04:00"},"changedFiles":6,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:28:19-04:00"},"deletions":7,"oid":"785f4beede26f472a63c22ee289f5319cb1e97fd","message":"upgrade
+      `git2go`/`libgit2` dependency to `v33`/`v1.3.0`","url":"https://github.com/mergestat/mergestat/commit/785f4beede26f472a63c22ee289f5319cb1e97fd"},{"additions":20,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-13T16:10:35-04:00"},"changedFiles":7,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-13T16:10:35-04:00"},"deletions":2,"oid":"2c0a585b370cccaabb03777b82e6cefc170d0230","message":"Merge
+      pull request #196 from askgitdev/github-tables-index-bugfix\n\nbugfix: fix an
+      index out of range error occurring in most github tables","url":"https://github.com/mergestat/mergestat/commit/2c0a585b370cccaabb03777b82e6cefc170d0230"},{"additions":20,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-13T16:05:35-04:00"},"changedFiles":7,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-13T16:05:35-04:00"},"deletions":2,"oid":"45344c8d4c7eb89889613dc224c0215c28ee8b4f","message":"fix
+      an index out of range error occurring in most github tables\n\nhappens when
+      the page of results from an API request is empty","url":"https://github.com/mergestat/mergestat/commit/45344c8d4c7eb89889613dc224c0215c28ee8b4f"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-11T00:55:05-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-11T00:55:05-04:00"},"deletions":8,"oid":"c2690e4c18ac6dd1b123ca213f201d328a11dfac","message":"Merge
+      pull request #195 from askgitdev/fix-error\n\nfix up some test error phrasing","url":"https://github.com/mergestat/mergestat/commit/c2690e4c18ac6dd1b123ca213f201d328a11dfac"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-11T00:48:27-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-11T00:48:27-04:00"},"deletions":8,"oid":"adf917449e581dae7f0ee33eb06d2c6e27ceaa35","message":"fix
+      up some test error phrasing","url":"https://github.com/mergestat/mergestat/commit/adf917449e581dae7f0ee33eb06d2c6e27ceaa35"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:57:43-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-10T23:57:43-04:00"},"deletions":0,"oid":"ace69daf3cba3efd3206c3b8bc04324fb6cc1ef9","message":"Merge
+      pull request #194 from askgitdev/CODEOWNERS\n\nCreate CODEOWNERS","url":"https://github.com/mergestat/mergestat/commit/ace69daf3cba3efd3206c3b8bc04324fb6cc1ef9"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:54:57-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:54:57-04:00"},"deletions":0,"oid":"54c17ff9d8aa70820c9d490d8603c6f93896c908","message":"Create
+      CODEOWNERS","url":"https://github.com/mergestat/mergestat/commit/54c17ff9d8aa70820c9d490d8603c6f93896c908"},{"additions":252,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:35:31-04:00"},"changedFiles":7,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-10T23:35:31-04:00"},"deletions":215,"oid":"fa65510cbec284ec1c0ddea9f74fe4727a7a9cbd","message":"Merge
+      pull request #193 from askgitdev/repo-topics\n\nadd a `topics` column to `github_user_repos`
+      and `github_org_repos` tables","url":"https://github.com/mergestat/mergestat/commit/fa65510cbec284ec1c0ddea9f74fe4727a7a9cbd"},{"additions":252,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"changedFiles":7,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"deletions":215,"oid":"cf8ca56e9e0fa106d42524cc965bbb1780920145","message":"add
+      a `topics` column to `github_user_repos` and `github_org_repos` tables\n\nthat''s
+      a JSON array of the GitHub topics associated with a repo","url":"https://github.com/mergestat/mergestat/commit/cf8ca56e9e0fa106d42524cc965bbb1780920145"},{"additions":36,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-09T12:06:54-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-09T12:06:54-04:00"},"deletions":0,"oid":"e3ada899f99c256b039c67aadd73edc37849e0ca","message":"Merge
+      pull request #192 from askgitdev/readme-schema-note\n\nadd a note to the README
+      about inspecting table schemas at runtime","url":"https://github.com/mergestat/mergestat/commit/e3ada899f99c256b039c67aadd73edc37849e0ca"},{"additions":36,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-09T12:03:46-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-09T12:03:46-04:00"},"deletions":0,"oid":"8975e5ddabd0a6d39d54f50dc932085ca3db8be1","message":"add
+      a note to the README about inspecting table schemas at runtime","url":"https://github.com/mergestat/mergestat/commit/8975e5ddabd0a6d39d54f50dc932085ca3db8be1"},{"additions":65,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-06T19:49:12-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-06T19:49:12-04:00"},"deletions":23,"oid":"3955f648feb2e12c6584ffd5071818f126bf636a","message":"Merge
+      pull request #191 from askgitdev/pgsync\n\npgsync improvements","url":"https://github.com/mergestat/mergestat/commit/3955f648feb2e12c6584ffd5071818f126bf636a"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:25:26-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:25:26-04:00"},"deletions":1,"oid":"55a0913520d42af5dcec74b4ede7f81e696ffe3f","message":"set
+      to debug level","url":"https://github.com/mergestat/mergestat/commit/55a0913520d42af5dcec74b4ede7f81e696ffe3f"},{"additions":6,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:24:58-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:24:58-04:00"},"deletions":1,"oid":"83891db2e2c7c73dfa32adf63aea26935a601781","message":"spruce
+      up the pgsync logger","url":"https://github.com/mergestat/mergestat/commit/83891db2e2c7c73dfa32adf63aea26935a601781"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:21:02-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:21:02-04:00"},"deletions":0,"oid":"0116d4618efb6fe83e62c0af569808a49a72bff8","message":"add
+      a `PGSYNC_PREAMBLE`","url":"https://github.com/mergestat/mergestat/commit/0116d4618efb6fe83e62c0af569808a49a72bff8"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:13:47-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:13:47-04:00"},"deletions":0,"oid":"9e6f3bdc987ecbe5bc97de6288a97d2df27e19c4","message":"add
+      logger to pgsync","url":"https://github.com/mergestat/mergestat/commit/9e6f3bdc987ecbe5bc97de6288a97d2df27e19c4"},{"additions":378,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:55-04:00"},"changedFiles":9,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:55-04:00"},"deletions":1,"oid":"b34695e908862a395dfbeb7a614a6f970cac12cd","message":"Merge
+      branch ''main'' into pgsync","url":"https://github.com/mergestat/mergestat/commit/b34695e908862a395dfbeb7a614a6f970cac12cd"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:39-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:39-04:00"},"deletions":0,"oid":"56e30312a3c79bbf381b47616aa3169ef322f17f","message":"run
+      `go fmt ./...`","url":"https://github.com/mergestat/mergestat/commit/56e30312a3c79bbf381b47616aa3169ef322f17f"},{"additions":156,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:53:42-04:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-05T20:53:42-04:00"},"deletions":3,"oid":"cab530c5e93234056f77c04bbb0a0dab7534d47f","message":"Merge
+      pull request #190 from askgitdev/str_split_all\n\nfeat: str_split_all table","url":"https://github.com/mergestat/mergestat/commit/cab530c5e93234056f77c04bbb0a0dab7534d47f"},{"additions":12,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:49:14-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:49:14-04:00"},"deletions":3,"oid":"64ea0f92e373dc1755012639ea16e8e2cdc561cc","message":"Update
+      README.md","url":"https://github.com/mergestat/mergestat/commit/64ea0f92e373dc1755012639ea16e8e2cdc561cc"},{"additions":0,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:04:24-05:00"},"changedFiles":0,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:04:24-05:00"},"deletions":0,"oid":"2de0ca3507d98fffea171bf6b4ebdd06c162b076","message":"Merge
+      branch ''str_split_all'' of github.com:askgitdev/askgit into str_split_all","url":"https://github.com/mergestat/mergestat/commit/2de0ca3507d98fffea171bf6b4ebdd06c162b076"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:03:57-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-05T20:03:57-04:00"},"deletions":1,"oid":"20b2bac33375034cc39b4b70aa5633012a6ab031","message":"Update
+      README.md","url":"https://github.com/mergestat/mergestat/commit/20b2bac33375034cc39b4b70aa5633012a6ab031"},{"additions":1,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:52-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:52-05:00"},"deletions":1,"oid":"a719cc0609aef4c274d1dee185b9b9e2372e6dea","message":"case","url":"https://github.com/mergestat/mergestat/commit/a719cc0609aef4c274d1dee185b9b9e2372e6dea"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:29-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:29-05:00"},"deletions":2,"oid":"dfc7eb831360f0938e1b0cbab07bb7e61f8a2cb4","message":"readme
+      change","url":"https://github.com/mergestat/mergestat/commit/dfc7eb831360f0938e1b0cbab07bb7e61f8a2cb4"},{"additions":10,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:27:43-05:00"},"changedFiles":4,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:27:43-05:00"},"deletions":11,"oid":"1b4d160de150c1d0c0b448cd62e8d70562c31021","message":"change
+      file names for clarity and change naming to match","url":"https://github.com/mergestat/mergestat/commit/1b4d160de150c1d0c0b448cd62e8d70562c31021"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:26:35-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:26:35-05:00"},"deletions":2,"oid":"dcb43191f3f22c80f729fae5046817558dd7c40f","message":"rename
+      str_split_all to str_split","url":"https://github.com/mergestat/mergestat/commit/dcb43191f3f22c80f729fae5046817558dd7c40f"},{"additions":12,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:38:58-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:38:58-05:00"},"deletions":0,"oid":"60486f5dc38a58e63db53bae206100c11d0156ca","message":"document
+      new table-valued function in readme","url":"https://github.com/mergestat/mergestat/commit/60486f5dc38a58e63db53bae206100c11d0156ca"},{"additions":27,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:35:21-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:35:21-05:00"},"deletions":0,"oid":"b4060d66037a7e6b1c8a37286dfde6d2d52195c8","message":"add
+      simple testing","url":"https://github.com/mergestat/mergestat/commit/b4060d66037a7e6b1c8a37286dfde6d2d52195c8"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:26:05-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:26:05-05:00"},"deletions":10,"oid":"3e6255887ce56efec4487da9d270abd01c392b50","message":"register
+      modules correctly","url":"https://github.com/mergestat/mergestat/commit/3e6255887ce56efec4487da9d270abd01c392b50"},{"additions":35,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:25:48-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:25:48-05:00"},"deletions":11,"oid":"5688ab9920f9bd5ae4c723c9d2e743ebe78a6c7c","message":"use
+      a scanner instead of splitting into an array","url":"https://github.com/mergestat/mergestat/commit/5688ab9920f9bd5ae4c723c9d2e743ebe78a6c7c"},{"additions":223,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:14:04-05:00"},"changedFiles":4,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:14:04-05:00"},"deletions":0,"oid":"3ef10200cb2404affa17cce40f5646e503efc622","message":"Merge
+      branch ''main'' into str_split_all","url":"https://github.com/mergestat/mergestat/commit/3ef10200cb2404affa17cce40f5646e503efc622"},{"additions":223,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T10:21:31-04:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-01T10:21:31-04:00"},"deletions":0,"oid":"2c3962977c4f8e25b66985ffe1ddffd2f8cd71e5","message":"Merge
+      pull request #188 from askgitdev/grep\n\nfeat: Grep table valued function","url":"https://github.com/mergestat/mergestat/commit/2c3962977c4f8e25b66985ffe1ddffd2f8cd71e5"},{"additions":3,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T10:17:30-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T10:17:30-04:00"},"deletions":2,"oid":"fcaf34bea9ec099e1ff75b1e066cb4f95d3bb144","message":"add
+      note about regex in README","url":"https://github.com/mergestat/mergestat/commit/fcaf34bea9ec099e1ff75b1e066cb4f95d3bb144"},{"additions":53,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T09:30:36-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T09:30:36-04:00"},"deletions":0,"oid":"086c8556f6a30cf4250513a8346ec4dd41bd0f4e","message":"add
+      some tests for before/after line preview in `grep`","url":"https://github.com/mergestat/mergestat/commit/086c8556f6a30cf4250513a8346ec4dd41bd0f4e"},{"additions":70,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T09:25:49-04:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-01T09:25:49-04:00"},"deletions":31,"oid":"575bbb3760b6439efdff8ac8b06988a4d81313c2","message":"Merge
+      pull request #189 from askgitdev/grep-fixes\n\nSome updates to `grep` table","url":"https://github.com/mergestat/mergestat/commit/575bbb3760b6439efdff8ac8b06988a4d81313c2"},{"additions":34,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T00:08:38-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T00:08:38-04:00"},"deletions":0,"oid":"3fe166f8e287db3733d8770b68b0c0c9e91a3f95","message":"add
+      simple test case","url":"https://github.com/mergestat/mergestat/commit/3fe166f8e287db3733d8770b68b0c0c9e91a3f95"},{"additions":36,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-30T23:53:49-04:00"},"changedFiles":3,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-30T23:53:49-04:00"},"deletions":31,"oid":"331d167296079e45f0bf883d987f03336fb2e7fe","message":"some
+      renaming and cleaning, implement a regex match","url":"https://github.com/mergestat/mergestat/commit/331d167296079e45f0bf883d987f03336fb2e7fe"},{"additions":15,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:22:51-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:22:51-05:00"},"deletions":0,"oid":"d22e86bd75a432a98e073a9226ff5e6eb7541927","message":"add
+      grep to readme","url":"https://github.com/mergestat/mergestat/commit/d22e86bd75a432a98e073a9226ff5e6eb7541927"},{"additions":5,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:12:02-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:12:02-05:00"},"deletions":5,"oid":"a4580f65457e0bb13e65abc104a18e6fb441f6a6","message":"fix
+      column name and next","url":"https://github.com/mergestat/mergestat/commit/a4580f65457e0bb13e65abc104a18e6fb441f6a6"},{"additions":7,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:51:06-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:51:06-05:00"},"deletions":7,"oid":"e18a593259d51997a66bb5f9414602862d0e769f","message":"some
+      changes","url":"https://github.com/mergestat/mergestat/commit/e18a593259d51997a66bb5f9414602862d0e769f"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:01:07-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:01:07-05:00"},"deletions":2,"oid":"875655824f8bf9007f0adf4425347ebf92333148","message":"checking","url":"https://github.com/mergestat/mergestat/commit/875655824f8bf9007f0adf4425347ebf92333148"},{"additions":8,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:19-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:19-05:00"},"deletions":0,"oid":"a6a998bdfa975e98332566711a52981e452813b6","message":"register
+      grep module","url":"https://github.com/mergestat/mergestat/commit/a6a998bdfa975e98332566711a52981e452813b6"},{"additions":107,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:09-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:09-05:00"},"deletions":0,"oid":"c1f9aaaf4f3a8500ac15b32056b7b301acbaf212","message":"grep
+      table","url":"https://github.com/mergestat/mergestat/commit/c1f9aaaf4f3a8500ac15b32056b7b301acbaf212"},{"additions":9,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T18:32:38-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T18:32:38-05:00"},"deletions":0,"oid":"905cb4846d7254db224ec79a577da832a41f4f3c","message":"register
+      module","url":"https://github.com/mergestat/mergestat/commit/905cb4846d7254db224ec79a577da832a41f4f3c"},{"additions":81,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-29T21:14:47-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-29T21:14:47-05:00"},"deletions":0,"oid":"4e7251f3d83f33ab1caee67393073890d0a120ca","message":"feat:
+      table, string and delim as inputs; splits into rows based on delim","url":"https://github.com/mergestat/mergestat/commit/4e7251f3d83f33ab1caee67393073890d0a120ca"},{"additions":521,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-25T09:45:13-04:00"},"changedFiles":14,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-25T09:45:13-04:00"},"deletions":72,"oid":"dda466d655c4b9c5c52e8cac5e2e77fa104a1ba9","message":"Merge
+      branch ''main'' into pgsync","url":"https://github.com/mergestat/mergestat/commit/dda466d655c4b9c5c52e8cac5e2e77fa104a1ba9"},{"additions":27,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-25T00:01:56-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-25T00:01:56-04:00"},"deletions":25,"oid":"089e7bdfac209c48534a30d74b9e0d8c4f58fccd","message":"Merge
+      pull request #187 from askgitdev/update-deps\n\nupdate some dependencies","url":"https://github.com/mergestat/mergestat/commit/089e7bdfac209c48534a30d74b9e0d8c4f58fccd"},{"additions":27,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:58:57-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:58:57-04:00"},"deletions":25,"oid":"f10d1772eb15b74d80b5337049a27ccabbc880ca","message":"update
+      some dependencies","url":"https://github.com/mergestat/mergestat/commit/f10d1772eb15b74d80b5337049a27ccabbc880ca"},{"additions":3,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:44:16-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T23:44:16-04:00"},"deletions":0,"oid":"57b69f586b75dd7bcba414e0c99d0d6f17c161e5","message":"Merge
+      pull request #186 from askgitdev/fix-affiliations-bug\n\nfix bug breaking github
+      repo tables when no affiliation was supplied","url":"https://github.com/mergestat/mergestat/commit/57b69f586b75dd7bcba414e0c99d0d6f17c161e5"},{"additions":3,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:40:47-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:40:47-04:00"},"deletions":0,"oid":"670642e1dd5c06f8ae0dc2e93fa908be2694f240","message":"fix
+      bug breaking github repo tables when no affiliation was supplied","url":"https://github.com/mergestat/mergestat/commit/670642e1dd5c06f8ae0dc2e93fa908be2694f240"},{"additions":51,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:22:28-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T23:22:28-04:00"},"deletions":1,"oid":"2e25213035302d87948254ff1636b03ce2b21e5f","message":"Merge
+      pull request #185 from askgitdev/ssh-repo-locator\n\nimplement an SSH repo locator","url":"https://github.com/mergestat/mergestat/commit/2e25213035302d87948254ff1636b03ce2b21e5f"},{"additions":14,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:17:36-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:17:36-04:00"},"deletions":1,"oid":"8073ca520efd23987b1ca07c45b23588fd647472","message":"fix
+      up username handling, add a TODO comment","url":"https://github.com/mergestat/mergestat/commit/8073ca520efd23987b1ca07c45b23588fd647472"},{"additions":38,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T22:57:00-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T22:57:00-04:00"},"deletions":1,"oid":"05f8c786c9fbff9c18fd0c21fe1a96611b69114a","message":"implement
+      a basic SSH repo locator","url":"https://github.com/mergestat/mergestat/commit/05f8c786c9fbff9c18fd0c21fe1a96611b69114a"},{"additions":24,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:56:14-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T21:56:14-04:00"},"deletions":15,"oid":"f7cdb8eed44638304a91b87c6d473f24cc9f5bb4","message":"Merge
+      pull request #184 from askgitdev/use-logger-errors\n\nuse the zerolog logger
+      to report errors","url":"https://github.com/mergestat/mergestat/commit/f7cdb8eed44638304a91b87c6d473f24cc9f5bb4"},{"additions":24,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:41:46-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:41:46-04:00"},"deletions":15,"oid":"2dbcee01c7d01c8c9fbd44284b37180cf04f0e06","message":"use
+      the zerolog logger to report errors","url":"https://github.com/mergestat/mergestat/commit/2dbcee01c7d01c8c9fbd44284b37180cf04f0e06"},{"additions":370,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:28:09-04:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T21:28:09-04:00"},"deletions":11,"oid":"f6dacc2245251506ce7d8ff392bd2be14b110f6e","message":"Merge
+      pull request #179 from askgitdev/protection_rules\n\nfeat: support for github
+      branch protection querying","url":"https://github.com/mergestat/mergestat/commit/f6dacc2245251506ce7d8ff392bd2be14b110f6e"}],"pageInfo":{"endCursor":"a7b0837840ae9ca39d1e3e14adb0b485aafab0d2
+      99","hasNextPage":true}}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 18 Jan 2022 17:23:13 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - D88B:4386:1A8BEDB:494B567:61E6F77F
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4971"
+      X-Ratelimit-Reset:
+      - "1642530123"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "29"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 2.84802505s
+- request:
+    body: |
+      {"query":"query($branch:String!$commitObjectCursor:String$name:String!$owner:String!){repository(owner: $owner, name: $name){owner{login},name,object(expression: $branch){... on Commit{history(first:100,after: $commitObjectCursor){nodes{additions,author{email,name,date},changedFiles,committer{email,name,date},deletions,oid,message,url},pageInfo{endCursor,hasNextPage}}}}}}","variables":{"branch":"main","commitObjectCursor":null,"name":"mergestat","owner":"mergestat"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"repository":{"owner":{"login":"mergestat"},"name":"mergestat","object":{"history":{"nodes":[{"additions":2,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2022-01-07T15:43:32-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2022-01-07T15:43:32-05:00"},"deletions":2,"oid":"a7b0837840ae9ca39d1e3e14adb0b485aafab0d2","message":"fix:
+      update some links in the README","url":"https://github.com/mergestat/mergestat/commit/a7b0837840ae9ca39d1e3e14adb0b485aafab0d2"},{"additions":424,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2022-01-06T13:05:20-06:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2022-01-06T14:05:20-05:00"},"deletions":0,"oid":"a8b15b84e3def7ec4601db072ffdc9893948ae15","message":"Implement
+      `github_repo_pr_commits` table (#226)\n\n* initial implementation\r\n\r\n* fix:
+      some updates to the `github_repo_pr_commits` implementation\r\n\r\n- fix some
+      typos\r\n- add some columns\r\n- add test fixtures\r\n\r\nCo-authored-by: Patrick
+      DeVivo <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/a8b15b84e3def7ec4601db072ffdc9893948ae15"},{"additions":14,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:14:19-05:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-20T16:14:19-05:00"},"deletions":3,"oid":"265355587ad35cd32224fe7eaa47569f4cca7720","message":"Merge
+      pull request #225 from mergestat/exclude-git\n\nfeat: option to _exclude_ git
+      functionality, when used as a library","url":"https://github.com/mergestat/mergestat/commit/265355587ad35cd32224fe7eaa47569f4cca7720"},{"additions":14,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:09:21-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:09:21-05:00"},"deletions":3,"oid":"7a9a8a7ae57ab50d5e5ac878203cfa7989ce3c00","message":"feat:
+      option to **exclude** git functionality, when used as a library","url":"https://github.com/mergestat/mergestat/commit/7a9a8a7ae57ab50d5e5ac878203cfa7989ce3c00"},{"additions":11558,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T16:05:31-05:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-20T16:05:31-05:00"},"deletions":7835,"oid":"5025aebd47dd8c6a57a97083fd24e7ce70a3b6be","message":"Merge
+      pull request #224 from mergestat/upgrade-deps\n\nchore: upgrade dependencies,
+      including `sqlite`","url":"https://github.com/mergestat/mergestat/commit/5025aebd47dd8c6a57a97083fd24e7ce70a3b6be"},{"additions":2,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:50:08-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:50:08-05:00"},"deletions":52,"oid":"8733694dfd6461ef05a05009c82a2cec6d73ac39","message":"chore:
+      `go mod tidy`","url":"https://github.com/mergestat/mergestat/commit/8733694dfd6461ef05a05009c82a2cec6d73ac39"},{"additions":11559,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:41:58-05:00"},"changedFiles":6,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-20T15:41:58-05:00"},"deletions":7786,"oid":"d8c623adf3bcef58329be641bdda6f79ac716bec","message":"chore:
+      upgrade dependencies, including `sqlite`","url":"https://github.com/mergestat/mergestat/commit/d8c623adf3bcef58329be641bdda6f79ac716bec"},{"additions":350,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-12-08T15:40:37-06:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-08T16:40:37-05:00"},"deletions":0,"oid":"b068a48fade28a4055eb1253275bc4a03e2b38a2","message":"feat:
+      GitHub branches table (#220)\n\n* initial implementation github_repo_branches
+      table\r\n\r\n* tweaking output\r\n\r\n* add testing and testing yaml\r\n\r\n*
+      cleanup\r\n\r\n* whoops","url":"https://github.com/mergestat/mergestat/commit/b068a48fade28a4055eb1253275bc4a03e2b38a2"},{"additions":0,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-07T10:01:04-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-07T10:01:04-05:00"},"deletions":71,"oid":"98607642655f64a5ae49247d79e920663a41a7d1","message":"Merge
+      pull request #221 from mergestat/rm-api-doc-page\n\nfix: remove old API documentation","url":"https://github.com/mergestat/mergestat/commit/98607642655f64a5ae49247d79e920663a41a7d1"},{"additions":0,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-07T09:56:29-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-07T09:56:29-05:00"},"deletions":71,"oid":"61cd80178f984fa1fe528b88f8bc2c10ba933743","message":"fix:
+      remove old API documentation\n\nin favor of: https://docs.mergestat.com/api/public","url":"https://github.com/mergestat/mergestat/commit/61cd80178f984fa1fe528b88f8bc2c10ba933743"},{"additions":62,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-05T22:04:44-05:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-05T22:04:44-05:00"},"deletions":106,"oid":"8fd8a6ebda2ab8b0c8b7e5c517d1c470a2c4cf51","message":"Merge
+      pull request #218 from mergestat/upgrade-deps\n\nchore: upgrade go dependencies","url":"https://github.com/mergestat/mergestat/commit/8fd8a6ebda2ab8b0c8b7e5c517d1c470a2c4cf51"},{"additions":62,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-05T22:00:34-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-05T22:00:34-05:00"},"deletions":106,"oid":"eee82eddc270b45bbcda44214fcc4890fafdd8af","message":"chore:
+      upgrade go dependencies","url":"https://github.com/mergestat/mergestat/commit/eee82eddc270b45bbcda44214fcc4890fafdd8af"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:40:33-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-01T00:40:33-05:00"},"deletions":1,"oid":"0407ab971c6a0923b8938128f70a52e8758b3c83","message":"fix:
+      add twitter link to README","url":"https://github.com/mergestat/mergestat/commit/0407ab971c6a0923b8938128f70a52e8758b3c83"},{"additions":26,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:38:57-05:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-12-01T00:38:57-05:00"},"deletions":4,"oid":"76debca57b3826406d36d09d21955f9ad817a235","message":"Merge
+      pull request #216 from mergestat/github-comments-date-fix\n\nfix: date formatting
+      on `created_at` and `updated_at` columns","url":"https://github.com/mergestat/mergestat/commit/76debca57b3826406d36d09d21955f9ad817a235"},{"additions":26,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:35:42-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-12-01T00:35:42-05:00"},"deletions":4,"oid":"2690f21e8eefa9be835bb3059734e52d1652dd06","message":"fix:
+      date formatting on `created_at` and `updated_at` columns\n\nof `github_issue_comments`
+      and `github_pr_comments` needed to be made consistent","url":"https://github.com/mergestat/mergestat/commit/2690f21e8eefa9be835bb3059734e52d1652dd06"},{"additions":4,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-30T14:00:19-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-30T14:00:19-05:00"},"deletions":1,"oid":"feafa25e8c1c3965336f9f9272d330bb8c58b366","message":"some
+      minor additions to the README","url":"https://github.com/mergestat/mergestat/commit/feafa25e8c1c3965336f9f9272d330bb8c58b366"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T14:16:03-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T14:16:03-05:00"},"deletions":1,"oid":"e54291f783a8811c47688b5e366deb1de001b6cd","message":"fix:
+      incorrect link","url":"https://github.com/mergestat/mergestat/commit/e54291f783a8811c47688b5e366deb1de001b6cd"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T14:15:26-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T14:15:26-05:00"},"deletions":1,"oid":"c80539634843c7efd9917065bf84733c2bd23519","message":"fix:
+      an incorrect link (for now)","url":"https://github.com/mergestat/mergestat/commit/c80539634843c7efd9917065bf84733c2bd23519"},{"additions":484,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T13:47:27-05:00"},"changedFiles":82,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T13:47:27-05:00"},"deletions":484,"oid":"d73842e747c7e897c669fcdd2db64cc5264b48e0","message":"Merge
+      pull request #215 from mergestat/rename-to-mergestat\n\nmore renaming (of all
+      imports) and some points in code/comments","url":"https://github.com/mergestat/mergestat/commit/d73842e747c7e897c669fcdd2db64cc5264b48e0"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T13:43:10-05:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T13:43:10-05:00"},"deletions":1,"oid":"aa52fdf5a53a617264318cff49e14b9e0da46104","message":"fix:
+      make failing test work by updating fixture (wrongly changed)","url":"https://github.com/mergestat/mergestat/commit/aa52fdf5a53a617264318cff49e14b9e0da46104"},{"additions":485,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T12:11:32-05:00"},"changedFiles":83,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T12:11:32-05:00"},"deletions":485,"oid":"70181cc599d0b5bc2d24209f9a979b1ea9daf1eb","message":"more
+      renaming (of all imports) and some points in code/comments","url":"https://github.com/mergestat/mergestat/commit/70181cc599d0b5bc2d24209f9a979b1ea9daf1eb"},{"additions":15,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T11:46:12-05:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-28T11:46:12-05:00"},"deletions":923,"oid":"bcdead6d2b8c3b823201c8609f25400ef4f62196","message":"Merge
+      pull request #214 from mergestat/rename-to-mergestat\n\nrename to `mergestat`
+      in outward facing artifacts","url":"https://github.com/mergestat/mergestat/commit/bcdead6d2b8c3b823201c8609f25400ef4f62196"},{"additions":15,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T11:28:44-05:00"},"changedFiles":4,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-28T11:28:44-05:00"},"deletions":923,"oid":"daeedb01f99ab2a7e1e26e81a95179f439bbcd2d","message":"rename
+      to `mergestat` in outward facing artifacts","url":"https://github.com/mergestat/mergestat/commit/daeedb01f99ab2a7e1e26e81a95179f439bbcd2d"},{"additions":170,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T21:10:07-05:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T21:10:07-05:00"},"deletions":0,"oid":"92048d2a2ccca9d7ecd69c028089351b366d9ede","message":"Merge
+      pull request #212 from askgitdev/github_user_info\n\nFeat: Scalar function to
+      pull GitHub user info","url":"https://github.com/mergestat/mergestat/commit/92048d2a2ccca9d7ecd69c028089351b366d9ede"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:54:46-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:54:46-05:00"},"deletions":1,"oid":"ec66caeee917a316bb7a702b4fd91b88ce59550b","message":"fix:
+      tweak wording of test error message","url":"https://github.com/mergestat/mergestat/commit/ec66caeee917a316bb7a702b4fd91b88ce59550b"},{"additions":0,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:54:32-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:54:32-05:00"},"deletions":6,"oid":"7a9fae44b4743b47f7e0dd266dc9be2e882f33f7","message":"fix:
+      rm duplicate rate limit check","url":"https://github.com/mergestat/mergestat/commit/7a9fae44b4743b47f7e0dd266dc9be2e882f33f7"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:54:19-05:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:54:19-05:00"},"deletions":1,"oid":"a2be3baa0ad74e23065bbfb23daf822b1cb01324","message":"fix:
+      should not be \"deterministic\" (I think)","url":"https://github.com/mergestat/mergestat/commit/a2be3baa0ad74e23065bbfb23daf822b1cb01324"},{"additions":95,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T18:50:58-05:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-08T18:50:58-05:00"},"deletions":28,"oid":"fa5d374831e4f17d5c75378444708d2c5b849faa","message":"Merge
+      pull request #213 from askgitdev/github_user_info-patrick-edits\n\nfix: GitHub
+      user info edits","url":"https://github.com/mergestat/mergestat/commit/fa5d374831e4f17d5c75378444708d2c5b849faa"},{"additions":29,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T16:12:40-05:00"},"changedFiles":3,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T16:12:40-05:00"},"deletions":27,"oid":"16efaf1009a67d6cea864fbe1bb6c670fb0ca0d3","message":"fix:
+      update some naming, formatting and README wording","url":"https://github.com/mergestat/mergestat/commit/16efaf1009a67d6cea864fbe1bb6c670fb0ca0d3"},{"additions":66,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T14:36:46-05:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-11-08T14:36:46-05:00"},"deletions":1,"oid":"fe3878126a0a6a155d20b97083586f556bd62ccf","message":"fix:
+      make tests pass","url":"https://github.com/mergestat/mergestat/commit/fe3878126a0a6a155d20b97083586f556bd62ccf"},{"additions":28,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:50:07-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:50:07-05:00"},"deletions":0,"oid":"fdcae40cd5c17be2bdc6160abdb886ad75919def","message":"add
+      testing","url":"https://github.com/mergestat/mergestat/commit/fdcae40cd5c17be2bdc6160abdb886ad75919def"},{"additions":19,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:17:04-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:17:04-05:00"},"deletions":0,"oid":"76db67c90e9cea8798ba12b5e6d1929bc5406e6d","message":"document
+      in readme","url":"https://github.com/mergestat/mergestat/commit/76db67c90e9cea8798ba12b5e6d1929bc5406e6d"},{"additions":61,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:33-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:33-05:00"},"deletions":0,"oid":"a184ba2ce156ef078395558dbad5645943f1703e","message":"implement
+      github_user function","url":"https://github.com/mergestat/mergestat/commit/a184ba2ce156ef078395558dbad5645943f1703e"},{"additions":1,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:12-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-11-06T20:09:12-05:00"},"deletions":0,"oid":"92cdc797ae014075d53b5f957f159bc20a902002","message":"register
+      user function","url":"https://github.com/mergestat/mergestat/commit/92cdc797ae014075d53b5f957f159bc20a902002"},{"additions":472,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-11-01T08:53:24-05:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-01T09:53:24-04:00"},"deletions":5,"oid":"85f0cb8a34cabf2d1574580e37b99b9f7642817a","message":"feat:
+      table GitHub pr comments (#206)\n\n* working version with old unused code\r\n\r\n*
+      working code with dead code removed\r\n\r\n* register new function\r\n\r\n*
+      add body text\r\n\r\n* add shortened alias to github modules\r\n\r\n* add testing
+      to github_pr_comments\r\n\r\n* fix some comments\r\n\r\n* add table to readme\r\n\r\n*
+      update to run only on specified pr\r\n\r\n* update testing\r\n\r\n* add testing
+      yaml\r\n\r\n* update readme\r\n\r\n* fix: struct names\r\n\r\n* fix: tweaks
+      to README,  implementation and column names\r\n\r\n* fix: rename and rerun\r\n\r\n*
+      fix: rm some extraneous items from logging\r\n\r\nCo-authored-by: Patrick DeVivo
+      <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/85f0cb8a34cabf2d1574580e37b99b9f7642817a"},{"additions":469,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-11-01T06:33:11-05:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-11-01T07:33:11-04:00"},"deletions":0,"oid":"11153d5b623fc8ee1dad3ed0e420b0790626ef3c","message":"feat:
+      table GitHub issues comments (#205)\n\n* add github_issues_comments table\r\n\r\n*
+      feat github_repo_issues_comments\r\n\r\n* issue comments yaml\r\n\r\n* add table
+      to readme and rename\r\n\r\n* change registered table name\r\n\r\n* change from
+      all issues to specified issue\r\n\r\n* update testing\r\n\r\n* update testing\r\n\r\n*
+      change table name at module registration\r\n\r\n* rename some columns and other
+      small changes\r\n\r\n* readme fix, tweaks to the ordering behavior\r\n\r\nCo-authored-by:
+      Patrick DeVivo <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/11153d5b623fc8ee1dad3ed0e420b0790626ef3c"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-21T10:42:02+02:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-21T10:42:02+02:00"},"deletions":8,"oid":"38045aed5ca7172a211e97044180a99db5e4563a","message":"Merge
+      pull request #204 from askgitdev/rm-checks\n\nrm some checks","url":"https://github.com/mergestat/mergestat/commit/38045aed5ca7172a211e97044180a99db5e4563a"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-21T10:38:58+02:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-21T10:38:58+02:00"},"deletions":8,"oid":"16e0a44623283dc3217d03f02f95071e8b4b1533","message":"rm
+      some checks\n\nshould be fine to pass an empty string to grep or split, as that''s
+      more like a \"base\" or \"noop\" case. It also prevents errors in queries where
+      the contents are dynamically supplied (a column in another table) and one \"poison\"
+      empty string causes an error in the entire query.","url":"https://github.com/mergestat/mergestat/commit/16e0a44623283dc3217d03f02f95071e8b4b1533"},{"additions":6,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-18T11:37:21+02:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-18T11:37:21+02:00"},"deletions":2,"oid":"4c159941a8096966661b1be3e7b84eebf9d0c700","message":"Merge
+      pull request #203 from askgitdev/prs-author_avatar_url-pointer\n\nmake the `githubv4.URI`
+      -> `*githubv4.URI` on `AvatarUrl`","url":"https://github.com/mergestat/mergestat/commit/4c159941a8096966661b1be3e7b84eebf9d0c700"},{"additions":6,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-18T11:33:55+02:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-18T11:33:55+02:00"},"deletions":2,"oid":"2d048fb9a84a3a0bf54c3af80bc50a78ee73e729","message":"make
+      the `githubv4.URI` -> `*githubv4.URI` on `AvatarUrl`\n\nfixes a nil pointer
+      exception that was occurring on this column","url":"https://github.com/mergestat/mergestat/commit/2d048fb9a84a3a0bf54c3af80bc50a78ee73e729"},{"additions":229,"author":{"email":"53903050+Vialeon@users.noreply.github.com","name":"Derrick
+      Newberry","date":"2021-10-15T10:21:13-05:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-15T11:21:13-04:00"},"deletions":120,"oid":"f965a1cdd5ac5c85bced0300e7f6a501fd633307","message":"Feat:
+      add author_avatar_url and author_name to  repo pull requests table (#201)\n\n*
+      add author  url and name to github pr table\r\n\r\n* add name when actor is
+      of type user\r\n\r\n* document added columns in readme\r\n\r\n* update tests
+      to include new columns\r\n\r\n* fix up tests, `author_url` -> `author_avatar_url`\r\n\r\neventually
+      we may want to reduce some scope in this table (remove these columns) and add
+      a `github_user(''login'')` scalar func to access this type of info\r\n\r\n*
+      Update README.md\r\n\r\nCo-authored-by: Patrick DeVivo <patrick.devivo@gmail.com>","url":"https://github.com/mergestat/mergestat/commit/f965a1cdd5ac5c85bced0300e7f6a501fd633307"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:44:33-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-14T21:44:33-04:00"},"deletions":32,"oid":"3e7e5d1d3ae9e07a081a7816418f50353cd0fe3e","message":"Merge
+      pull request #200 from askgitdev/global-flags\n\nmake some flags \"global\"
+      (`PersistentFlags`)","url":"https://github.com/mergestat/mergestat/commit/3e7e5d1d3ae9e07a081a7816418f50353cd0fe3e"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:41:09-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:41:09-04:00"},"deletions":32,"oid":"cd9e16920f7394dd6089e7c425892ff1e5145ae3","message":"make
+      some flags \"global\" (`PersistentFlags`)","url":"https://github.com/mergestat/mergestat/commit/cd9e16920f7394dd6089e7c425892ff1e5145ae3"},{"additions":7,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:33:36-04:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-14T21:33:36-04:00"},"deletions":7,"oid":"11828e85788eaeffd7fc9a89d8315871ad56a699","message":"Merge
+      pull request #199 from askgitdev/upgrade-git2go-v33\n\nupgrade `git2go`/`libgit2`
+      dependency to `v33`/`v1.3.0`","url":"https://github.com/mergestat/mergestat/commit/11828e85788eaeffd7fc9a89d8315871ad56a699"},{"additions":7,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:28:19-04:00"},"changedFiles":6,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-14T21:28:19-04:00"},"deletions":7,"oid":"785f4beede26f472a63c22ee289f5319cb1e97fd","message":"upgrade
+      `git2go`/`libgit2` dependency to `v33`/`v1.3.0`","url":"https://github.com/mergestat/mergestat/commit/785f4beede26f472a63c22ee289f5319cb1e97fd"},{"additions":20,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-13T16:10:35-04:00"},"changedFiles":7,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-13T16:10:35-04:00"},"deletions":2,"oid":"2c0a585b370cccaabb03777b82e6cefc170d0230","message":"Merge
+      pull request #196 from askgitdev/github-tables-index-bugfix\n\nbugfix: fix an
+      index out of range error occurring in most github tables","url":"https://github.com/mergestat/mergestat/commit/2c0a585b370cccaabb03777b82e6cefc170d0230"},{"additions":20,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-13T16:05:35-04:00"},"changedFiles":7,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-13T16:05:35-04:00"},"deletions":2,"oid":"45344c8d4c7eb89889613dc224c0215c28ee8b4f","message":"fix
+      an index out of range error occurring in most github tables\n\nhappens when
+      the page of results from an API request is empty","url":"https://github.com/mergestat/mergestat/commit/45344c8d4c7eb89889613dc224c0215c28ee8b4f"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-11T00:55:05-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-11T00:55:05-04:00"},"deletions":8,"oid":"c2690e4c18ac6dd1b123ca213f201d328a11dfac","message":"Merge
+      pull request #195 from askgitdev/fix-error\n\nfix up some test error phrasing","url":"https://github.com/mergestat/mergestat/commit/c2690e4c18ac6dd1b123ca213f201d328a11dfac"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-11T00:48:27-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-11T00:48:27-04:00"},"deletions":8,"oid":"adf917449e581dae7f0ee33eb06d2c6e27ceaa35","message":"fix
+      up some test error phrasing","url":"https://github.com/mergestat/mergestat/commit/adf917449e581dae7f0ee33eb06d2c6e27ceaa35"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:57:43-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-10T23:57:43-04:00"},"deletions":0,"oid":"ace69daf3cba3efd3206c3b8bc04324fb6cc1ef9","message":"Merge
+      pull request #194 from askgitdev/CODEOWNERS\n\nCreate CODEOWNERS","url":"https://github.com/mergestat/mergestat/commit/ace69daf3cba3efd3206c3b8bc04324fb6cc1ef9"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:54:57-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:54:57-04:00"},"deletions":0,"oid":"54c17ff9d8aa70820c9d490d8603c6f93896c908","message":"Create
+      CODEOWNERS","url":"https://github.com/mergestat/mergestat/commit/54c17ff9d8aa70820c9d490d8603c6f93896c908"},{"additions":252,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:35:31-04:00"},"changedFiles":7,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-10T23:35:31-04:00"},"deletions":215,"oid":"fa65510cbec284ec1c0ddea9f74fe4727a7a9cbd","message":"Merge
+      pull request #193 from askgitdev/repo-topics\n\nadd a `topics` column to `github_user_repos`
+      and `github_org_repos` tables","url":"https://github.com/mergestat/mergestat/commit/fa65510cbec284ec1c0ddea9f74fe4727a7a9cbd"},{"additions":252,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"changedFiles":7,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-10T23:31:16-04:00"},"deletions":215,"oid":"cf8ca56e9e0fa106d42524cc965bbb1780920145","message":"add
+      a `topics` column to `github_user_repos` and `github_org_repos` tables\n\nthat''s
+      a JSON array of the GitHub topics associated with a repo","url":"https://github.com/mergestat/mergestat/commit/cf8ca56e9e0fa106d42524cc965bbb1780920145"},{"additions":36,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-09T12:06:54-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-09T12:06:54-04:00"},"deletions":0,"oid":"e3ada899f99c256b039c67aadd73edc37849e0ca","message":"Merge
+      pull request #192 from askgitdev/readme-schema-note\n\nadd a note to the README
+      about inspecting table schemas at runtime","url":"https://github.com/mergestat/mergestat/commit/e3ada899f99c256b039c67aadd73edc37849e0ca"},{"additions":36,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-09T12:03:46-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-09T12:03:46-04:00"},"deletions":0,"oid":"8975e5ddabd0a6d39d54f50dc932085ca3db8be1","message":"add
+      a note to the README about inspecting table schemas at runtime","url":"https://github.com/mergestat/mergestat/commit/8975e5ddabd0a6d39d54f50dc932085ca3db8be1"},{"additions":65,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-06T19:49:12-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-06T19:49:12-04:00"},"deletions":23,"oid":"3955f648feb2e12c6584ffd5071818f126bf636a","message":"Merge
+      pull request #191 from askgitdev/pgsync\n\npgsync improvements","url":"https://github.com/mergestat/mergestat/commit/3955f648feb2e12c6584ffd5071818f126bf636a"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:25:26-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:25:26-04:00"},"deletions":1,"oid":"55a0913520d42af5dcec74b4ede7f81e696ffe3f","message":"set
+      to debug level","url":"https://github.com/mergestat/mergestat/commit/55a0913520d42af5dcec74b4ede7f81e696ffe3f"},{"additions":6,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:24:58-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:24:58-04:00"},"deletions":1,"oid":"83891db2e2c7c73dfa32adf63aea26935a601781","message":"spruce
+      up the pgsync logger","url":"https://github.com/mergestat/mergestat/commit/83891db2e2c7c73dfa32adf63aea26935a601781"},{"additions":8,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:21:02-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:21:02-04:00"},"deletions":0,"oid":"0116d4618efb6fe83e62c0af569808a49a72bff8","message":"add
+      a `PGSYNC_PREAMBLE`","url":"https://github.com/mergestat/mergestat/commit/0116d4618efb6fe83e62c0af569808a49a72bff8"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:13:47-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T21:13:47-04:00"},"deletions":0,"oid":"9e6f3bdc987ecbe5bc97de6288a97d2df27e19c4","message":"add
+      logger to pgsync","url":"https://github.com/mergestat/mergestat/commit/9e6f3bdc987ecbe5bc97de6288a97d2df27e19c4"},{"additions":378,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:55-04:00"},"changedFiles":9,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:55-04:00"},"deletions":1,"oid":"b34695e908862a395dfbeb7a614a6f970cac12cd","message":"Merge
+      branch ''main'' into pgsync","url":"https://github.com/mergestat/mergestat/commit/b34695e908862a395dfbeb7a614a6f970cac12cd"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:39-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:54:39-04:00"},"deletions":0,"oid":"56e30312a3c79bbf381b47616aa3169ef322f17f","message":"run
+      `go fmt ./...`","url":"https://github.com/mergestat/mergestat/commit/56e30312a3c79bbf381b47616aa3169ef322f17f"},{"additions":156,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:53:42-04:00"},"changedFiles":6,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-05T20:53:42-04:00"},"deletions":3,"oid":"cab530c5e93234056f77c04bbb0a0dab7534d47f","message":"Merge
+      pull request #190 from askgitdev/str_split_all\n\nfeat: str_split_all table","url":"https://github.com/mergestat/mergestat/commit/cab530c5e93234056f77c04bbb0a0dab7534d47f"},{"additions":12,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:49:14-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:49:14-04:00"},"deletions":3,"oid":"64ea0f92e373dc1755012639ea16e8e2cdc561cc","message":"Update
+      README.md","url":"https://github.com/mergestat/mergestat/commit/64ea0f92e373dc1755012639ea16e8e2cdc561cc"},{"additions":0,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:04:24-05:00"},"changedFiles":0,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:04:24-05:00"},"deletions":0,"oid":"2de0ca3507d98fffea171bf6b4ebdd06c162b076","message":"Merge
+      branch ''str_split_all'' of github.com:askgitdev/askgit into str_split_all","url":"https://github.com/mergestat/mergestat/commit/2de0ca3507d98fffea171bf6b4ebdd06c162b076"},{"additions":1,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-05T20:03:57-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-05T20:03:57-04:00"},"deletions":1,"oid":"20b2bac33375034cc39b4b70aa5633012a6ab031","message":"Update
+      README.md","url":"https://github.com/mergestat/mergestat/commit/20b2bac33375034cc39b4b70aa5633012a6ab031"},{"additions":1,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:52-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:52-05:00"},"deletions":1,"oid":"a719cc0609aef4c274d1dee185b9b9e2372e6dea","message":"case","url":"https://github.com/mergestat/mergestat/commit/a719cc0609aef4c274d1dee185b9b9e2372e6dea"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:29-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T19:03:29-05:00"},"deletions":2,"oid":"dfc7eb831360f0938e1b0cbab07bb7e61f8a2cb4","message":"readme
+      change","url":"https://github.com/mergestat/mergestat/commit/dfc7eb831360f0938e1b0cbab07bb7e61f8a2cb4"},{"additions":10,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:27:43-05:00"},"changedFiles":4,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:27:43-05:00"},"deletions":11,"oid":"1b4d160de150c1d0c0b448cd62e8d70562c31021","message":"change
+      file names for clarity and change naming to match","url":"https://github.com/mergestat/mergestat/commit/1b4d160de150c1d0c0b448cd62e8d70562c31021"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:26:35-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-05T05:26:35-05:00"},"deletions":2,"oid":"dcb43191f3f22c80f729fae5046817558dd7c40f","message":"rename
+      str_split_all to str_split","url":"https://github.com/mergestat/mergestat/commit/dcb43191f3f22c80f729fae5046817558dd7c40f"},{"additions":12,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:38:58-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:38:58-05:00"},"deletions":0,"oid":"60486f5dc38a58e63db53bae206100c11d0156ca","message":"document
+      new table-valued function in readme","url":"https://github.com/mergestat/mergestat/commit/60486f5dc38a58e63db53bae206100c11d0156ca"},{"additions":27,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:35:21-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:35:21-05:00"},"deletions":0,"oid":"b4060d66037a7e6b1c8a37286dfde6d2d52195c8","message":"add
+      simple testing","url":"https://github.com/mergestat/mergestat/commit/b4060d66037a7e6b1c8a37286dfde6d2d52195c8"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:26:05-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:26:05-05:00"},"deletions":10,"oid":"3e6255887ce56efec4487da9d270abd01c392b50","message":"register
+      modules correctly","url":"https://github.com/mergestat/mergestat/commit/3e6255887ce56efec4487da9d270abd01c392b50"},{"additions":35,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:25:48-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:25:48-05:00"},"deletions":11,"oid":"5688ab9920f9bd5ae4c723c9d2e743ebe78a6c7c","message":"use
+      a scanner instead of splitting into an array","url":"https://github.com/mergestat/mergestat/commit/5688ab9920f9bd5ae4c723c9d2e743ebe78a6c7c"},{"additions":223,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:14:04-05:00"},"changedFiles":4,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-10-04T19:14:04-05:00"},"deletions":0,"oid":"3ef10200cb2404affa17cce40f5646e503efc622","message":"Merge
+      branch ''main'' into str_split_all","url":"https://github.com/mergestat/mergestat/commit/3ef10200cb2404affa17cce40f5646e503efc622"},{"additions":223,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T10:21:31-04:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-01T10:21:31-04:00"},"deletions":0,"oid":"2c3962977c4f8e25b66985ffe1ddffd2f8cd71e5","message":"Merge
+      pull request #188 from askgitdev/grep\n\nfeat: Grep table valued function","url":"https://github.com/mergestat/mergestat/commit/2c3962977c4f8e25b66985ffe1ddffd2f8cd71e5"},{"additions":3,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T10:17:30-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T10:17:30-04:00"},"deletions":2,"oid":"fcaf34bea9ec099e1ff75b1e066cb4f95d3bb144","message":"add
+      note about regex in README","url":"https://github.com/mergestat/mergestat/commit/fcaf34bea9ec099e1ff75b1e066cb4f95d3bb144"},{"additions":53,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T09:30:36-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T09:30:36-04:00"},"deletions":0,"oid":"086c8556f6a30cf4250513a8346ec4dd41bd0f4e","message":"add
+      some tests for before/after line preview in `grep`","url":"https://github.com/mergestat/mergestat/commit/086c8556f6a30cf4250513a8346ec4dd41bd0f4e"},{"additions":70,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T09:25:49-04:00"},"changedFiles":4,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-10-01T09:25:49-04:00"},"deletions":31,"oid":"575bbb3760b6439efdff8ac8b06988a4d81313c2","message":"Merge
+      pull request #189 from askgitdev/grep-fixes\n\nSome updates to `grep` table","url":"https://github.com/mergestat/mergestat/commit/575bbb3760b6439efdff8ac8b06988a4d81313c2"},{"additions":34,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T00:08:38-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-10-01T00:08:38-04:00"},"deletions":0,"oid":"3fe166f8e287db3733d8770b68b0c0c9e91a3f95","message":"add
+      simple test case","url":"https://github.com/mergestat/mergestat/commit/3fe166f8e287db3733d8770b68b0c0c9e91a3f95"},{"additions":36,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-30T23:53:49-04:00"},"changedFiles":3,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-30T23:53:49-04:00"},"deletions":31,"oid":"331d167296079e45f0bf883d987f03336fb2e7fe","message":"some
+      renaming and cleaning, implement a regex match","url":"https://github.com/mergestat/mergestat/commit/331d167296079e45f0bf883d987f03336fb2e7fe"},{"additions":15,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:22:51-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:22:51-05:00"},"deletions":0,"oid":"d22e86bd75a432a98e073a9226ff5e6eb7541927","message":"add
+      grep to readme","url":"https://github.com/mergestat/mergestat/commit/d22e86bd75a432a98e073a9226ff5e6eb7541927"},{"additions":5,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:12:02-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T20:12:02-05:00"},"deletions":5,"oid":"a4580f65457e0bb13e65abc104a18e6fb441f6a6","message":"fix
+      column name and next","url":"https://github.com/mergestat/mergestat/commit/a4580f65457e0bb13e65abc104a18e6fb441f6a6"},{"additions":7,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:51:06-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:51:06-05:00"},"deletions":7,"oid":"e18a593259d51997a66bb5f9414602862d0e769f","message":"some
+      changes","url":"https://github.com/mergestat/mergestat/commit/e18a593259d51997a66bb5f9414602862d0e769f"},{"additions":2,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:01:07-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:01:07-05:00"},"deletions":2,"oid":"875655824f8bf9007f0adf4425347ebf92333148","message":"checking","url":"https://github.com/mergestat/mergestat/commit/875655824f8bf9007f0adf4425347ebf92333148"},{"additions":8,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:19-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:19-05:00"},"deletions":0,"oid":"a6a998bdfa975e98332566711a52981e452813b6","message":"register
+      grep module","url":"https://github.com/mergestat/mergestat/commit/a6a998bdfa975e98332566711a52981e452813b6"},{"additions":107,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:09-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T19:00:09-05:00"},"deletions":0,"oid":"c1f9aaaf4f3a8500ac15b32056b7b301acbaf212","message":"grep
+      table","url":"https://github.com/mergestat/mergestat/commit/c1f9aaaf4f3a8500ac15b32056b7b301acbaf212"},{"additions":9,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T18:32:38-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-30T18:32:38-05:00"},"deletions":0,"oid":"905cb4846d7254db224ec79a577da832a41f4f3c","message":"register
+      module","url":"https://github.com/mergestat/mergestat/commit/905cb4846d7254db224ec79a577da832a41f4f3c"},{"additions":81,"author":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-29T21:14:47-05:00"},"changedFiles":1,"committer":{"email":"dnewberry21@amherst.edu","name":"vialeon","date":"2021-09-29T21:14:47-05:00"},"deletions":0,"oid":"4e7251f3d83f33ab1caee67393073890d0a120ca","message":"feat:
+      table, string and delim as inputs; splits into rows based on delim","url":"https://github.com/mergestat/mergestat/commit/4e7251f3d83f33ab1caee67393073890d0a120ca"},{"additions":521,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-25T09:45:13-04:00"},"changedFiles":14,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-25T09:45:13-04:00"},"deletions":72,"oid":"dda466d655c4b9c5c52e8cac5e2e77fa104a1ba9","message":"Merge
+      branch ''main'' into pgsync","url":"https://github.com/mergestat/mergestat/commit/dda466d655c4b9c5c52e8cac5e2e77fa104a1ba9"},{"additions":27,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-25T00:01:56-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-25T00:01:56-04:00"},"deletions":25,"oid":"089e7bdfac209c48534a30d74b9e0d8c4f58fccd","message":"Merge
+      pull request #187 from askgitdev/update-deps\n\nupdate some dependencies","url":"https://github.com/mergestat/mergestat/commit/089e7bdfac209c48534a30d74b9e0d8c4f58fccd"},{"additions":27,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:58:57-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:58:57-04:00"},"deletions":25,"oid":"f10d1772eb15b74d80b5337049a27ccabbc880ca","message":"update
+      some dependencies","url":"https://github.com/mergestat/mergestat/commit/f10d1772eb15b74d80b5337049a27ccabbc880ca"},{"additions":3,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:44:16-04:00"},"changedFiles":1,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T23:44:16-04:00"},"deletions":0,"oid":"57b69f586b75dd7bcba414e0c99d0d6f17c161e5","message":"Merge
+      pull request #186 from askgitdev/fix-affiliations-bug\n\nfix bug breaking github
+      repo tables when no affiliation was supplied","url":"https://github.com/mergestat/mergestat/commit/57b69f586b75dd7bcba414e0c99d0d6f17c161e5"},{"additions":3,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:40:47-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:40:47-04:00"},"deletions":0,"oid":"670642e1dd5c06f8ae0dc2e93fa908be2694f240","message":"fix
+      bug breaking github repo tables when no affiliation was supplied","url":"https://github.com/mergestat/mergestat/commit/670642e1dd5c06f8ae0dc2e93fa908be2694f240"},{"additions":51,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:22:28-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T23:22:28-04:00"},"deletions":1,"oid":"2e25213035302d87948254ff1636b03ce2b21e5f","message":"Merge
+      pull request #185 from askgitdev/ssh-repo-locator\n\nimplement an SSH repo locator","url":"https://github.com/mergestat/mergestat/commit/2e25213035302d87948254ff1636b03ce2b21e5f"},{"additions":14,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:17:36-04:00"},"changedFiles":1,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T23:17:36-04:00"},"deletions":1,"oid":"8073ca520efd23987b1ca07c45b23588fd647472","message":"fix
+      up username handling, add a TODO comment","url":"https://github.com/mergestat/mergestat/commit/8073ca520efd23987b1ca07c45b23588fd647472"},{"additions":38,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T22:57:00-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T22:57:00-04:00"},"deletions":1,"oid":"05f8c786c9fbff9c18fd0c21fe1a96611b69114a","message":"implement
+      a basic SSH repo locator","url":"https://github.com/mergestat/mergestat/commit/05f8c786c9fbff9c18fd0c21fe1a96611b69114a"},{"additions":24,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:56:14-04:00"},"changedFiles":2,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T21:56:14-04:00"},"deletions":15,"oid":"f7cdb8eed44638304a91b87c6d473f24cc9f5bb4","message":"Merge
+      pull request #184 from askgitdev/use-logger-errors\n\nuse the zerolog logger
+      to report errors","url":"https://github.com/mergestat/mergestat/commit/f7cdb8eed44638304a91b87c6d473f24cc9f5bb4"},{"additions":24,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:41:46-04:00"},"changedFiles":2,"committer":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:41:46-04:00"},"deletions":15,"oid":"2dbcee01c7d01c8c9fbd44284b37180cf04f0e06","message":"use
+      the zerolog logger to report errors","url":"https://github.com/mergestat/mergestat/commit/2dbcee01c7d01c8c9fbd44284b37180cf04f0e06"},{"additions":370,"author":{"email":"patrick.devivo@gmail.com","name":"Patrick
+      DeVivo","date":"2021-09-24T21:28:09-04:00"},"changedFiles":5,"committer":{"email":"noreply@github.com","name":"GitHub","date":"2021-09-24T21:28:09-04:00"},"deletions":11,"oid":"f6dacc2245251506ce7d8ff392bd2be14b110f6e","message":"Merge
+      pull request #179 from askgitdev/protection_rules\n\nfeat: support for github
+      branch protection querying","url":"https://github.com/mergestat/mergestat/commit/f6dacc2245251506ce7d8ff392bd2be14b110f6e"}],"pageInfo":{"endCursor":"a7b0837840ae9ca39d1e3e14adb0b485aafab0d2
+      99","hasNextPage":true}}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 18 Jan 2022 17:23:14 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - D88B:4386:1A8C013:494B86D:61E6F77F
+      X-Oauth-Scopes:
+      - read:org, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4970"
+      X-Ratelimit-Reset:
+      - "1642530123"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "30"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 524.929157ms
