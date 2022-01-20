@@ -22,9 +22,10 @@ func init() {
 }
 
 var exportCmd = &cobra.Command{
-	Use:  "export [sqlite db file]",
-	Long: `Use this command to export queries into a SQLite database file on disk`,
-	Args: cobra.ExactArgs(1),
+	Use:   "export [sqlite db file]",
+	Short: "Export queries into a SQLite db file",
+	Long:  `Use this command to export queries into a SQLite database file on disk`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
