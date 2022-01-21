@@ -17,6 +17,7 @@ import (
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/mergestat/mergestat/extensions/options"
@@ -74,6 +75,31 @@ func HttpLocator() services.RepoLocator {
 	})
 }
 
+// httpLocatorWithAuth returns a func that returns a repo locator 🤯
+// its primary intended use is below in the MultiLocator, which receives options.
+// If HTTP auth options are supplied, they will be used when cloning an https (only https) repo.
+func httpLocatorWithAuth(user, pass string, rl services.RepoLocator) func() services.RepoLocator {
+	return func() services.RepoLocator {
+		return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+			if !strings.HasPrefix(path, "https") {
+				return rl.Open(ctx, path)
+			}
+
+			if parsed, err := url.Parse(path); err != nil {
+				return nil, err
+			} else {
+				pass, passSet := parsed.User.Password()
+				if parsed.User.Username() == "" && !passSet {
+					parsed.User = url.UserPassword(user, pass)
+					path = parsed.String()
+				}
+			}
+
+			return rl.Open(ctx, path)
+		})
+	}
+}
+
 // SSHLocator returns a repo locator capable of cloning remote
 // ssh repositories on-demand into temporary storage. It is recommended
 // that you club it with something like CachedLocator to improve performance
@@ -110,13 +136,24 @@ func SSHLocator() services.RepoLocator {
 	})
 }
 
+type MultiLocatorOptions struct {
+	HTTPAuth *http.BasicAuth
+}
+
 // MultiLocator returns a locator service that work with multiple git protocols
 // and is able to pick the correct underlying locator based on path provided.
-func MultiLocator() services.RepoLocator {
+func MultiLocator(o *MultiLocatorOptions) services.RepoLocator {
+	if o == nil {
+		o = &MultiLocatorOptions{}
+	}
 	var locators = map[string]func() services.RepoLocator{
 		"http": HttpLocator,
 		"ssh":  SSHLocator,
 		"file": DiskLocator,
+	}
+
+	if o.HTTPAuth != nil {
+		locators["http"] = httpLocatorWithAuth(o.HTTPAuth.Username, o.HTTPAuth.Password, HttpLocator())
 	}
 
 	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
