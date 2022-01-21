@@ -12,14 +12,12 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 
-	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/mergestat/mergestat/extensions/services"
 	"github.com/pkg/errors"
@@ -54,25 +52,68 @@ func CachedLocator(rl services.RepoLocator) services.RepoLocator {
 	})
 }
 
+// determineCloneDir returns the path to a directory on disk where a repository will be cloned to
+// given a baseCloneDir. If baseCloneDir == "", a tmp dir will be created, otherwise a directory
+// path will be determined based on the URL (HTTP(s) or SSH) of the provided repository.
+// The bool returned (2nd return val) indicates whether the output dir is in a tmp directory or not.
+func determineCloneDir(path, baseCloneDir string) (string, bool, error) {
+	var err error
+	var parsed *url.URL
+	if parsed, err = url.ParseRequestURI(path); err != nil {
+		return "", false, errors.Wrap(err, "invalid remote url")
+	}
+
+	// if no clone directory is specified, use a tmp dir
+	if baseCloneDir == "" {
+		if baseCloneDir, err = ioutil.TempDir(os.TempDir(), "mergestat"); err != nil {
+			return "", false, errors.Wrap(err, "failed to create a temporary directory")
+		}
+
+		return baseCloneDir, true, nil
+	}
+
+	// if clone directory is set, get the abs path
+	if baseCloneDir, err = filepath.Abs(baseCloneDir); err != nil {
+		return "", false, errors.Wrap(err, "failed to retrieve absolute path for clone directory")
+	}
+
+	// then use the parsed path to determine where repos should end up
+	if strings.HasPrefix(path, "http") {
+		baseCloneDir = filepath.Join(baseCloneDir, parsed.Hostname(), parsed.EscapedPath()[1:])
+	} else { // assume it's an ssh repo
+		baseCloneDir = filepath.Join(baseCloneDir, strings.Replace(parsed.String(), ":", "/", 1))
+	}
+
+	if _, err = os.Stat(baseCloneDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(baseCloneDir, 0755); err != nil {
+			return "", false, errors.Wrap(err, "failed to create clone directory")
+		}
+	}
+
+	return baseCloneDir, false, nil
+}
+
 // HttpLocator returns a repo locator capable of cloning remote
 // http repositories on-demand into temporary storage. It is recommended
 // that you club it with something like CachedLocator to improve performance
 // and remove the need to clone a single repository multiple times.
-func HttpLocator() services.RepoLocator {
-	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
-		var err error
-		if _, err = url.ParseRequestURI(path); err != nil {
-			return nil, errors.Wrap(err, "invalid remote url")
-		}
+func HttpLocator(cloneDir string) func() services.RepoLocator {
+	return func() services.RepoLocator {
+		return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+			var err error
+			if _, err = url.ParseRequestURI(path); err != nil {
+				return nil, errors.Wrap(err, "invalid remote url")
+			}
 
-		var dir string
-		if dir, err = ioutil.TempDir(os.TempDir(), "mergestat"); err != nil {
-			return nil, errors.Wrap(err, "failed to create a temporary directory")
-		}
+			var cd string
+			var isTmp bool
+			if cd, isTmp, err = determineCloneDir(path, cloneDir); err != nil {
+				return nil, errors.Wrap(err, "could not determine clone directory")
+			}
 
-		var storer = filesystem.NewStorage(osfs.New(dir), cache.NewObjectLRUDefault())
-		return git.CloneContext(ctx, storer, storer.Filesystem(), &git.CloneOptions{URL: path, NoCheckout: true})
-	})
+			return git.PlainCloneContext(ctx, cd, isTmp, &git.CloneOptions{URL: path})
+		})
+	}
 }
 
 // httpLocatorWithAuth returns a func that returns a repo locator 🤯
@@ -104,40 +145,44 @@ func httpLocatorWithAuth(user, pass string, rl services.RepoLocator) func() serv
 // ssh repositories on-demand into temporary storage. It is recommended
 // that you club it with something like CachedLocator to improve performance
 // and remove the need to clone a single repository multiple times.
-func SSHLocator() services.RepoLocator {
-	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
-		path = strings.TrimPrefix(path, "ssh://")
+func SSHLocator(cloneDir string) func() services.RepoLocator {
+	return func() services.RepoLocator {
+		return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
+			path = strings.TrimPrefix(path, "ssh://")
 
-		// TODO(patrickdevivo) maybe a little hacky instead of properly parsing the url, strip out the username first
-		// if it's set, otherwise default to "git"
-		var user string
-		split := strings.SplitN(path, "@", 2)
-		switch len(split) {
-		case 1:
-			user = "git"
-			path = split[0]
-		case 2:
-			user = split[0]
-			path = split[1]
-		}
+			// TODO(patrickdevivo) maybe a little hacky instead of properly parsing the url, strip out the username first
+			// if it's set, otherwise default to "git"
+			var user string
+			split := strings.SplitN(path, "@", 2)
+			switch len(split) {
+			case 1:
+				user = "git"
+				path = split[0]
+			case 2:
+				user = split[0]
+				path = split[1]
+			}
 
-		var dir string
-		var err error
-		if dir, err = ioutil.TempDir(os.TempDir(), "mergestat"); err != nil {
-			return nil, errors.Wrap(err, "failed to create a temporary directory")
-		}
+			var cd string
+			var isTmp bool
+			var err error
+			if cd, isTmp, err = determineCloneDir(path, cloneDir); err != nil {
+				return nil, errors.Wrap(err, "could not determine clone directory")
+			}
 
-		var storer = filesystem.NewStorage(osfs.New(dir), cache.NewObjectLRUDefault())
-		var auth ssh.AuthMethod
-		if auth, err = ssh.DefaultAuthBuilder(user); err != nil {
-			return nil, errors.Wrap(err, "failed to create an SSH authentication method")
-		}
-		return git.CloneContext(ctx, storer, storer.Filesystem(), &git.CloneOptions{URL: path, NoCheckout: true, Auth: auth})
-	})
+			var auth ssh.AuthMethod
+			if auth, err = ssh.DefaultAuthBuilder(user); err != nil {
+				return nil, errors.Wrap(err, "failed to create an SSH authentication method")
+			}
+
+			return git.PlainCloneContext(ctx, cd, isTmp, &git.CloneOptions{URL: path, Auth: auth})
+		})
+	}
 }
 
 type MultiLocatorOptions struct {
 	HTTPAuth *http.BasicAuth
+	CloneDir string
 }
 
 // MultiLocator returns a locator service that work with multiple git protocols
@@ -147,19 +192,18 @@ func MultiLocator(o *MultiLocatorOptions) services.RepoLocator {
 		o = &MultiLocatorOptions{}
 	}
 	var locators = map[string]func() services.RepoLocator{
-		"http": HttpLocator,
-		"ssh":  SSHLocator,
+		"http": HttpLocator(o.CloneDir),
+		"ssh":  SSHLocator(o.CloneDir),
 		"file": DiskLocator,
-	}
-
-	if o.HTTPAuth != nil {
-		locators["http"] = httpLocatorWithAuth(o.HTTPAuth.Username, o.HTTPAuth.Password, HttpLocator())
 	}
 
 	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
 		var fn = locators["file"] // file is the default locator
 		if strings.HasPrefix(path, "http") || strings.HasPrefix(path, "https") {
 			fn = locators["http"]
+			if o.HTTPAuth != nil {
+				fn = httpLocatorWithAuth(o.HTTPAuth.Username, o.HTTPAuth.Password, fn())
+			}
 		}
 		if strings.HasPrefix(path, "ssh") {
 			fn = locators["ssh"]

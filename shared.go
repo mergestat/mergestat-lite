@@ -17,16 +17,16 @@ import (
 
 func init() {
 	githubToken := os.Getenv("GITHUB_TOKEN")
-	var multiLocOpt *locator.MultiLocatorOptions
+	var multiLocOpt locator.MultiLocatorOptions
 	if githubToken != "" {
-		multiLocOpt = &locator.MultiLocatorOptions{
+		multiLocOpt = locator.MultiLocatorOptions{
 			HTTPAuth: &http.BasicAuth{Username: githubToken},
 		}
 	}
 
 	sqlite.Register(extensions.RegisterFn(
 		options.WithExtraFunctions(),
-		options.WithRepoLocator(locator.CachedLocator(locator.MultiLocator(multiLocOpt))),
+		options.WithRepoLocator(locator.CachedLocator(locator.MultiLocator(&multiLocOpt))),
 		options.WithGitHub(),
 		options.WithContextValue("githubToken", githubToken),
 		options.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),

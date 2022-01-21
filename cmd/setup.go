@@ -15,11 +15,11 @@ import (
 )
 
 func registerExt() {
-	var multiLocOpt *locator.MultiLocatorOptions
+	multiLocOpt := &locator.MultiLocatorOptions{
+		CloneDir: cloneDir,
+	}
 	if githubToken != "" {
-		multiLocOpt = &locator.MultiLocatorOptions{
-			HTTPAuth: &http.BasicAuth{Username: githubToken},
-		}
+		multiLocOpt.HTTPAuth = &http.BasicAuth{Username: githubToken}
 	}
 
 	sqlite.Register(

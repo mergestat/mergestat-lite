@@ -16,6 +16,7 @@ import (
 var format string                                     // output format flag
 var presetQuery string                                // named / preset query flag
 var repo string                                       // path to repo on disk
+var cloneDir string                                   // path to directory to clone repos in
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
 var verbose bool                                      // whether or not to print logs to stderr
@@ -26,6 +27,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&format, "format", "f", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' and 'json'")
 	rootCmd.Flags().StringVarP(&presetQuery, "preset", "p", "", "used to pick a preset query")
 	rootCmd.PersistentFlags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
+	rootCmd.PersistentFlags().StringVarP(&cloneDir, "clone-dir", "c", "", "specify a path to a directory on disk to use when cloning repos, instead of a tmp dir. Should be empty to avoid path conflicts.")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
 
 	// register the sqlite extension ahead of any command
