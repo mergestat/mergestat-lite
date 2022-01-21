@@ -40,6 +40,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 
 	var fns = map[string]sqlite.Function{
 		"commit_from_tag": &CommitFromTagFn{},
+		"clone":           NewCloneFn(moduleOpts),
 	}
 
 	for name, fn := range fns {
