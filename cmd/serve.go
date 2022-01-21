@@ -101,6 +101,9 @@ var serveCmd = &cobra.Command{
 	Long:  `Use this command to start a query API server`,
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO(patrickdevivo) we might want to figure out a better logger set-up here.
+		// For instance, to separate HTTP request logs from SQL execution logs.
+		// Right now, they are all mixed together and sent to the global logger.
 		var srv *queryServiceHandler
 		var err error
 		if srv, err = newQueryServiceHandler(); err != nil {
