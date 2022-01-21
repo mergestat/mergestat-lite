@@ -184,7 +184,9 @@ func jsonDisplay(rows *sql.Rows, writer io.Writer) error {
 	if out, err := json.Marshal(buffer); err != nil {
 		return err
 	} else {
-		writer.Write(out)
+		if _, err := writer.Write(out); err != nil {
+			return err
+		}
 	}
 
 	return nil
