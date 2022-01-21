@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -131,6 +132,39 @@ func TestDisplayJSON(t *testing.T) {
 
 	var b bytes.Buffer
 	err := WriteTo(rows, &b, "json", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	o := make([]map[string]interface{}, 0)
+	err = json.Unmarshal(b.Bytes(), &o)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(o) != 3 {
+		t.Fatalf("expected 3 rows of output, got: %d", len(o))
+	}
+
+	if o[0]["name"] != "name 1" {
+		t.Fatalf(`expected "name" in first row to be "name 1", got: %s`, o[0]["name"])
+	}
+}
+
+func TestDisplayNDJSON(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+
+	mockRows := sqlmock.NewRows([]string{"id", "name", "value"}).
+		AddRow("1", "name 1", "value 1").
+		AddRow("2", "name 2", "value 2").
+		AddRow("3", "name 3", "value 3")
+
+	mock.ExpectQuery("select").WillReturnRows(mockRows)
+
+	rows, _ := db.Query("select")
+
+	var b bytes.Buffer
+	err := WriteTo(rows, &b, "ndjson", false)
 	if err != nil {
 		t.Fatal(err)
 	}
