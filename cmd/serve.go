@@ -15,6 +15,11 @@ var (
 	servicePort int
 )
 
+func init() {
+	serveCmd.Flags().IntVarP(&servicePort, "port", "p", 8000, "port to listen on")
+}
+
+// ServiceQueryRequest is the JSON body from a query HTTP request
 type ServiceQueryRequest struct {
 	Query string `json:"query"`
 }
@@ -23,15 +28,19 @@ type queryServiceHandler struct {
 	DB *sql.DB
 }
 
-func (h *queryServiceHandler) init() error {
+func newQueryServiceHandler() (*queryServiceHandler, error) {
 	if db, err := sql.Open("sqlite3", ":memory:"); err != nil {
-		return fmt.Errorf("failed to initialize database connection: %v", err)
+		return nil, fmt.Errorf("failed to initialize database connection: %v", err)
 	} else {
-		h.DB = db
+		return &queryServiceHandler{DB: db}, nil
 	}
-	return nil
 }
 
+func (h *queryServiceHandler) Close() error {
+	return h.DB.Close()
+}
+
+// handleErr is a helper for writing errors to the http response
 func (h *queryServiceHandler) handleErr(w http.ResponseWriter, statusCode int, err error) {
 	if statusCode == 0 {
 		statusCode = http.StatusInternalServerError
@@ -56,6 +65,10 @@ func (h *queryServiceHandler) handleErr(w http.ResponseWriter, statusCode int, e
 }
 
 func (h *queryServiceHandler) httpHandler(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		h.handleErr(w, http.StatusBadRequest, fmt.Errorf("must POST to this endpoint"))
+	}
+
 	var body []byte
 	var err error
 	if body, err = ioutil.ReadAll(req.Body); err != nil {
@@ -82,22 +95,22 @@ func (h *queryServiceHandler) httpHandler(w http.ResponseWriter, req *http.Reque
 	logger.Info().Msgf(`handled request for query=%q`, serviceQueryRequest.Query)
 }
 
-func init() {
-	serveCmd.Flags().IntVarP(&servicePort, "port", "p", 8000, "port to listen on")
-}
-
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Run an HTTP API server for receiving queries to execute",
 	Long:  `Use this command to start a query API server`,
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-
-		srv := &queryServiceHandler{}
-		if err := srv.init(); err != nil {
+		var srv *queryServiceHandler
+		var err error
+		if srv, err = newQueryServiceHandler(); err != nil {
 			handleExitError(err)
 		}
-		defer srv.DB.Close()
+		defer func() {
+			if err := srv.Close(); err != nil {
+				handleExitError(err)
+			}
+		}()
 
 		http.HandleFunc("/", srv.httpHandler)
 		http.HandleFunc("/query", srv.httpHandler)
