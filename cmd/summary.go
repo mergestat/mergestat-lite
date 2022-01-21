@@ -18,11 +18,10 @@ import (
 
 var headingStyle = lipgloss.NewStyle().
 	Bold(true)
-	// Background(lipgloss.Color("24"))
 
-var underlineStyle = lipgloss.NewStyle().Underline(true)
+// var underlineStyle = lipgloss.NewStyle().Underline(true)
 
-var textStyle = lipgloss.NewStyle()
+// var textStyle = lipgloss.NewStyle()
 
 type CommitSummary struct {
 	Total           int       `db:"total"`
