@@ -32,6 +32,11 @@ func WriteTo(rows *sql.Rows, w io.Writer, format string, interactive bool) error
 		if err != nil {
 			return err
 		}
+	case "ndjson":
+		err := ndjsonDisplay(rows, w)
+		if err != nil {
+			return err
+		}
 	//TODO: switch between table and csv dependent on num columns(suggested num for table 5<=
 	default:
 		err := tableDisplay(rows, w, interactive)
@@ -73,12 +78,12 @@ func single(rows *sql.Rows, write io.Writer) error {
 	return nil
 }
 
-func csvDisplay(rows *sql.Rows, commaChar rune, write io.Writer) error {
+func csvDisplay(rows *sql.Rows, commaChar rune, writer io.Writer) error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
 	}
-	w := csv.NewWriter(write)
+	w := csv.NewWriter(writer)
 	w.Comma = commaChar
 
 	err = w.Write(columns)
@@ -113,7 +118,7 @@ func csvDisplay(rows *sql.Rows, commaChar rune, write io.Writer) error {
 	return nil
 }
 
-func jsonDisplay(rows *sql.Rows, write io.Writer) error {
+func ndjsonDisplay(rows *sql.Rows, writer io.Writer) error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
@@ -124,7 +129,7 @@ func jsonDisplay(rows *sql.Rows, write io.Writer) error {
 		values[i] = new(interface{})
 	}
 
-	enc := json.NewEncoder(write)
+	enc := json.NewEncoder(writer)
 
 	for rows.Next() {
 		err = rows.Scan(values...)
@@ -147,6 +152,44 @@ func jsonDisplay(rows *sql.Rows, write io.Writer) error {
 
 	return nil
 }
+
+func jsonDisplay(rows *sql.Rows, writer io.Writer) error {
+	buffer := make([]interface{}, 0)
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return err
+	}
+
+	values := make([]interface{}, len(columns))
+	for i := range values {
+		values[i] = new(interface{})
+	}
+
+	for rows.Next() {
+		err = rows.Scan(values...)
+		if err != nil {
+			return err
+		}
+
+		dest := make(map[string]interface{})
+
+		for i, column := range columns {
+			dest[column] = *(values[i].(*interface{}))
+		}
+
+		buffer = append(buffer, dest)
+	}
+
+	if out, err := json.Marshal(buffer); err != nil {
+		return err
+	} else {
+		writer.Write(out)
+	}
+
+	return nil
+}
+
 func tableDisplay(rows *sql.Rows, write io.Writer, overflow bool) error {
 	columns, err := rows.Columns()
 	if err != nil {
