@@ -36,8 +36,8 @@ func init() {
 		registerExt()
 	}
 
-	// add the export sub command
-	rootCmd.AddCommand(exportCmd)
+	// add the export and serve sub commands
+	rootCmd.AddCommand(exportCmd, serveCmd)
 
 	// conditionally add the pgsync sub command
 	// TODO(patrickdevivo) "conditional" for now until the behavior stabilizes
@@ -73,7 +73,7 @@ func handleExitError(err error) {
 }
 
 var rootCmd = &cobra.Command{
-	Use:  `display "SELECT * FROM commits"`,
+	Use:  `mergestat "SELECT * FROM commits"`,
 	Args: cobra.MaximumNArgs(2),
 	Long: `
   mergestat is a CLI for querying git repositories with SQL, using SQLite virtual tables.
