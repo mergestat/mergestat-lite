@@ -106,7 +106,7 @@ func newFilesIter(options *utils.ModuleOptions, repoPath, rev string) (*filesIte
 		defer obj.Free()
 
 		if obj.Type() != libgit2.ObjectCommit {
-			return nil, fmt.Errorf("invalid rev, could not resolve to a commit")
+			return nil, fmt.Errorf("invalid revision, could not resolve to a commit")
 		}
 
 		commitID = obj.Id()
