@@ -11,11 +11,13 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
-// CloneFn is essentially a no-op
+// CloneFn is essentially a no-op that's useful for cloning remote repos
+// by opening them (and calling the Locator)
 type CloneFn struct {
 	Options *utils.ModuleOptions
 }
 
+// NewCloneFn returns a new CloneFn implementation
 func NewCloneFn(opt *utils.ModuleOptions) *CloneFn {
 	return &CloneFn{Options: opt}
 }
