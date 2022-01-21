@@ -36,8 +36,8 @@ func init() {
 		registerExt()
 	}
 
-	// add the export and serve sub commands
-	rootCmd.AddCommand(exportCmd, serveCmd)
+	// add sub commands
+	rootCmd.AddCommand(exportCmd, serveCmd, summaryCmd)
 
 	// conditionally add the pgsync sub command
 	// TODO(patrickdevivo) "conditional" for now until the behavior stabilizes
