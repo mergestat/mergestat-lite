@@ -16,7 +16,7 @@ import (
 func init() {
 	// register sqlite extension when this package is loaded
 	sqlite.Register(extensions.RegisterFn(
-		options.WithExtraFunctions(), options.WithRepoLocator(locator.CachedLocator(locator.MultiLocator())),
+		options.WithExtraFunctions(), options.WithRepoLocator(locator.CachedLocator(locator.MultiLocator(nil))),
 	))
 }
 
