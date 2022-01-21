@@ -100,7 +100,7 @@ func newStatsIter(options *utils.ModuleOptions, repoPath, rev, toRev string) (*s
 		defer obj.Free()
 
 		if obj.Type() != libgit2.ObjectCommit {
-			return nil, fmt.Errorf("invalid rev, could not resolve to a commit")
+			return nil, fmt.Errorf("invalid revision, could not resolve to a commit")
 		}
 
 		fromCommit, err = repo.LookupCommit(obj.Id())
