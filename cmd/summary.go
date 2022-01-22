@@ -74,7 +74,7 @@ var summaryCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var db *sqlx.DB
 		var err error
-		if db, err = sqlx.Open("sqlite3", ":memory:?parseTime=true"); err != nil {
+		if db, err = sqlx.Open("sqlite3", ":memory:"); err != nil {
 			handleExitError(fmt.Errorf("failed to initialize database connection: %v", err))
 		}
 		defer func() {
@@ -97,8 +97,8 @@ var summaryCmd = &cobra.Command{
 			strings.Join([]string{headingStyle.Render("Non-Merge Commits"), p.Sprintf("%d", commitSummary.TotalNonMerges)}, "\t"),
 			strings.Join([]string{headingStyle.Render("Files"), p.Sprintf("%d", commitSummary.DistinctFiles)}, "\t"),
 			strings.Join([]string{headingStyle.Render("Unique Authors"), p.Sprintf("%d", commitSummary.DistinctAuthors)}, "\t"),
-			strings.Join([]string{headingStyle.Render("First Commit"), timediff.TimeDiff(commitSummary.FirstCommit)}, "\t"),
-			strings.Join([]string{headingStyle.Render("Latest Commit"), timediff.TimeDiff(commitSummary.LastCommit)}, "\t"),
+			strings.Join([]string{headingStyle.Render("First Commit"), fmt.Sprintf("%s (%s)", timediff.TimeDiff(commitSummary.FirstCommit), commitSummary.FirstCommit.Format("2006-01-02"))}, "\t"),
+			strings.Join([]string{headingStyle.Render("Latest Commit"), fmt.Sprintf("%s (%s)", timediff.TimeDiff(commitSummary.LastCommit), commitSummary.FirstCommit.Format("2006-01-02"))}, "\t"),
 		}
 		p.Fprintln(w, strings.Join(rows, "\n"))
 
@@ -115,10 +115,10 @@ var summaryCmd = &cobra.Command{
 		}
 
 		r := strings.Join([]string{
-			"Author Name",
+			"Author",
 			"Commits",
 			"Commit %",
-			"Files Modified",
+			"Files Δ",
 			"Additions",
 			"Deletions",
 			"First Commit",
