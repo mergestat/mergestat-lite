@@ -2,8 +2,16 @@ name: Tests
 on: [push, pull_request]
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name: mergestat-linux-amd64
+          - os: macos-latest
+            asset_name: mergestat-macos-amd64
+
     steps:
     - name: Set up Go 1.15
       uses: actions/setup-go@v1
