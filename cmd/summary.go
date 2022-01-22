@@ -9,7 +9,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jmoiron/sqlx"
-	"github.com/patrickdevivo/timediff"
+	"github.com/mergestat/timediff"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
