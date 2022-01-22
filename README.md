@@ -21,3 +21,19 @@ You can try queries on public git repositories without installing anything at [a
 More in-depth examples and documentation can be found on our dedicated [**documentation site**](https://docs.mergestat.com/).
 
 Join our community on [Slack](https://join.slack.com/t/mergestatcommunity/shared_invite/zt-xvvtvcz9-w3JJVIdhLgEWrVrKKNXOYg) if you have questions, or just to say hi 🎉.
+
+## Installation
+
+See the [**full instructions**](https://docs.mergestat.com/getting-started-cli/installation) in our documentation.
+
+### Homebrew
+
+```bash
+brew tap mergestat/mergestat
+brew install mergestat
+```
+
+### Docker
+```bash
+docker run -v "${PWD}:/repo" mergestat/mergestat "select count(*) from commits"
+```
