@@ -17,7 +17,7 @@ require (
 	github.com/lib/pq v1.10.4
 	github.com/libgit2/git2go/v33 v33.0.6
 	github.com/mattn/go-sqlite3 v1.14.10
-	github.com/patrickdevivo/timediff v0.0.0-20220121234408-c77502ff7936
+	github.com/mergestat/timediff v0.0.0-20220122221928-6ab2757dc5c0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.26.1
 	github.com/shurcooL/githubv4 v0.0.0-20220115235240-a14260e6f8a2
@@ -63,7 +63,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	go.mongodb.org/mongo-driver v1.8.2 // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
-	golang.org/x/net v0.0.0-20220114011407-0dd24b26b47d // indirect
+	golang.org/x/net v0.0.0-20220121210141-e204ce36a2ba // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
