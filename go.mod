@@ -25,6 +25,7 @@ require (
 	github.com/libgit2/git2go/v33 v33.0.6
 	github.com/mattn/go-sqlite3 v1.14.10
 	github.com/muesli/reflow v0.3.0 // indirect
+	github.com/patrickdevivo/timediff v0.0.0-20220121234408-c77502ff7936
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.26.1
 	github.com/sergi/go-diff v1.2.0 // indirect
@@ -32,7 +33,6 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a
 	github.com/spf13/cobra v1.3.0
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
-	github.com/xeonx/timeago v1.0.0-rc4
 	go.mongodb.org/mongo-driver v1.8.2 // indirect
 	go.riyazali.net/sqlite v0.0.0-20211205072512-8da54dbc2d28
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect

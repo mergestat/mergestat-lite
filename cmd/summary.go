@@ -7,13 +7,12 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"golang.org/x/text/language"
-	"golang.org/x/text/message"
-
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jmoiron/sqlx"
+	"github.com/patrickdevivo/timediff"
 	"github.com/spf13/cobra"
-	"github.com/xeonx/timeago"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 var headingStyle = lipgloss.NewStyle().
@@ -38,7 +37,7 @@ SELECT
 	(SELECT count(*) FROM commits WHERE parents < 2) AS total_non_merges,
 	(SELECT author_when FROM commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
 	(SELECT author_when FROM commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
-	(SELECT count(distinct(author_email)) FROM commits) AS distinct_authors,
+	(SELECT count(distinct(author_email || author_name)) FROM commits) AS distinct_authors,
 	(SELECT count(distinct(path)) FROM files) AS distinct_files
 `
 
@@ -70,12 +69,12 @@ LIMIT 25
 
 var summaryCmd = &cobra.Command{
 	Use:  "summary",
-	Long: "",
+	Long: "prints a summary of commit activity in the default repository.",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		var db *sqlx.DB
 		var err error
-		if db, err = sqlx.Open("sqlite3", ":memory:"); err != nil {
+		if db, err = sqlx.Open("sqlite3", ":memory:?parseTime=true"); err != nil {
 			handleExitError(fmt.Errorf("failed to initialize database connection: %v", err))
 		}
 		defer func() {
@@ -98,8 +97,8 @@ var summaryCmd = &cobra.Command{
 			strings.Join([]string{headingStyle.Render("Non-Merge Commits"), p.Sprintf("%d", commitSummary.TotalNonMerges)}, "\t"),
 			strings.Join([]string{headingStyle.Render("Files"), p.Sprintf("%d", commitSummary.DistinctFiles)}, "\t"),
 			strings.Join([]string{headingStyle.Render("Unique Authors"), p.Sprintf("%d", commitSummary.DistinctAuthors)}, "\t"),
-			strings.Join([]string{headingStyle.Render("First Commit"), timeago.English.Format(commitSummary.FirstCommit)}, "\t"),
-			strings.Join([]string{headingStyle.Render("Latest Commit"), timeago.English.Format(commitSummary.LastCommit)}, "\t"),
+			strings.Join([]string{headingStyle.Render("First Commit"), timediff.TimeDiff(commitSummary.FirstCommit)}, "\t"),
+			strings.Join([]string{headingStyle.Render("Latest Commit"), timediff.TimeDiff(commitSummary.LastCommit)}, "\t"),
 		}
 		p.Fprintln(w, strings.Join(rows, "\n"))
 
@@ -110,7 +109,7 @@ var summaryCmd = &cobra.Command{
 		p.Println()
 		p.Println()
 
-		var commitAuthorSummaries []CommitAuthorSummary
+		var commitAuthorSummaries []*CommitAuthorSummary
 		if err := db.Select(&commitAuthorSummaries, commitAuthorSummarySQL); err != nil {
 			handleExitError(err)
 		}
@@ -122,12 +121,23 @@ var summaryCmd = &cobra.Command{
 			"Files Modified",
 			"Additions",
 			"Deletions",
+			"First Commit",
+			"Latest Commit",
 		}, "\t")
 
 		p.Fprintln(w, r)
 
 		for _, authorRow := range commitAuthorSummaries {
 			commitPercent := (float32(authorRow.Commits) / float32(commitSummary.Total)) * 100.0
+
+			var firstCommit, lastCommit time.Time
+			if firstCommit, err = time.Parse(time.RFC3339, authorRow.FirstCommit); err != nil {
+				handleExitError(err)
+			}
+			if lastCommit, err = time.Parse(time.RFC3339, authorRow.LastCommit); err != nil {
+				handleExitError(err)
+			}
+
 			r := strings.Join([]string{
 				authorRow.AuthorName,
 				p.Sprintf("%d", authorRow.Commits),
@@ -135,9 +145,18 @@ var summaryCmd = &cobra.Command{
 				p.Sprintf("%d", authorRow.DistinctFiles),
 				p.Sprintf("%d", authorRow.Additions),
 				p.Sprintf("%d", authorRow.Deletions),
+				p.Sprintf("%s (%s)", timediff.TimeDiff(firstCommit), firstCommit.Format("2006-01-02")),
+				p.Sprintf("%s (%s)", timediff.TimeDiff(lastCommit), lastCommit.Format("2006-01-02")),
 			}, "\t")
 
 			p.Fprintln(w, r)
+		}
+
+		d := commitSummary.DistinctAuthors - len(commitAuthorSummaries)
+		if d == 1 {
+			p.Fprintf(w, "...1 more author\n")
+		} else if d > 1 {
+			p.Fprintf(w, "...%d more authors\n", d)
 		}
 
 		if err := w.Flush(); err != nil {
