@@ -2,6 +2,7 @@ package summary
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 	"strings"
 	"text/tabwriter"
@@ -17,18 +18,17 @@ import (
 )
 
 type CommitSummary struct {
-	Total           int    `db:"total"`
-	TotalNonMerges  int    `db:"total_non_merges"`
-	FirstCommit     string `db:"first_commit"`
-	LastCommit      string `db:"last_commit"`
-	FirstCommitT    time.Time
-	LastCommitT     time.Time
-	DistinctAuthors int `db:"distinct_authors"`
-	DistinctFiles   int `db:"distinct_files"`
+	Total           int            `db:"total"`
+	TotalNonMerges  int            `db:"total_non_merges"`
+	FirstCommit     sql.NullString `db:"first_commit"`
+	LastCommit      sql.NullString `db:"last_commit"`
+	DistinctAuthors int            `db:"distinct_authors"`
+	DistinctFiles   int            `db:"distinct_files"`
 }
 
 const preloadCommitsSQL = `
-CREATE TABLE preloaded_commits AS SELECT * FROM commits;
+CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits, stats('', commits.hash) WHERE file_path LIKE ?;
+CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
 `
 
 const commitSummarySQL = `
@@ -38,7 +38,7 @@ SELECT
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
 	(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
-	(SELECT count(distinct(path)) FROM files) AS distinct_files
+	(SELECT count(distinct(path)) FROM files WHERE path LIKE ?) AS distinct_files
 `
 
 type CommitAuthorSummary struct {
@@ -61,7 +61,7 @@ SELECT
 	count(distinct file_path) AS distinct_files,
 	min(author_when) AS first_commit,
 	max(author_when) AS last_commit
-FROM preloaded_commits, stats('', preloaded_commits.hash)
+FROM preloaded_commit_stats
 GROUP BY author_name, author_email
 ORDER BY commit_count DESC
 LIMIT 25
@@ -69,29 +69,36 @@ LIMIT 25
 
 type TermUI struct {
 	db                    *sqlx.DB
+	pathPattern           string
 	err                   error
 	spinner               spinner.Model
 	commitsPreloaded      bool
 	commitSummary         *CommitSummary
-	commitAuthorSummaries []*CommitAuthorSummary
+	commitAuthorSummaries *[]*CommitAuthorSummary
 }
 
-func NewTermUI() (*TermUI, error) {
+func NewTermUI(pathPattern string) (*TermUI, error) {
 	var db *sqlx.DB
 	var err error
 	if db, err = sqlx.Open("sqlite3", "file::memory:?cache=shared"); err != nil {
 		return nil, fmt.Errorf("failed to initialize database connection: %v", err)
 	}
 	db.SetMaxOpenConns(1)
+
 	s := spinner.New()
 	s.Spinner = spinner.Spinner{
 		Frames: []string{".", "..", "..."},
 		FPS:    300 * time.Millisecond,
 	}
 
+	if pathPattern == "" {
+		pathPattern = "%"
+	}
+
 	return &TermUI{
-		db:      db,
-		spinner: s,
+		db:          db,
+		pathPattern: pathPattern,
+		spinner:     s,
 	}, nil
 }
 
@@ -105,7 +112,7 @@ func (t *TermUI) Init() tea.Cmd {
 }
 
 func (t *TermUI) preloadCommits() tea.Msg {
-	if _, err := t.db.Exec(preloadCommitsSQL); err != nil {
+	if _, err := t.db.Exec(preloadCommitsSQL, t.pathPattern); err != nil {
 		return err
 	}
 
@@ -118,15 +125,7 @@ func (t *TermUI) loadCommitSummary() tea.Msg {
 		time.Sleep(2 * time.Second)
 	}
 	var commitSummary CommitSummary
-	if err := t.db.QueryRowx(commitSummarySQL).StructScan(&commitSummary); err != nil {
-		return err
-	}
-
-	var err error
-	if commitSummary.FirstCommitT, err = time.Parse(time.RFC3339, commitSummary.FirstCommit); err != nil {
-		return err
-	}
-	if commitSummary.LastCommitT, err = time.Parse(time.RFC3339, commitSummary.LastCommit); err != nil {
+	if err := t.db.QueryRowx(commitSummarySQL, t.pathPattern).StructScan(&commitSummary); err != nil {
 		return err
 	}
 
@@ -143,7 +142,7 @@ func (t *TermUI) loadAuthorCommitSummary() tea.Msg {
 		return err
 	}
 
-	t.commitAuthorSummaries = commitAuthorSummaries
+	t.commitAuthorSummaries = &commitAuthorSummaries
 	return nil
 }
 
@@ -159,8 +158,19 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 		totalNonMerges = p.Sprintf("%d", t.commitSummary.TotalNonMerges)
 		distinctFiles = p.Sprintf("%d", t.commitSummary.DistinctFiles)
 		distinctAuthors = p.Sprintf("%d", t.commitSummary.DistinctAuthors)
-		firstCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(t.commitSummary.FirstCommitT), t.commitSummary.FirstCommitT.Format("2006-01-02"))
-		lastCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(t.commitSummary.LastCommitT), t.commitSummary.LastCommitT.Format("2006-01-02"))
+
+		firstCommit, lastCommit = "<none>", "<none>"
+
+		if t.commitSummary.FirstCommit.Valid {
+			when, _ := time.Parse(time.RFC3339, t.commitSummary.FirstCommit.String)
+			firstCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
+		}
+
+		if t.commitSummary.LastCommit.Valid {
+			when, _ := time.Parse(time.RFC3339, t.commitSummary.LastCommit.String)
+			lastCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
+		}
+
 	} else {
 		total = t.spinner.View()
 		totalNonMerges = t.spinner.View()
@@ -198,6 +208,11 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
 
 	if t.commitAuthorSummaries != nil && t.commitSummary != nil {
+
+		if len(*t.commitAuthorSummaries) == 0 {
+			return "<no authors>"
+		}
+
 		r := strings.Join([]string{
 			"Author",
 			"Commits",
@@ -211,7 +226,7 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 
 		p.Fprintln(w, r)
 
-		for _, authorRow := range t.commitAuthorSummaries {
+		for _, authorRow := range *t.commitAuthorSummaries {
 			commitPercent := (float32(authorRow.Commits) / float32(t.commitSummary.Total)) * 100.0
 
 			var firstCommit, lastCommit time.Time
@@ -241,7 +256,7 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 			return err.Error()
 		}
 
-		d := t.commitSummary.DistinctAuthors - len(t.commitAuthorSummaries)
+		d := t.commitSummary.DistinctAuthors - len(*t.commitAuthorSummaries)
 		if d == 1 {
 			p.Fprintf(&b, "...1 more author\n")
 		} else if d > 1 {
