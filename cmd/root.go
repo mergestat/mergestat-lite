@@ -75,10 +75,9 @@ func handleExitError(err error) {
 var rootCmd = &cobra.Command{
 	Use:  `mergestat "SELECT * FROM commits"`,
 	Args: cobra.MaximumNArgs(2),
-	Long: `
-  mergestat is a CLI for querying git repositories with SQL, using SQLite virtual tables.
-  Example queries can be found in the GitHub repo: https://github.com/mergestat/mergestat`,
-	Short: `query your github repos with SQL`,
+	Long: `mergestat is a CLI for querying git repositories with SQL, using SQLite virtual tables.
+Example queries can be found in the GitHub repo: https://github.com/mergestat/mergestat`,
+	Short: `Query git repositories with SQL`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
