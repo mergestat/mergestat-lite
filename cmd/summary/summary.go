@@ -122,7 +122,7 @@ func (t *TermUI) preloadCommits() tea.Msg {
 
 func (t *TermUI) loadCommitSummary() tea.Msg {
 	for !t.commitsPreloaded {
-		time.Sleep(2 * time.Second)
+		time.Sleep(300 * time.Millisecond)
 	}
 	var commitSummary CommitSummary
 	if err := t.db.QueryRowx(commitSummarySQL, t.pathPattern).StructScan(&commitSummary); err != nil {
@@ -135,7 +135,7 @@ func (t *TermUI) loadCommitSummary() tea.Msg {
 
 func (t *TermUI) loadAuthorCommitSummary() tea.Msg {
 	for !t.commitsPreloaded {
-		time.Sleep(2 * time.Second)
+		time.Sleep(300 * time.Millisecond)
 	}
 	var commitAuthorSummaries []*CommitAuthorSummary
 	if err := t.db.Select(&commitAuthorSummaries, commitAuthorSummarySQL); err != nil {
