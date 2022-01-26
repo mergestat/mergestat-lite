@@ -10,8 +10,13 @@ import (
 )
 
 var summaryCmd = &cobra.Command{
-	Use:  "summary",
-	Long: "prints a summary of commit activity in the default repository.",
+	Use:   "summary [file pattern]",
+	Short: "Print a summary of commit activity",
+	Long: `Prints a summary of commit activity in the default repository (either the current directory or supplied by --repo).
+Specify a file pattern as an argument to filter for commits that only modified a certain file or directory.
+The path is used in a SQL LIKE clause, so use '%' as a wildcard.
+Read more here: https://sqlite.org/lang_expr.html#the_like_glob_regexp_and_match_operators
+`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var pathPattern string
