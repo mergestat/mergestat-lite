@@ -28,7 +28,7 @@ func init() {
 	// local (root command only) flags
 	rootCmd.Flags().StringVarP(&format, "format", "f", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' 'ndjson' and 'json'")
 	rootCmd.Flags().StringVarP(&presetQuery, "preset", "p", "", "used to pick a preset query")
-	rootCmd.Flags().StringVarP(&dbPath, "db", "d", "", "specify a db file on disk to mount when executing queries")
+	rootCmd.PersistentFlags().StringVarP(&dbPath, "db", "d", "", "specify a db file on disk to mount when executing queries")
 	rootCmd.PersistentFlags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
 	rootCmd.PersistentFlags().StringVarP(&cloneDir, "clone-dir", "c", "", "specify a path to a directory on disk to use when cloning repos, instead of a tmp dir. Should be empty to avoid path conflicts.")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
