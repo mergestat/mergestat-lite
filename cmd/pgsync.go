@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/mergestat/mergestat/pkg/pgsync"
@@ -45,7 +46,13 @@ var pgsyncCmd = &cobra.Command{
 			}
 		}()
 
-		if mergestat, err = sql.Open("sqlite3", ":memory:"); err != nil {
+		openPath := ":memory:"
+		if dbPath != "" {
+			if openPath, err = filepath.Abs(dbPath); err != nil {
+				handleExitError(err)
+			}
+		}
+		if mergestat, err = sql.Open("sqlite3", openPath); err != nil {
 			logger.Error().Msgf("could not initialize mergestat: %v", err)
 			return
 		}
