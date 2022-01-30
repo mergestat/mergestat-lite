@@ -27,44 +27,76 @@ type CommitSummary struct {
 }
 
 const preloadCommitsSQL = `
-CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits, stats('', commits.hash) WHERE file_path LIKE ?;
+CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits, stats('', commits.hash) WHERE file_path LIKE '%';
 CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
+CREATE TABLE preloaded_commits_summary AS SELECT
+(SELECT count(*) FROM preloaded_commits) AS total,
+(SELECT count(*) FROM preloaded_commits WHERE parents < 2) AS total_non_merges,
+(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
+(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
+(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
+(SELECT count(distinct(path)) FROM files WHERE path LIKE '%') AS distinct_files;
 `
 
 const commitSummarySQL = `
 SELECT
-	(SELECT count(*) FROM preloaded_commits) AS total,
-	(SELECT count(*) FROM preloaded_commits WHERE parents < 2) AS total_non_merges,
-	(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
-	(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
-	(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
-	(SELECT count(distinct(path)) FROM files WHERE path LIKE ?) AS distinct_files
+	total,
+	total_non_merges,
+	first_commit,
+	last_commit,
+	distinct_authors,
+	distinct_files
+	FROM preloaded_commits_summary
 `
 
 type CommitAuthorSummary struct {
-	AuthorName    string `db:"author_name"`
-	AuthorEmail   string `db:"author_email"`
-	Commits       int    `db:"commit_count"`
-	Additions     int    `db:"additions"`
-	Deletions     int    `db:"deletions"`
-	DistinctFiles int    `db:"distinct_files"`
-	FirstCommit   string `db:"first_commit"`
-	LastCommit    string `db:"last_commit"`
+	AuthorName    string  `db:"author_name"`
+	AuthorEmail   string  `db:"author_email"`
+	Commits       int     `db:"commit_count"`
+	CommitPercent float32 `db:"commit_percent"`
+	Additions     int     `db:"additions"`
+	Deletions     int     `db:"deletions"`
+	DistinctFiles int     `db:"distinct_files"`
+	FirstCommit   string  `db:"first_commit"`
+	LastCommit    string  `db:"last_commit"`
 }
 
 const commitAuthorSummarySQL = `
-SELECT
-	author_name, author_email,
-	count(distinct hash) AS commit_count,
-	sum(additions) AS additions,
-	sum(deletions) AS deletions,
-	count(distinct file_path) AS distinct_files,
-	min(author_when) AS first_commit,
-	max(author_when) AS last_commit
-FROM preloaded_commit_stats
-GROUP BY author_name, author_email
+SELECT author_name,
+    author_email,
+    count(distinct hash) AS commit_count,
+    ROUND(CAST(count(distinct hash) as REAL) / total, 4) * 100 AS commit_percent,
+    sum(additions) AS additions,
+    sum(deletions) AS deletions,
+    count(distinct file_path) AS distinct_files,
+    CASE
+        WHEN julianday('now', 'localtime') - julianday(min(author_when), 'localtime') > 730 THEN 
+            PRINTF('%d years ago (%s)',ROUND((julianday('now', 'localtime') - julianday(min(author_when), 'localtime')) / 365),DATE(author_when))
+        WHEN julianday('now', 'localtime') - julianday(min(author_when), 'localtime') > 365 THEN 
+            PRINTF('1 year ago (%s)', DATE(author_when))
+        WHEN julianday('now', 'localtime') - julianday(min(author_when), 'localtime') > 31 THEN 
+        PRINTF('%d months ago (%s)',ROUND((julianday('now', 'localtime') - julianday(min(author_when), 'localtime')) /(365 / 12)), DATE(author_when))
+        WHEN ROUND(julianday('now', 'localtime') - julianday(min(author_when), 'localtime')) = 1 THEN
+            PRINTF('1 day ago (%s)',DATE(author_when))
+        ELSE PRINTF('%d day ago (%s)',ROUND(julianday('now', 'localtime') - julianday(min(author_when), 'localtime')),DATE(author_when))
+    END AS first_commit,
+    CASE
+        WHEN julianday('now', 'localtime') - julianday(max(author_when), 'localtime') > 730 THEN 
+            PRINTF('%d years ago (%s)', ROUND((julianday('now', 'localtime') - julianday(max(author_when), 'localtime')) / 365), DATE(author_when))
+        WHEN julianday('now', 'localtime') - julianday(max(author_when), 'localtime') > 365 THEN 
+            PRINTF('1 year ago (%s)', DATE(author_when))
+        WHEN julianday('now', 'localtime') - julianday(max(author_when), 'localtime') > 31 THEN 
+            PRINTF('%d months ago (%s)',ROUND((julianday('now', 'localtime') - julianday(max(author_when))) /(365 / 12)), DATE(author_when))
+        WHEN ROUND(julianday('now', 'localtime') - julianday(max(author_when), 'localtime')) = 1 THEN
+            PRINTF('1 day ago (%s)',DATE(author_when))
+        ELSE PRINTF('%d day(s) ago (%s)',ROUND(julianday('now', 'localtime') - julianday(max(author_when), 'localtime')),DATE(author_when))
+    END AS last_commit
+FROM preloaded_commit_stats,
+    preloaded_commits_summary
+GROUP BY author_name,
+    author_email
 ORDER BY commit_count DESC
-LIMIT 25
+LIMIT 25;
 `
 
 type TermUI struct {
@@ -74,7 +106,7 @@ type TermUI struct {
 	spinner               spinner.Model
 	commitsPreloaded      bool
 	commitSummary         *CommitSummary
-	commitAuthorSummaries *[]*CommitAuthorSummary
+	commitAuthorSummaries []CommitAuthorSummary
 }
 
 func NewTermUI(pathPattern string) (*TermUI, error) {
@@ -137,12 +169,12 @@ func (t *TermUI) loadAuthorCommitSummary() tea.Msg {
 	for !t.commitsPreloaded {
 		time.Sleep(300 * time.Millisecond)
 	}
-	var commitAuthorSummaries []*CommitAuthorSummary
+	var commitAuthorSummaries []CommitAuthorSummary
 	if err := t.db.Select(&commitAuthorSummaries, commitAuthorSummarySQL); err != nil {
 		return err
 	}
 
-	t.commitAuthorSummaries = &commitAuthorSummaries
+	t.commitAuthorSummaries = commitAuthorSummaries
 	return nil
 }
 
@@ -205,58 +237,37 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 func (t *TermUI) renderCommitAuthorSummary() string {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
-	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
 
 	if t.commitAuthorSummaries != nil && t.commitSummary != nil {
 
-		if len(*t.commitAuthorSummaries) == 0 {
+		if len(t.commitAuthorSummaries) == 0 {
 			return "<no authors>"
 		}
 
-		r := strings.Join([]string{
+		headers := []string{
 			"Author",
+			"Author email",
 			"Commits",
-			"Commit %",
+			"Commit %%",
 			"Files Δ",
 			"Additions",
 			"Deletions",
 			"First Commit",
 			"Latest Commit",
-		}, "\t")
-
-		p.Fprintln(w, r)
-
-		for _, authorRow := range *t.commitAuthorSummaries {
-			commitPercent := (float32(authorRow.Commits) / float32(t.commitSummary.Total)) * 100.0
-
-			var firstCommit, lastCommit time.Time
-			var err error
-			if firstCommit, err = time.Parse(time.RFC3339, authorRow.FirstCommit); err != nil {
-				return err.Error()
-			}
-			if lastCommit, err = time.Parse(time.RFC3339, authorRow.LastCommit); err != nil {
-				return err.Error()
-			}
-
-			r := strings.Join([]string{
-				authorRow.AuthorName,
-				p.Sprintf("%d", authorRow.Commits),
-				p.Sprintf("%.2f%%", commitPercent),
-				p.Sprintf("%d", authorRow.DistinctFiles),
-				p.Sprintf("%d", authorRow.Additions),
-				p.Sprintf("%d", authorRow.Deletions),
-				p.Sprintf("%s (%s)", timediff.TimeDiff(firstCommit), firstCommit.Format("2006-01-02")),
-				p.Sprintf("%s (%s)", timediff.TimeDiff(lastCommit), lastCommit.Format("2006-01-02")),
-			}, "\t")
-
-			p.Fprintln(w, r)
 		}
 
-		if err := w.Flush(); err != nil {
+		// put t.commitAuthorSummaries in a struct. I dream of generics
+		s := make([]interface{}, len(t.commitAuthorSummaries))
+		for i, v := range t.commitAuthorSummaries {
+			s[i] = v
+		}
+		formattedTable, err := tableBuilder(headers, s...)
+		if err != nil {
 			return err.Error()
 		}
+		b = *formattedTable
 
-		d := t.commitSummary.DistinctAuthors - len(*t.commitAuthorSummaries)
+		d := t.commitSummary.DistinctAuthors - len(t.commitAuthorSummaries)
 		if d == 1 {
 			p.Fprintf(&b, "...1 more author\n")
 		} else if d > 1 {
