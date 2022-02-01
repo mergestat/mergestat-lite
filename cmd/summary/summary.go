@@ -3,6 +3,7 @@ package summary
 import (
 	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"text/tabwriter"
@@ -358,6 +359,49 @@ func (t *TermUI) PrintNoTTY() string {
 	fmt.Fprint(&b, t.renderCommitAuthorSummary())
 
 	return b.String()
+}
+
+func (t *TermUI) PrintJSON() string {
+	t.preloadCommits()
+	t.loadCommitSummary()
+	t.loadAuthorCommitSummary()
+
+	if t.err != nil {
+		return t.err.Error()
+	}
+
+	output := map[string]interface{}{
+		"commits":         t.commitSummary.Total,
+		"nonMergeCommits": t.commitSummary.TotalNonMerges,
+		"filesChanged":    t.commitSummary.DistinctFiles,
+		"uniqueAuthors":   t.commitSummary.DistinctAuthors,
+		"firstCommit":     t.commitSummary.FirstCommit.String,
+		"lastCommit":      t.commitSummary.LastCommit.String,
+	}
+
+	p := message.NewPrinter(language.English)
+	authorSummaries := make([]map[string]string, len(*t.commitAuthorSummaries))
+
+	for i, authorSummary := range *t.commitAuthorSummaries {
+		commitPercent := (float32(authorSummary.Commits) / float32(t.commitSummary.Total)) * 100.0
+		authorSummaries[i] = map[string]string{
+			"name":          authorSummary.AuthorName,
+			"email":         authorSummary.AuthorEmail,
+			"commits":       p.Sprintf("%d", authorSummary.Commits),
+			"commitPercent": p.Sprintf("%.2f%%", commitPercent),
+			"filesModified": p.Sprintf("%d", authorSummary.DistinctFiles),
+			"additions":     p.Sprintf("%d", authorSummary.Additions),
+			"deletions":     p.Sprintf("%d", authorSummary.Deletions),
+		}
+	}
+
+	output["authors"] = authorSummaries
+
+	if o, err := json.MarshalIndent(output, "", "  "); err != nil {
+		return err.Error()
+	} else {
+		return string(o)
+	}
 }
 
 func (t *TermUI) Close() error {
