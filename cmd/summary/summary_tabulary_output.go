@@ -11,6 +11,9 @@ import (
 	"golang.org/x/text/message"
 )
 
+// type has2DStringArrFunction interface {
+// 	to2StringArr() [][]string
+// }
 func tableBuilder(headers []string, data ...interface{}) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)

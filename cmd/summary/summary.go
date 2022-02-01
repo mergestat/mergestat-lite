@@ -2,28 +2,24 @@ package summary
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
-	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jmoiron/sqlx"
-	"github.com/mergestat/timediff"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
 type CommitSummary struct {
-	Total           int            `db:"total"`
-	TotalNonMerges  int            `db:"total_non_merges"`
-	FirstCommit     sql.NullString `db:"first_commit"`
-	LastCommit      sql.NullString `db:"last_commit"`
-	DistinctAuthors int            `db:"distinct_authors"`
-	DistinctFiles   int            `db:"distinct_files"`
+	Total           int    `db:"total"`
+	TotalNonMerges  int    `db:"total_non_merges"`
+	DistinctAuthors int    `db:"distinct_authors"`
+	DistinctFiles   int    `db:"distinct_files"`
+	FirstCommit     string `db:"first_commit"`
+	LastCommit      string `db:"last_commit"`
 }
 
 const preloadCommitsSQL = `
@@ -42,8 +38,8 @@ const commitSummarySQL = `
 SELECT
 	total,
 	total_non_merges,
-	first_commit,
-	last_commit,
+	timediff_now(first_commit) AS first_commit,
+	timediff_now(last_commit) AS last_commit,
 	distinct_authors,
 	distinct_files
 	FROM preloaded_commits_summary
@@ -159,57 +155,27 @@ func (t *TermUI) loadAuthorCommitSummary() tea.Msg {
 }
 
 func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
-	var b bytes.Buffer
-	p := message.NewPrinter(language.English)
-	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
+	var b *bytes.Buffer
+	var err error
 
-	var total, totalNonMerges, distinctFiles, distinctAuthors, firstCommit, lastCommit string
-
-	if t.commitSummary != nil {
-		total = p.Sprintf("%d", t.commitSummary.Total)
-		totalNonMerges = p.Sprintf("%d", t.commitSummary.TotalNonMerges)
-		distinctFiles = p.Sprintf("%d", t.commitSummary.DistinctFiles)
-		distinctAuthors = p.Sprintf("%d", t.commitSummary.DistinctAuthors)
-
-		firstCommit, lastCommit = "<none>", "<none>"
-
-		if t.commitSummary.FirstCommit.Valid {
-			when, _ := time.Parse(time.RFC3339, t.commitSummary.FirstCommit.String)
-			firstCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
-		}
-
-		if t.commitSummary.LastCommit.Valid {
-			when, _ := time.Parse(time.RFC3339, t.commitSummary.LastCommit.String)
-			lastCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
-		}
-
-	} else {
-		total = t.spinner.View()
-		totalNonMerges = t.spinner.View()
-		distinctFiles = t.spinner.View()
-		distinctAuthors = t.spinner.View()
-		firstCommit = t.spinner.View()
-		lastCommit = t.spinner.View()
-	}
-
-	var headingStyle = lipgloss.NewStyle().Bold(boldHeader)
+	headingStyle := lipgloss.NewStyle().Bold(boldHeader)
 
 	rows := []string{
-		strings.Join([]string{headingStyle.Render("Commits"), total}, "\t"),
-		strings.Join([]string{headingStyle.Render("Non-Merge Commits"), totalNonMerges}, "\t"),
-		strings.Join([]string{headingStyle.Render("Files"), distinctFiles}, "\t"),
-		strings.Join([]string{headingStyle.Render("Unique Authors"), distinctAuthors}, "\t"),
-		strings.Join([]string{headingStyle.Render("First Commit"), firstCommit}, "\t"),
-		strings.Join([]string{headingStyle.Render("Latest Commit"), lastCommit}, "\t"),
+		headingStyle.Render("Commits"),
+		headingStyle.Render("Non-Merge Commits"),
+		headingStyle.Render("Files"),
+		headingStyle.Render("Unique Authors"),
+		headingStyle.Render("First Commit"),
+		headingStyle.Render("Latest Commit"),
 	}
-
-	p.Fprintln(w, strings.Join(rows, "\n"))
-	if err := w.Flush(); err != nil {
-		return err.Error()
+	if t.commitSummary != nil {
+		b, err = oneToOneOutputBuilder(rows, t.commitSummary)
+		if err != nil {
+			return err.Error()
+		}
+	} else {
+		b = loadingSymbols(rows, t)
 	}
-
-	p.Fprintln(&b)
-	p.Fprintln(&b)
 
 	return b.String()
 }
