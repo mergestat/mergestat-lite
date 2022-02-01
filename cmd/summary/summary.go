@@ -3,6 +3,7 @@ package summary
 import (
 	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"text/tabwriter"
@@ -26,8 +27,25 @@ type CommitSummary struct {
 	DistinctFiles   int            `db:"distinct_files"`
 }
 
-const preloadCommitsSQL = `
-CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits, stats('', commits.hash) WHERE file_path LIKE ?;
+// This is a bit odd. We have two queries, one that includes filtering by file_path with a LIKE
+// and another that skips file_path filtering completely.
+// This is because it is possible to have "empty" commits - commits where no changes were made
+// (and therefore there are no file_paths to filter on). For these commits, stats.* will be all NULLs.
+// If a user does *not* specify a file pattern to match on, we want to include these empty commits
+// in our calculations, therefore we don't mention file_path in the WHERE clause at all.
+//
+// This is because `file_path LIKE %` will not match when file_path IS NULL (empty commit).
+// When a path filter is supplied by the user, we do apply it. Note that even supplying just a '%'
+// will exclude empty commits from the resultset. This makes sense, because empty commits won't have
+// changed any files in the specified pattern (they won't have changed any files at all).
+const preloadCommitsWithFilePathPatternSQL = `
+CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits LEFT JOIN stats('', commits.hash) WHERE file_path LIKE $file_path AND author_when > date($start, $start_mod) AND author_when < date($end, $end_mod);
+CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
+`
+
+// See comment above
+const preloadCommitsWithoutFilePathPatternSQL = `
+CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits LEFT JOIN stats('', commits.hash) WHERE author_when > date($start, $start_mod) AND author_when < date($end, $end_mod);
 CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
 `
 
@@ -38,18 +56,18 @@ SELECT
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
 	(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
-	(SELECT count(distinct(path)) FROM files WHERE path LIKE ?) AS distinct_files
+	(SELECT count(distinct(file_path)) FROM preloaded_commit_stats WHERE file_path LIKE ?) AS distinct_files
 `
 
 type CommitAuthorSummary struct {
-	AuthorName    string `db:"author_name"`
-	AuthorEmail   string `db:"author_email"`
-	Commits       int    `db:"commit_count"`
-	Additions     int    `db:"additions"`
-	Deletions     int    `db:"deletions"`
-	DistinctFiles int    `db:"distinct_files"`
-	FirstCommit   string `db:"first_commit"`
-	LastCommit    string `db:"last_commit"`
+	AuthorName    string        `db:"author_name"`
+	AuthorEmail   string        `db:"author_email"`
+	Commits       int           `db:"commit_count"`
+	Additions     sql.NullInt64 `db:"additions"`
+	Deletions     sql.NullInt64 `db:"deletions"`
+	DistinctFiles int           `db:"distinct_files"`
+	FirstCommit   string        `db:"first_commit"`
+	LastCommit    string        `db:"last_commit"`
 }
 
 const commitAuthorSummarySQL = `
@@ -64,12 +82,18 @@ SELECT
 FROM preloaded_commit_stats
 GROUP BY author_name, author_email
 ORDER BY commit_count DESC
-LIMIT 25
 `
+
+type dateFilter struct {
+	date string
+	mod  string
+}
 
 type TermUI struct {
 	db                    *sqlx.DB
 	pathPattern           string
+	dateFilterStart       dateFilter
+	dateFilterEnd         dateFilter
 	err                   error
 	spinner               spinner.Model
 	commitsPreloaded      bool
@@ -77,7 +101,7 @@ type TermUI struct {
 	commitAuthorSummaries *[]*CommitAuthorSummary
 }
 
-func NewTermUI(pathPattern string) (*TermUI, error) {
+func NewTermUI(pathPattern, dateFilterStart, dateFilterEnd string) (*TermUI, error) {
 	var db *sqlx.DB
 	var err error
 	if db, err = sqlx.Open("sqlite3", "file::memory:?cache=shared"); err != nil {
@@ -91,14 +115,35 @@ func NewTermUI(pathPattern string) (*TermUI, error) {
 		FPS:    300 * time.Millisecond,
 	}
 
-	if pathPattern == "" {
-		pathPattern = "%"
+	start := "now"
+	startMod := "-1000 years"
+	end := "now"
+	endMod := "0 days"
+
+	// if the start date cannot be parsed, assume it is a date modifier relative to 'now'
+	if _, err := time.Parse("2006-01-02", dateFilterStart); err != nil {
+		if dateFilterStart != "" {
+			startMod = dateFilterStart
+		}
+	} else {
+		start = dateFilterStart
+		startMod = "0 days"
+	}
+
+	if _, err := time.Parse("2006-01-02", dateFilterEnd); err != nil {
+		if dateFilterEnd != "" {
+			endMod = dateFilterEnd
+		}
+	} else {
+		end = dateFilterEnd
 	}
 
 	return &TermUI{
-		db:          db,
-		pathPattern: pathPattern,
-		spinner:     s,
+		db:              db,
+		pathPattern:     pathPattern,
+		spinner:         s,
+		dateFilterStart: dateFilter{date: start, mod: startMod},
+		dateFilterEnd:   dateFilter{date: end, mod: endMod},
 	}, nil
 }
 
@@ -112,7 +157,19 @@ func (t *TermUI) Init() tea.Cmd {
 }
 
 func (t *TermUI) preloadCommits() tea.Msg {
-	if _, err := t.db.Exec(preloadCommitsSQL, t.pathPattern); err != nil {
+	preloadCommitsSQL := preloadCommitsWithoutFilePathPatternSQL
+	args := []interface{}{
+		sql.Named("start", t.dateFilterStart.date),
+		sql.Named("start_mod", t.dateFilterStart.mod),
+		sql.Named("end", t.dateFilterEnd.date),
+		sql.Named("end_mod", t.dateFilterEnd.mod),
+	}
+
+	if t.pathPattern != "" {
+		preloadCommitsSQL = preloadCommitsWithFilePathPatternSQL
+		args = append(args, sql.Named("file_path", t.pathPattern))
+	}
+	if _, err := t.db.Exec(preloadCommitsSQL, args...); err != nil {
 		return err
 	}
 
@@ -185,7 +242,7 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 	rows := []string{
 		strings.Join([]string{headingStyle.Render("Commits"), total}, "\t"),
 		strings.Join([]string{headingStyle.Render("Non-Merge Commits"), totalNonMerges}, "\t"),
-		strings.Join([]string{headingStyle.Render("Files"), distinctFiles}, "\t"),
+		strings.Join([]string{headingStyle.Render("Files Δ"), distinctFiles}, "\t"),
 		strings.Join([]string{headingStyle.Render("Unique Authors"), distinctAuthors}, "\t"),
 		strings.Join([]string{headingStyle.Render("First Commit"), firstCommit}, "\t"),
 		strings.Join([]string{headingStyle.Render("Latest Commit"), lastCommit}, "\t"),
@@ -202,7 +259,7 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 	return b.String()
 }
 
-func (t *TermUI) renderCommitAuthorSummary() string {
+func (t *TermUI) renderCommitAuthorSummary(limit int) string {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
 	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
@@ -226,7 +283,10 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 
 		p.Fprintln(w, r)
 
-		for _, authorRow := range *t.commitAuthorSummaries {
+		for i, authorRow := range *t.commitAuthorSummaries {
+			if i > limit-1 && limit != 0 {
+				break
+			}
 			commitPercent := (float32(authorRow.Commits) / float32(t.commitSummary.Total)) * 100.0
 
 			var firstCommit, lastCommit time.Time
@@ -243,8 +303,8 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 				p.Sprintf("%d", authorRow.Commits),
 				p.Sprintf("%.2f%%", commitPercent),
 				p.Sprintf("%d", authorRow.DistinctFiles),
-				p.Sprintf("%d", authorRow.Additions),
-				p.Sprintf("%d", authorRow.Deletions),
+				p.Sprintf("%d", authorRow.Additions.Int64),
+				p.Sprintf("%d", authorRow.Deletions.Int64),
 				p.Sprintf("%s (%s)", timediff.TimeDiff(firstCommit), firstCommit.Format("2006-01-02")),
 				p.Sprintf("%s (%s)", timediff.TimeDiff(lastCommit), lastCommit.Format("2006-01-02")),
 			}, "\t")
@@ -256,7 +316,7 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 			return err.Error()
 		}
 
-		d := t.commitSummary.DistinctAuthors - len(*t.commitAuthorSummaries)
+		d := t.commitSummary.DistinctAuthors - limit
 		if d == 1 {
 			p.Fprintf(&b, "...1 more author\n")
 		} else if d > 1 {
@@ -301,11 +361,12 @@ func (t *TermUI) View() string {
 
 	var b bytes.Buffer
 	fmt.Fprint(&b, t.renderCommitSummaryTable(true))
-	fmt.Fprint(&b, t.renderCommitAuthorSummary())
+	fmt.Fprint(&b, t.renderCommitAuthorSummary(25))
 
 	return b.String()
 }
 
+// PrintNoTTY prints a version of output with no terminal styles
 func (t *TermUI) PrintNoTTY() string {
 	t.preloadCommits()
 	t.loadCommitSummary()
@@ -317,9 +378,52 @@ func (t *TermUI) PrintNoTTY() string {
 
 	var b bytes.Buffer
 	fmt.Fprint(&b, t.renderCommitSummaryTable(false))
-	fmt.Fprint(&b, t.renderCommitAuthorSummary())
+	fmt.Fprint(&b, t.renderCommitAuthorSummary(0))
 
 	return b.String()
+}
+
+// PrintJSON outputs summary results as a JSON object
+func (t *TermUI) PrintJSON() string {
+	t.preloadCommits()
+	t.loadCommitSummary()
+	t.loadAuthorCommitSummary()
+
+	if t.err != nil {
+		return t.err.Error()
+	}
+
+	output := map[string]interface{}{
+		"commits":         t.commitSummary.Total,
+		"nonMergeCommits": t.commitSummary.TotalNonMerges,
+		"filesChanged":    t.commitSummary.DistinctFiles,
+		"uniqueAuthors":   t.commitSummary.DistinctAuthors,
+		"firstCommit":     t.commitSummary.FirstCommit.String,
+		"lastCommit":      t.commitSummary.LastCommit.String,
+	}
+
+	authorSummaries := make([]map[string]interface{}, len(*t.commitAuthorSummaries))
+
+	for i, authorSummary := range *t.commitAuthorSummaries {
+		commitPercent := (float32(authorSummary.Commits) / float32(t.commitSummary.Total)) * 100.0
+		authorSummaries[i] = map[string]interface{}{
+			"name":          authorSummary.AuthorName,
+			"email":         authorSummary.AuthorEmail,
+			"commits":       authorSummary.Commits,
+			"commitPercent": commitPercent,
+			"filesModified": authorSummary.DistinctFiles,
+			"additions":     authorSummary.Additions.Int64,
+			"deletions":     authorSummary.Deletions.Int64,
+		}
+	}
+
+	output["authors"] = authorSummaries
+
+	if o, err := json.MarshalIndent(output, "", "  "); err != nil {
+		return err.Error()
+	} else {
+		return string(o)
+	}
 }
 
 func (t *TermUI) Close() error {
