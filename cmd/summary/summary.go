@@ -69,28 +69,8 @@ SELECT author_name,
     sum(additions) AS additions,
     sum(deletions) AS deletions,
     count(distinct file_path) AS distinct_files,
-    CASE
-        WHEN julianday('now', 'localtime') - julianday(min(author_when), 'localtime') > 730 THEN 
-            PRINTF('%d years ago (%s)',ROUND((julianday('now', 'localtime') - julianday(min(author_when), 'localtime')) / 365),DATE(author_when))
-        WHEN julianday('now', 'localtime') - julianday(min(author_when), 'localtime') > 365 THEN 
-            PRINTF('1 year ago (%s)', DATE(author_when))
-        WHEN julianday('now', 'localtime') - julianday(min(author_when), 'localtime') > 31 THEN 
-        PRINTF('%d months ago (%s)',ROUND((julianday('now', 'localtime') - julianday(min(author_when), 'localtime')) /(365 / 12)), DATE(author_when))
-        WHEN ROUND(julianday('now', 'localtime') - julianday(min(author_when), 'localtime')) = 1 THEN
-            PRINTF('1 day ago (%s)',DATE(author_when))
-        ELSE PRINTF('%d day ago (%s)',ROUND(julianday('now', 'localtime') - julianday(min(author_when), 'localtime')),DATE(author_when))
-    END AS first_commit,
-    CASE
-        WHEN julianday('now', 'localtime') - julianday(max(author_when), 'localtime') > 730 THEN 
-            PRINTF('%d years ago (%s)', ROUND((julianday('now', 'localtime') - julianday(max(author_when), 'localtime')) / 365), DATE(author_when))
-        WHEN julianday('now', 'localtime') - julianday(max(author_when), 'localtime') > 365 THEN 
-            PRINTF('1 year ago (%s)', DATE(author_when))
-        WHEN julianday('now', 'localtime') - julianday(max(author_when), 'localtime') > 31 THEN 
-            PRINTF('%d months ago (%s)',ROUND((julianday('now', 'localtime') - julianday(max(author_when))) /(365 / 12)), DATE(author_when))
-        WHEN ROUND(julianday('now', 'localtime') - julianday(max(author_when), 'localtime')) = 1 THEN
-            PRINTF('1 day ago (%s)',DATE(author_when))
-        ELSE PRINTF('%d day(s) ago (%s)',ROUND(julianday('now', 'localtime') - julianday(max(author_when), 'localtime')),DATE(author_when))
-    END AS last_commit
+    timediff_now(min(author_when)) AS first_commit,
+    timediff_now(max(author_when)) AS last_commit
 FROM preloaded_commit_stats,
     preloaded_commits_summary
 GROUP BY author_name,
