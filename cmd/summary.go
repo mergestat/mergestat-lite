@@ -9,6 +9,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	dateFilterStart string
+	dateFilterEnd   string
+)
+
+func init() {
+	summaryCmd.Flags().StringVarP(&dateFilterStart, "start", "s", "", "specify a start date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
+	summaryCmd.Flags().StringVarP(&dateFilterEnd, "end", "e", "", "specify an end date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
+}
+
 var summaryCmd = &cobra.Command{
 	Use:   "summary [file pattern]",
 	Short: "Print a summary of commit activity",
@@ -26,7 +36,7 @@ Read more here: https://sqlite.org/lang_expr.html#the_like_glob_regexp_and_match
 
 		var ui *summary.TermUI
 		var err error
-		if ui, err = summary.NewTermUI(pathPattern); err != nil {
+		if ui, err = summary.NewTermUI(pathPattern, dateFilterStart, dateFilterEnd); err != nil {
 			handleExitError(err)
 		}
 		defer ui.Close()

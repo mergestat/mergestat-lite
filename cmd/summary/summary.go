@@ -27,7 +27,7 @@ type CommitSummary struct {
 }
 
 const preloadCommitsSQL = `
-CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits, stats('', commits.hash) WHERE file_path LIKE ?;
+CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits, stats('', commits.hash) WHERE file_path LIKE $file_path AND author_when > date($start, $start_mod) AND author_when < date($end, $end_mod);
 CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
 `
 
@@ -67,9 +67,16 @@ ORDER BY commit_count DESC
 LIMIT 25
 `
 
+type dateFilter struct {
+	date string
+	mod  string
+}
+
 type TermUI struct {
 	db                    *sqlx.DB
 	pathPattern           string
+	dateFilterStart       dateFilter
+	dateFilterEnd         dateFilter
 	err                   error
 	spinner               spinner.Model
 	commitsPreloaded      bool
@@ -77,7 +84,7 @@ type TermUI struct {
 	commitAuthorSummaries *[]*CommitAuthorSummary
 }
 
-func NewTermUI(pathPattern string) (*TermUI, error) {
+func NewTermUI(pathPattern, dateFilterStart, dateFilterEnd string) (*TermUI, error) {
 	var db *sqlx.DB
 	var err error
 	if db, err = sqlx.Open("sqlite3", "file::memory:?cache=shared"); err != nil {
@@ -95,10 +102,35 @@ func NewTermUI(pathPattern string) (*TermUI, error) {
 		pathPattern = "%"
 	}
 
+	start := "now"
+	startMod := "-1000 years"
+	end := "now"
+	endMod := "0 days"
+
+	// if the start date cannot be parsed, assume it is a date modifier relative to 'now'
+	if _, err := time.Parse("2006-01-02", dateFilterStart); err != nil {
+		if dateFilterStart != "" {
+			startMod = dateFilterStart
+		}
+	} else {
+		start = dateFilterStart
+		startMod = "0 days"
+	}
+
+	if _, err := time.Parse("2006-01-02", dateFilterEnd); err != nil {
+		if dateFilterEnd != "" {
+			endMod = dateFilterEnd
+		}
+	} else {
+		end = dateFilterEnd
+	}
+
 	return &TermUI{
-		db:          db,
-		pathPattern: pathPattern,
-		spinner:     s,
+		db:              db,
+		pathPattern:     pathPattern,
+		spinner:         s,
+		dateFilterStart: dateFilter{date: start, mod: startMod},
+		dateFilterEnd:   dateFilter{date: end, mod: endMod},
 	}, nil
 }
 
@@ -112,7 +144,13 @@ func (t *TermUI) Init() tea.Cmd {
 }
 
 func (t *TermUI) preloadCommits() tea.Msg {
-	if _, err := t.db.Exec(preloadCommitsSQL, t.pathPattern); err != nil {
+	if _, err := t.db.Exec(preloadCommitsSQL,
+		sql.Named("file_path", t.pathPattern),
+		sql.Named("start", t.dateFilterStart.date),
+		sql.Named("start_mod", t.dateFilterStart.mod),
+		sql.Named("end", t.dateFilterEnd.date),
+		sql.Named("end_mod", t.dateFilterEnd.mod),
+	); err != nil {
 		return err
 	}
 
