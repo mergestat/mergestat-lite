@@ -38,7 +38,7 @@ SELECT
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
 	(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
-	(SELECT count(distinct(path)) FROM files WHERE path LIKE ?) AS distinct_files
+	(SELECT count(distinct(file_path)) FROM preloaded_commit_stats WHERE file_path LIKE ?) AS distinct_files
 `
 
 type CommitAuthorSummary struct {
@@ -223,7 +223,7 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 	rows := []string{
 		strings.Join([]string{headingStyle.Render("Commits"), total}, "\t"),
 		strings.Join([]string{headingStyle.Render("Non-Merge Commits"), totalNonMerges}, "\t"),
-		strings.Join([]string{headingStyle.Render("Files"), distinctFiles}, "\t"),
+		strings.Join([]string{headingStyle.Render("Files Δ"), distinctFiles}, "\t"),
 		strings.Join([]string{headingStyle.Render("Unique Authors"), distinctAuthors}, "\t"),
 		strings.Join([]string{headingStyle.Render("First Commit"), firstCommit}, "\t"),
 		strings.Join([]string{headingStyle.Render("Latest Commit"), lastCommit}, "\t"),
