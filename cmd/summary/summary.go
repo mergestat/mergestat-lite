@@ -379,19 +379,18 @@ func (t *TermUI) PrintJSON() string {
 		"lastCommit":      t.commitSummary.LastCommit.String,
 	}
 
-	p := message.NewPrinter(language.English)
-	authorSummaries := make([]map[string]string, len(*t.commitAuthorSummaries))
+	authorSummaries := make([]map[string]interface{}, len(*t.commitAuthorSummaries))
 
 	for i, authorSummary := range *t.commitAuthorSummaries {
 		commitPercent := (float32(authorSummary.Commits) / float32(t.commitSummary.Total)) * 100.0
-		authorSummaries[i] = map[string]string{
+		authorSummaries[i] = map[string]interface{}{
 			"name":          authorSummary.AuthorName,
 			"email":         authorSummary.AuthorEmail,
-			"commits":       p.Sprintf("%d", authorSummary.Commits),
-			"commitPercent": p.Sprintf("%.2f%%", commitPercent),
-			"filesModified": p.Sprintf("%d", authorSummary.DistinctFiles),
-			"additions":     p.Sprintf("%d", authorSummary.Additions),
-			"deletions":     p.Sprintf("%d", authorSummary.Deletions),
+			"commits":       authorSummary.Commits,
+			"commitPercent": commitPercent,
+			"filesModified": authorSummary.DistinctFiles,
+			"additions":     authorSummary.Additions,
+			"deletions":     authorSummary.Deletions,
 		}
 	}
 
