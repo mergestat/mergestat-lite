@@ -27,8 +27,25 @@ type CommitSummary struct {
 	DistinctFiles   int            `db:"distinct_files"`
 }
 
-const preloadCommitsSQL = `
-CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits, stats('', commits.hash) WHERE file_path LIKE $file_path AND author_when > date($start, $start_mod) AND author_when < date($end, $end_mod);
+// This is a bit odd. We have two queries, one that includes filtering by file_path with a LIKE
+// and another that skips file_path filtering completely.
+// This is because it is possible to have "empty" commits - commits where no changes were made
+// (and therefore there are no file_paths to filter on). For these commits, stats.* will be all NULLs.
+// If a user does *not* specify a file pattern to match on, we want to include these empty commits
+// in our calculations, therefore we don't mention file_path in the WHERE clause at all.
+//
+// This is because `file_path LIKE %` will not match when file_path IS NULL (empty commit).
+// When a path filter is supplied by the user, we do apply it. Note that even supplying just a '%'
+// will exclude empty commits from the resultset. This makes sense, because empty commits won't have
+// changed any files in the specified pattern (they won't have changed any files at all).
+const preloadCommitsWithFilePathPatternSQL = `
+CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits LEFT JOIN stats('', commits.hash) WHERE file_path LIKE $file_path AND author_when > date($start, $start_mod) AND author_when < date($end, $end_mod);
+CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
+`
+
+// See comment above
+const preloadCommitsWithoutFilePathPatternSQL = `
+CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits LEFT JOIN stats('', commits.hash) WHERE author_when > date($start, $start_mod) AND author_when < date($end, $end_mod);
 CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
 `
 
@@ -43,14 +60,14 @@ SELECT
 `
 
 type CommitAuthorSummary struct {
-	AuthorName    string `db:"author_name"`
-	AuthorEmail   string `db:"author_email"`
-	Commits       int    `db:"commit_count"`
-	Additions     int    `db:"additions"`
-	Deletions     int    `db:"deletions"`
-	DistinctFiles int    `db:"distinct_files"`
-	FirstCommit   string `db:"first_commit"`
-	LastCommit    string `db:"last_commit"`
+	AuthorName    string        `db:"author_name"`
+	AuthorEmail   string        `db:"author_email"`
+	Commits       int           `db:"commit_count"`
+	Additions     sql.NullInt64 `db:"additions"`
+	Deletions     sql.NullInt64 `db:"deletions"`
+	DistinctFiles int           `db:"distinct_files"`
+	FirstCommit   string        `db:"first_commit"`
+	LastCommit    string        `db:"last_commit"`
 }
 
 const commitAuthorSummarySQL = `
@@ -65,7 +82,6 @@ SELECT
 FROM preloaded_commit_stats
 GROUP BY author_name, author_email
 ORDER BY commit_count DESC
-LIMIT 25
 `
 
 type dateFilter struct {
@@ -97,10 +113,6 @@ func NewTermUI(pathPattern, dateFilterStart, dateFilterEnd string) (*TermUI, err
 	s.Spinner = spinner.Spinner{
 		Frames: []string{".", "..", "..."},
 		FPS:    300 * time.Millisecond,
-	}
-
-	if pathPattern == "" {
-		pathPattern = "%"
 	}
 
 	start := "now"
@@ -145,13 +157,19 @@ func (t *TermUI) Init() tea.Cmd {
 }
 
 func (t *TermUI) preloadCommits() tea.Msg {
-	if _, err := t.db.Exec(preloadCommitsSQL,
-		sql.Named("file_path", t.pathPattern),
+	preloadCommitsSQL := preloadCommitsWithoutFilePathPatternSQL
+	args := []interface{}{
 		sql.Named("start", t.dateFilterStart.date),
 		sql.Named("start_mod", t.dateFilterStart.mod),
 		sql.Named("end", t.dateFilterEnd.date),
 		sql.Named("end_mod", t.dateFilterEnd.mod),
-	); err != nil {
+	}
+
+	if t.pathPattern != "" {
+		preloadCommitsSQL = preloadCommitsWithFilePathPatternSQL
+		args = append(args, sql.Named("file_path", t.pathPattern))
+	}
+	if _, err := t.db.Exec(preloadCommitsSQL, args...); err != nil {
 		return err
 	}
 
@@ -241,7 +259,7 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 	return b.String()
 }
 
-func (t *TermUI) renderCommitAuthorSummary() string {
+func (t *TermUI) renderCommitAuthorSummary(limit int) string {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
 	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
@@ -265,7 +283,10 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 
 		p.Fprintln(w, r)
 
-		for _, authorRow := range *t.commitAuthorSummaries {
+		for i, authorRow := range *t.commitAuthorSummaries {
+			if i > limit-1 && limit != 0 {
+				break
+			}
 			commitPercent := (float32(authorRow.Commits) / float32(t.commitSummary.Total)) * 100.0
 
 			var firstCommit, lastCommit time.Time
@@ -282,8 +303,8 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 				p.Sprintf("%d", authorRow.Commits),
 				p.Sprintf("%.2f%%", commitPercent),
 				p.Sprintf("%d", authorRow.DistinctFiles),
-				p.Sprintf("%d", authorRow.Additions),
-				p.Sprintf("%d", authorRow.Deletions),
+				p.Sprintf("%d", authorRow.Additions.Int64),
+				p.Sprintf("%d", authorRow.Deletions.Int64),
 				p.Sprintf("%s (%s)", timediff.TimeDiff(firstCommit), firstCommit.Format("2006-01-02")),
 				p.Sprintf("%s (%s)", timediff.TimeDiff(lastCommit), lastCommit.Format("2006-01-02")),
 			}, "\t")
@@ -295,7 +316,7 @@ func (t *TermUI) renderCommitAuthorSummary() string {
 			return err.Error()
 		}
 
-		d := t.commitSummary.DistinctAuthors - len(*t.commitAuthorSummaries)
+		d := t.commitSummary.DistinctAuthors - limit
 		if d == 1 {
 			p.Fprintf(&b, "...1 more author\n")
 		} else if d > 1 {
@@ -340,7 +361,7 @@ func (t *TermUI) View() string {
 
 	var b bytes.Buffer
 	fmt.Fprint(&b, t.renderCommitSummaryTable(true))
-	fmt.Fprint(&b, t.renderCommitAuthorSummary())
+	fmt.Fprint(&b, t.renderCommitAuthorSummary(25))
 
 	return b.String()
 }
@@ -357,7 +378,7 @@ func (t *TermUI) PrintNoTTY() string {
 
 	var b bytes.Buffer
 	fmt.Fprint(&b, t.renderCommitSummaryTable(false))
-	fmt.Fprint(&b, t.renderCommitAuthorSummary())
+	fmt.Fprint(&b, t.renderCommitAuthorSummary(0))
 
 	return b.String()
 }
@@ -391,8 +412,8 @@ func (t *TermUI) PrintJSON() string {
 			"commits":       authorSummary.Commits,
 			"commitPercent": commitPercent,
 			"filesModified": authorSummary.DistinctFiles,
-			"additions":     authorSummary.Additions,
-			"deletions":     authorSummary.Deletions,
+			"additions":     authorSummary.Additions.Int64,
+			"deletions":     authorSummary.Deletions.Int64,
 		}
 	}
 
