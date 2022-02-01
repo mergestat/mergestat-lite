@@ -32,7 +32,7 @@ func oneToOneOutputBuilder(names []string, data interface{}) (*bytes.Buffer, err
 	return &b, nil
 }
 
-func loadingSymbols(names []string, t *TermUI) *bytes.Buffer {
+func loadingSymbols(names []string, t *TermUI) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
 	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
@@ -40,6 +40,8 @@ func loadingSymbols(names []string, t *TermUI) *bytes.Buffer {
 		p.Fprintf(w, "%s\t%s\n", n, t.spinner.View())
 	}
 	p.Fprintf(w, "\n\n")
-	w.Flush()
-	return &b
+	if err := w.Flush(); err != nil {
+		return nil, err
+	}
+	return &b, nil
 }

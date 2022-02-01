@@ -14,8 +14,6 @@ func Register(ext *sqlite.ExtensionApi, _ *options.Options) (_ sqlite.ErrorCode,
 		"yaml_to_json": &YamlToJson{},
 		"xml_to_json":  &XmlToJson{},
 		"timediff":     &TimeDiff{},
-		"timediff_now":     &TimeDiffNow{},
-
 	}
 
 	// alias yaml_to_json => yml_to_json

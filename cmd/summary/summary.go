@@ -38,11 +38,12 @@ const commitSummarySQL = `
 SELECT
 	total,
 	total_non_merges,
-	timediff_now(first_commit) AS first_commit,
-	timediff_now(last_commit) AS last_commit,
 	distinct_authors,
-	distinct_files
-	FROM preloaded_commits_summary
+	distinct_files,
+	PRINTF('%s (%s)',timediff(first_commit),first_commit) AS first_commit,
+	PRINTF('%s (%s)',timediff(last_commit),last_commit) AS last_commit
+	FROM preloaded_commits_summary;
+	
 `
 
 type CommitAuthorSummary struct {
@@ -65,8 +66,8 @@ SELECT author_name,
     sum(additions) AS additions,
     sum(deletions) AS deletions,
     count(distinct file_path) AS distinct_files,
-    timediff_now(min(author_when)) AS first_commit,
-    timediff_now(max(author_when)) AS last_commit
+	PRINTF('%s (%s)',timediff(min(author_when)),min(author_when)) AS first_commit,
+	PRINTF('%s (%s)',timediff(max(author_when)),max(author_when)) AS last_commit
 FROM preloaded_commit_stats,
     preloaded_commits_summary
 GROUP BY author_name,
@@ -174,7 +175,10 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 			return err.Error()
 		}
 	} else {
-		b = loadingSymbols(rows, t)
+		b, err = loadingSymbols(rows, t)
+		if err != nil {
+			return err.Error()
+		}
 	}
 
 	return b.String()
