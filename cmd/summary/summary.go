@@ -345,6 +345,7 @@ func (t *TermUI) View() string {
 	return b.String()
 }
 
+// PrintNoTTY prints a version of output with no terminal styles
 func (t *TermUI) PrintNoTTY() string {
 	t.preloadCommits()
 	t.loadCommitSummary()
@@ -361,6 +362,7 @@ func (t *TermUI) PrintNoTTY() string {
 	return b.String()
 }
 
+// PrintJSON outputs summary results as a JSON object
 func (t *TermUI) PrintJSON() string {
 	t.preloadCommits()
 	t.loadCommitSummary()
