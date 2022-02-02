@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -21,15 +20,13 @@ func init() {
 var blameCmd = &cobra.Command{
 	Use:   "blame [file pattern]",
 	Short: "Print a summary of the blame context for a file",
-	Long:  ``,
-	Args:  cobra.MaximumNArgs(1),
+	Long: `Prints a summary of the blame context for all files matching the supplied path pattern in the default repo (--repo or current directory).
+Specify a file path pattern as the first argument to see aggregate blame data for all files that match the pattern.
+Use '%' to match all file paths or as a wildcard (e.g. '%.go' for all .go files). You may specify a full file path (no wildcard) as well.
+`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var pathPattern string
-		if len(args) > 0 {
-			pathPattern = args[0]
-		} else {
-			handleExitError(errors.New("please supply a file path pattern as first argument, use '%%' to represent any path"))
-		}
+		pathPattern := args[0]
 
 		var ui *blame.TermUI
 		var err error
