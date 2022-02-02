@@ -28,7 +28,7 @@ var blameCmd = &cobra.Command{
 		if len(args) > 0 {
 			pathPattern = args[0]
 		} else {
-			handleExitError(errors.New("please supply a file path pattern as first argument - use '%%' to represent any path"))
+			handleExitError(errors.New("please supply a file path pattern as first argument, use '%%' to represent any path"))
 		}
 
 		var ui *blame.TermUI
