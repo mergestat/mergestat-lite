@@ -40,7 +40,7 @@ func init() {
 	}
 
 	// add sub commands
-	rootCmd.AddCommand(exportCmd, serveCmd, summaryCmd)
+	rootCmd.AddCommand(exportCmd, serveCmd, summaryCmd, blameCmd)
 
 	// conditionally add the pgsync sub command
 	// TODO(patrickdevivo) "conditional" for now until the behavior stabilizes
