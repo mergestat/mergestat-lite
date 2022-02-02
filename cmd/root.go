@@ -19,6 +19,7 @@ var presetQuery string                                // named / preset query fl
 var dbPath string                                     // path to sqlite db file on disk to mount on
 var repo string                                       // path to repo on disk
 var cloneDir string                                   // path to directory to clone repos in
+var gitSSLNoVerify = os.Getenv("GIT_SSL_NO_VERIFY")   // if set to anything, will not verify SSL when cloning
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
 var verbose bool                                      // whether or not to print logs to stderr

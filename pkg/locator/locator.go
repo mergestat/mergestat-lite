@@ -97,7 +97,7 @@ func determineCloneDir(path, baseCloneDir string) (string, bool, error) {
 // http repositories on-demand into temporary storage. It is recommended
 // that you club it with something like CachedLocator to improve performance
 // and remove the need to clone a single repository multiple times.
-func HttpLocator(cloneDir string) func() services.RepoLocator {
+func HttpLocator(o *MultiLocatorOptions) func() services.RepoLocator {
 	return func() services.RepoLocator {
 		return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
 			var err error
@@ -107,11 +107,11 @@ func HttpLocator(cloneDir string) func() services.RepoLocator {
 
 			var cd string
 			var isTmp bool
-			if cd, isTmp, err = determineCloneDir(path, cloneDir); err != nil {
+			if cd, isTmp, err = determineCloneDir(path, o.CloneDir); err != nil {
 				return nil, errors.Wrap(err, "could not determine clone directory")
 			}
 
-			return git.PlainCloneContext(ctx, cd, isTmp, &git.CloneOptions{URL: path})
+			return git.PlainCloneContext(ctx, cd, isTmp, &git.CloneOptions{URL: path, InsecureSkipTLS: o.InsecureSkipTLS})
 		})
 	}
 }
@@ -145,7 +145,7 @@ func httpLocatorWithAuth(user, pass string, rl services.RepoLocator) func() serv
 // ssh repositories on-demand into temporary storage. It is recommended
 // that you club it with something like CachedLocator to improve performance
 // and remove the need to clone a single repository multiple times.
-func SSHLocator(cloneDir string) func() services.RepoLocator {
+func SSHLocator(o *MultiLocatorOptions) func() services.RepoLocator {
 	return func() services.RepoLocator {
 		return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
 			path = strings.TrimPrefix(path, "ssh://")
@@ -166,7 +166,7 @@ func SSHLocator(cloneDir string) func() services.RepoLocator {
 			var cd string
 			var isTmp bool
 			var err error
-			if cd, isTmp, err = determineCloneDir(path, cloneDir); err != nil {
+			if cd, isTmp, err = determineCloneDir(path, o.CloneDir); err != nil {
 				return nil, errors.Wrap(err, "could not determine clone directory")
 			}
 
@@ -175,14 +175,15 @@ func SSHLocator(cloneDir string) func() services.RepoLocator {
 				return nil, errors.Wrap(err, "failed to create an SSH authentication method")
 			}
 
-			return git.PlainCloneContext(ctx, cd, isTmp, &git.CloneOptions{URL: path, Auth: auth})
+			return git.PlainCloneContext(ctx, cd, isTmp, &git.CloneOptions{URL: path, Auth: auth, InsecureSkipTLS: o.InsecureSkipTLS})
 		})
 	}
 }
 
 type MultiLocatorOptions struct {
-	HTTPAuth *http.BasicAuth
-	CloneDir string
+	HTTPAuth        *http.BasicAuth
+	CloneDir        string
+	InsecureSkipTLS bool
 }
 
 // MultiLocator returns a locator service that work with multiple git protocols
@@ -192,8 +193,8 @@ func MultiLocator(o *MultiLocatorOptions) services.RepoLocator {
 		o = &MultiLocatorOptions{}
 	}
 	var locators = map[string]func() services.RepoLocator{
-		"http": HttpLocator(o.CloneDir),
-		"ssh":  SSHLocator(o.CloneDir),
+		"http": HttpLocator(o),
+		"ssh":  SSHLocator(o),
 		"file": DiskLocator,
 	}
 
