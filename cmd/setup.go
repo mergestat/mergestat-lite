@@ -16,7 +16,8 @@ import (
 
 func registerExt() {
 	multiLocOpt := &locator.MultiLocatorOptions{
-		CloneDir: cloneDir,
+		CloneDir:        cloneDir,
+		InsecureSkipTLS: gitSSLNoVerify != "",
 	}
 	if githubToken != "" {
 		multiLocOpt.HTTPAuth = &http.BasicAuth{Username: githubToken}

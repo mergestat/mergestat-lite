@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/mergestat/mergestat/pkg/display"
@@ -15,8 +16,10 @@ import (
 
 var format string                                     // output format flag
 var presetQuery string                                // named / preset query flag
+var dbPath string                                     // path to sqlite db file on disk to mount on
 var repo string                                       // path to repo on disk
 var cloneDir string                                   // path to directory to clone repos in
+var gitSSLNoVerify = os.Getenv("GIT_SSL_NO_VERIFY")   // if set to anything, will not verify SSL when cloning
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
 var verbose bool                                      // whether or not to print logs to stderr
@@ -26,6 +29,7 @@ func init() {
 	// local (root command only) flags
 	rootCmd.Flags().StringVarP(&format, "format", "f", "table", "specify the output format. Options are 'csv' 'tsv' 'table' 'single' 'ndjson' and 'json'")
 	rootCmd.Flags().StringVarP(&presetQuery, "preset", "p", "", "used to pick a preset query")
+	rootCmd.PersistentFlags().StringVarP(&dbPath, "db", "d", "", "specify a db file on disk to mount when executing queries")
 	rootCmd.PersistentFlags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
 	rootCmd.PersistentFlags().StringVarP(&cloneDir, "clone-dir", "c", "", "specify a path to a directory on disk to use when cloning repos, instead of a tmp dir. Should be empty to avoid path conflicts.")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
@@ -37,7 +41,7 @@ func init() {
 	}
 
 	// add sub commands
-	rootCmd.AddCommand(exportCmd, serveCmd, summaryCmd)
+	rootCmd.AddCommand(exportCmd, serveCmd, summaryCmd, blameCmd)
 
 	// conditionally add the pgsync sub command
 	// TODO(patrickdevivo) "conditional" for now until the behavior stabilizes
@@ -108,7 +112,13 @@ Example queries can be found in the GitHub repo: https://github.com/mergestat/me
 		}
 
 		var db *sql.DB
-		if db, err = sql.Open("sqlite3", ":memory:"); err != nil {
+		openPath := ":memory:"
+		if dbPath != "" {
+			if openPath, err = filepath.Abs(dbPath); err != nil {
+				handleExitError(err)
+			}
+		}
+		if db, err = sql.Open("sqlite3", openPath); err != nil {
 			handleExitError(fmt.Errorf("failed to initialize database connection: %v", err))
 		}
 

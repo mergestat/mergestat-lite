@@ -10,6 +10,7 @@ import (
 
 var (
 	exports []string
+	append  bool
 )
 
 type export struct {
@@ -19,6 +20,7 @@ type export struct {
 
 func init() {
 	exportCmd.Flags().StringArrayVarP(&exports, "exports", "e", []string{}, "queries to export, supplied as string pairs")
+	exportCmd.Flags().BoolVarP(&append, "append", "a", false, "append mode: insert into tables rather than creating new ones")
 }
 
 var exportCmd = &cobra.Command{
@@ -57,10 +59,39 @@ var exportCmd = &cobra.Command{
 		}
 
 		for _, pair := range pairs {
-			var query = fmt.Sprintf("CREATE TABLE %s AS %s", pair.table, pair.query)
-			if _, err = db.Exec(query); err != nil {
-				handleExitError(fmt.Errorf("failed to execute query: %v", err))
+			if append {
+				var tableAlreadyExists bool
+				if row := db.QueryRow("SELECT EXISTS (SELECT * FROM sqlite_master WHERE type='table' AND name = ?)", pair.table); row.Err() != nil {
+					handleExitError(fmt.Errorf("failed to execute query: %v", err))
+				} else {
+					if err := row.Scan(&tableAlreadyExists); err != nil {
+						handleExitError(fmt.Errorf("failed to scan row: %v", err))
+					}
+				}
 
+				if !tableAlreadyExists {
+					if _, err = db.Exec(fmt.Sprintf("CREATE TABLE %s AS %s", pair.table, pair.query)); err != nil {
+						handleExitError(fmt.Errorf("failed to execute query: %v", err))
+					}
+				} else {
+					var tx *sql.Tx
+					if tx, err = db.BeginTx(cmd.Context(), &sql.TxOptions{}); err != nil {
+						handleExitError(fmt.Errorf("failed to start transaction: %v", err))
+					}
+
+					if _, err = tx.Exec(fmt.Sprintf("INSERT INTO %s %s", pair.table, pair.query)); err != nil {
+						handleExitError(fmt.Errorf("failed to execute query: %v", err))
+					}
+
+					if err = tx.Commit(); err != nil {
+						handleExitError(err)
+					}
+				}
+
+			} else {
+				if _, err = db.Exec(fmt.Sprintf("CREATE TABLE %s AS %s", pair.table, pair.query)); err != nil {
+					handleExitError(fmt.Errorf("failed to execute query: %v", err))
+				}
 			}
 		}
 
