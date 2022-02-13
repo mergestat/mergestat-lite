@@ -3,26 +3,27 @@ package summary
 import (
 	"bytes"
 	"fmt"
-	"reflect"
 	"text/tabwriter"
 
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
-func oneToOneOutputBuilder(names []string, data interface{}) (*bytes.Buffer, error) {
+type hasToStringArr interface {
+	toStringArr() []string
+}
+
+func oneToOneOutputBuilder(names []string, data hasToStringArr) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
 	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
-
-	dataPointReflection := reflect.ValueOf(data)
-	if dataPointReflection.Kind() == reflect.Ptr {
-		dataPointReflection = dataPointReflection.Elem()
+	stringData := data.toStringArr()
+	if len(stringData) != len(names) {
+		return nil, fmt.Errorf("length of headers does not match length of data")
 	}
-	for i := 0; i < dataPointReflection.NumField(); i++ {
-		dataPoint := dataPointReflection.Field(i).Interface()
+	for i := 0; i < len(stringData); i++ {
 		p.Fprintf(w, fmt.Sprintf("%v\t", names[i]))
-		p.Fprintln(w, fmt.Sprintf("%v", dataPoint))
+		p.Fprintln(w, fmt.Sprintf("%v", stringData[i]))
 	}
 	p.Fprint(w, "\n\n")
 	if err := w.Flush(); err != nil {

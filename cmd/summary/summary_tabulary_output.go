@@ -2,8 +2,6 @@ package summary
 
 import (
 	"bytes"
-	"fmt"
-	"reflect"
 	"strings"
 	"text/tabwriter"
 
@@ -14,7 +12,11 @@ import (
 // type has2DStringArrFunction interface {
 // 	to2StringArr() [][]string
 // }
-func tableBuilder(headers []string, data ...interface{}) (*bytes.Buffer, error) {
+type hasDelimToStringArr interface {
+	toStringArr(delimiter ...string) []string
+}
+
+func tableBuilder(headers []string, data hasDelimToStringArr) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
 	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
@@ -22,20 +24,9 @@ func tableBuilder(headers []string, data ...interface{}) (*bytes.Buffer, error) 
 	p.Fprintf(w, strings.Join(headers, "\t"))
 	p.Fprintln(w)
 	// format table data
-	for _, row := range data {
-		columnValueReflection := reflect.ValueOf(row)
-		if columnValueReflection.Kind() == reflect.Ptr {
-			columnValueReflection = columnValueReflection.Elem()
-		}
-		// iterate over all values of the struct
-		for i := 0; i < columnValueReflection.NumField(); i++ {
-			columnValue := columnValueReflection.Field(i).Interface()
-			if i < columnValueReflection.NumField()-1 {
-				p.Fprintf(w, fmt.Sprintf("%v\t", columnValue))
-			} else {
-				p.Fprintln(w, fmt.Sprintf("%v", columnValue))
-			}
-		}
+	rows := data.toStringArr()
+	for _, row := range rows {
+		p.Fprintln(w, row)
 	}
 
 	if err := w.Flush(); err != nil {

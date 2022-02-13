@@ -16,12 +16,23 @@ import (
 )
 
 type CommitSummary struct {
-	Total           int    `db:"total"`
-	TotalNonMerges  int    `db:"total_non_merges"`
-	DistinctAuthors int    `db:"distinct_authors"`
-	DistinctFiles   int    `db:"distinct_files"`
-	FirstCommit     string `db:"first_commit"`
-	LastCommit      string `db:"last_commit"`
+	Total           int            `db:"total"`
+	TotalNonMerges  int            `db:"total_non_merges"`
+	DistinctAuthors int            `db:"distinct_authors"`
+	DistinctFiles   int            `db:"distinct_files"`
+	FirstCommit     sql.NullString `db:"first_commit"`
+	LastCommit      sql.NullString `db:"last_commit"`
+}
+
+func (cs *CommitSummary) toStringArr() []string {
+	stringArr := make([]string, 6)
+	stringArr[0] = fmt.Sprint(cs.Total)
+	stringArr[1] = fmt.Sprint(cs.TotalNonMerges)
+	stringArr[2] = fmt.Sprint(cs.DistinctAuthors)
+	stringArr[3] = fmt.Sprint(cs.DistinctFiles)
+	stringArr[4] = cs.FirstCommit.String
+	stringArr[5] = cs.LastCommit.String
+	return stringArr
 }
 
 // This is a bit odd. We have two queries, one that includes filtering by file_path with a LIKE
@@ -74,6 +85,34 @@ type CommitAuthorSummary struct {
 	DistinctFiles int            `db:"distinct_files"`
 	FirstCommit   sql.NullString `db:"first_commit"`
 	LastCommit    sql.NullString `db:"last_commit"`
+}
+type CommitAuthorSummarySlice struct {
+	casSlice []CommitAuthorSummary
+}
+
+// a function that turns a CommitAuthorSummary into a prettified string with a default delimiter of \t
+func (cas *CommitAuthorSummarySlice) toStringArr(delimiter ...string) []string {
+	var stringifiedRow string
+	fullStringArr := make([]string, len(cas.casSlice))
+	delim := "\t"
+	if len(delimiter) == 1 {
+		delim = delimiter[0]
+	}
+	for i, v := range cas.casSlice {
+		stringifiedRow = ""
+		stringifiedRow += v.AuthorName + delim
+		stringifiedRow += v.AuthorEmail + delim
+		stringifiedRow += fmt.Sprint(v.Commits) + delim
+		stringifiedRow += fmt.Sprintf("%.2f", v.CommitPercent) + delim
+		stringifiedRow += fmt.Sprint(v.Additions.Int64) + delim
+		stringifiedRow += fmt.Sprint(v.Deletions.Int64) + delim
+		stringifiedRow += fmt.Sprint(v.DistinctFiles) + delim
+		stringifiedRow += v.FirstCommit.String + delim
+		stringifiedRow += v.LastCommit.String + delim
+		fullStringArr[i] = stringifiedRow
+	}
+	//println(strings.Join(fullStringArr, " "))
+	return fullStringArr
 }
 
 const commitAuthorSummarySQL = `
@@ -262,13 +301,15 @@ func (t *TermUI) renderCommitAuthorSummary(limit int) string {
 			"First Commit",
 			"Latest Commit",
 		}
-
+		var casSlice CommitAuthorSummarySlice
+		// casSlice.casSlice = make([]CommitAuthorSummary, len(t.commitAuthorSummaries))
+		// for i, v := range t.commitAuthorSummaries {
+		// 	casSlice.casSlice[i] = *v
+		// 	fmt.Printf("%#v", v)
+		// }
+		casSlice.casSlice = t.commitAuthorSummaries
 		// put t.commitAuthorSummaries in a struct. I dream of generics
-		s := make([]interface{}, len(t.commitAuthorSummaries))
-		for i, v := range t.commitAuthorSummaries {
-			s[i] = v
-		}
-		formattedTable, err := tableBuilder(headers, s...)
+		formattedTable, err := tableBuilder(headers, &casSlice)
 		if err != nil {
 			return err.Error()
 		}
