@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jmoiron/sqlx"
+	dashboards "github.com/mergestat/mergestat/cmd/dashboards"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -24,7 +25,7 @@ type CommitSummary struct {
 	LastCommit      sql.NullString `db:"last_commit"`
 }
 
-func (cs *CommitSummary) toStringArr() []string {
+func (cs *CommitSummary) ToStringArr() []string {
 	stringArr := make([]string, 6)
 	stringArr[0] = fmt.Sprint(cs.Total)
 	stringArr[1] = fmt.Sprint(cs.TotalNonMerges)
@@ -91,7 +92,7 @@ type CommitAuthorSummarySlice struct {
 }
 
 // a function that turns a CommitAuthorSummary into a prettified string with a default delimiter of \t
-func (cas *CommitAuthorSummarySlice) toStringArr(delimiter ...string) []string {
+func (cas *CommitAuthorSummarySlice) ToStringArr(delimiter ...string) []string {
 	var stringifiedRow string
 	fullStringArr := make([]string, len(cas.casSlice))
 	delim := "\t"
@@ -266,12 +267,12 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 		headingStyle.Render("Latest Commit"),
 	}
 	if t.commitSummary != nil {
-		b, err = oneToOneOutputBuilder(rows, t.commitSummary)
+		b, err = dashboards.OneToOneOutputBuilder(rows, t.commitSummary)
 		if err != nil {
 			return err.Error()
 		}
 	} else {
-		b, err = loadingSymbols(rows, t)
+		b, err = dashboards.LoadingSymbols(rows, t.spinner)
 		if err != nil {
 			return err.Error()
 		}
@@ -302,14 +303,8 @@ func (t *TermUI) renderCommitAuthorSummary(limit int) string {
 			"Latest Commit",
 		}
 		var casSlice CommitAuthorSummarySlice
-		// casSlice.casSlice = make([]CommitAuthorSummary, len(t.commitAuthorSummaries))
-		// for i, v := range t.commitAuthorSummaries {
-		// 	casSlice.casSlice[i] = *v
-		// 	fmt.Printf("%#v", v)
-		// }
 		casSlice.casSlice = t.commitAuthorSummaries
-		// put t.commitAuthorSummaries in a struct. I dream of generics
-		formattedTable, err := tableBuilder(headers, &casSlice)
+		formattedTable, err := dashboards.TableBuilder(headers, &casSlice)
 		if err != nil {
 			return err.Error()
 		}

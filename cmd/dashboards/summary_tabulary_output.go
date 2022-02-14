@@ -1,4 +1,4 @@
-package summary
+package dashboards
 
 import (
 	"bytes"
@@ -13,10 +13,10 @@ import (
 // 	to2StringArr() [][]string
 // }
 type hasDelimToStringArr interface {
-	toStringArr(delimiter ...string) []string
+	ToStringArr(delimiter ...string) []string
 }
 
-func tableBuilder(headers []string, data hasDelimToStringArr) (*bytes.Buffer, error) {
+func TableBuilder(headers []string, data hasDelimToStringArr) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
 	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
@@ -24,7 +24,7 @@ func tableBuilder(headers []string, data hasDelimToStringArr) (*bytes.Buffer, er
 	p.Fprintf(w, strings.Join(headers, "\t"))
 	p.Fprintln(w)
 	// format table data
-	rows := data.toStringArr()
+	rows := data.ToStringArr()
 	for _, row := range rows {
 		p.Fprintln(w, row)
 	}
