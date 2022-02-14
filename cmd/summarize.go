@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	summarizeCmd.AddCommand(summarizeCommitsCmd, blameCmd)
+	summarizeCmd.AddCommand(summarizeCommitsCmd, summarizeBlameCmd)
 }
 
 var summarizeCmd = &cobra.Command{

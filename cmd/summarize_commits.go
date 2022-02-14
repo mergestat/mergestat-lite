@@ -22,9 +22,8 @@ func init() {
 }
 
 var summarizeCommitsCmd = &cobra.Command{
-	TraverseChildren: true,
-	Use:              "commits [file pattern]",
-	Short:            "Print a summary of commit activity",
+	Use:   "commits [file pattern]",
+	Short: "Print a summary of commit activity",
 	Long: `Prints a summary of commit activity in the default repository (either the current directory or supplied by --repo).
 Specify a file pattern as an argument to filter for commits that only modified a certain file or directory.
 The path is used in a SQL LIKE clause, so use '%' as a wildcard.

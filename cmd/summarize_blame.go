@@ -14,10 +14,10 @@ var (
 )
 
 func init() {
-	blameCmd.Flags().BoolVar(&blameOutputJSON, "json", false, "output as JSON")
+	summarizeBlameCmd.Flags().BoolVar(&blameOutputJSON, "json", false, "output as JSON")
 }
 
-var blameCmd = &cobra.Command{
+var summarizeBlameCmd = &cobra.Command{
 	Use:   "blame [file pattern]",
 	Short: "Print a summary of blameable lines for a file path pattern",
 	Long: `Prints a summary of the blameable lines for all files matching the supplied path pattern in the default repo (--repo or current directory).
