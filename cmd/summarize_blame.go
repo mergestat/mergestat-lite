@@ -5,7 +5,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mergestat/mergestat/cmd/blame"
+	"github.com/mergestat/mergestat/cmd/summarize/blame"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +19,8 @@ func init() {
 
 var blameCmd = &cobra.Command{
 	Use:   "blame [file pattern]",
-	Short: "Print a summary of the blame context for a file",
-	Long: `Prints a summary of the blame context for all files matching the supplied path pattern in the default repo (--repo or current directory).
+	Short: "Print a summary of blameable lines for a file path pattern",
+	Long: `Prints a summary of the blameable lines for all files matching the supplied path pattern in the default repo (--repo or current directory).
 Specify a file path pattern as the first argument to see aggregate blame data for all files that match the pattern.
 Use '%' to match all file paths or as a wildcard (e.g. '%.go' for all .go files). You may specify a full file path (no wildcard) as well.
 `,
