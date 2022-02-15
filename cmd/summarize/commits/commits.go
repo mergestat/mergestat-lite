@@ -1,4 +1,4 @@
-package summary
+package commits
 
 import (
 	"bytes"
@@ -56,7 +56,7 @@ SELECT
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
 	(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
 	(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
-	(SELECT count(distinct(file_path)) FROM preloaded_commit_stats WHERE file_path LIKE ?) AS distinct_files
+	(SELECT count(distinct(file_path)) FROM preloaded_commit_stats WHERE file_path LIKE $file_path) AS distinct_files
 `
 
 type CommitAuthorSummary struct {
@@ -181,8 +181,14 @@ func (t *TermUI) loadCommitSummary() tea.Msg {
 	for !t.commitsPreloaded {
 		time.Sleep(300 * time.Millisecond)
 	}
+
+	pathPattern := "%"
+	if t.pathPattern != "" {
+		pathPattern = t.pathPattern
+	}
+
 	var commitSummary CommitSummary
-	if err := t.db.QueryRowx(commitSummarySQL, t.pathPattern).StructScan(&commitSummary); err != nil {
+	if err := t.db.QueryRowx(commitSummarySQL, sql.Named("file_path", pathPattern)).StructScan(&commitSummary); err != nil {
 		return err
 	}
 
