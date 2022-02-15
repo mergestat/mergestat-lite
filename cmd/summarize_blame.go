@@ -33,7 +33,11 @@ Use '%' to match all file paths or as a wildcard (e.g. '%.go' for all .go files)
 		if ui, err = blame.NewTermUI(pathPattern); err != nil {
 			handleExitError(err)
 		}
-		defer ui.Close()
+		defer func() {
+			if err := ui.Close(); err != nil {
+				handleExitError(err)
+			}
+		}()
 
 		if blameOutputJSON {
 			fmt.Println(ui.PrintJSON())

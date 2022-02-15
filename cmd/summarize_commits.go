@@ -41,7 +41,11 @@ Read more here: https://sqlite.org/lang_expr.html#the_like_glob_regexp_and_match
 		if ui, err = commits.NewTermUI(pathPattern, summarizeDateFilterStart, summarizeDateFilterEnd); err != nil {
 			handleExitError(err)
 		}
-		defer ui.Close()
+		defer func() {
+			if err := ui.Close(); err != nil {
+				handleExitError(err)
+			}
+		}()
 
 		if summarizeOutputJSON {
 			fmt.Println(ui.PrintJSON())
