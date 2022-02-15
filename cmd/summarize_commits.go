@@ -16,9 +16,9 @@ var (
 )
 
 func init() {
-	summarizeCommitsCmd.PersistentFlags().StringVarP(&summarizeDateFilterStart, "start", "s", "", "specify a start date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
-	summarizeCommitsCmd.PersistentFlags().StringVarP(&summarizeDateFilterEnd, "end", "e", "", "specify an end date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
-	summarizeCommitsCmd.PersistentFlags().BoolVar(&summarizeOutputJSON, "json", false, "output as JSON")
+	summarizeCommitsCmd.Flags().StringVarP(&summarizeDateFilterStart, "start", "s", "", "specify a start date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
+	summarizeCommitsCmd.Flags().StringVarP(&summarizeDateFilterEnd, "end", "e", "", "specify an end date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
+	summarizeCommitsCmd.Flags().BoolVar(&summarizeOutputJSON, "json", false, "output as JSON")
 }
 
 var summarizeCommitsCmd = &cobra.Command{
