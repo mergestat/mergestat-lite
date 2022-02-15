@@ -61,14 +61,24 @@ func Parse(input string) (MailMap, error) {
 }
 
 // Lookup receives a name/email pair and finds the first proper name/email pair
-func (mm MailMap) Lookup(commitLookup NameAndEmail) *NameAndEmail {
+func (mm MailMap) Lookup(commitLookup NameAndEmail) NameAndEmail {
 	for proper, commits := range mm {
 		for _, commit := range commits {
 			// case insensitive match
-			if strings.EqualFold(commit.Name, commitLookup.Name) && strings.EqualFold(commit.Email, commit.Email) {
-				return &proper
+
+			namesMatch := strings.EqualFold(commit.Name, commitLookup.Name)
+			emailsMatch := strings.EqualFold(commit.Email, commitLookup.Email)
+
+			// if the name to match on is unset, then short-circuit the name check
+			// because the email may still match
+			if commit.Name == "" {
+				namesMatch = true
+			}
+
+			if (namesMatch) && emailsMatch {
+				return proper
 			}
 		}
 	}
-	return nil
+	return commitLookup
 }

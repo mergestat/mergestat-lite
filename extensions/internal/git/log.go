@@ -9,6 +9,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/mergestat/mergestat/extensions/internal/git/utils"
+	"github.com/mergestat/mergestat/pkg/mailmap"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )
@@ -161,6 +162,8 @@ type gitLogCursor struct {
 
 	commit  *object.Commit // the current commit
 	commits object.CommitIter
+
+	mm mailmap.MailMap
 }
 
 func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err error) {
@@ -233,6 +236,42 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 
 	logger = logger.With().Str("revision", opts.From.String()).Logger()
 
+	{
+		var c *object.Commit
+		if c, err = repo.CommitObject(opts.From); err != nil {
+			return errors.Wrapf(err, "could not lookup commit")
+		}
+		var t *object.Tree
+		if t, err = c.Tree(); err != nil {
+			return errors.Wrapf(err, "could not lookup tree")
+		}
+
+		var f *object.File
+		if f, err = t.File(".mailmap"); err != nil {
+			if err != object.ErrFileNotFound {
+				return errors.Wrapf(err, "could not lookup mailmap file")
+			} else {
+				goto skip_mailmap
+			}
+		}
+
+		var m string
+		if m, err = f.Contents(); err != nil {
+			if err != nil {
+				return errors.Wrapf(err, "could not retrieve contents of mailmap file")
+			}
+		}
+
+		var mm mailmap.MailMap
+		if mm, err = mailmap.Parse(m); err != nil {
+			return errors.Wrapf(err, "could not parse mailmap file")
+		}
+		logger.Info().Msg("found and parsed .mailmap file")
+		cur.mm = mm
+	}
+
+skip_mailmap:
+
 	if start != "" {
 		var t time.Time
 		if t, err = time.Parse(time.RFC3339, start); err == nil {
@@ -259,21 +298,24 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 func (cur *gitLogCursor) Column(c *sqlite.Context, col int) error {
 	commit := cur.commit
 
+	properCommitterSig := cur.mm.Lookup(mailmap.NameAndEmail{Name: commit.Committer.Name, Email: commit.Committer.Email})
+	properAuthorSig := cur.mm.Lookup(mailmap.NameAndEmail{Name: commit.Author.Name, Email: commit.Author.Email})
+
 	switch col {
 	case 0:
 		c.ResultText(commit.Hash.String())
 	case 1:
 		c.ResultText(commit.Message)
 	case 2:
-		c.ResultText(commit.Author.Name)
+		c.ResultText(properAuthorSig.Name)
 	case 3:
-		c.ResultText(commit.Author.Email)
+		c.ResultText(properAuthorSig.Email)
 	case 4:
 		c.ResultText(commit.Author.When.Format(time.RFC3339))
 	case 5:
-		c.ResultText(commit.Committer.Name)
+		c.ResultText(properCommitterSig.Name)
 	case 6:
-		c.ResultText(commit.Committer.Email)
+		c.ResultText(properCommitterSig.Email)
 	case 7:
 		c.ResultText(commit.Committer.When.Format(time.RFC3339))
 	case 8:
