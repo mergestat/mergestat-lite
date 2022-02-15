@@ -236,7 +236,7 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 
 	logger = logger.With().Str("revision", opts.From.String()).Logger()
 
-	{
+	if skipMailmap, _ := cur.Context.GetBool("skipMailmap"); !skipMailmap {
 		var c *object.Commit
 		if c, err = repo.CommitObject(opts.From); err != nil {
 			return errors.Wrapf(err, "could not lookup commit")

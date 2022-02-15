@@ -1,6 +1,9 @@
 package services
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 // Context is a key-value store that holds general configuration parameters for the "environment"
 // in which a module/function is executed in. For instance, it can be used to hold API tokens or configuration.
@@ -17,5 +20,20 @@ func (ctx Context) GetInt(key string) (int, bool) {
 		}
 	} else {
 		return 0, false
+	}
+}
+
+// GetBool retrieves a key from the context and returns true if it matches the string "true" (case insensitive),
+// otherwise it returns false if the key is unset or does not match "true". The second return indicates whether
+// a value was set in the key at all.
+func (ctx Context) GetBool(key string) (bool, bool) {
+	if val, ok := ctx[key]; ok && val != "" {
+		if strings.EqualFold(val, "true") {
+			return true, true
+		} else {
+			return false, true
+		}
+	} else {
+		return false, false
 	}
 }
