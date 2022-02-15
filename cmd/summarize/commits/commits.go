@@ -435,5 +435,9 @@ func (t *TermUI) PrintJSON() string {
 }
 
 func (t *TermUI) Close() error {
-	return t.db.Close()
+	defer t.db.Close()
+	if t.err != nil {
+		return t.err
+	}
+	return nil
 }
