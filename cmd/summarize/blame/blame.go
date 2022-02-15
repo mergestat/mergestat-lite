@@ -173,13 +173,13 @@ func (t *TermUI) renderDurationString(d time.Duration) string {
 		21 * time.Hour:        func(d time.Duration) string { return fmt.Sprintf("%.0f hours", math.Ceil(d.Hours())) },
 		35 * time.Hour:        func(_ time.Duration) string { return "1 day" },
 		25 * (24 * time.Hour): func(d time.Duration) string { return fmt.Sprintf("%.0f days", math.Ceil(d.Hours()/24.0)) },
-		45 * (24 * time.Hour): func(d time.Duration) string {
-			return fmt.Sprintf("1 month (%.0f days)", math.Round(d.Hours()/24.0))
-		},
+		45 * (24 * time.Hour): func(_ time.Duration) string { return "1 month" },
 		10 * (24 * time.Hour) * 30: func(d time.Duration) string {
-			return fmt.Sprintf("%.0f months (%.0f days)", math.Ceil(d.Hours()/(24.0*30)), math.Round(d.Hours()/24.0))
+			return fmt.Sprintf("%.0f months", math.Ceil(d.Hours()/(24.0*30)))
 		},
-		17 * (24 * time.Hour) * 30: func(_ time.Duration) string { return "1 year" },
+		17 * (24 * time.Hour) * 30: func(d time.Duration) string {
+			return fmt.Sprintf("1 year (%.0f months)", math.Round(d.Hours()/(24.0*30)))
+		},
 		1<<63 - 1: func(d time.Duration) string {
 			return fmt.Sprintf("%.0f years (%.0f months)", math.Ceil(d.Hours()/(24.0*30*12)), math.Round(d.Hours()/(24.0*30)))
 		},
