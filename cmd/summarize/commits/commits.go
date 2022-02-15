@@ -322,11 +322,13 @@ func (t *TermUI) renderCommitAuthorSummary(limit int) string {
 			return err.Error()
 		}
 
-		d := t.commitSummary.DistinctAuthors - limit
-		if d == 1 {
-			p.Fprintf(&b, "...1 more author\n")
-		} else if d > 1 {
-			p.Fprintf(&b, "...%d more authors\n", d)
+		if limit != 0 {
+			d := t.commitSummary.DistinctAuthors - limit
+			if d == 1 {
+				p.Fprintf(&b, "...1 more author\n")
+			} else if d > 1 {
+				p.Fprintf(&b, "...%d more authors\n", d)
+			}
 		}
 	} else {
 		p.Fprintln(&b, "Loading authors", t.spinner.View())
