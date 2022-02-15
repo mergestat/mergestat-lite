@@ -10,5 +10,6 @@ func init() {
 
 var summarizeCmd = &cobra.Command{
 	Use:     "summarize [command]",
+	Short:   "Generate various summary reports",
 	Aliases: []string{"summary"},
 }
