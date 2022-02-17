@@ -208,14 +208,6 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 		logger = logger.With().Str("repo-disk-path", path).Logger()
 	}
 
-	if hash != "" {
-		// we only need to get a single commit
-		cur.commits = object.NewCommitIter(repo.Storer, storer.NewEncodedObjectLookupIter(
-			repo.Storer, plumbing.CommitObject, []plumbing.Hash{plumbing.NewHash(hash)}))
-		logger = logger.With().Str("hash", hash).Logger()
-		return cur.Next()
-	}
-
 	var opts = &git.LogOptions{Order: git.LogOrderCommitterTime}
 
 	rev := plumbing.Revision(refName)
@@ -271,6 +263,14 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	}
 
 skip_mailmap:
+
+	if hash != "" {
+		// we only need to get a single commit
+		cur.commits = object.NewCommitIter(repo.Storer, storer.NewEncodedObjectLookupIter(
+			repo.Storer, plumbing.CommitObject, []plumbing.Hash{plumbing.NewHash(hash)}))
+		logger = logger.With().Str("hash", hash).Logger()
+		return cur.Next()
+	}
 
 	if start != "" {
 		var t time.Time
