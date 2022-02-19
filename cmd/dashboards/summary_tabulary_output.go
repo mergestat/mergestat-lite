@@ -9,9 +9,7 @@ import (
 	"golang.org/x/text/message"
 )
 
-// type has2DStringArrFunction interface {
-// 	to2StringArr() [][]string
-// }
+// interface with ToStringArr function. Usually takes in delimiter or defaults to \t
 type hasDelimToStringArr interface {
 	ToStringArr(delimiter ...string) []string
 }
@@ -23,12 +21,13 @@ func TableBuilder(headers []string, data hasDelimToStringArr) (*bytes.Buffer, er
 	// format header string
 	p.Fprintf(w, strings.Join(headers, "\t"))
 	p.Fprintln(w)
-	// format table data
+	// get formatted table data
 	rows := data.ToStringArr()
+	// build output
 	for _, row := range rows {
 		p.Fprintln(w, row)
 	}
-
+	// output formatted table
 	if err := w.Flush(); err != nil {
 		return nil, err
 	}

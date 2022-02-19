@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -13,8 +12,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jmoiron/sqlx"
 	"github.com/mergestat/mergestat/cmd/dashboards"
-	"github.com/mergestat/timediff"
-	"github.com/mergestat/timediff/locale"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -41,21 +38,21 @@ SELECT
 	count(*) AS loc,
 	count(distinct path) AS files,
 	count(distinct(author_email || author_name)) AS authors,
-	PRINTF('%s (%s)',timediff(MAX(author_when)),MAX(author_when)) AS latest,
-	PRINTF('%s (%s)',timediff(MIN(author_when)),MIN(author_when)) AS oldest,
-	AVG(julianday('now') - julianday(author_when)) AS avg_age,
+	PRINTF('%s (%s)',timediff(MAX(author_when)),STRFTIME('%Y-%m-%d',MAX(author_when))) AS latest,
+	PRINTF('%s (%s)',timediff(MIN(author_when)),STRFTIME('%Y-%m-%d',MIN(author_when))) AS oldest,
+	printduration(AVG(julianday('now') - julianday(author_when))) AS avg_age,
 	count(distinct hash) AS commits
 FROM preloaded_blame
 `
 
 type BlameSummary struct {
-	Lines   int             `db:"loc"`
-	Files   int             `db:"files"`
-	Authors int             `db:"authors"`
-	Latest  sql.NullString  `db:"latest"`
-	Oldest  sql.NullString  `db:"oldest"`
-	AvgAge  sql.NullFloat64 `db:"avg_age"`
-	Commits int             `db:"commits"`
+	Lines   int            `db:"loc"`
+	Files   int            `db:"files"`
+	Authors int            `db:"authors"`
+	Latest  sql.NullString `db:"latest"`
+	Oldest  sql.NullString `db:"oldest"`
+	AvgAge  sql.NullString `db:"avg_age"`
+	Commits int            `db:"commits"`
 }
 
 func (bs *BlameSummary) ToStringArr() []string {
@@ -64,7 +61,7 @@ func (bs *BlameSummary) ToStringArr() []string {
 	stringArr[1] = fmt.Sprint(bs.Lines)
 	stringArr[2] = fmt.Sprint(bs.Authors)
 	stringArr[3] = fmt.Sprint(bs.Commits)
-	stringArr[4] = fmt.Sprintf("%.2f", bs.AvgAge.Float64)
+	stringArr[4] = bs.AvgAge.String
 	stringArr[5] = bs.Oldest.String
 	stringArr[6] = bs.Latest.String
 
@@ -76,9 +73,9 @@ SELECT
 	author_name, author_email,
 	count(*) AS loc,
 	(CAST(count(*) AS FLOAT)/(SELECT count(*) FROM preloaded_blame))*100 AS percent_loc,
-	PRINTF('%s (%s)',timediff(MAX(author_when)),MAX(author_when)) AS latest,
-	PRINTF('%s (%s)',timediff(MIN(author_when)),MIN(author_when)) AS oldest,
-	AVG(julianday('now') - julianday(author_when)) AS avg_age,
+	PRINTF('%s (%s)',timediff(MAX(author_when)),STRFTIME('%Y-%m-%d',MAX(author_when))) AS latest,
+	PRINTF('%s (%s)',timediff(MIN(author_when)),STRFTIME('%Y-%m-%d',MIN(author_when))) AS oldest,
+	printduration(AVG(julianday('now') - julianday(author_when))) AS avg_age,
 	count(distinct hash) AS commits
 FROM preloaded_blame
 GROUP BY author_name, author_email
@@ -92,8 +89,8 @@ type BlameAuthorSummary struct {
 	LinesPercent sql.NullFloat64 `db:"percent_loc"`
 	Latest       sql.NullString  `db:"latest"`
 	Oldest       sql.NullString  `db:"oldest"`
-	AvgAge       sql.NullFloat64 `db:"avg_age"`
-	Commits      sql.NullInt64   `db:"commits"`
+	AvgAge       sql.NullString  `db:"avg_age"`
+	Commits      int             `db:"commits"`
 }
 type BlameAuthorSummarySlice struct {
 	bass []BlameAuthorSummary
@@ -110,9 +107,9 @@ func (bass *BlameAuthorSummarySlice) ToStringArr(delimiter ...string) []string {
 		stringifiedRow = ""
 		stringifiedRow += v.AuthorName + delim
 		stringifiedRow += fmt.Sprint(v.Lines) + delim
-		stringifiedRow += fmt.Sprintf("%.2f", v.LinesPercent.Float64)
-		stringifiedRow += fmt.Sprintf("%d", v.Commits.Int64) + delim
-		stringifiedRow += fmt.Sprintf("%.2f", v.AvgAge.Float64) + delim
+		stringifiedRow += fmt.Sprintf("%.2f", v.LinesPercent.Float64) + delim
+		stringifiedRow += fmt.Sprintf("%d", v.Commits) + delim
+		stringifiedRow += v.AvgAge.String + delim
 		stringifiedRow += v.Oldest.String + delim
 		stringifiedRow += v.Latest.String
 		fullStringArr[i] = stringifiedRow
@@ -194,41 +191,13 @@ func (t *TermUI) loadBlameAuthorSummary() tea.Msg {
 	if err := t.db.Select(&blameAuthorSummaries, blameAuthorSummarySQL); err != nil {
 		return err
 	}
-	//fmt.Printf("%#v", blameAuthorSummaries)
 	t.blameAuthorSummaries = blameAuthorSummaries
 	return nil
-}
-
-func (t *TermUI) renderDurationString(d time.Duration) string {
-	f := timediff.WithCustomFormatters(locale.Formatters{
-		time.Second:           func(_ time.Duration) string { return "<none>" },
-		44 * time.Second:      func(_ time.Duration) string { return "a few seconds" },
-		89 * time.Second:      func(_ time.Duration) string { return "1 minute" },
-		44 * time.Minute:      func(d time.Duration) string { return fmt.Sprintf("%.0f minutes", math.Ceil(d.Minutes())) },
-		89 * time.Minute:      func(_ time.Duration) string { return "1 hour" },
-		21 * time.Hour:        func(d time.Duration) string { return fmt.Sprintf("%.0f hours", math.Ceil(d.Hours())) },
-		35 * time.Hour:        func(_ time.Duration) string { return "1 day" },
-		25 * (24 * time.Hour): func(d time.Duration) string { return fmt.Sprintf("%.0f days", math.Ceil(d.Hours()/24.0)) },
-		45 * (24 * time.Hour): func(_ time.Duration) string { return "1 month" },
-		10 * (24 * time.Hour) * 30: func(d time.Duration) string {
-			return fmt.Sprintf("%.0f months", math.Ceil(d.Hours()/(24.0*30)))
-		},
-		17 * (24 * time.Hour) * 30: func(d time.Duration) string {
-			return fmt.Sprintf("1 year (%.0f months)", math.Round(d.Hours()/(24.0*30)))
-		},
-		1<<63 - 1: func(d time.Duration) string {
-			return fmt.Sprintf("%.0f years (%.0f months)", math.Ceil(d.Hours()/(24.0*30*12)), math.Round(d.Hours()/(24.0*30)))
-		},
-	})
-
-	return timediff.TimeDiff(time.Now().Add(-d), f)
 }
 
 func (t *TermUI) renderBlameSummaryTable(boldHeader bool) string {
 	var b *bytes.Buffer
 	var err error
-	//var files, authors, commits, avgAge, lines string
-	//firstCommit, lastCommit := "<none>", "<none>"
 	var headingStyle = lipgloss.NewStyle().Bold(boldHeader)
 
 	rows := []string{
@@ -245,27 +214,6 @@ func (t *TermUI) renderBlameSummaryTable(boldHeader bool) string {
 		if err != nil {
 			return err.Error()
 		}
-		// files = p.Sprintf("%d", t.blameSummary.Files)
-		// authors = p.Sprintf("%d", t.blameSummary.Authors)
-		// commits = p.Sprintf("%d", t.blameSummary.Commits)
-		// var avgAgeDur time.Duration
-		// if t.blameSummary.AvgAge.Valid {
-		// 	avgAgeDur = time.Duration((t.blameSummary.AvgAge.Float64 * 24 * float64(time.Hour.Nanoseconds())))
-		// }
-
-		// avgAge = p.Sprintf("%s", t.renderDurationString(avgAgeDur))
-		// lines = p.Sprintf("%d", t.blameSummary.Lines)
-
-		// if t.blameSummary.Oldest.Valid {
-		// 	when, _ := time.Parse(time.RFC3339, t.blameSummary.Oldest.String)
-		// 	firstCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
-		// }
-
-		// if t.blameSummary.Latest.Valid {
-		// 	when, _ := time.Parse(time.RFC3339, t.blameSummary.Latest.String)
-		// 	lastCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
-		// }
-
 	} else {
 		b, err = dashboards.LoadingSymbols(rows, t.spinner)
 		if err != nil {
@@ -311,49 +259,6 @@ func (t *TermUI) renderBlameAuthorSummary(limit int) string {
 				p.Fprintf(&b, "...%d more authors\n", d)
 			}
 		}
-		// for i, authorRow := range *t.blameAuthorSummaries {
-		// 	if i > limit-1 && limit != 0 {
-		// 		break
-		// 	}
-
-		// 	linesPercent := (float32(authorRow.Lines) / float32(t.blameSummary.Lines)) * 100.0
-
-		// 	var firstCommit, lastCommit time.Time
-		// 	var err error
-
-		// 	if authorRow.Oldest.Valid {
-		// 		if firstCommit, err = time.Parse(time.RFC3339, authorRow.Oldest.String); err != nil {
-		// 			return err.Error()
-		// 		}
-		// 	}
-
-		// 	if authorRow.Latest.Valid {
-		// 		if lastCommit, err = time.Parse(time.RFC3339, authorRow.Latest.String); err != nil {
-		// 			return err.Error()
-		// 		}
-		// 	}
-
-		// 	var avgAgeDur time.Duration
-		// 	if authorRow.AvgAge.Valid {
-		// 		avgAgeDur = time.Duration((authorRow.AvgAge.Float64 * 24 * float64(time.Hour.Nanoseconds())))
-		// 	}
-
-		// 	r := strings.Join([]string{
-		// 		authorRow.AuthorName,
-		// 		p.Sprintf("%d", authorRow.Lines),
-		// 		p.Sprintf("%.2f%%", linesPercent),
-		// 		p.Sprintf("%d", authorRow.Commits),
-		// 		p.Sprintf("%s", t.renderDurationString(avgAgeDur)),
-		// 		p.Sprintf("%s (%s)", timediff.TimeDiff(firstCommit), firstCommit.Format("2006-01-02")),
-		// 		p.Sprintf("%s (%s)", timediff.TimeDiff(lastCommit), lastCommit.Format("2006-01-02")),
-		// 	}, "\t")
-
-		// 	p.Fprintln(w, r)
-		// }
-
-		// if err := w.Flush(); err != nil {
-		// 	return err.Error()
-		// }
 
 	} else {
 		p.Fprintln(&b, "Loading authors", t.spinner.View())
@@ -437,7 +342,7 @@ func (t *TermUI) PrintJSON() string {
 	}
 
 	if t.blameSummary.AvgAge.Valid {
-		output["avgAgeLines"] = t.blameSummary.AvgAge.Float64
+		output["avgAgeLines"] = t.blameSummary.AvgAge
 	}
 
 	if t.blameSummary.Oldest.Valid {
@@ -468,19 +373,13 @@ func (t *TermUI) PrintJSON() string {
 			}
 		}
 
-		var avgAgeDur time.Duration
-		if authorSummary.AvgAge.Valid {
-			avgAgeDur = time.Duration((authorSummary.AvgAge.Float64 * 24 * float64(time.Hour.Nanoseconds())))
-		}
-
 		authorSummaries[i] = map[string]interface{}{
 			"name":           authorSummary.AuthorName,
 			"email":          authorSummary.AuthorEmail,
 			"blameableLines": authorSummary.Lines,
 			"linePercent":    linesPercent,
 			"commits":        authorSummary.Commits,
-			"avgAge":         t.renderDurationString(avgAgeDur),
-			"avgAgeSeconds":  avgAgeDur.Seconds(),
+			"avgAge":         authorSummary.AvgAge.String,
 			"oldestLine":     firstCommit.Format(time.RFC3339),
 			"newestLine":     lastCommit.Format(time.RFC3339),
 		}

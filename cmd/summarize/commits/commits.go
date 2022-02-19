@@ -71,8 +71,8 @@ SELECT
 	total_non_merges,
 	distinct_authors,
 	distinct_files,
-	PRINTF('%s (%s)',timediff(first_commit),first_commit) AS first_commit,
-	PRINTF('%s (%s)',timediff(last_commit),last_commit) AS last_commit
+	PRINTF('%s (%s)',timediff(first_commit),STRFTIME('%Y-%m-%d',first_commit)) AS first_commit,
+	PRINTF('%s (%s)',timediff(last_commit),STRFTIME('%Y-%m-%d',last_commit)) AS last_commit
 	FROM preloaded_commits_summary;
 	`
 
@@ -124,8 +124,8 @@ SELECT author_name,
     sum(additions) AS additions,
     sum(deletions) AS deletions,
     count(distinct file_path) AS distinct_files,
-	PRINTF('%s (%s)',timediff(min(author_when)),min(author_when)) AS first_commit,
-	PRINTF('%s (%s)',timediff(max(author_when)),max(author_when)) AS last_commit
+	PRINTF('%s (%s)',timediff(min(author_when)),STRFTIME('%Y-%m-%d',min(author_when))) AS first_commit,
+	PRINTF('%s (%s)',timediff(max(author_when)),STRFTIME('%Y-%m-%d',max(author_when))) AS last_commit
 FROM preloaded_commit_stats,
     preloaded_commits_summary
 GROUP BY author_name,

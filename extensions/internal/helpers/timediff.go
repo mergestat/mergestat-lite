@@ -7,9 +7,8 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
-// YamlToJson implements yaml_to_json sql function.
-// The function signature of the equivalent sql function is:
-//     yaml_to_json(string) string
+// TimeDiff implements a timediff pretty print function
+// using github.com/mergestat/timediff
 type TimeDiff struct{}
 
 func (y *TimeDiff) Args() int           { return -1 }

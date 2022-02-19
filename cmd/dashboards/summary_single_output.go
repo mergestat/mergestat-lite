@@ -14,6 +14,8 @@ type hasToStringArr interface {
 	ToStringArr() []string
 }
 
+// names : ordered string array to left of outputted data
+// data  : struct implementing interface hasToStringArr to be displayed as the data of the headers
 func OneToOneOutputBuilder(names []string, data hasToStringArr) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
@@ -34,6 +36,7 @@ func OneToOneOutputBuilder(names []string, data hasToStringArr) (*bytes.Buffer, 
 	return &b, nil
 }
 
+// names: the ordered headers to be displayed to the left of the data
 func LoadingSymbols(names []string, s spinner.Model) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
