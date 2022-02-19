@@ -5,15 +5,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jmoiron/sqlx"
-	"github.com/mergestat/timediff"
+	dashboards "github.com/mergestat/mergestat/cmd/dashboards"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -21,10 +19,21 @@ import (
 type CommitSummary struct {
 	Total           int            `db:"total"`
 	TotalNonMerges  int            `db:"total_non_merges"`
-	FirstCommit     sql.NullString `db:"first_commit"`
-	LastCommit      sql.NullString `db:"last_commit"`
 	DistinctAuthors int            `db:"distinct_authors"`
 	DistinctFiles   int            `db:"distinct_files"`
+	FirstCommit     sql.NullString `db:"first_commit"`
+	LastCommit      sql.NullString `db:"last_commit"`
+}
+
+func (cs *CommitSummary) ToStringArr() []string {
+	stringArr := make([]string, 6)
+	stringArr[0] = fmt.Sprint(cs.Total)
+	stringArr[1] = fmt.Sprint(cs.TotalNonMerges)
+	stringArr[2] = fmt.Sprint(cs.DistinctAuthors)
+	stringArr[3] = fmt.Sprint(cs.DistinctFiles)
+	stringArr[4] = cs.FirstCommit.String
+	stringArr[5] = cs.LastCommit.String
+	return stringArr
 }
 
 // This is a bit odd. We have two queries, one that includes filtering by file_path with a LIKE
@@ -47,40 +56,79 @@ CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author
 const preloadCommitsWithoutFilePathPatternSQL = `
 CREATE TABLE preloaded_commit_stats AS SELECT * FROM commits LEFT JOIN stats('', commits.hash) WHERE author_when > date($start, $start_mod) AND author_when < date($end, $end_mod);
 CREATE TABLE preloaded_commits AS SELECT hash, author_name, author_email, author_when, parents FROM preloaded_commit_stats GROUP BY hash;
+CREATE TABLE preloaded_commits_summary AS SELECT
+(SELECT count(*) FROM preloaded_commits) AS total,
+(SELECT count(*) FROM preloaded_commits WHERE parents < 2) AS total_non_merges,
+(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
+(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
+(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
+(SELECT count(distinct(path)) FROM files WHERE path LIKE '%') AS distinct_files;
 `
 
 const commitSummarySQL = `
 SELECT
-	(SELECT count(*) FROM preloaded_commits) AS total,
-	(SELECT count(*) FROM preloaded_commits WHERE parents < 2) AS total_non_merges,
-	(SELECT author_when FROM preloaded_commits ORDER BY author_when ASC LIMIT 1) AS first_commit,
-	(SELECT author_when FROM preloaded_commits ORDER BY author_when DESC LIMIT 1) AS last_commit,
-	(SELECT count(distinct(author_email || author_name)) FROM preloaded_commits) AS distinct_authors,
-	(SELECT count(distinct(file_path)) FROM preloaded_commit_stats WHERE file_path LIKE $file_path) AS distinct_files
-`
+	total,
+	total_non_merges,
+	distinct_authors,
+	distinct_files,
+	PRINTF('%s (%s)',timediff(first_commit),STRFTIME('%Y-%m-%d',first_commit)) AS first_commit,
+	PRINTF('%s (%s)',timediff(last_commit),STRFTIME('%Y-%m-%d',last_commit)) AS last_commit
+	FROM preloaded_commits_summary;
+	`
 
 type CommitAuthorSummary struct {
-	AuthorName    string        `db:"author_name"`
-	AuthorEmail   string        `db:"author_email"`
-	Commits       int           `db:"commit_count"`
-	Additions     sql.NullInt64 `db:"additions"`
-	Deletions     sql.NullInt64 `db:"deletions"`
-	DistinctFiles int           `db:"distinct_files"`
-	FirstCommit   string        `db:"first_commit"`
-	LastCommit    string        `db:"last_commit"`
+	AuthorName    string         `db:"author_name"`
+	AuthorEmail   string         `db:"author_email"`
+	Commits       int            `db:"commit_count"`
+	CommitPercent float32        `db:"commit_percent"`
+	Additions     sql.NullInt64  `db:"additions"`
+	Deletions     sql.NullInt64  `db:"deletions"`
+	DistinctFiles int            `db:"distinct_files"`
+	FirstCommit   sql.NullString `db:"first_commit"`
+	LastCommit    sql.NullString `db:"last_commit"`
+}
+type CommitAuthorSummarySlice struct {
+	casSlice []CommitAuthorSummary
+}
+
+// a function that turns a CommitAuthorSummary into a prettified string with a default delimiter of \t
+func (cas *CommitAuthorSummarySlice) ToStringArr(delimiter ...string) []string {
+	var stringifiedRow string
+	fullStringArr := make([]string, len(cas.casSlice))
+	delim := "\t"
+	if len(delimiter) == 1 {
+		delim = delimiter[0]
+	}
+	for i, v := range cas.casSlice {
+		stringifiedRow = ""
+		stringifiedRow += v.AuthorName + delim
+		stringifiedRow += v.AuthorEmail + delim
+		stringifiedRow += fmt.Sprint(v.Commits) + delim
+		stringifiedRow += fmt.Sprintf("%.2f", v.CommitPercent) + delim
+		stringifiedRow += fmt.Sprint(v.Additions.Int64) + delim
+		stringifiedRow += fmt.Sprint(v.Deletions.Int64) + delim
+		stringifiedRow += fmt.Sprint(v.DistinctFiles) + delim
+		stringifiedRow += v.FirstCommit.String + delim
+		stringifiedRow += v.LastCommit.String + delim
+		fullStringArr[i] = stringifiedRow
+	}
+	return fullStringArr
 }
 
 const commitAuthorSummarySQL = `
-SELECT
-	author_name, author_email,
-	count(distinct hash) AS commit_count,
-	sum(additions) AS additions,
-	sum(deletions) AS deletions,
-	count(distinct file_path) AS distinct_files,
-	min(author_when) AS first_commit,
-	max(author_when) AS last_commit
-FROM preloaded_commit_stats
-GROUP BY author_name, author_email
+SELECT author_name,
+    author_email,
+    count(distinct hash) AS commit_count,
+    ROUND(CAST(count(distinct hash) as REAL) / total, 4) * 100 AS commit_percent,
+    sum(additions) AS additions,
+    sum(deletions) AS deletions,
+    count(distinct file_path) AS distinct_files,
+	PRINTF('%s (%s)',timediff(min(author_when)),STRFTIME('%Y-%m-%d',min(author_when))) AS first_commit,
+	PRINTF('%s (%s)',timediff(max(author_when)),STRFTIME('%Y-%m-%d',max(author_when))) AS last_commit
+FROM preloaded_commit_stats,
+    preloaded_commits_summary
+GROUP BY author_name,
+    author_email
 ORDER BY commit_count DESC
 `
 
@@ -98,7 +146,7 @@ type TermUI struct {
 	spinner               spinner.Model
 	commitsPreloaded      bool
 	commitSummary         *CommitSummary
-	commitAuthorSummaries *[]*CommitAuthorSummary
+	commitAuthorSummaries []CommitAuthorSummary
 }
 
 func NewTermUI(pathPattern, dateFilterStart, dateFilterEnd string) (*TermUI, error) {
@@ -200,67 +248,40 @@ func (t *TermUI) loadAuthorCommitSummary() tea.Msg {
 	for !t.commitsPreloaded {
 		time.Sleep(300 * time.Millisecond)
 	}
-	var commitAuthorSummaries []*CommitAuthorSummary
+	var commitAuthorSummaries []CommitAuthorSummary
 	if err := t.db.Select(&commitAuthorSummaries, commitAuthorSummarySQL); err != nil {
 		return err
 	}
 
-	t.commitAuthorSummaries = &commitAuthorSummaries
+	t.commitAuthorSummaries = commitAuthorSummaries
 	return nil
 }
 
 func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
-	var b bytes.Buffer
-	p := message.NewPrinter(language.English)
-	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
+	var b *bytes.Buffer
+	var err error
 
-	var total, totalNonMerges, distinctFiles, distinctAuthors, firstCommit, lastCommit string
-
-	if t.commitSummary != nil {
-		total = p.Sprintf("%d", t.commitSummary.Total)
-		totalNonMerges = p.Sprintf("%d", t.commitSummary.TotalNonMerges)
-		distinctFiles = p.Sprintf("%d", t.commitSummary.DistinctFiles)
-		distinctAuthors = p.Sprintf("%d", t.commitSummary.DistinctAuthors)
-
-		firstCommit, lastCommit = "<none>", "<none>"
-
-		if t.commitSummary.FirstCommit.Valid {
-			when, _ := time.Parse(time.RFC3339, t.commitSummary.FirstCommit.String)
-			firstCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
-		}
-
-		if t.commitSummary.LastCommit.Valid {
-			when, _ := time.Parse(time.RFC3339, t.commitSummary.LastCommit.String)
-			lastCommit = fmt.Sprintf("%s (%s)", timediff.TimeDiff(when), when.Format("2006-01-02"))
-		}
-
-	} else {
-		total = t.spinner.View()
-		totalNonMerges = t.spinner.View()
-		distinctFiles = t.spinner.View()
-		distinctAuthors = t.spinner.View()
-		firstCommit = t.spinner.View()
-		lastCommit = t.spinner.View()
-	}
-
-	var headingStyle = lipgloss.NewStyle().Bold(boldHeader)
+	headingStyle := lipgloss.NewStyle().Bold(boldHeader)
 
 	rows := []string{
-		strings.Join([]string{headingStyle.Render("Commits"), total}, "\t"),
-		strings.Join([]string{headingStyle.Render("Non-Merge Commits"), totalNonMerges}, "\t"),
-		strings.Join([]string{headingStyle.Render("Files Δ"), distinctFiles}, "\t"),
-		strings.Join([]string{headingStyle.Render("Unique Authors"), distinctAuthors}, "\t"),
-		strings.Join([]string{headingStyle.Render("First Commit"), firstCommit}, "\t"),
-		strings.Join([]string{headingStyle.Render("Latest Commit"), lastCommit}, "\t"),
+		headingStyle.Render("Commits"),
+		headingStyle.Render("Non-Merge Commits"),
+		headingStyle.Render("Files"),
+		headingStyle.Render("Unique Authors"),
+		headingStyle.Render("First Commit"),
+		headingStyle.Render("Latest Commit"),
 	}
-
-	p.Fprintln(w, strings.Join(rows, "\n"))
-	if err := w.Flush(); err != nil {
-		return err.Error()
+	if t.commitSummary != nil {
+		b, err = dashboards.OneToOneOutputBuilder(rows, t.commitSummary)
+		if err != nil {
+			return err.Error()
+		}
+	} else {
+		b, err = dashboards.LoadingSymbols(rows, t.spinner)
+		if err != nil {
+			return err.Error()
+		}
 	}
-
-	p.Fprintln(&b)
-	p.Fprintln(&b)
 
 	return b.String()
 }
@@ -268,59 +289,31 @@ func (t *TermUI) renderCommitSummaryTable(boldHeader bool) string {
 func (t *TermUI) renderCommitAuthorSummary(limit int) string {
 	var b bytes.Buffer
 	p := message.NewPrinter(language.English)
-	w := tabwriter.NewWriter(&b, 0, 0, 3, ' ', tabwriter.TabIndent)
 
 	if t.commitAuthorSummaries != nil && t.commitSummary != nil {
 
-		if len(*t.commitAuthorSummaries) == 0 {
+		if len(t.commitAuthorSummaries) == 0 {
 			return "<no authors>"
 		}
 
-		r := strings.Join([]string{
+		headers := []string{
 			"Author",
+			"Author email",
 			"Commits",
-			"Commit %",
+			"Commit %%",
 			"Files Δ",
 			"Additions",
 			"Deletions",
 			"First Commit",
 			"Latest Commit",
-		}, "\t")
-
-		p.Fprintln(w, r)
-
-		for i, authorRow := range *t.commitAuthorSummaries {
-			if i > limit-1 && limit != 0 {
-				break
-			}
-			commitPercent := (float32(authorRow.Commits) / float32(t.commitSummary.Total)) * 100.0
-
-			var firstCommit, lastCommit time.Time
-			var err error
-			if firstCommit, err = time.Parse(time.RFC3339, authorRow.FirstCommit); err != nil {
-				return err.Error()
-			}
-			if lastCommit, err = time.Parse(time.RFC3339, authorRow.LastCommit); err != nil {
-				return err.Error()
-			}
-
-			r := strings.Join([]string{
-				authorRow.AuthorName,
-				p.Sprintf("%d", authorRow.Commits),
-				p.Sprintf("%.2f%%", commitPercent),
-				p.Sprintf("%d", authorRow.DistinctFiles),
-				p.Sprintf("%d", authorRow.Additions.Int64),
-				p.Sprintf("%d", authorRow.Deletions.Int64),
-				p.Sprintf("%s (%s)", timediff.TimeDiff(firstCommit), firstCommit.Format("2006-01-02")),
-				p.Sprintf("%s (%s)", timediff.TimeDiff(lastCommit), lastCommit.Format("2006-01-02")),
-			}, "\t")
-
-			p.Fprintln(w, r)
 		}
-
-		if err := w.Flush(); err != nil {
+		var casSlice CommitAuthorSummarySlice
+		casSlice.casSlice = t.commitAuthorSummaries
+		formattedTable, err := dashboards.TableBuilder(headers, &casSlice)
+		if err != nil {
 			return err.Error()
 		}
+		b = *formattedTable
 
 		if limit != 0 {
 			d := t.commitSummary.DistinctAuthors - limit
@@ -410,9 +403,9 @@ func (t *TermUI) PrintJSON() string {
 		"lastCommit":      t.commitSummary.LastCommit.String,
 	}
 
-	authorSummaries := make([]map[string]interface{}, len(*t.commitAuthorSummaries))
+	authorSummaries := make([]map[string]interface{}, len(t.commitAuthorSummaries))
 
-	for i, authorSummary := range *t.commitAuthorSummaries {
+	for i, authorSummary := range t.commitAuthorSummaries {
 		commitPercent := (float32(authorSummary.Commits) / float32(t.commitSummary.Total)) * 100.0
 		authorSummaries[i] = map[string]interface{}{
 			"name":          authorSummary.AuthorName,
