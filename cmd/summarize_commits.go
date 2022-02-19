@@ -5,24 +5,24 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mergestat/mergestat/cmd/summary"
+	"github.com/mergestat/mergestat/cmd/summarize/commits"
 	"github.com/spf13/cobra"
 )
 
 var (
-	summaryDateFilterStart string
-	summaryDateFilterEnd   string
-	summaryOutputJSON      bool
+	summarizeDateFilterStart string
+	summarizeDateFilterEnd   string
+	summarizeOutputJSON      bool
 )
 
 func init() {
-	summaryCmd.Flags().StringVarP(&summaryDateFilterStart, "start", "s", "", "specify a start date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
-	summaryCmd.Flags().StringVarP(&summaryDateFilterEnd, "end", "e", "", "specify an end date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
-	summaryCmd.Flags().BoolVar(&summaryOutputJSON, "json", false, "output as JSON")
+	summarizeCommitsCmd.Flags().StringVarP(&summarizeDateFilterStart, "start", "s", "", "specify a start date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
+	summarizeCommitsCmd.Flags().StringVarP(&summarizeDateFilterEnd, "end", "e", "", "specify an end date to filter by. Can be of format YYYY-MM-DD, or a SQLite \"date modifier,\" relative to 'now'")
+	summarizeCommitsCmd.Flags().BoolVar(&summarizeOutputJSON, "json", false, "output as JSON")
 }
 
-var summaryCmd = &cobra.Command{
-	Use:   "summary [file pattern]",
+var summarizeCommitsCmd = &cobra.Command{
+	Use:   "commits [file pattern]",
 	Short: "Print a summary of commit activity",
 	Long: `Prints a summary of commit activity in the default repository (either the current directory or supplied by --repo).
 Specify a file pattern as an argument to filter for commits that only modified a certain file or directory.
@@ -36,14 +36,18 @@ Read more here: https://sqlite.org/lang_expr.html#the_like_glob_regexp_and_match
 			pathPattern = args[0]
 		}
 
-		var ui *summary.TermUI
+		var ui *commits.TermUI
 		var err error
-		if ui, err = summary.NewTermUI(pathPattern, summaryDateFilterStart, summaryDateFilterEnd); err != nil {
+		if ui, err = commits.NewTermUI(pathPattern, summarizeDateFilterStart, summarizeDateFilterEnd); err != nil {
 			handleExitError(err)
 		}
-		defer ui.Close()
+		defer func() {
+			if err := ui.Close(); err != nil {
+				handleExitError(err)
+			}
+		}()
 
-		if summaryOutputJSON {
+		if summarizeOutputJSON {
 			fmt.Println(ui.PrintJSON())
 			return
 		}

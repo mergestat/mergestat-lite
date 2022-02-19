@@ -19,6 +19,7 @@ var presetQuery string                                // named / preset query fl
 var dbPath string                                     // path to sqlite db file on disk to mount on
 var repo string                                       // path to repo on disk
 var cloneDir string                                   // path to directory to clone repos in
+var skipMailmap bool                                  // whether to skip usage of the .mailmap file when querying commit history
 var gitSSLNoVerify = os.Getenv("GIT_SSL_NO_VERIFY")   // if set to anything, will not verify SSL when cloning
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
@@ -32,6 +33,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&dbPath, "db", "d", "", "specify a db file on disk to mount when executing queries")
 	rootCmd.PersistentFlags().StringVarP(&repo, "repo", "r", ".", "specify a path to a default repo on disk. This will be used if no repo is supplied as an argument to a git table")
 	rootCmd.PersistentFlags().StringVarP(&cloneDir, "clone-dir", "c", "", "specify a path to a directory on disk to use when cloning repos, instead of a tmp dir. Should be empty to avoid path conflicts.")
+	rootCmd.PersistentFlags().BoolVar(&skipMailmap, "skip-mailmap", false, "skip usage of .mailmap file when querying commit history.")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
 
 	// register the sqlite extension ahead of any command
@@ -41,7 +43,7 @@ func init() {
 	}
 
 	// add sub commands
-	rootCmd.AddCommand(exportCmd, serveCmd, summaryCmd, blameCmd)
+	rootCmd.AddCommand(exportCmd, serveCmd, summarizeCmd)
 
 	// conditionally add the pgsync sub command
 	// TODO(patrickdevivo) "conditional" for now until the behavior stabilizes

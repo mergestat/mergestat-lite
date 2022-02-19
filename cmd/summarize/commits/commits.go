@@ -1,4 +1,4 @@
-package summary
+package commits
 
 import (
 	"bytes"
@@ -230,8 +230,14 @@ func (t *TermUI) loadCommitSummary() tea.Msg {
 	for !t.commitsPreloaded {
 		time.Sleep(300 * time.Millisecond)
 	}
+
+	pathPattern := "%"
+	if t.pathPattern != "" {
+		pathPattern = t.pathPattern
+	}
+
 	var commitSummary CommitSummary
-	if err := t.db.QueryRowx(commitSummarySQL, t.pathPattern).StructScan(&commitSummary); err != nil {
+	if err := t.db.QueryRowx(commitSummarySQL, sql.Named("file_path", pathPattern)).StructScan(&commitSummary); err != nil {
 		return err
 	}
 
@@ -310,11 +316,13 @@ func (t *TermUI) renderCommitAuthorSummary(limit int) string {
 		}
 		b = *formattedTable
 
-		d := t.commitSummary.DistinctAuthors - limit
-		if d == 1 {
-			p.Fprintf(&b, "...1 more author\n")
-		} else if d > 1 {
-			p.Fprintf(&b, "...%d more authors\n", d)
+		if limit != 0 {
+			d := t.commitSummary.DistinctAuthors - limit
+			if d == 1 {
+				p.Fprintf(&b, "...1 more author\n")
+			} else if d > 1 {
+				p.Fprintf(&b, "...%d more authors\n", d)
+			}
 		}
 	} else {
 		p.Fprintln(&b, "Loading authors", t.spinner.View())
@@ -421,5 +429,9 @@ func (t *TermUI) PrintJSON() string {
 }
 
 func (t *TermUI) Close() error {
-	return t.db.Close()
+	defer t.db.Close()
+	if t.err != nil {
+		return t.err
+	}
+	return nil
 }

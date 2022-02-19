@@ -23,6 +23,11 @@ func registerExt() {
 		multiLocOpt.HTTPAuth = &http.BasicAuth{Username: githubToken}
 	}
 
+	var skipMailmapCtx string
+	if skipMailmap {
+		skipMailmapCtx = "true"
+	}
+
 	sqlite.Register(
 		extensions.RegisterFn(
 			options.WithExtraFunctions(),
@@ -31,6 +36,7 @@ func registerExt() {
 				locator.MultiLocator(multiLocOpt),
 			))),
 			options.WithContextValue("defaultRepoPath", repo),
+			options.WithContextValue("skipMailmap", skipMailmapCtx),
 			options.WithGitHub(),
 			options.WithContextValue("githubToken", githubToken),
 			options.WithContextValue("githubPerPage", os.Getenv("GITHUB_PER_PAGE")),
