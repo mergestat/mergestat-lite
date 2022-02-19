@@ -112,7 +112,6 @@ func (cas *CommitAuthorSummarySlice) ToStringArr(delimiter ...string) []string {
 		stringifiedRow += v.LastCommit.String + delim
 		fullStringArr[i] = stringifiedRow
 	}
-	//println(strings.Join(fullStringArr, " "))
 	return fullStringArr
 }
 
