@@ -23,27 +23,27 @@ func (y *TimeDiff) Apply(context *sqlite.Context, value ...sqlite.Value) {
 	case 1:
 		time1, err = time.Parse(time.RFC3339, value[0].Text())
 		if err != nil {
-			context.ResultText(err.Error())
+			context.ResultError(err)
 		}
 		context.ResultText(timediff.TimeDiff(time1))
 	case 2:
 		time1, err = time.Parse(time.RFC3339, value[0].Text())
 		if err != nil {
-			context.ResultText(err.Error())
+			context.ResultError(err)
 		}
 		time2, err = time.Parse(time.RFC3339, value[1].Text())
 		if err != nil {
-			context.ResultText(err.Error())
+			context.ResultError(err)
 		}
 		context.ResultText(timediff.TimeDiff(time1, timediff.WithStartTime(time2)))
 	case 3:
 		time1, err = time.Parse(value[2].Text(), value[0].Text())
 		if err != nil {
-			context.ResultText(err.Error())
+			context.ResultError(err)
 		}
 		time2, err = time.Parse(value[2].Text(), value[1].Text())
 		if err != nil {
-			context.ResultText(err.Error())
+			context.ResultError(err)
 		}
 		context.ResultText(timediff.TimeDiff(time1, timediff.WithStartTime(time2)))
 	default:
