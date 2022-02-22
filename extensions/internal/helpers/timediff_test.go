@@ -16,24 +16,25 @@ func TestTimediff(t *testing.T) {
 	}
 	tests := []test{
 		// 3 inputs end date, start date, format
-		{query: `SELECT timediff(DATE('now','-4 year','-6 month'),DATE('now'),'2006-01-02')`, expected: "5 years ago"},
-		{query: `SELECT timediff(DATE('now','-1 year'),DATE('now'),'2006-01-02')`, expected: "a year ago"},
-		{query: `SELECT timediff(DATE('now','-6 month'),DATE('now'),'2006-01-02')`, expected: "7 months ago"},
-		{query: `SELECT timediff(DATE('now','-1 month'),DATE('now'),'2006-01-02')`, expected: "a month ago"},
-		{query: `SELECT timediff(DATE('now','-5 day'),DATE('now'),'2006-01-02')`, expected: "5 days ago"},
-		{query: `SELECT timediff(DATE('now','-1 day'),DATE('now'),'2006-01-02')`, expected: "a day ago"},
+		{query: `SELECT time_diff(DATE('now','-4 year','-6 month'),DATE('now'),'2006-01-02')`, expected: "5 years ago"},
+		{query: `SELECT time_diff(DATE('now','-1 year'),DATE('now'),'2006-01-02')`, expected: "a year ago"},
+		{query: `SELECT time_diff(DATE('now','-6 month'),DATE('now'),'2006-01-02')`, expected: "7 months ago"},
+		{query: `SELECT time_diff(DATE('now','-1 month'),DATE('now'),'2006-01-02')`, expected: "a month ago"},
+		{query: `SELECT time_diff(DATE('now','-5 day'),DATE('now'),'2006-01-02')`, expected: "5 days ago"},
+		{query: `SELECT time_diff(DATE('now','-1 day'),DATE('now'),'2006-01-02')`, expected: "a day ago"},
 		// one input end date
-		{query: `SELECT timediff(?)`, queryInput: []interface{}{time.Now().Add(-time.Hour * 7).Add(time.Minute * 1).Format(time.RFC3339)}, expected: "7 hours ago"},
-		{query: `SELECT timediff(?)`, queryInput: []interface{}{time.Now().Add(-time.Hour * 1).Format(time.RFC3339)}, expected: "an hour ago"},
-		{query: `SELECT timediff(?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 32).Add(time.Second * 2).Format(time.RFC3339)}, expected: "32 minutes ago"},
-		{query: `SELECT timediff(?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 1).Format(time.RFC3339)}, expected: "a minute ago"},
-		{query: `SELECT timediff(?)`, queryInput: []interface{}{time.Now().Add(-time.Second * 15).Format(time.RFC3339)}, expected: "a few seconds ago"},
+		{query: `SELECT time_diff(?)`, queryInput: []interface{}{time.Now().Add(-time.Hour * 7).Add(time.Minute * 1).Format(time.RFC3339)}, expected: "7 hours ago"},
+		{query: `SELECT time_diff(?)`, queryInput: []interface{}{time.Now().Add(-time.Hour * 1).Format(time.RFC3339)}, expected: "an hour ago"},
+		{query: `SELECT time_diff(?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 32).Add(time.Second * 2).Format(time.RFC3339)}, expected: "32 minutes ago"},
+		{query: `SELECT time_diff(?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 1).Format(time.RFC3339)}, expected: "a minute ago"},
+		{query: `SELECT time_diff(?)`, queryInput: []interface{}{time.Now().Add(-time.Second * 15).Format(time.RFC3339)}, expected: "a few seconds ago"},
 		// two inputs end date, start date
-		{query: `SELECT timediff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Second * 15).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "a few seconds ago"},
-		{query: `SELECT timediff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 1).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "a minute ago"},
-		{query: `SELECT timediff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 32).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "32 minutes ago"},
-		{query: `SELECT timediff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Hour * 1).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "an hour ago"},
+		{query: `SELECT time_diff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Second * 15).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "a few seconds ago"},
+		{query: `SELECT time_diff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 1).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "a minute ago"},
+		{query: `SELECT time_diff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Minute * 32).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "32 minutes ago"},
+		{query: `SELECT time_diff(?,?)`, queryInput: []interface{}{time.Now().Add(-time.Hour * 1).Format(time.RFC3339), time.Now().Format(time.RFC3339)}, expected: "an hour ago"},
 	}
+
 	var rows *sql.Rows
 	var err error
 	var rowNum int

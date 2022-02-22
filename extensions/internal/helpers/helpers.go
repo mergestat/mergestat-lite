@@ -9,12 +9,12 @@ import (
 // Register registers helpers as a SQLite extension
 func Register(ext *sqlite.ExtensionApi, _ *options.Options) (_ sqlite.ErrorCode, err error) {
 	var fns = map[string]sqlite.Function{
-		"str_split":     &StringSplit{},
-		"toml_to_json":  &TomlToJson{},
-		"yaml_to_json":  &YamlToJson{},
-		"xml_to_json":   &XmlToJson{},
-		"timediff":      &TimeDiff{},
-		"printduration": &PrintDuration{},
+		"str_split":    &StringSplit{},
+		"toml_to_json": &TomlToJson{},
+		"yaml_to_json": &YamlToJson{},
+		"xml_to_json":  &XmlToJson{},
+		"time_diff":    &TimeDiff{},
+		"approx_dur":   &ApproxDuration{},
 	}
 
 	// alias yaml_to_json => yml_to_json
