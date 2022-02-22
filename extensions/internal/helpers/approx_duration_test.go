@@ -7,7 +7,7 @@ import (
 	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
-func TestApproxDurationPrintDuration(t *testing.T) {
+func TestApproxDuration(t *testing.T) {
 	type test struct {
 		query    string
 		expected string
