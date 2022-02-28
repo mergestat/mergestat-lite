@@ -21,6 +21,7 @@ func (y *TimeDiff) Apply(context *sqlite.Context, value ...sqlite.Value) {
 	switch len(value) {
 	case 0:
 		context.ResultError(fmt.Errorf("must supply a time value"))
+		return
 	case 1:
 		time1, err = time.Parse(time.RFC3339, value[0].Text())
 		if err != nil {
