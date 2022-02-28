@@ -10,18 +10,18 @@ import (
 	"go.riyazali.net/sqlite"
 )
 
-// PrintDuration pretty prints a duration given in days showing
+// ApproxDuration pretty prints a duration given in days showing
 // x years (y months)
 // x years
 // x months (y days)
 // x months
 // x days
-type PrintDuration struct{}
+type ApproxDuration struct{}
 
-func (y *PrintDuration) Args() int           { return 1 }
-func (y *PrintDuration) Deterministic() bool { return false }
+func (y *ApproxDuration) Args() int           { return 1 }
+func (y *ApproxDuration) Deterministic() bool { return true }
 
-func (y *PrintDuration) Apply(context *sqlite.Context, value ...sqlite.Value) {
+func (y *ApproxDuration) Apply(context *sqlite.Context, value ...sqlite.Value) {
 	d := time.Duration(value[0].Float() * 24 * float64(time.Hour.Nanoseconds()))
 
 	f := timediff.WithCustomFormatters(locale.Formatters{

@@ -7,37 +7,38 @@ import (
 	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
-func TestPrintDuration(t *testing.T) {
+func TestApproxDuration(t *testing.T) {
 	type test struct {
 		query    string
 		expected string
 	}
 	tests := []test{
 		// multiple years
-		{query: `SELECT printduration('1000')`, expected: "3 years (33 months)"},
+		{query: `SELECT approx_dur(1000)`, expected: "3 years (33 months)"},
 		// single year
-		{query: `SELECT printduration('365')`, expected: "1 year (12 months)"},
+		{query: `SELECT approx_dur(365)`, expected: "1 year (12 months)"},
 		// multiple months
-		{query: `SELECT printduration('185')`, expected: "7 months"},
+		{query: `SELECT approx_dur(185)`, expected: "7 months"},
 		// single month
-		{query: `SELECT printduration('31')`, expected: "1 month"},
+		{query: `SELECT approx_dur(31)`, expected: "1 month"},
 		// multiple days
-		{query: `SELECT printduration('5')`, expected: "5 days"},
+		{query: `SELECT approx_dur(5)`, expected: "5 days"},
 		// single day
-		{query: `SELECT printduration('1')`, expected: "1 day"},
+		{query: `SELECT approx_dur(1)`, expected: "1 day"},
 		// multiple hours
-		{query: `SELECT printduration('.5')`, expected: "12 hours"},
+		{query: `SELECT approx_dur(.5)`, expected: "12 hours"},
 		// single hour
-		{query: `SELECT printduration('.04')`, expected: "1 hour"},
+		{query: `SELECT approx_dur(.04)`, expected: "1 hour"},
 		// multiple minutes
-		{query: `SELECT printduration('.022')`, expected: "32 minutes"},
+		{query: `SELECT approx_dur(.022)`, expected: "32 minutes"},
 		// single minute
-		{query: `SELECT printduration('.001')`, expected: "1 minute"},
+		{query: `SELECT approx_dur(.001)`, expected: "1 minute"},
 		// seconds
-		{query: `SELECT printduration('.0001')`, expected: "a few seconds"},
+		{query: `SELECT approx_dur(.0001)`, expected: "a few seconds"},
 		// null
-		{query: `SELECT printduration('0')`, expected: "<none>"},
+		{query: `SELECT approx_dur(0)`, expected: "<none>"},
 	}
+
 	var rows *sql.Rows
 	var err error
 	var rowNum int
