@@ -13,6 +13,8 @@ func Register(ext *sqlite.ExtensionApi, _ *options.Options) (_ sqlite.ErrorCode,
 		"toml_to_json": &TomlToJson{},
 		"yaml_to_json": &YamlToJson{},
 		"xml_to_json":  &XmlToJson{},
+		"time_diff":    &TimeDiff{},
+		"approx_dur":   &ApproxDuration{},
 	}
 
 	// alias yaml_to_json => yml_to_json
