@@ -37,3 +37,18 @@ brew install mergestat
 ```bash
 docker run -v "${PWD}:/repo" mergestat/mergestat "select count(*) from commits"
 ```
+
+### Examples
+
+SQL queries can be executed in the CLI on local or remote git repositories.
+Remote repos are cloned to a temporary directory at runtime.
+
+![CLI SQL Screenshot](./docs/cli-query-example.png)
+
+The `--format` flag can be used to output `json`, `ndjson`, `csv` and more (see `mergestat -h`).
+This can be useful for piping/using with other tools.
+
+Higher level commands such as `mergestat summarize commits` generate reports without requiring a SQL input.
+Learn more [here](https://docs.mergestat.com/getting-started-cli/summarize-commits) about the available flags such as `--start` to change the date range and `--json` to output as JSON.
+
+![CLI Summarize Commits Screenshot](./docs/cli-summarize-example.png)
