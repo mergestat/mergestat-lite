@@ -29,11 +29,11 @@ jobs:
     - name: Check out source
       uses: actions/checkout@v1
 
-    - name: Update submodules
-      run: git submodule update --init
+    - name: Install libgit2
+      run: git submodule update --init && make libgit2
 
     - name: Build
-      run: make libgit2 && make
+      run: make
 
     - name: Compress
       run: tar -czvf mergestat.tar.gz -C .build/ .
