@@ -77,6 +77,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 		"github_stargazer_count":   NewStarredReposFunc(githubOpts),
 		"github_repo_file_content": NewRepoFileContentFunc(githubOpts),
 		"github_user":              NewGitHubUserFunc(githubOpts),
+		"github_repo":              NewRepoInfoFunc(githubOpts),
 	}
 
 	// register GitHub funcs
