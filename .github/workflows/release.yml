@@ -29,11 +29,11 @@ jobs:
     - name: Check out source
       uses: actions/checkout@v1
 
-    - name: Install libgit2
-      run: sudo ./scripts/install_libgit2.sh
+    - name: Update submodules
+      run: git submodule update --init
 
     - name: Build
-      run: make
+      run: make libgit2 && make
 
     - name: Compress
       run: tar -czvf mergestat.tar.gz -C .build/ .
