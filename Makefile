@@ -25,15 +25,15 @@ endif
 
 # target to download latest sqlite3 amalgamation code
 pkg/sqlite/sqlite3.c:
-	$(call log, $(CYAN), "downloading sqlite3 amalgamation source v3.37.0")
+	$(call log, $(CYAN), "downloading sqlite3 amalgamation source v3.38.0")
 	$(eval SQLITE_DOWNLOAD_DIR = $(shell mktemp -d))
-	@curl -sSLo $(SQLITE_DOWNLOAD_DIR)/sqlite3.zip https://www.sqlite.org/2021/sqlite-amalgamation-3370000.zip
-	$(call log, $(GREEN), "downloaded sqlite3 amalgamation source v3.37.0")
+	@curl -sSLo $(SQLITE_DOWNLOAD_DIR)/sqlite3.zip https://www.sqlite.org/2022/sqlite-amalgamation-3380000.zip
+	$(call log, $(GREEN), "downloaded sqlite3 amalgamation source v3.38.0")
 	$(call log, $(CYAN), "unzipping to $(SQLITE_DOWNLOAD_DIR)")
 	@(cd $(SQLITE_DOWNLOAD_DIR) && unzip sqlite3.zip > /dev/null)
-	@-rm $(SQLITE_DOWNLOAD_DIR)/sqlite-amalgamation-3370000/shell.c
+	@-rm $(SQLITE_DOWNLOAD_DIR)/sqlite-amalgamation-3380000/shell.c
 	$(call log, $(CYAN), "moving to pkg/sqlite")
-	@mv $(SQLITE_DOWNLOAD_DIR)/sqlite-amalgamation-3370000/* pkg/sqlite
+	@mv $(SQLITE_DOWNLOAD_DIR)/sqlite-amalgamation-3380000/* pkg/sqlite
 
 clean:
 	$(call log, $(YELLOW), "nuking .build/")
