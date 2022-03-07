@@ -47,7 +47,7 @@ clean:
 # target for common golang tasks
 
 # go build tags used by test, vet and more
-TAGS = "static,system_libgit2"
+TAGS = "static"
 
 update:
 	go get -tags=$(TAGS) -u ./...
