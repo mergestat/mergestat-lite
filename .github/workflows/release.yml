@@ -28,9 +28,11 @@ jobs:
 
     - name: Check out source
       uses: actions/checkout@v1
+      with:
+        submodules: recursive
 
     - name: Install libgit2
-      run: git submodule update --init && make libgit2
+      run: make libgit2
 
     - name: Build
       run: make
