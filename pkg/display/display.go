@@ -18,12 +18,22 @@ func WriteTo(rows *sql.Rows, w io.Writer, format string, interactive bool) error
 			return err
 		}
 	case "csv":
-		err := csvDisplay(rows, ',', w)
+		err := csvDisplay(rows, ',', false, w)
+		if err != nil {
+			return err
+		}
+	case "csv-noheader":
+		err := csvDisplay(rows, ',', true, w)
 		if err != nil {
 			return err
 		}
 	case "tsv":
-		err := csvDisplay(rows, '\t', w)
+		err := csvDisplay(rows, '\t', false, w)
+		if err != nil {
+			return err
+		}
+	case "tsv-noheader":
+		err := csvDisplay(rows, '\t', true, w)
 		if err != nil {
 			return err
 		}
@@ -37,7 +47,6 @@ func WriteTo(rows *sql.Rows, w io.Writer, format string, interactive bool) error
 		if err != nil {
 			return err
 		}
-	//TODO: switch between table and csv dependent on num columns(suggested num for table 5<=
 	default:
 		err := tableDisplay(rows, w, interactive)
 		if err != nil {
@@ -78,7 +87,7 @@ func single(rows *sql.Rows, write io.Writer) error {
 	return nil
 }
 
-func csvDisplay(rows *sql.Rows, commaChar rune, writer io.Writer) error {
+func csvDisplay(rows *sql.Rows, commaChar rune, noHeader bool, writer io.Writer) error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
@@ -86,10 +95,13 @@ func csvDisplay(rows *sql.Rows, commaChar rune, writer io.Writer) error {
 	w := csv.NewWriter(writer)
 	w.Comma = commaChar
 
-	err = w.Write(columns)
-	if err != nil {
-		return err
+	if !noHeader {
+		err = w.Write(columns)
+		if err != nil {
+			return err
+		}
 	}
+
 	pointers := make([]interface{}, len(columns))
 	container := make([]sql.NullString, len(columns))
 
