@@ -52,3 +52,7 @@ Higher level commands such as `mergestat summarize commits` generate reports wit
 Learn more [here](https://docs.mergestat.com/getting-started-cli/summarize-commits) about the available flags such as `--start` to change the date range and `--json` to output as JSON.
 
 ![CLI Summarize Commits Screenshot](./docs/cli-summarize-example.png)
+
+[**Learn more in our docs**](https://docs.mergestat.com/)
+[**Try live queries**](https://app.mergestat.com/)
+
