@@ -105,7 +105,7 @@ func (r *repoInfo) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	}
 
 	l := r.opts.Logger.With().Str("owner", owner).Str("name", name).Logger()
-	l.Info().Msgf("fetching number of GitHub stargazers for: %s/%s", owner, name)
+	l.Info().Msgf("fetching repo info from GitHub for: %s/%s", owner, name)
 
 	variables := map[string]interface{}{
 		"owner": githubv4.String(owner),
