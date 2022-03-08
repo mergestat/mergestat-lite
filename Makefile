@@ -11,16 +11,20 @@ ifeq ($(shell uname -s),Darwin)
 	export CGO_LDFLAGS = -Wl,-undefined,dynamic_lookup
 endif
 
+# target to build and install libgit2
+libgit2:
+	cd git2go; make install-static
+
 # target to build a dynamic extension that can be loaded at runtime
 .build/libmergestat.so: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
-	@go build -buildmode=c-shared -o $@ -tags="system_libgit2,shared" shared.go
+	@go build -buildmode=c-shared -o $@ -tags="static,shared" shared.go
 	$(call log, $(GREEN), "built $@")
 
 # target to compile mergestat executable
 .build/mergestat: $(shell find . -type f -name '*.go' -o -name '*.c')
 	$(call log, $(CYAN), "building $@")
-	@go build -o $@ -tags="static,system_libgit2" mergestat.go
+	@go build -o $@ -tags="static" mergestat.go
 	$(call log, $(GREEN), "built $@")
 
 # target to download latest sqlite3 amalgamation code
@@ -43,7 +47,7 @@ clean:
 # target for common golang tasks
 
 # go build tags used by test, vet and more
-TAGS = "static,system_libgit2"
+TAGS = "static"
 
 update:
 	go get -tags=$(TAGS) -u ./...

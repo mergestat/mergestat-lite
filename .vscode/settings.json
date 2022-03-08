@@ -2,7 +2,7 @@
     "go.buildFlags": [
         "-tags='libsqlite3'"
     ],
-    "go.testFlags":  ["-v", "-tags=libsqlite3,static,system_libgit2"],
+    "go.testFlags":  ["-v", "-tags=libsqlite3,static"],
     "go.vetFlags": ["-tags=libsqlite3"],
     "go.toolsEnvVars": {
         "GOFLAGS": "-tags='libsqlite3'",

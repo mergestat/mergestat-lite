@@ -21,9 +21,11 @@ jobs:
 
     - name: Check out source
       uses: actions/checkout@v1
+      with:
+        submodules: recursive
 
     - name: Install libgit2
-      run: sudo ./scripts/install_libgit2.sh
+      run: make libgit2
 
     - name: Vet
       run: make vet
