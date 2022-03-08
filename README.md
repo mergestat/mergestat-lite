@@ -54,5 +54,6 @@ Learn more [here](https://docs.mergestat.com/getting-started-cli/summarize-commi
 ![CLI Summarize Commits Screenshot](./docs/cli-summarize-example.png)
 
 [**Learn more in our docs**](https://docs.mergestat.com/)
+
 [**Try live queries**](https://app.mergestat.com/)
 
