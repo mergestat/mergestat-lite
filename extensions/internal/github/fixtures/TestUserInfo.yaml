@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"query":"query($login:String!){user(login: $login){bio,avatarUrl,company,createdAt,email,isHireable,isEmployee,name,twitterUsername}}","variables":{"login":"patrickdevivo"}}
+      {"query":"query($login:String!){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},user(login: $login){bio,avatarUrl,company,createdAt,email,isHireable,isEmployee,name,twitterUsername}}","variables":{"login":"patrickdevivo"}}
     form: {}
     headers:
       Content-Type:
@@ -11,23 +11,23 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: '{"data":{"user":{"bio":"Software engineer in NYC","avatarUrl":"https://avatars.githubusercontent.com/u/57259?u=9f229083d0db9f54add2b0db0bea1d726d6640cd&v=4","company":"@packethost
-      ","createdAt":"2009-02-23T21:42:03Z","email":"patrick.devivo@gmail.com","isHireable":true,"isEmployee":false,"name":"Patrick
-      DeVivo","twitterUsername":null}}}'
+    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":0,"remaining":4258,"resetAt":"2022-03-21T18:34:57Z","used":742},"user":{"bio":"Software
+      engineer in NYC","avatarUrl":"https://avatars.githubusercontent.com/u/57259?u=9f229083d0db9f54add2b0db0bea1d726d6640cd&v=4","company":"@mergestat","createdAt":"2009-02-23T21:42:03Z","email":"patrick.devivo@gmail.com","isHireable":true,"isEmployee":false,"name":"Patrick
+      DeVivo","twitterUsername":"patrickdevivo"}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
       Access-Control-Expose-Headers:
       - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
         X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
-        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
-        Sunset
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
       Content-Security-Policy:
       - default-src 'none'
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 08 Nov 2021 19:33:54 GMT
+      - Mon, 21 Mar 2022 17:53:17 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -45,21 +45,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - DD4A:7085:101956:2AB454:61897BA2
+      - E87F:64AF:DB65F7:1ECF384:6238BB8D
       X-Oauth-Scopes:
       - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4999"
+      - "4258"
       X-Ratelimit-Reset:
-      - "1636403634"
+      - "1647887697"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "1"
+      - "742"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 327.876304ms
+    duration: 365.145731ms

@@ -13,11 +13,22 @@ import (
 )
 
 type Options struct {
-	Client      func() *githubv4.Client
-	RateLimiter *rate.Limiter
+	Client           func() *githubv4.Client
+	RateLimiter      *rate.Limiter
+	RateLimitHandler func(*RateLimitResponse)
 	// PerPage is the default number of items per page to use when making a paginated GitHub API request
 	PerPage int
 	Logger  *zerolog.Logger
+}
+
+// RateLimiteResponse represents metadata about the caller's rate limit, returned by the GitHub GraphQL API
+type RateLimitResponse struct {
+	Cost      int
+	Limit     int
+	NodeCount int
+	Remaining int
+	ResetAt   githubv4.DateTime
+	Used      int
 }
 
 // GetGitHubTokenFromCtx looks up the githubToken key in the supplied context and returns it if set
@@ -64,12 +75,12 @@ func GetGitHubRateLimitFromCtx(ctx services.Context) *rate.Limiter {
 }
 
 // GetGitHubPerPageFromCtx looks up the githubPerPage key in the supplied context and returns it if set,
-// otherwise it returns a default of 100
+// otherwise it returns a default of 50
 func GetGitHubPerPageFromCtx(ctx services.Context) int {
 	if val, ok := ctx.GetInt("githubPerPage"); ok && val != 0 {
 		return val
 	} else {
-		return 100
+		return 50
 	}
 }
 

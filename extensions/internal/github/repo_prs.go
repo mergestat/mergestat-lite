@@ -76,6 +76,7 @@ type pullRequest struct {
 }
 
 type fetchPRResults struct {
+	RateLimit   *RateLimitResponse
 	Edges       []*pullRequest
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -83,6 +84,7 @@ type fetchPRResults struct {
 
 func (i *iterPRs) fetchPRs(ctx context.Context, startCursor *githubv4.String) (*fetchPRResults, error) {
 	var PRQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -111,9 +113,10 @@ func (i *iterPRs) fetchPRs(ctx context.Context, startCursor *githubv4.String) (*
 	}
 
 	return &fetchPRResults{
-		PRQuery.Repository.PullRequests.Nodes,
-		PRQuery.Repository.PullRequests.PageInfo.HasNextPage,
-		&PRQuery.Repository.PullRequests.PageInfo.EndCursor,
+		RateLimit:   PRQuery.RateLimit,
+		Edges:       PRQuery.Repository.PullRequests.Nodes,
+		HasNextPage: PRQuery.Repository.PullRequests.PageInfo.HasNextPage,
+		EndCursor:   &PRQuery.Repository.PullRequests.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -276,6 +279,8 @@ func (i *iterPRs) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.current = 0

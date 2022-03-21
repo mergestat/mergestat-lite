@@ -28,6 +28,7 @@ func (r *repoInfo) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	// and then immediately re-marshal it into json for output...should probably make this simpler
 	// by using the graphQL query directly and returning the []byte result directly
 	var repoInfoQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			CreatedAt        time.Time
 			DefaultBranchRef struct {
@@ -116,6 +117,8 @@ func (r *repoInfo) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		ctx.ResultError(err)
 		return
 	}
+
+	r.opts.RateLimitHandler(repoInfoQuery.RateLimit)
 
 	repo := repoInfoQuery.Repository
 

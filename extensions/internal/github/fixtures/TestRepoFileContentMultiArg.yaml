@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"query":"query($expression:String!$name:String!$owner:String!){repository(owner: $owner, name: $name){object(expression: $expression){... on Blob{text}}}}","variables":{"expression":"cfdcd109d8582ac7cb5b69c48bb426f31f39e948:README.md","name":"askgit","owner":"askgitdev"}}
+      {"query":"query($expression:String!$name:String!$owner:String!){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){object(expression: $expression){... on Blob{text}}}}","variables":{"expression":"cfdcd109d8582ac7cb5b69c48bb426f31f39e948:README.md","name":"askgit","owner":"askgitdev"}}
     form: {}
     headers:
       Content-Type:
@@ -11,8 +11,9 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: "{\"data\":{\"repository\":{\"object\":{\"text\":\"[![Go Reference](https://pkg.go.dev/badge/github.com/mergestat/mergestat.svg)](https://pkg.go.dev/github.com/mergestat/mergestat)\\n[![BuildStatus](https://github.com/mergestat/mergestat/workflows/tests/badge.svg)](https://github.com/mergestat/mergestat/actions?workflow=tests)\\n[![Go
-      Report Card](https://goreportcard.com/badge/github.com/mergestat/mergestat)](https://goreportcard.com/report/github.com/mergestat/mergestat)\\n[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/mergestat/mergestat/main)](https://www.tickgit.com/browse?repo=github.com/mergestat/mergestat&branch=main)\\n[![codecov](https://codecov.io/gh/mergestat/mergestat/branch/main/graph/badge.svg)](https://codecov.io/gh/mergestat/mergestat)\\n\\n\\n#
+    body: "{\"data\":{\"rateLimit\":{\"cost\":1,\"limit\":5000,\"nodeCount\":0,\"remaining\":4474,\"resetAt\":\"2022-03-21T18:34:57Z\",\"used\":526},\"repository\":{\"object\":{\"text\":\"[![Go
+      Reference](https://pkg.go.dev/badge/github.com/askgitdev/askgit.svg)](https://pkg.go.dev/github.com/askgitdev/askgit)\\n[![BuildStatus](https://github.com/askgitdev/askgit/workflows/tests/badge.svg)](https://github.com/askgitdev/askgit/actions?workflow=tests)\\n[![Go
+      Report Card](https://goreportcard.com/badge/github.com/askgitdev/askgit)](https://goreportcard.com/report/github.com/askgitdev/askgit)\\n[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/askgitdev/askgit/main)](https://www.tickgit.com/browse?repo=github.com/askgitdev/askgit&branch=main)\\n[![codecov](https://codecov.io/gh/askgitdev/askgit/branch/main/graph/badge.svg)](https://codecov.io/gh/askgitdev/askgit)\\n\\n\\n#
       askgit <a href=\\\"https://try.askgit.com/\\\"><img align=\\\"right\\\" src=\\\"docs/logo.png\\\"
       alt=\\\"AskGit Logo\\\" height=\\\"100\\\"></a>\\n\\n`askgit` is a command-line
       tool for running SQL queries on git repositories.\\nIt's meant for ad-hoc querying
@@ -24,8 +25,8 @@ interactions:
       in-depth examples and documentation can be found below.\\nAlso checkout [our
       newsletter](https://askgit.substack.com) to stay up to date with feature releases
       and interesting queries and use cases.\\n\\n## Installation\\n\\n### Homebrew\\n\\n```\\nbrew
-      tap mergestat/mergestat\\nbrew install askgit\\n```\\n\\n### Pre-Built Binaries\\n\\nThe
-      [latest releases](https://github.com/mergestat/mergestat/releases) should have
+      tap askgitdev/askgit\\nbrew install askgit\\n```\\n\\n### Pre-Built Binaries\\n\\nThe
+      [latest releases](https://github.com/askgitdev/askgit/releases) should have
       pre-built binaries for Mac and Linux.\\nYou can download and add the `askgit`
       binary somewhere on your `$PATH` to use.\\n`libaskgit.so` is also available
       to be loaded as a SQLite run-time extension.\\n\\n### Go\\n\\n[`libgit2`](https://libgit2.org/)
@@ -34,9 +35,9 @@ interactions:
       `go install` commands can be used to install a binary via the go toolchain.\\n\\nOn
       Mac:\\n```\\nCGO_CFLAGS=-DUSE_LIBSQLITE3 CGO_LDFLAGS=-Wl,-undefined,dynamic_lookup
       go install -tags=\\\"sqlite_vtable,vtable,sqlite_json1,static,system_libgit2\\\"
-      github.com/mergestat/mergestat@latest\\n```\\n\\nOn Linux:\\n```\\nCGO_CFLAGS=-DUSE_LIBSQLITE3
+      github.com/askgitdev/askgit@latest\\n```\\n\\nOn Linux:\\n```\\nCGO_CFLAGS=-DUSE_LIBSQLITE3
       CGO_LDFLAGS=-Wl,--unresolved-symbols=ignore-in-object-files go install -tags=\\\"sqlite_vtable,vtable,sqlite_json1,static,system_libgit2\\\"
-      github.com/mergestat/mergestat@latest\\n```\\n\\nSee the [`Makefile`](https://github.com/mergestat/mergestat/blob/main/Makefile)
+      github.com/askgitdev/askgit@latest\\n```\\n\\nSee the [`Makefile`](https://github.com/askgitdev/askgit/blob/main/Makefile)
       for more context.\\nChecking out this repository and running `make` in the root
       will produce two files in the `.build` directory:\\n\\n  1. `askgit` - the CLI
       binary (which can then be moved into your `$PATH` for use)\\n  2. `libaskgit.so`
@@ -66,7 +67,7 @@ interactions:
       access a git repository in the current directory by default.\\nIf the `--repo`
       flag is specified, they will use the path provided there instead.\\nA parameter
       (usually the first) can also be provided to any of the tables below to override
-      the default repo path.\\nFor instance, `SELECT * FROM commits('https://github.com/mergestat/mergestat')`
+      the default repo path.\\nFor instance, `SELECT * FROM commits('https://github.com/askgitdev/askgit')`
       will clone this repo to a temporary directory on disk and return its commits.\\n\\n#####
       `commits`\\n\\nSimilar to `git log`, the `commits` table includes all commits
       in the history of the currently checked out commit.\\n\\n| Column          |
@@ -79,7 +80,7 @@ interactions:
       at this revision (i.e. branch name or SHA), defaults to `HEAD`\\n\\n```sql\\n--
       return all commits starting at HEAD\\nSELECT * FROM commits\\n\\n-- specify
       an alternative repo on disk\\nSELECT * FROM commits('/some/path/to/repo')\\n\\n--
-      clone a remote repo and use it\\nSELECT * FROM commits('https://github.com/mergestat/mergestat')\\n\\n--
+      clone a remote repo and use it\\nSELECT * FROM commits('https://github.com/askgitdev/askgit')\\n\\n--
       use the default repo, but provide an alternate branch\\nSELECT * FROM commits('',
       'some-ref')\\n```\\n\\n##### `refs`\\n\\n| Column    | Type |\\n|-----------|------|\\n|
       name      | TEXT |\\n| type      | TEXT |\\n| remote    | TEXT |\\n| full_name
@@ -176,10 +177,10 @@ interactions:
       \       | TEXT |\\n| company    | TEXT |\\n| avatar_url | TEXT |\\n| created_at
       | TEXT |\\n| updated_at | TEXT |\\n| twitter    | TEXT |\\n| website    | TEXT
       |\\n| location   | TEXT |\\n| starred_at | TEXT |\\n\\nParams:\\n  1. `fullNameOrOwner`
-      - either the full repo name `mergestat/mergestat` or just the owner `askgit` (which
+      - either the full repo name `askgitdev/askgit` or just the owner `askgit` (which
       would require the second argument)\\n  2. `name` - optional if the first argument
       is a \\\"full\\\" name, otherwise required - the name of the repo\\n\\n```sql\\nSELECT
-      * FROM github_stargazers('askgitdev', 'askgit');\\nSELECT * FROM github_stargazers('mergestat/mergestat');
+      * FROM github_stargazers('askgitdev', 'askgit');\\nSELECT * FROM github_stargazers('askgitdev/askgit');
       -- both are equivalent\\n```\\n\\n##### `github_starred_repos`\\n\\nTable-valued-function
       that returns a list of repositories a user has starred.\\n\\n| Column          |
       Type |\\n|-----------------|------|\\n| name            | TEXT |\\n| url             |
@@ -189,10 +190,10 @@ interactions:
       - the `login` of a GitHub user\\n\\n```sql\\nSELECT * FROM github_starred_repos('patrickdevivo')\\n```\\n\\n#####
       `github_stargazer_count`\\n\\nScalar function that returns the number of stars
       a GitHub repository has.\\n\\nParams:\\n  1. `fullNameOrOwner` - either the
-      full repo name `mergestat/mergestat` or just the owner `askgit` (which would require
+      full repo name `askgitdev/askgit` or just the owner `askgit` (which would require
       the second argument)\\n  2. `name` - optional if the first argument is a \\\"full\\\"
       name, otherwise required - the name of the repo\\n\\n```sql\\nSELECT github_stargazer_count('askgitdev',
-      'askgit');\\nSELECT github_stargazer_count('mergestat/mergestat'); -- both are
+      'askgit');\\nSELECT github_stargazer_count('askgitdev/askgit'); -- both are
       equivalent\\n```\\n\\n##### `github_user_repos` and `github_org_repos`\\n\\nTable-valued
       function that returns all the repositories belonging to a user or an organization.\\n\\n|
       Column                      | Type |\\n|-----------------------------|------|\\n|
@@ -226,10 +227,10 @@ interactions:
       \ |\\n| reaction_count        | INT   |\\n| state                 | TEXT  |\\n|
       title                 | TEXT  |\\n| updated_at            | TEXT  |\\n| url
       \                  | TEXT  |\\n\\nParams:\\n  1. `fullNameOrOwner` - either
-      the full repo name `mergestat/mergestat` or just the owner `askgit` (which would
+      the full repo name `askgitdev/askgit` or just the owner `askgit` (which would
       require the second argument)\\n  2. `name` - optional if the first argument
       is a \\\"full\\\" name, otherwise required - the name of the repo\\n\\n```sql\\nSELECT
-      * FROM github_repo_issues('mergestat/mergestat');\\nSELECT * FROM github_repo_issues('askgitdev',
+      * FROM github_repo_issues('askgitdev/askgit');\\nSELECT * FROM github_repo_issues('askgitdev',
       'askgit'); -- both are equivalent\\n```\\n##### `github_repo_prs`\\n\\nTable-valued-function
       that returns all the pull requests of a GitHub repository.\\n\\n| Column                   |
       Type |\\n|--------------------------|------|\\n| additions                |
@@ -251,10 +252,10 @@ interactions:
       INT  |\\n| published_at             | TEXT |\\n| review_decision          |
       TEXT |\\n| state                    | TEXT |\\n| title                    |
       TEXT |\\n| updated_at               | TEXT |\\n| url                      |
-      TEXT |\\n\\nParams:\\n  1. `fullNameOrOwner` - either the full repo name `mergestat/mergestat`
+      TEXT |\\n\\nParams:\\n  1. `fullNameOrOwner` - either the full repo name `askgitdev/askgit`
       or just the owner `askgit` (which would require the second argument)\\n  2.
       `name` - optional if the first argument is a \\\"full\\\" name, otherwise required
-      - the name of the repo\\n\\n```sql\\nSELECT * FROM github_repo_prs('mergestat/mergestat');\\nSELECT
+      - the name of the repo\\n\\n```sql\\nSELECT * FROM github_repo_prs('askgitdev/askgit');\\nSELECT
       * FROM github_repo_prs('askgitdev', 'askgit'); -- both are equivalent\\n```\\n\\n###
       Example Queries\\n\\nThis will return all commits in the history of the currently
       checked out branch/commit of the repo.\\n```sql\\nSELECT * FROM commits\\n```\\n\\nReturn
@@ -295,16 +296,14 @@ interactions:
       Access-Control-Expose-Headers:
       - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
         X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
-        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
-        Sunset
-      Cache-Control:
-      - no-cache
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
       Content-Security-Policy:
       - default-src 'none'
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 12 Aug 2021 01:44:44 GMT
+      - Mon, 21 Mar 2022 17:46:33 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -322,21 +321,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - E8FE:04B8:22466:DB0A7:61147D0C
+      - E819:68C9:F3B677:3339FCF:6238B9F8
       X-Oauth-Scopes:
       - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4975"
+      - "4474"
       X-Ratelimit-Reset:
-      - "1628734978"
+      - "1647887697"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "25"
+      - "526"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 283.942439ms
+    duration: 546.958493ms

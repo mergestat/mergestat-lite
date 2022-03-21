@@ -12,6 +12,7 @@ import (
 )
 
 type fetchStarredReposResults struct {
+	RateLimit   *RateLimitResponse
 	Edges       []*starredRepoEdge
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -35,7 +36,8 @@ type starredRepoNode struct {
 
 func (i *iterStarredRepos) fetchStarredRepos(ctx context.Context, startCursor *githubv4.String) (*fetchStarredReposResults, error) {
 	var reposQuery struct {
-		User struct {
+		RateLimit *RateLimitResponse
+		User      struct {
 			Login               string
 			StarredRepositories struct {
 				Edges    []*starredRepoEdge
@@ -60,9 +62,10 @@ func (i *iterStarredRepos) fetchStarredRepos(ctx context.Context, startCursor *g
 	}
 
 	return &fetchStarredReposResults{
-		reposQuery.User.StarredRepositories.Edges,
-		reposQuery.User.StarredRepositories.PageInfo.HasNextPage,
-		&reposQuery.User.StarredRepositories.PageInfo.EndCursor,
+		RateLimit:   reposQuery.RateLimit,
+		Edges:       reposQuery.User.StarredRepositories.Edges,
+		HasNextPage: reposQuery.User.StarredRepositories.PageInfo.HasNextPage,
+		EndCursor:   &reposQuery.User.StarredRepositories.PageInfo.EndCursor,
 	}, nil
 
 }
@@ -146,6 +149,8 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.current = 0

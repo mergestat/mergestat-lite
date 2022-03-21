@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"query":"query($name:String!$owner:String!){repository(owner: $owner, name: $name){createdAt,defaultBranchRef{name,prefix},description,diskUsage,forkCount,homepageUrl,isArchived,isDisabled,isFork,isMirror,isPrivate,issues{totalCount},latestRelease{author{login},createdAt,name,publishedAt},licenseInfo{key,name,nickname},name,openGraphImageUrl,primaryLanguage{name},pullRequests{totalCount},pushedAt,releases{totalCount},stargazerCount,repositoryTopics(first: 10){nodes{topic{name}}},updatedAt,watchers{totalCount}}}","variables":{"name":"mergestat","owner":"mergestat"}}
+      {"query":"query($name:String!$owner:String!){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){createdAt,defaultBranchRef{name,prefix},description,diskUsage,forkCount,homepageUrl,isArchived,isDisabled,isFork,isMirror,isPrivate,issues{totalCount},latestRelease{author{login},createdAt,name,publishedAt},licenseInfo{key,name,nickname},name,openGraphImageUrl,primaryLanguage{name},pullRequests{totalCount},pushedAt,releases{totalCount},stargazerCount,repositoryTopics(first: 10){nodes{topic{name}}},updatedAt,watchers{totalCount}}}","variables":{"name":"mergestat","owner":"mergestat"}}
     form: {}
     headers:
       Content-Type:
@@ -11,10 +11,10 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: "{\"data\":{\"repository\":{\"createdAt\":\"2020-07-03T19:46:40Z\",\"defaultBranchRef\":{\"name\":\"main\",\"prefix\":\"refs/heads/\"},\"description\":\"Query
+    body: "{\"data\":{\"rateLimit\":{\"cost\":1,\"limit\":5000,\"nodeCount\":10,\"remaining\":4487,\"resetAt\":\"2022-03-21T18:34:57Z\",\"used\":513},\"repository\":{\"createdAt\":\"2020-07-03T19:46:40Z\",\"defaultBranchRef\":{\"name\":\"main\",\"prefix\":\"refs/heads/\"},\"description\":\"Query
       git repositories with SQL. Generate reports, perform status checks, analyze
-      codebases. \U0001F50D \U0001F4CA\",\"diskUsage\":4383,\"forkCount\":83,\"homepageUrl\":\"https://app.mergestat.com/\",\"isArchived\":false,\"isDisabled\":false,\"isFork\":false,\"isMirror\":false,\"isPrivate\":false,\"issues\":{\"totalCount\":44},\"latestRelease\":{\"author\":{\"login\":\"github-actions[bot]\"},\"createdAt\":\"2022-02-16T00:58:21Z\",\"name\":\"v0.5.4\",\"publishedAt\":\"2022-02-16T01:01:02Z\"},\"licenseInfo\":{\"key\":\"mit\",\"name\":\"MIT
-      License\",\"nickname\":null},\"name\":\"mergestat\",\"openGraphImageUrl\":\"https://avatars.githubusercontent.com/u/83927013?s=400&v=4\",\"primaryLanguage\":{\"name\":\"Go\"},\"pullRequests\":{\"totalCount\":216},\"pushedAt\":\"2022-03-05T19:00:56Z\",\"releases\":{\"totalCount\":24},\"stargazerCount\":2830,\"repositoryTopics\":{\"nodes\":[{\"topic\":{\"name\":\"git\"}},{\"topic\":{\"name\":\"sql\"}},{\"topic\":{\"name\":\"sqlite\"}},{\"topic\":{\"name\":\"golang\"}},{\"topic\":{\"name\":\"go\"}},{\"topic\":{\"name\":\"cli\"}},{\"topic\":{\"name\":\"command-line\"}}]},\"updatedAt\":\"2022-03-07T08:54:14Z\",\"watchers\":{\"totalCount\":36}}}}"
+      codebases. \U0001F50D \U0001F4CA\",\"diskUsage\":4929,\"forkCount\":85,\"homepageUrl\":\"https://app.mergestat.com/\",\"isArchived\":false,\"isDisabled\":false,\"isFork\":false,\"isMirror\":false,\"isPrivate\":false,\"issues\":{\"totalCount\":46},\"latestRelease\":{\"author\":{\"login\":\"github-actions[bot]\"},\"createdAt\":\"2022-03-08T01:05:05Z\",\"name\":\"v0.5.5\",\"publishedAt\":\"2022-03-08T01:08:17Z\"},\"licenseInfo\":{\"key\":\"mit\",\"name\":\"MIT
+      License\",\"nickname\":null},\"name\":\"mergestat\",\"openGraphImageUrl\":\"https://avatars.githubusercontent.com/u/83927013?s=400&v=4\",\"primaryLanguage\":{\"name\":\"Go\"},\"pullRequests\":{\"totalCount\":221},\"pushedAt\":\"2022-03-08T19:52:09Z\",\"releases\":{\"totalCount\":25},\"stargazerCount\":2868,\"repositoryTopics\":{\"nodes\":[{\"topic\":{\"name\":\"git\"}},{\"topic\":{\"name\":\"sql\"}},{\"topic\":{\"name\":\"sqlite\"}},{\"topic\":{\"name\":\"golang\"}},{\"topic\":{\"name\":\"go\"}},{\"topic\":{\"name\":\"cli\"}},{\"topic\":{\"name\":\"command-line\"}}]},\"updatedAt\":\"2022-03-19T03:11:20Z\",\"watchers\":{\"totalCount\":36}}}}"
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -28,7 +28,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 07 Mar 2022 20:29:44 GMT
+      - Mon, 21 Mar 2022 17:46:09 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -46,21 +46,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - F5AE:81CB:BF07A6:1B79969:62266B38
+      - E80D:51D5:55092F:1141A84:6238B9E0
       X-Oauth-Scopes:
       - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4994"
+      - "4487"
       X-Ratelimit-Reset:
-      - "1646687690"
+      - "1647887697"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "6"
+      - "513"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 544.137384ms
+    duration: 478.100292ms

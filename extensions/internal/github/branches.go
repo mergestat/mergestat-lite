@@ -25,6 +25,7 @@ type ref struct {
 }
 
 type fetchBranchResults struct {
+	RateLimit   *RateLimitResponse
 	Edges       []*ref
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -32,6 +33,7 @@ type fetchBranchResults struct {
 
 func (i *iterBranches) fetchBranches(ctx context.Context, startCursor *githubv4.String) (*fetchBranchResults, error) {
 	var BranchQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -60,9 +62,10 @@ func (i *iterBranches) fetchBranches(ctx context.Context, startCursor *githubv4.
 	}
 
 	return &fetchBranchResults{
-		BranchQuery.Repository.Refs.Nodes,
-		BranchQuery.Repository.Refs.PageInfo.HasNextPage,
-		&BranchQuery.Repository.Refs.PageInfo.EndCursor,
+		RateLimit:   BranchQuery.RateLimit,
+		Edges:       BranchQuery.Repository.Refs.Nodes,
+		HasNextPage: BranchQuery.Repository.Refs.PageInfo.HasNextPage,
+		EndCursor:   &BranchQuery.Repository.Refs.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -117,6 +120,8 @@ func (i *iterBranches) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.current = 0

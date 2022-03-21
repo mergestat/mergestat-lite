@@ -24,6 +24,7 @@ func (f *repoFileContent) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	}
 
 	var fileContentsQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Object struct {
 				Blob struct {
@@ -80,6 +81,7 @@ func (f *repoFileContent) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		ctx.ResultError(err)
 		return
 	}
+	f.opts.RateLimitHandler(fileContentsQuery.RateLimit)
 	ctx.ResultText(fileContentsQuery.Repository.Object.Blob.Text)
 }
 

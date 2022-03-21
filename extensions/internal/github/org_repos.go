@@ -14,6 +14,7 @@ import (
 )
 
 type fetchOrgReposResults struct {
+	RateLimit   *RateLimitResponse
 	OrgRepos    []*orgRepo
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -79,6 +80,7 @@ type orgRepo struct {
 
 func (i *iterOrgRepos) fetchOrgRepos(ctx context.Context, startCursor *githubv4.String) (*fetchOrgReposResults, error) {
 	var reposQuery struct {
+		RateLimit    *RateLimitResponse
 		Organization struct {
 			Login        string
 			Repositories struct {
@@ -104,9 +106,10 @@ func (i *iterOrgRepos) fetchOrgRepos(ctx context.Context, startCursor *githubv4.
 	}
 
 	return &fetchOrgReposResults{
-		reposQuery.Organization.Repositories.Nodes,
-		reposQuery.Organization.Repositories.PageInfo.HasNextPage,
-		&reposQuery.Organization.Repositories.PageInfo.EndCursor,
+		RateLimit:   reposQuery.RateLimit,
+		OrgRepos:    reposQuery.Organization.Repositories.Nodes,
+		HasNextPage: reposQuery.Organization.Repositories.PageInfo.HasNextPage,
+		EndCursor:   &reposQuery.Organization.Repositories.PageInfo.EndCursor,
 	}, nil
 
 }
@@ -251,6 +254,8 @@ func (i *iterOrgRepos) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.current = 0

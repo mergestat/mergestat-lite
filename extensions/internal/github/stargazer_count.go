@@ -23,6 +23,7 @@ func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	}
 
 	var starsCountQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			StargazerCount int
 		} `graphql:"repository(owner: $owner, name: $name)"`
@@ -58,6 +59,9 @@ func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		ctx.ResultError(err)
 		return
 	}
+
+	s.opts.RateLimitHandler(starsCountQuery.RateLimit)
+
 	ctx.ResultInt(starsCountQuery.Repository.StargazerCount)
 }
 

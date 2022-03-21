@@ -27,6 +27,19 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 
 	githubOpts := &Options{
 		RateLimiter: rateLimiter,
+		RateLimitHandler: func(rlr *RateLimitResponse) {
+			// TODO(patrickdevivo) improve this
+			// remaining := rlr.Remaining - 100
+			secondsUntilReset := time.Until(rlr.ResetAt.Time).Seconds()
+			// v := math.Round(float64(remaining)/float64(rlr.Cost)) / secondsUntilReset
+			opt.Logger.Debug().
+				Int("cost", rlr.Cost).
+				Int("remaining", rlr.Remaining).
+				Float64("resets-in", secondsUntilReset).
+				// Str("wait-time", (time.Duration(v)).String()).
+				Msgf("handling rate limit")
+			// time.Sleep(time.Duration(v))
+		},
 		Client: func() *githubv4.Client {
 			httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
 				&oauth2.Token{AccessToken: GetGitHubTokenFromCtx(opt.Context)},

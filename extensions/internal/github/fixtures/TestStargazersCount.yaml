@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"query":"query($name:String!$owner:String!){repository(owner: $owner, name: $name){stargazerCount}}","variables":{"name":"askgit","owner":"askgitdev"}}
+      {"query":"query($name:String!$owner:String!){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){stargazerCount}}","variables":{"name":"mergestat","owner":"mergestat"}}
     form: {}
     headers:
       Content-Type:
@@ -11,23 +11,21 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: '{"data":{"repository":{"stargazerCount":2403}}}'
+    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":0,"remaining":4347,"resetAt":"2022-03-21T18:34:57Z","used":653},"repository":{"stargazerCount":2868}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
       Access-Control-Expose-Headers:
       - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
         X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
-        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
-        Sunset
-      Cache-Control:
-      - no-cache
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
       Content-Security-Policy:
       - default-src 'none'
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Fri, 30 Jul 2021 03:26:23 GMT
+      - Mon, 21 Mar 2022 17:50:43 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -45,21 +43,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - FD9E:7F59:1372A8B:2A4BCB8:6103715F
+      - E851:5B9E:4DC89:667B9F:6238BAF2
       X-Oauth-Scopes:
-      - repo, user
+      - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4903"
+      - "4347"
       X-Ratelimit-Reset:
-      - "1627616382"
+      - "1647887697"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "97"
+      - "653"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 333.695986ms
+    duration: 328.943031ms
