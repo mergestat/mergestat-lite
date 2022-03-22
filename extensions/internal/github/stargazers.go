@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
@@ -31,7 +32,7 @@ type stargazerEdge struct {
 }
 
 type fetchStarsResults struct {
-	RateLimit   *RateLimitResponse
+	RateLimit   *options.GitHubRateLimitResponse
 	Edges       []*stargazerEdge
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -39,7 +40,7 @@ type fetchStarsResults struct {
 
 func (i *iterStargazers) fetchStars(ctx context.Context, startCursor *githubv4.String) (*fetchStarsResults, error) {
 	var starsQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string

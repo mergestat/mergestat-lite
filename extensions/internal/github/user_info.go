@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
 )
@@ -25,7 +26,7 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 	}
 	login := value[0].Text()
 	var query struct {
-		RateLimit *RateLimitResponse
+		RateLimit *options.GitHubRateLimitResponse
 		User      struct {
 			Bio             string            `json:"bio"`
 			AvatarUrl       githubv4.URI      `json:"avatarUrl"`

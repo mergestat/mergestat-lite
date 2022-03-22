@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/mergestat/mergestat/extensions/services"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
@@ -15,20 +16,10 @@ import (
 type Options struct {
 	Client           func() *githubv4.Client
 	RateLimiter      *rate.Limiter
-	RateLimitHandler func(*RateLimitResponse)
+	RateLimitHandler func(*options.GitHubRateLimitResponse)
 	// PerPage is the default number of items per page to use when making a paginated GitHub API request
 	PerPage int
 	Logger  *zerolog.Logger
-}
-
-// RateLimiteResponse represents metadata about the caller's rate limit, returned by the GitHub GraphQL API
-type RateLimitResponse struct {
-	Cost      int
-	Limit     int
-	NodeCount int
-	Remaining int
-	ResetAt   githubv4.DateTime
-	Used      int
 }
 
 // GetGitHubTokenFromCtx looks up the githubToken key in the supplied context and returns it if set

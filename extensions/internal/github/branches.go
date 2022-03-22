@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
@@ -25,7 +26,7 @@ type ref struct {
 }
 
 type fetchBranchResults struct {
-	RateLimit   *RateLimitResponse
+	RateLimit   *options.GitHubRateLimitResponse
 	Edges       []*ref
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -33,7 +34,7 @@ type fetchBranchResults struct {
 
 func (i *iterBranches) fetchBranches(ctx context.Context, startCursor *githubv4.String) (*fetchBranchResults, error) {
 	var BranchQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string

@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
 )
 
 type fetchStarredReposResults struct {
-	RateLimit   *RateLimitResponse
+	RateLimit   *options.GitHubRateLimitResponse
 	Edges       []*starredRepoEdge
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -36,7 +37,7 @@ type starredRepoNode struct {
 
 func (i *iterStarredRepos) fetchStarredRepos(ctx context.Context, startCursor *githubv4.String) (*fetchStarredReposResults, error) {
 	var reposQuery struct {
-		RateLimit *RateLimitResponse
+		RateLimit *options.GitHubRateLimitResponse
 		User      struct {
 			Login               string
 			StarredRepositories struct {

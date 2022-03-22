@@ -8,13 +8,14 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
 )
 
 type fetchUserReposResults struct {
-	RateLimit   *RateLimitResponse
+	RateLimit   *options.GitHubRateLimitResponse
 	UserRepos   []*userRepo
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -80,7 +81,7 @@ type userRepo struct {
 
 func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv4.String) (*fetchUserReposResults, error) {
 	var reposQuery struct {
-		RateLimit *RateLimitResponse
+		RateLimit *options.GitHubRateLimitResponse
 		User      struct {
 			Login        string
 			Repositories struct {

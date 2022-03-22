@@ -27,7 +27,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 
 	githubOpts := &Options{
 		RateLimiter: rateLimiter,
-		RateLimitHandler: func(rlr *RateLimitResponse) {
+		RateLimitHandler: func(rlr *options.GitHubRateLimitResponse) {
 			// for now, just log to debug output current status of rate limit
 			secondsUntilReset := time.Until(rlr.ResetAt.Time).Seconds()
 			opt.Logger.Debug().
@@ -49,6 +49,10 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 
 	if opt.GitHubClientGetter != nil {
 		githubOpts.Client = opt.GitHubClientGetter
+	}
+
+	if opt.GitHubRateLimitHandler != nil {
+		githubOpts.RateLimitHandler = opt.GitHubRateLimitHandler
 	}
 
 	var modules = map[string]sqlite.Module{
