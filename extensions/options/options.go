@@ -93,6 +93,11 @@ func WithGitHubPreRequestHook(f func()) OptionFn {
 	return func(o *Options) { o.GitHubPreRequestHook = f }
 }
 
+// WithGitHubPostRequestHook configures a way to use a custom GitHub API rate limit handler
+func WithGitHubPostRequestHook(f func()) OptionFn {
+	return func(o *Options) { o.GitHubPostRequestHook = f }
+}
+
 // WithSourcegraph configures the extension to also register the Sourcegraph related tables and funcs
 func WithSourcegraph() OptionFn {
 	return func(o *Options) { o.Sourcegraph = true }
