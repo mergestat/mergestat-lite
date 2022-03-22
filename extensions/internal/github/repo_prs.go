@@ -279,6 +279,9 @@ func (i *iterPRs) Next() (vtab.Row, error) {
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of repo_pull_requests for %s/%s", i.owner, i.name)
 			results, err := i.fetchPRs(context.Background(), cursor)
+
+			i.Options.GitHubPostRequestHook()
+
 			if err != nil {
 				return nil, err
 			}

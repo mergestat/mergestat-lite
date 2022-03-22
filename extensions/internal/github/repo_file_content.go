@@ -80,6 +80,9 @@ func (f *repoFileContent) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	f.opts.GitHubPreRequestHook()
 
 	err = f.opts.Client().Query(context.Background(), &fileContentsQuery, variables)
+
+	f.opts.GitHubPostRequestHook()
+
 	if err != nil {
 		ctx.ResultError(err)
 		return

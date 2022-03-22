@@ -50,6 +50,9 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 	l.Info().Msgf("fetching user information for: %s", login)
 
 	err = s.opts.Client().Query(context.TODO(), &query, variables)
+
+	s.opts.GitHubPostRequestHook()
+
 	if err != nil {
 		ctx.ResultError(err)
 		return

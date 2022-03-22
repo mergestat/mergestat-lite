@@ -166,6 +166,9 @@ func (i *iterPRCommits) Next() (vtab.Row, error) {
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of pr_comments for %s/%s", i.owner, i.name)
 			results, err := i.fetchPRCommits(context.Background(), cursor)
+
+			i.Options.GitHubPostRequestHook()
+
 			if err != nil {
 				return nil, err
 			}

@@ -60,6 +60,10 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 		githubOpts.GitHubPreRequestHook = opt.GitHubPreRequestHook
 	}
 
+	if opt.GitHubPostRequestHook != nil {
+		githubOpts.GitHubPostRequestHook = opt.GitHubPostRequestHook
+	}
+
 	var modules = map[string]sqlite.Module{
 		"github_stargazers":              NewStargazersModule(githubOpts),
 		"github_starred_repos":           NewStarredReposModule(githubOpts),
