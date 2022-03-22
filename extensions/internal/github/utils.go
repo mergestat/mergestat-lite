@@ -14,9 +14,10 @@ import (
 )
 
 type Options struct {
-	Client           func() *githubv4.Client
-	RateLimiter      *rate.Limiter
-	RateLimitHandler func(*options.GitHubRateLimitResponse)
+	Client               func() *githubv4.Client
+	RateLimiter          *rate.Limiter
+	RateLimitHandler     func(*options.GitHubRateLimitResponse)
+	GitHubPreRequestHook func()
 	// PerPage is the default number of items per page to use when making a paginated GitHub API request
 	PerPage int
 	Logger  *zerolog.Logger

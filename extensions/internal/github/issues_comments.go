@@ -152,6 +152,8 @@ func (i *iterIssuesComments) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
+			i.Options.GitHubPreRequestHook()
+
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of issue_comments for %s/%s", i.owner, i.name)
 			results, err := i.fetchIssueComments(context.Background(), cursor)

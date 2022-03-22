@@ -48,6 +48,8 @@ func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		name = values[1].Text()
 	}
 
+	s.opts.GitHubPreRequestHook()
+
 	l := s.opts.Logger.With().Str("owner", owner).Str("name", name).Logger()
 	l.Info().Msgf("fetching number of GitHub stargazers for: %s/%s", owner, name)
 

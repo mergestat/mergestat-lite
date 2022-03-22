@@ -149,6 +149,8 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
+			i.Options.GitHubPreRequestHook()
+
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of stargazers for %s/%s", i.owner, i.name)
 			results, err := i.fetchStars(context.Background(), cursor)

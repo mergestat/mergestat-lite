@@ -158,6 +158,8 @@ func (i *iterProtections) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
+			i.Options.GitHubPreRequestHook()
+
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of repo_protections for %s/%s", i.owner, i.name)
 			results, err := i.fetchProtections(context.Background(), cursor)

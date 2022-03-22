@@ -213,6 +213,8 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
+			i.Options.GitHubPreRequestHook()
+
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of repo_issues for %s/%s", i.owner, i.name)
 			results, err := i.fetchIssues(context.Background(), cursor)
