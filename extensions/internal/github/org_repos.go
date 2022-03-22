@@ -254,6 +254,9 @@ func (i *iterOrgRepos) Next() (vtab.Row, error) {
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of org repos for %s", i.login)
 			results, err := i.fetchOrgRepos(context.Background(), cursor)
+
+			i.Options.GitHubPostRequestHook()
+
 			if err != nil {
 				return nil, err
 			}

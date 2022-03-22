@@ -58,6 +58,9 @@ func (s *starCount) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		"name":  githubv4.String(name),
 	}
 	err = s.opts.Client().Query(context.Background(), &starsCountQuery, variables)
+
+	s.opts.GitHubPostRequestHook()
+
 	if err != nil {
 		ctx.ResultError(err)
 		return

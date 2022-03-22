@@ -34,8 +34,11 @@ type Options struct {
 	// GitHubRateLimitHandler overrides the default GitHub API rate limit response handler
 	GitHubRateLimitHandler func(*GitHubRateLimitResponse)
 
-	// GitHubPreRequestHook
+	// GitHubPreRequestHook runs a function before making a GitHub API request
 	GitHubPreRequestHook func()
+
+	// GitHubPostRequestHook runs a function after making a GitHub API request
+	GitHubPostRequestHook func()
 
 	// Sourcegraph set to true to register Sourcegraph tables/func
 	Sourcegraph bool

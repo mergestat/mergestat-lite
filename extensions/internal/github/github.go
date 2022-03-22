@@ -36,7 +36,8 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 				Float64("seconds-until-reset", secondsUntilReset).
 				Msgf("handling rate limit")
 		},
-		GitHubPreRequestHook: func() {},
+		GitHubPreRequestHook:  func() {},
+		GitHubPostRequestHook: func() {},
 		Client: func() *githubv4.Client {
 			httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
 				&oauth2.Token{AccessToken: GetGitHubTokenFromCtx(opt.Context)},
@@ -58,6 +59,10 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 
 	if opt.GitHubPreRequestHook != nil {
 		githubOpts.GitHubPreRequestHook = opt.GitHubPreRequestHook
+	}
+
+	if opt.GitHubPostRequestHook != nil {
+		githubOpts.GitHubPostRequestHook = opt.GitHubPostRequestHook
 	}
 
 	var modules = map[string]sqlite.Module{

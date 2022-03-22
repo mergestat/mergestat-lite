@@ -154,6 +154,9 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of stargazers for %s/%s", i.owner, i.name)
 			results, err := i.fetchStars(context.Background(), cursor)
+
+			i.Options.GitHubPostRequestHook()
+
 			if err != nil {
 				return nil, err
 			}

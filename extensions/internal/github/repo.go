@@ -116,6 +116,9 @@ func (r *repoInfo) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		"name":  githubv4.String(name),
 	}
 	err = r.opts.Client().Query(context.Background(), &repoInfoQuery, variables)
+
+	r.opts.GitHubPostRequestHook()
+
 	if err != nil {
 		ctx.ResultError(err)
 		return
