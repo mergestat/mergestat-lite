@@ -31,6 +31,7 @@ type stargazerEdge struct {
 }
 
 type fetchStarsResults struct {
+	RateLimit   *RateLimitResponse
 	Edges       []*stargazerEdge
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -38,6 +39,7 @@ type fetchStarsResults struct {
 
 func (i *iterStargazers) fetchStars(ctx context.Context, startCursor *githubv4.String) (*fetchStarsResults, error) {
 	var starsQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -66,9 +68,10 @@ func (i *iterStargazers) fetchStars(ctx context.Context, startCursor *githubv4.S
 	}
 
 	return &fetchStarsResults{
-		starsQuery.Repository.Stargazers.Edges,
-		starsQuery.Repository.Stargazers.PageInfo.HasNextPage,
-		&starsQuery.Repository.Stargazers.PageInfo.EndCursor,
+		RateLimit:   starsQuery.RateLimit,
+		Edges:       starsQuery.Repository.Stargazers.Edges,
+		HasNextPage: starsQuery.Repository.Stargazers.PageInfo.HasNextPage,
+		EndCursor:   &starsQuery.Repository.Stargazers.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -151,6 +154,8 @@ func (i *iterStargazers) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.current = 0

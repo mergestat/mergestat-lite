@@ -25,7 +25,8 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 	}
 	login := value[0].Text()
 	var query struct {
-		User struct {
+		RateLimit *RateLimitResponse
+		User      struct {
 			Bio             string            `json:"bio"`
 			AvatarUrl       githubv4.URI      `json:"avatarUrl"`
 			Company         string            `json:"company"`
@@ -50,6 +51,8 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 		ctx.ResultError(err)
 		return
 	}
+
+	s.opts.RateLimitHandler(query.RateLimit)
 
 	resultString, err := json.Marshal(query.User)
 	if err != nil {

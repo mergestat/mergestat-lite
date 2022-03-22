@@ -38,6 +38,7 @@ type prComment struct {
 }
 
 type fetchPRCommentsResults struct {
+	RateLimit   *RateLimitResponse
 	Comments    *pullRequestForComments
 	OrderBy     *githubv4.IssueCommentOrder
 	HasNextPage bool
@@ -46,6 +47,7 @@ type fetchPRCommentsResults struct {
 
 func (i *iterPRComments) fetchPRComments(ctx context.Context, endCursor *githubv4.String) (*fetchPRCommentsResults, error) {
 	var PRQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -69,10 +71,11 @@ func (i *iterPRComments) fetchPRComments(ctx context.Context, endCursor *githubv
 	}
 
 	return &fetchPRCommentsResults{
-		&PRQuery.Repository.PullRequest,
-		i.orderBy,
-		PRQuery.Repository.PullRequest.Comments.PageInfo.HasNextPage,
-		&PRQuery.Repository.PullRequest.Comments.PageInfo.EndCursor,
+		RateLimit:   PRQuery.RateLimit,
+		Comments:    &PRQuery.Repository.PullRequest,
+		OrderBy:     i.orderBy,
+		HasNextPage: PRQuery.Repository.PullRequest.Comments.PageInfo.HasNextPage,
+		EndCursor:   &PRQuery.Repository.PullRequest.Comments.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -154,6 +157,8 @@ func (i *iterPRComments) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.currentComment = 0

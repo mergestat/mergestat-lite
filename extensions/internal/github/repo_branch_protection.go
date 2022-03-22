@@ -41,6 +41,7 @@ type protectionRules struct {
 }
 
 type fetchBranchProtectionResults struct {
+	RateLimit   *RateLimitResponse
 	Edges       []*protectionRules
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -48,6 +49,7 @@ type fetchBranchProtectionResults struct {
 
 func (i *iterProtections) fetchProtections(ctx context.Context, startCursor *githubv4.String) (*fetchBranchProtectionResults, error) {
 	var Query struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -75,9 +77,10 @@ func (i *iterProtections) fetchProtections(ctx context.Context, startCursor *git
 	}
 
 	return &fetchBranchProtectionResults{
-		Query.Repository.BranchProtectionRules.Nodes,
-		Query.Repository.BranchProtectionRules.PageInfo.HasNextPage,
-		&Query.Repository.BranchProtectionRules.PageInfo.EndCursor,
+		RateLimit:   Query.RateLimit,
+		Edges:       Query.Repository.BranchProtectionRules.Nodes,
+		HasNextPage: Query.Repository.BranchProtectionRules.PageInfo.HasNextPage,
+		EndCursor:   &Query.Repository.BranchProtectionRules.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -160,6 +163,8 @@ func (i *iterProtections) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.current = 0

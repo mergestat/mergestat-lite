@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"query":"query($commentcursor:String$issueNumber:Int!$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!){repository(owner: $owner, name: $name){owner{login},name,issue(number: $issueNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"issueNumber":10,"name":"askgit","orderBy":{"field":"UPDATED_AT","direction":"ASC"},"owner":"askgitdev","perPage":100}}
+      {"query":"query($commentcursor:String$issueNumber:Int!$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){owner{login},name,issue(number: $issueNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"issueNumber":10,"name":"mergestat","orderBy":null,"owner":"mergestat","perPage":50}}
     form: {}
     headers:
       Content-Type:
@@ -11,7 +11,7 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","issue":{"id":"MDU6SXNzdWU2NTIyNzA5NTI=","number":10,"comments":{"nodes":[{"body":"Unfortunately
+    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":50,"remaining":3351,"resetAt":"2022-03-21T17:34:56Z","used":1649},"repository":{"owner":{"login":"mergestat"},"name":"mergestat","issue":{"id":"MDU6SXNzdWU2NTIyNzA5NTI=","number":10,"comments":{"nodes":[{"body":"Unfortunately
       GoReleaser does not work with CGO which is necessary for accessing the git objects.
       This seems to be something that is common throughout pre-built go binary builders
       as I know xgo also has issues compiling projects with CGO. If you happen to
@@ -26,23 +26,21 @@ interactions:
       in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-656118539"},{"body":"#50
       adds some instructions to the README on how to install via `homebrew`, which
       will now be maintained. Running via Docker has also been documented, as such
-      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
+      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpHOKOZqUQ==","hasNextPage":false}}}}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
       Access-Control-Expose-Headers:
       - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
         X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
-        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
-        Sunset
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
       Content-Security-Policy:
       - default-src 'none'
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 31 Oct 2021 18:25:33 GMT
-      Github-Authentication-Token-Expiration:
-      - 2021-11-30 18:12:25 UTC
+      - Mon, 21 Mar 2022 17:15:37 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -60,29 +58,27 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - B6D2:0489:3014470:84A500A:617EDF9D
+      - E3A2:1ACD:120FA08:34FA07B:6238B2B9
       X-Oauth-Scopes:
-      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
-        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
-        user, workflow, write:discussion, write:packages
+      - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4996"
+      - "3351"
       X-Ratelimit-Reset:
-      - "1635708098"
+      - "1647884096"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "4"
+      - "1649"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 496.32475ms
+    duration: 378.366598ms
 - request:
     body: |
-      {"query":"query($commentcursor:String$issueNumber:Int!$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!){repository(owner: $owner, name: $name){owner{login},name,issue(number: $issueNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"issueNumber":10,"name":"askgit","orderBy":{"field":"UPDATED_AT","direction":"ASC"},"owner":"askgitdev","perPage":100}}
+      {"query":"query($commentcursor:String$issueNumber:Int!$name:String!$orderBy:IssueCommentOrder$owner:String!$perPage:Int!){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){owner{login},name,issue(number: $issueNumber){id,number,comments(first: $perPage, after: $commentcursor,orderBy: $orderBy){nodes{body,author{login,url},createdAt,databaseId,id,updatedAt,url},pageInfo{endCursor,hasNextPage}}}}}","variables":{"commentcursor":null,"issueNumber":10,"name":"askgit","orderBy":null,"owner":"askgitdev","perPage":50}}
     form: {}
     headers:
       Content-Type:
@@ -90,7 +86,7 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: '{"data":{"repository":{"owner":{"login":"askgitdev"},"name":"askgit","issue":{"id":"MDU6SXNzdWU2NTIyNzA5NTI=","number":10,"comments":{"nodes":[{"body":"Unfortunately
+    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":50,"remaining":3349,"resetAt":"2022-03-21T17:34:56Z","used":1651},"repository":{"owner":{"login":"mergestat"},"name":"mergestat","issue":{"id":"MDU6SXNzdWU2NTIyNzA5NTI=","number":10,"comments":{"nodes":[{"body":"Unfortunately
       GoReleaser does not work with CGO which is necessary for accessing the git objects.
       This seems to be something that is common throughout pre-built go binary builders
       as I know xgo also has issues compiling projects with CGO. If you happen to
@@ -105,23 +101,21 @@ interactions:
       in xgo) yesterday. \r\n\r\nNo homebrew yet.","author":{"login":"Vialeon","url":"https://github.com/Vialeon"},"createdAt":"2020-07-09T13:12:07Z","databaseId":656118539,"id":"MDEyOklzc3VlQ29tbWVudDY1NjExODUzOQ==","updatedAt":"2020-07-09T13:12:07Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-656118539"},{"body":"#50
       adds some instructions to the README on how to install via `homebrew`, which
       will now be maintained. Running via Docker has also been documented, as such
-      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpK5MjAyMC0wOS0wMlQyMTowODoxMC0wNTowMM4o5mpR","hasNextPage":false}}}}}}'
+      I''ll close this out as PR #50 merges","author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"createdAt":"2020-09-03T02:08:10Z","databaseId":686189137,"id":"MDEyOklzc3VlQ29tbWVudDY4NjE4OTEzNw==","updatedAt":"2020-09-03T02:08:10Z","url":"https://github.com/mergestat/mergestat/issues/10#issuecomment-686189137"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpHOKOZqUQ==","hasNextPage":false}}}}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
       Access-Control-Expose-Headers:
       - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
         X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
-        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation,
-        Sunset
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
       Content-Security-Policy:
       - default-src 'none'
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 31 Oct 2021 18:25:34 GMT
-      Github-Authentication-Token-Expiration:
-      - 2021-11-30 18:12:25 UTC
+      - Mon, 21 Mar 2022 17:15:37 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -139,23 +133,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - B6D2:0489:3014481:84A5048:617EDF9D
+      - E3A2:1ACD:120FA17:34FA09B:6238B2B9
       X-Oauth-Scopes:
-      - admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key,
-        admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo,
-        user, workflow, write:discussion, write:packages
+      - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4995"
+      - "3349"
       X-Ratelimit-Reset:
-      - "1635708098"
+      - "1647884096"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "5"
+      - "1651"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 203.271208ms
+    duration: 199.898778ms

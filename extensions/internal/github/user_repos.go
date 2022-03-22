@@ -14,6 +14,7 @@ import (
 )
 
 type fetchUserReposResults struct {
+	RateLimit   *RateLimitResponse
 	UserRepos   []*userRepo
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -79,7 +80,8 @@ type userRepo struct {
 
 func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv4.String) (*fetchUserReposResults, error) {
 	var reposQuery struct {
-		User struct {
+		RateLimit *RateLimitResponse
+		User      struct {
 			Login        string
 			Repositories struct {
 				Nodes    []*userRepo
@@ -105,9 +107,10 @@ func (i *iterUserRepos) fetchUserRepos(ctx context.Context, startCursor *githubv
 	}
 
 	return &fetchUserReposResults{
-		reposQuery.User.Repositories.Nodes,
-		reposQuery.User.Repositories.PageInfo.HasNextPage,
-		&reposQuery.User.Repositories.PageInfo.EndCursor,
+		RateLimit:   reposQuery.RateLimit,
+		UserRepos:   reposQuery.User.Repositories.Nodes,
+		HasNextPage: reposQuery.User.Repositories.PageInfo.HasNextPage,
+		EndCursor:   &reposQuery.User.Repositories.PageInfo.EndCursor,
 	}, nil
 }
 

@@ -6,7 +6,7 @@ import (
 	"github.com/mergestat/mergestat/extensions/internal/tools"
 )
 
-func TestRepoProtections(t *testing.T) {
+func TestRepoBranchProtections(t *testing.T) {
 	cleanup := newRecorder(t)
 	defer cleanup()
 

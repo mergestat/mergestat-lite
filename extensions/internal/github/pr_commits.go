@@ -46,13 +46,15 @@ type prCommit struct {
 }
 
 type fetchPRCommitsResults struct {
-	Comments    *pullRequestForCommits
+	RateLimit   *RateLimitResponse
+	PR          *pullRequestForCommits
 	HasNextPage bool
 	EndCursor   *githubv4.String
 }
 
 func (i *iterPRCommits) fetchPRCommits(ctx context.Context, endCursor *githubv4.String) (*fetchPRCommitsResults, error) {
 	var PRQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -75,9 +77,10 @@ func (i *iterPRCommits) fetchPRCommits(ctx context.Context, endCursor *githubv4.
 	}
 
 	return &fetchPRCommitsResults{
-		&PRQuery.Repository.PullRequest,
-		PRQuery.Repository.PullRequest.Commits.PageInfo.HasNextPage,
-		&PRQuery.Repository.PullRequest.Commits.PageInfo.EndCursor,
+		RateLimit:   PRQuery.RateLimit,
+		PR:          &PRQuery.Repository.PullRequest,
+		HasNextPage: PRQuery.Repository.PullRequest.Commits.PageInfo.HasNextPage,
+		EndCursor:   &PRQuery.Repository.PullRequest.Commits.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -96,7 +99,7 @@ func (i *iterPRCommits) logger() *zerolog.Logger {
 }
 
 func (i *iterPRCommits) Column(ctx vtab.Context, c int) error {
-	current := i.results.Comments.Commits.Nodes[i.currentCommit]
+	current := i.results.PR.Commits.Nodes[i.currentCommit]
 	col := prCommitsCols[c]
 
 	switch col.Name {
@@ -145,7 +148,7 @@ func (i *iterPRCommits) Column(ctx vtab.Context, c int) error {
 func (i *iterPRCommits) Next() (vtab.Row, error) {
 	i.currentCommit += 1
 
-	if i.results == nil || i.currentCommit >= len(i.results.Comments.Commits.Nodes) {
+	if i.results == nil || i.currentCommit >= len(i.results.PR.Commits.Nodes) {
 		if i.results == nil || i.results.HasNextPage {
 			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
@@ -164,10 +167,12 @@ func (i *iterPRCommits) Next() (vtab.Row, error) {
 				return nil, err
 			}
 
+			i.Options.RateLimitHandler(results.RateLimit)
+
 			i.results = results
 			i.currentCommit = 0
 
-			if len(results.Comments.Commits.Nodes) == 0 {
+			if len(results.PR.Commits.Nodes) == 0 {
 				return nil, io.EOF
 			}
 		} else {

@@ -58,6 +58,7 @@ type objectCommit struct {
 }
 
 type fetchRepositoryCommitsResults struct {
+	RateLimit      *RateLimitResponse
 	defaultCommits *repositoryDefaultBranchForCommits
 	Commits        *repositoryForCommits
 	HasNextPage    bool
@@ -66,6 +67,7 @@ type fetchRepositoryCommitsResults struct {
 
 func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endCursor *githubv4.String) (*fetchRepositoryCommitsResults, error) {
 	var repoQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -75,6 +77,7 @@ func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endC
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	var repoBranchQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -98,10 +101,11 @@ func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endC
 			return nil, err
 		}
 		return &fetchRepositoryCommitsResults{
-			nil,
-			&repoBranchQuery.Repository.Target,
-			repoBranchQuery.Repository.Target.Commits.History.PageInfo.HasNextPage,
-			&repoBranchQuery.Repository.Target.Commits.History.PageInfo.EndCursor,
+			RateLimit:      repoBranchQuery.RateLimit,
+			defaultCommits: nil,
+			Commits:        &repoBranchQuery.Repository.Target,
+			HasNextPage:    repoBranchQuery.Repository.Target.Commits.History.PageInfo.HasNextPage,
+			EndCursor:      &repoBranchQuery.Repository.Target.Commits.History.PageInfo.EndCursor,
 		}, nil
 	} else {
 		variables = map[string]interface{}{
@@ -114,10 +118,11 @@ func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endC
 			return nil, err
 		}
 		return &fetchRepositoryCommitsResults{
-			&repoQuery.Repository.DefaultBranchRef,
-			nil,
-			repoQuery.Repository.DefaultBranchRef.Target.Commits.History.PageInfo.HasNextPage,
-			&repoQuery.Repository.DefaultBranchRef.Target.Commits.History.PageInfo.EndCursor,
+			RateLimit:      repoQuery.RateLimit,
+			defaultCommits: &repoQuery.Repository.DefaultBranchRef,
+			Commits:        nil,
+			HasNextPage:    repoQuery.Repository.DefaultBranchRef.Target.Commits.History.PageInfo.HasNextPage,
+			EndCursor:      &repoQuery.Repository.DefaultBranchRef.Target.Commits.History.PageInfo.EndCursor,
 		}, nil
 	}
 
@@ -217,6 +222,8 @@ func (i *iterRepositoryCommits) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.currentCommit = 0

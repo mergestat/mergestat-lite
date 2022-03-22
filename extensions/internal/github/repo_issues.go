@@ -53,6 +53,7 @@ type issue struct {
 }
 
 type fetchIssuesResults struct {
+	RateLimit   *RateLimitResponse
 	Edges       []*issueEdge
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -65,6 +66,7 @@ type issueEdge struct {
 
 func (i *iterIssues) fetchIssues(ctx context.Context, startCursor *githubv4.String) (*fetchIssuesResults, error) {
 	var issuesQuery struct {
+		RateLimit  *RateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -93,9 +95,10 @@ func (i *iterIssues) fetchIssues(ctx context.Context, startCursor *githubv4.Stri
 	}
 
 	return &fetchIssuesResults{
-		issuesQuery.Repository.Issues.Edges,
-		issuesQuery.Repository.Issues.PageInfo.HasNextPage,
-		&issuesQuery.Repository.Issues.PageInfo.EndCursor,
+		RateLimit:   issuesQuery.RateLimit,
+		Edges:       issuesQuery.Repository.Issues.Edges,
+		HasNextPage: issuesQuery.Repository.Issues.PageInfo.HasNextPage,
+		EndCursor:   &issuesQuery.Repository.Issues.PageInfo.EndCursor,
 	}, nil
 }
 
@@ -215,6 +218,8 @@ func (i *iterIssues) Next() (vtab.Row, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			i.Options.RateLimitHandler(results.RateLimit)
 
 			i.results = results
 			i.current = 0
