@@ -144,6 +144,8 @@ func (i *iterStarredRepos) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
+			i.Options.GitHubPreRequestHook()
+
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of starred_repos for %s", i.login)
 			results, err := i.fetchStarredRepos(context.Background(), cursor)

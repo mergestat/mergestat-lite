@@ -44,6 +44,8 @@ func (s *userInfo) Apply(ctx *sqlite.Context, value ...sqlite.Value) {
 		"login": githubv4.String(login),
 	}
 
+	s.opts.GitHubPreRequestHook()
+
 	l := s.opts.Logger.With().Str("login", login).Logger()
 	l.Info().Msgf("fetching user information for: %s", login)
 

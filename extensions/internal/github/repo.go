@@ -106,6 +106,8 @@ func (r *repoInfo) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 		name = values[1].Text()
 	}
 
+	r.opts.GitHubPreRequestHook()
+
 	l := r.opts.Logger.With().Str("owner", owner).Str("name", name).Logger()
 	l.Info().Msgf("fetching repo info from GitHub for: %s/%s", owner, name)
 

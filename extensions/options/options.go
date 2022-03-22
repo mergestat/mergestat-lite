@@ -34,6 +34,9 @@ type Options struct {
 	// GitHubRateLimitHandler overrides the default GitHub API rate limit response handler
 	GitHubRateLimitHandler func(*GitHubRateLimitResponse)
 
+	// GitHubPreRequestHook
+	GitHubPreRequestHook func()
+
 	// Sourcegraph set to true to register Sourcegraph tables/func
 	Sourcegraph bool
 
@@ -80,6 +83,11 @@ func WithGitHubClientGetter(getter func() *githubv4.Client) OptionFn {
 // WithGitHubRateLimitHandler configures a way to use a custom GitHub API rate limit handler
 func WithGitHubRateLimitHandler(handler func(*GitHubRateLimitResponse)) OptionFn {
 	return func(o *Options) { o.GitHubRateLimitHandler = handler }
+}
+
+// WithGitHubPreRequestHook configures a way to use a custom GitHub API rate limit handler
+func WithGitHubPreRequestHook(f func()) OptionFn {
+	return func(o *Options) { o.GitHubPreRequestHook = f }
 }
 
 // WithSourcegraph configures the extension to also register the Sourcegraph related tables and funcs

@@ -249,6 +249,8 @@ func (i *iterUserRepos) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
+			i.Options.GitHubPreRequestHook()
+
 			l := i.logger().With().Interface("cursor", cursor).Logger()
 			l.Info().Msgf("fetching page of user_repos for %s", i.login)
 			results, err := i.fetchUserRepos(context.Background(), cursor)
