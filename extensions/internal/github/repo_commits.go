@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
@@ -58,7 +59,7 @@ type objectCommit struct {
 }
 
 type fetchRepositoryCommitsResults struct {
-	RateLimit      *RateLimitResponse
+	RateLimit      *options.GitHubRateLimitResponse
 	defaultCommits *repositoryDefaultBranchForCommits
 	Commits        *repositoryForCommits
 	HasNextPage    bool
@@ -67,7 +68,7 @@ type fetchRepositoryCommitsResults struct {
 
 func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endCursor *githubv4.String) (*fetchRepositoryCommitsResults, error) {
 	var repoQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string
@@ -77,7 +78,7 @@ func (i *iterRepositoryCommits) fetchRepositoryCommits(ctx context.Context, endC
 		} `graphql:"repository(owner: $owner, name: $name)"`
 	}
 	var repoBranchQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string

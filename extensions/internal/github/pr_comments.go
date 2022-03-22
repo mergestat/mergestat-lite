@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
@@ -38,7 +39,7 @@ type prComment struct {
 }
 
 type fetchPRCommentsResults struct {
-	RateLimit   *RateLimitResponse
+	RateLimit   *options.GitHubRateLimitResponse
 	Comments    *pullRequestForComments
 	OrderBy     *githubv4.IssueCommentOrder
 	HasNextPage bool
@@ -47,7 +48,7 @@ type fetchPRCommentsResults struct {
 
 func (i *iterPRComments) fetchPRComments(ctx context.Context, endCursor *githubv4.String) (*fetchPRCommentsResults, error) {
 	var PRQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
@@ -41,7 +42,7 @@ type protectionRules struct {
 }
 
 type fetchBranchProtectionResults struct {
-	RateLimit   *RateLimitResponse
+	RateLimit   *options.GitHubRateLimitResponse
 	Edges       []*protectionRules
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -49,7 +50,7 @@ type fetchBranchProtectionResults struct {
 
 func (i *iterProtections) fetchProtections(ctx context.Context, startCursor *githubv4.String) (*fetchBranchProtectionResults, error) {
 	var Query struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
@@ -53,7 +54,7 @@ type issue struct {
 }
 
 type fetchIssuesResults struct {
-	RateLimit   *RateLimitResponse
+	RateLimit   *options.GitHubRateLimitResponse
 	Edges       []*issueEdge
 	HasNextPage bool
 	EndCursor   *githubv4.String
@@ -66,7 +67,7 @@ type issueEdge struct {
 
 func (i *iterIssues) fetchIssues(ctx context.Context, startCursor *githubv4.String) (*fetchIssuesResults, error) {
 	var issuesQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Owner struct {
 				Login string

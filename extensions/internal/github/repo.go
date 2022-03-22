@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
 )
@@ -28,7 +29,7 @@ func (r *repoInfo) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	// and then immediately re-marshal it into json for output...should probably make this simpler
 	// by using the graphQL query directly and returning the []byte result directly
 	var repoInfoQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			CreatedAt        time.Time
 			DefaultBranchRef struct {

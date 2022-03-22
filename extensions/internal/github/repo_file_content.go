@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mergestat/mergestat/extensions/options"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
 )
@@ -24,7 +25,7 @@ func (f *repoFileContent) Apply(ctx *sqlite.Context, values ...sqlite.Value) {
 	}
 
 	var fileContentsQuery struct {
-		RateLimit  *RateLimitResponse
+		RateLimit  *options.GitHubRateLimitResponse
 		Repository struct {
 			Object struct {
 				Blob struct {
