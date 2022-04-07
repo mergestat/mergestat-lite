@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -35,11 +36,11 @@ func DiskLocator() services.RepoLocator {
 // and returns another one that caches output from the underlying locator
 // using path as the key.
 func CachedLocator(rl services.RepoLocator) services.RepoLocator {
-	var cache = make(map[string]*git.Repository)
+	cache := sync.Map{}
 
 	return options.RepoLocatorFn(func(ctx context.Context, path string) (*git.Repository, error) {
-		if cached, ok := cache[path]; ok {
-			return cached, nil
+		if cached, ok := cache.Load(path); ok {
+			return cached.(*git.Repository), nil
 		}
 
 		repo, err := rl.Open(ctx, path)
@@ -47,7 +48,7 @@ func CachedLocator(rl services.RepoLocator) services.RepoLocator {
 			return nil, err
 		}
 
-		cache[path] = repo
+		cache.Store(path, repo)
 		return repo, nil
 	})
 }
