@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"query":"query($name:String!$owner:String!$perPage:Int!$prNumber:Int!$reviewCursor:String){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,reviews(first: $perPage, after: $reviewCursor){nodes{author{login,url},authorAssociation,authorCanPushToRepository,body,comments{totalCount},createdAt,createdViaEmail,editor{login},lastEditedAt,publishedAt,state,submittedAt,updatedAt},pageInfo{endCursor,hasNextPage}}}}}","variables":{"name":"mergestat","owner":"mergestat","perPage":50,"prNumber":261,"reviewCursor":null}}
+      {"query":"query($name:String!$owner:String!$perPage:Int!$prNumber:Int!$reviewCursor:String){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,reviews(first: $perPage, after: $reviewCursor){nodes{author{login,url},authorAssociation,authorCanPushToRepository,body,comments{totalCount},createdAt,createdViaEmail,editor{login},id,lastEditedAt,publishedAt,state,submittedAt,updatedAt},pageInfo{endCursor,hasNextPage}}}}}","variables":{"name":"mergestat","owner":"mergestat","perPage":50,"prNumber":261,"reviewCursor":null}}
     form: {}
     headers:
       Content-Type:
@@ -11,7 +11,7 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":50,"remaining":4993,"resetAt":"2022-03-28T14:49:02Z","used":7},"repository":{"owner":{"login":"mergestat"},"name":"mergestat","pullRequest":{"id":"PR_kwDOEIJSDM4zLnWt","number":261,"reviews":{"nodes":[{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":1},"createdAt":"2022-02-28T19:22:22Z","createdViaEmail":false,"editor":null,"lastEditedAt":null,"publishedAt":"2022-02-28T19:22:22Z","state":"COMMENTED","submittedAt":"2022-02-28T19:22:22Z","updatedAt":"2022-02-28T19:22:22Z"},{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":0},"createdAt":"2022-03-02T23:44:33Z","createdViaEmail":false,"editor":null,"lastEditedAt":null,"publishedAt":"2022-03-02T23:44:33Z","state":"APPROVED","submittedAt":"2022-03-02T23:44:33Z","updatedAt":"2022-03-02T23:44:33Z"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpO5MjAyMi0wMy0wMlQxODo0NDozMy0wNTowMLkyMDIyLTAzLTAyVDE4OjQ0OjMzLTA1OjAwzjWK9qY=","hasNextPage":false}}}}}}'
+    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":50,"remaining":4780,"resetAt":"2022-04-14T15:54:03Z","used":220},"repository":{"owner":{"login":"mergestat"},"name":"mergestat","pullRequest":{"id":"PR_kwDOEIJSDM4zLnWt","number":261,"reviews":{"nodes":[{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":1},"createdAt":"2022-02-28T19:22:22Z","createdViaEmail":false,"editor":null,"id":"PRR_kwDOEIJSDM41YD9j","lastEditedAt":null,"publishedAt":"2022-02-28T19:22:22Z","state":"COMMENTED","submittedAt":"2022-02-28T19:22:22Z","updatedAt":"2022-02-28T19:22:22Z"},{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":0},"createdAt":"2022-03-02T23:44:33Z","createdViaEmail":false,"editor":null,"id":"PRR_kwDOEIJSDM41ivam","lastEditedAt":null,"publishedAt":"2022-03-02T23:44:33Z","state":"APPROVED","submittedAt":"2022-03-02T23:44:33Z","updatedAt":"2022-03-02T23:44:33Z"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpO5MjAyMi0wMy0wMlQxODo0NDozMy0wNTowMLkyMDIyLTAzLTAyVDE4OjQ0OjMzLTA1OjAwzjWK9qY=","hasNextPage":false}}}}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -25,7 +25,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 28 Mar 2022 14:14:47 GMT
+      - Thu, 14 Apr 2022 15:01:57 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -43,27 +43,27 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - F059:3EEF:14A9F2E:2FD4030:6241C2D7
+      - D16F:6E84:18785B2:307A265:62583765
       X-Oauth-Scopes:
       - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4993"
+      - "4780"
       X-Ratelimit-Reset:
-      - "1648478942"
+      - "1649951643"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "7"
+      - "220"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 414.403177ms
+    duration: 290.360703ms
 - request:
     body: |
-      {"query":"query($name:String!$owner:String!$perPage:Int!$prNumber:Int!$reviewCursor:String){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,reviews(first: $perPage, after: $reviewCursor){nodes{author{login,url},authorAssociation,authorCanPushToRepository,body,comments{totalCount},createdAt,createdViaEmail,editor{login},lastEditedAt,publishedAt,state,submittedAt,updatedAt},pageInfo{endCursor,hasNextPage}}}}}","variables":{"name":"mergestat","owner":"mergestat","perPage":50,"prNumber":261,"reviewCursor":null}}
+      {"query":"query($name:String!$owner:String!$perPage:Int!$prNumber:Int!$reviewCursor:String){rateLimit{cost,limit,nodeCount,remaining,resetAt,used},repository(owner: $owner, name: $name){owner{login},name,pullRequest(number: $prNumber){id,number,reviews(first: $perPage, after: $reviewCursor){nodes{author{login,url},authorAssociation,authorCanPushToRepository,body,comments{totalCount},createdAt,createdViaEmail,editor{login},id,lastEditedAt,publishedAt,state,submittedAt,updatedAt},pageInfo{endCursor,hasNextPage}}}}}","variables":{"name":"mergestat","owner":"mergestat","perPage":50,"prNumber":261,"reviewCursor":null}}
     form: {}
     headers:
       Content-Type:
@@ -71,7 +71,7 @@ interactions:
     url: https://api.github.com/graphql
     method: POST
   response:
-    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":50,"remaining":4992,"resetAt":"2022-03-28T14:49:02Z","used":8},"repository":{"owner":{"login":"mergestat"},"name":"mergestat","pullRequest":{"id":"PR_kwDOEIJSDM4zLnWt","number":261,"reviews":{"nodes":[{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":1},"createdAt":"2022-02-28T19:22:22Z","createdViaEmail":false,"editor":null,"lastEditedAt":null,"publishedAt":"2022-02-28T19:22:22Z","state":"COMMENTED","submittedAt":"2022-02-28T19:22:22Z","updatedAt":"2022-02-28T19:22:22Z"},{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":0},"createdAt":"2022-03-02T23:44:33Z","createdViaEmail":false,"editor":null,"lastEditedAt":null,"publishedAt":"2022-03-02T23:44:33Z","state":"APPROVED","submittedAt":"2022-03-02T23:44:33Z","updatedAt":"2022-03-02T23:44:33Z"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpO5MjAyMi0wMy0wMlQxODo0NDozMy0wNTowMLkyMDIyLTAzLTAyVDE4OjQ0OjMzLTA1OjAwzjWK9qY=","hasNextPage":false}}}}}}'
+    body: '{"data":{"rateLimit":{"cost":1,"limit":5000,"nodeCount":50,"remaining":4779,"resetAt":"2022-04-14T15:54:03Z","used":221},"repository":{"owner":{"login":"mergestat"},"name":"mergestat","pullRequest":{"id":"PR_kwDOEIJSDM4zLnWt","number":261,"reviews":{"nodes":[{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":1},"createdAt":"2022-02-28T19:22:22Z","createdViaEmail":false,"editor":null,"id":"PRR_kwDOEIJSDM41YD9j","lastEditedAt":null,"publishedAt":"2022-02-28T19:22:22Z","state":"COMMENTED","submittedAt":"2022-02-28T19:22:22Z","updatedAt":"2022-02-28T19:22:22Z"},{"author":{"login":"patrickdevivo","url":"https://github.com/patrickdevivo"},"authorAssociation":"MEMBER","authorCanPushToRepository":true,"body":"","comments":{"totalCount":0},"createdAt":"2022-03-02T23:44:33Z","createdViaEmail":false,"editor":null,"id":"PRR_kwDOEIJSDM41ivam","lastEditedAt":null,"publishedAt":"2022-03-02T23:44:33Z","state":"APPROVED","submittedAt":"2022-03-02T23:44:33Z","updatedAt":"2022-03-02T23:44:33Z"}],"pageInfo":{"endCursor":"Y3Vyc29yOnYyOpO5MjAyMi0wMy0wMlQxODo0NDozMy0wNTowMLkyMDIyLTAzLTAyVDE4OjQ0OjMzLTA1OjAwzjWK9qY=","hasNextPage":false}}}}}}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -85,7 +85,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 28 Mar 2022 14:14:48 GMT
+      - Thu, 14 Apr 2022 15:01:57 GMT
       Referrer-Policy:
       - origin-when-cross-origin, strict-origin-when-cross-origin
       Server:
@@ -103,21 +103,21 @@ interactions:
       X-Github-Media-Type:
       - github.v4; format=json
       X-Github-Request-Id:
-      - F059:3EEF:14A9F35:2FD404C:6241C2D7
+      - D16F:6E84:18785BE:307A285:62583765
       X-Oauth-Scopes:
       - read:org, repo, user
       X-Ratelimit-Limit:
       - "5000"
       X-Ratelimit-Remaining:
-      - "4992"
+      - "4779"
       X-Ratelimit-Reset:
-      - "1648478942"
+      - "1649951643"
       X-Ratelimit-Resource:
       - graphql
       X-Ratelimit-Used:
-      - "8"
+      - "221"
       X-Xss-Protection:
       - "0"
     status: 200 OK
     code: 200
-    duration: 180.348054ms
+    duration: 175.539519ms

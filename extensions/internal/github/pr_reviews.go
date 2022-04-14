@@ -41,6 +41,7 @@ type prReview struct {
 	Editor          struct {
 		Login string
 	}
+	Id           string
 	LastEditedAt githubv4.DateTime
 	PublishedAt  githubv4.DateTime
 	State        string
@@ -129,6 +130,8 @@ func (i *iterPRReviews) Column(ctx vtab.Context, c int) error {
 		ctx.ResultInt(t1f0(current.CreatedViaEmail))
 	case "editor_login":
 		ctx.ResultText(current.Editor.Login)
+	case "id":
+		ctx.ResultText(current.Id)
 	case "last_edited_at":
 		t := current.LastEditedAt
 		if t.IsZero() {
@@ -222,6 +225,7 @@ var prReviewCols = []vtab.Column{
 	{Name: "created_at", Type: "DATETIME"},
 	{Name: "created_via_email", Type: "BOOLEAN"},
 	{Name: "editor_login", Type: "TEXT"},
+	{Name: "id", Type: "TEXT"},
 	{Name: "last_edited_at", Type: "DATETIME"},
 	{Name: "published_at", Type: "DATETIME"},
 	{Name: "state", Type: "TEXT"},
