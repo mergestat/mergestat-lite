@@ -23,7 +23,7 @@ func TestPRReviews(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if expected := 14; colCount != expected {
+	if expected := 15; colCount != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, colCount)
 	}
 
@@ -38,7 +38,7 @@ func TestPRReviews(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if expected := 14; colCount != expected {
+	if expected := 15; colCount != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, colCount)
 	}
 }
