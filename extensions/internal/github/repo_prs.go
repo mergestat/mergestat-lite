@@ -317,9 +317,15 @@ var prCols = []vtab.Column{
 	{Name: "changed_files", Type: "INT"},
 	{Name: "closed", Type: "BOOLEAN"},
 	{Name: "closed_at", Type: "DATETIME"},
-	{Name: "comment_count", Type: "INT", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "comment_count", Type: "INT", OrderBy: vtab.ASC | vtab.DESC, Filters: []*vtab.ColumnFilter{
+		{Op: sqlite.INDEX_CONSTRAINT_GT}, {Op: sqlite.INDEX_CONSTRAINT_GE},
+		{Op: sqlite.INDEX_CONSTRAINT_LT}, {Op: sqlite.INDEX_CONSTRAINT_LE},
+	}},
 	{Name: "commit_count", Type: "INT"},
-	{Name: "created_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "created_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC, Filters: []*vtab.ColumnFilter{
+		{Op: sqlite.INDEX_CONSTRAINT_GT}, {Op: sqlite.INDEX_CONSTRAINT_GE},
+		{Op: sqlite.INDEX_CONSTRAINT_LT}, {Op: sqlite.INDEX_CONSTRAINT_LE},
+	}},
 	{Name: "created_via_email", Type: "BOOLEAN"},
 	{Name: "database_id", Type: "INT"},
 	{Name: "deletions", Type: "INT"},
@@ -342,7 +348,10 @@ var prCols = []vtab.Column{
 	{Name: "review_decision", Type: "TEXT"},
 	{Name: "state", Type: "TEXT"},
 	{Name: "title", Type: "TEXT"},
-	{Name: "updated_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
+	{Name: "updated_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC, Filters: []*vtab.ColumnFilter{
+		{Op: sqlite.INDEX_CONSTRAINT_GT}, {Op: sqlite.INDEX_CONSTRAINT_GE},
+		{Op: sqlite.INDEX_CONSTRAINT_LT}, {Op: sqlite.INDEX_CONSTRAINT_LE},
+	}},
 	{Name: "url", Type: "TEXT"},
 }
 
