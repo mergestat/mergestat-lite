@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"time"
 
@@ -54,7 +55,10 @@ type pullRequest struct {
 	IsDraft           bool
 	Labels            struct {
 		TotalCount int
-	}
+		Nodes      []struct {
+			Name string
+		}
+	} `graphql:"labels(first: 15)"`
 	LastEditedAt        githubv4.DateTime
 	Locked              bool
 	MaintainerCanModify bool
@@ -205,6 +209,18 @@ func (i *iterPRs) Column(ctx vtab.Context, c int) error {
 		ctx.ResultInt(t1f0(current.IsDraft))
 	case "label_count":
 		ctx.ResultInt(current.Labels.TotalCount)
+	case "labels":
+		labels := make([]string, len(current.Labels.Nodes))
+		for l, label := range current.Labels.Nodes {
+			labels[l] = label.Name
+		}
+		js, err := json.Marshal(labels)
+		if err != nil {
+			i.logger().Err(err).Msgf("could not marshal PR labels")
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(string(js))
+		}
 	case "last_edited_at":
 		t := current.LastEditedAt
 		if t.IsZero() {
@@ -335,6 +351,7 @@ var prCols = []vtab.Column{
 	{Name: "head_repository_name", Type: "TEXT"},
 	{Name: "is_draft", Type: "BOOLEAN"},
 	{Name: "label_count", Type: "INT"},
+	{Name: "labels", Type: "JSON"},
 	{Name: "last_edited_at", Type: "DATETIME"},
 	{Name: "locked", Type: "BOOLEAN"},
 	{Name: "maintainer_can_modify", Type: "BOOLEAN"},
