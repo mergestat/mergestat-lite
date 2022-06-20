@@ -208,7 +208,7 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 		logger = logger.With().Str("repo-disk-path", path).Logger()
 	}
 
-	var opts = &git.LogOptions{Order: git.LogOrderCommitterTime}
+	var opts = &git.LogOptions{Order: git.LogOrderDefault}
 
 	rev := plumbing.Revision(refName)
 	cur.rev = &rev
