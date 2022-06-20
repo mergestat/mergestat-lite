@@ -23,8 +23,8 @@ func TestRepoIssues(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if colCount != 22 {
-		t.Fatalf("expected 22 columns, got: %d", colCount)
+	if colCount != 23 {
+		t.Fatalf("expected 23 columns, got: %d", colCount)
 	}
 
 	if len(content) != 10 {

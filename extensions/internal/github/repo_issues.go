@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"time"
@@ -33,7 +34,10 @@ type issue struct {
 	IsReadByViewer      bool
 	Labels              struct {
 		TotalCount int
-	}
+		Nodes      []struct {
+			Name string
+		}
+	} `graphql:"labels(first: 15)"`
 	LastEditedAt githubv4.DateTime
 	Locked       bool
 	Milestone    struct {
@@ -157,6 +161,18 @@ func (i *iterIssues) Column(ctx vtab.Context, c int) error {
 		ctx.ResultInt(t1f0(current.Node.IncludesCreatedEdit))
 	case "label_count":
 		ctx.ResultInt(current.Node.Labels.TotalCount)
+	case "labels":
+		labels := make([]string, len(current.Node.Labels.Nodes))
+		for l, label := range current.Node.Labels.Nodes {
+			labels[l] = label.Name
+		}
+		js, err := json.Marshal(labels)
+		if err != nil {
+			i.logger().Err(err).Msgf("could not marshal issue labels")
+			ctx.ResultNull()
+		} else {
+			ctx.ResultText(string(js))
+		}
 	case "last_edited_at":
 		t := current.Node.LastEditedAt
 		if t.IsZero() {
@@ -255,6 +271,7 @@ var issuesCols = []vtab.Column{
 	{Name: "editor_login", Type: "TEXT"},
 	{Name: "includes_created_edit", Type: "BOOLEAN"},
 	{Name: "label_count", Type: "INT"},
+	{Name: "labels", Type: "JSON"},
 	{Name: "last_edited_at", Type: "DATETIME"},
 	{Name: "locked", Type: "BOOLEAN"},
 	{Name: "milestone_count", Type: "INT"},
