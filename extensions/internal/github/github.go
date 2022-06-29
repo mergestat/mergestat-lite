@@ -79,6 +79,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 		"github_repo_pr_commits":         NewPRCommitsModule(githubOpts),
 		"github_repo_commits":            NewRepoCommitsModule(githubOpts),
 		"github_repo_pr_reviews":         NewPRReviewsModule(githubOpts),
+		"github_org_audit_log":           NewOrgAuditModule(githubOpts),
 	}
 
 	modules["github_issue_comments"] = modules["github_repo_issue_comments"]
@@ -90,6 +91,7 @@ func Register(ext *sqlite.ExtensionApi, opt *options.Options) (_ sqlite.ErrorCod
 	modules["github_branch_protections"] = modules["github_repo_branch_protections"]
 	modules["github_pr_commits"] = modules["github_repo_pr_commits"]
 	modules["github_pr_reviews"] = modules["github_repo_pr_reviews"]
+	modules["github_audit_log"] = modules["github_org_audit_log"]
 
 	// register GitHub tables
 	for name, mod := range modules {

@@ -1,0 +1,63 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"query":"query($auditLogCursor:String$auditLogOrder:AuditLogOrder$login:String!$perPage:Int!){organization(login: $login){login,auditLog(first: $perPage, after: $auditLogCursor, orderBy: $auditLogOrder){totalCount,nodes{__typename,... on Node{id},... on AuditEntry{action,actor{__typename},actorLogin,actorIp,createdAt,operationType,userLogin}},pageInfo{endCursor,hasNextPage}}}}","variables":{"auditLogCursor":null,"auditLogOrder":null,"login":"mergestat","perPage":50}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+    url: https://api.github.com/graphql
+    method: POST
+  response:
+    body: '{"data":{"organization":{"login":"mergestat","auditLog":{"totalCount":39,"nodes":[{"__typename":"RepoCreateAuditEntry","id":"fake-id","action":"repo.create","actor":{"__typename":"User"},"actorLogin":"patrickdevivo","actorIp":"0.0.0.0","createdAt":"2022-06-29T14:06:02.543Z","operationType":"CREATE","userLogin":null}],"pageInfo":{"endCursor":null,"hasNextPage":false}}}}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 29 Jun 2022 15:22:01 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-Oauth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-Github-Media-Type:
+      - github.v4; format=json
+      X-Github-Request-Id:
+      - D50C:5249:26D5CB9:574FAA0:62BC6E18
+      X-Oauth-Scopes:
+      - admin:enterprise, admin:org, project, repo, user
+      X-Ratelimit-Limit:
+      - "5000"
+      X-Ratelimit-Remaining:
+      - "4970"
+      X-Ratelimit-Reset:
+      - "1656516380"
+      X-Ratelimit-Resource:
+      - graphql
+      X-Ratelimit-Used:
+      - "30"
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: 1.438554716s
