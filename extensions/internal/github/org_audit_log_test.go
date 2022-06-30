@@ -23,7 +23,7 @@ func TestOrgAuditLog(t *testing.T) {
 		t.Fatalf("failed to retrieve row contents: %v", err.Error())
 	}
 
-	if expected := 9; colCount != expected {
+	if expected := 10; colCount != expected {
 		t.Fatalf("expected %d columns, got: %d", expected, colCount)
 	}
 }
