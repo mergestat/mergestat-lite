@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"strings"
 	"time"
@@ -33,6 +34,13 @@ type auditLogEntryContents struct {
 	}
 	ActorLogin    string
 	ActorIp       string
+	ActorLocation struct {
+		City        string `json:"city"`
+		Country     string `json:"country"`
+		CountryCode string `json:"countryCode"`
+		Region      string `json:"region"`
+		RegionCode  string `json:"regionCode"`
+	}
 	CreatedAt     githubv4.DateTime
 	OperationType string
 	UserLogin     string
@@ -107,6 +115,12 @@ func (i *iterOrgAuditLogs) Column(ctx vtab.Context, c int) error {
 		ctx.ResultText(current.Entry.ActorLogin)
 	case "actor_ip":
 		ctx.ResultText(current.Entry.ActorIp)
+	case "actor_location":
+		if s, err := json.Marshal(current.Entry.ActorLocation); err != nil {
+			return err
+		} else {
+			ctx.ResultText(string(s))
+		}
 	case "created_at":
 		t := current.Entry.CreatedAt
 		if t.IsZero() {
@@ -163,6 +177,7 @@ var orgAuditCols = []vtab.Column{
 	{Name: "actor_type", Type: "TEXT"},
 	{Name: "actor_login", Type: "TEXT"},
 	{Name: "actor_ip", Type: "TEXT"},
+	{Name: "actor_location", Type: "JSON"},
 	{Name: "created_at", Type: "DATETIME", OrderBy: vtab.ASC | vtab.DESC},
 	{Name: "operation_type", Type: "TEXT"},
 	{Name: "user_login", Type: "TEXT"},
