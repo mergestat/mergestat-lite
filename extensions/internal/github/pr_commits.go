@@ -164,7 +164,7 @@ func (i *iterPRCommits) Next() (vtab.Row, error) {
 			i.Options.GitHubPreRequestHook()
 
 			l := i.logger().With().Interface("cursor", cursor).Logger()
-			l.Info().Msgf("fetching page of pr_comments for %s/%s", i.owner, i.name)
+			l.Info().Msgf("fetching page of pr_commits for %s/%s", i.owner, i.name)
 			results, err := i.fetchPRCommits(context.Background(), cursor)
 
 			i.Options.GitHubPostRequestHook()
@@ -252,7 +252,7 @@ func NewPRCommitsModule(opts *Options) sqlite.Module {
 		}
 
 		iter := &iterPRCommits{opts, owner, name, number, -1, nil}
-		iter.logger().Info().Msgf("starting GitHub repo_pr_comment iterator for %s/%s pr : %d", owner, name, number)
+		iter.logger().Info().Msgf("starting GitHub repo_pr_commit iterator for %s/%s pr : %d", owner, name, number)
 		return iter, nil
 	}, vtab.EarlyOrderByConstraintExit(true))
 }
