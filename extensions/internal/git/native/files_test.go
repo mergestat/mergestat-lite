@@ -2,7 +2,7 @@ package native_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -49,7 +49,7 @@ func TestSelectKnownContents(t *testing.T) {
 		}
 		t.Logf("file: path=%s contents_len=%d", path, len(contents))
 
-		expectedFileContents, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s.testdata", hash, path))
+		expectedFileContents, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s.testdata", hash, path))
 		if err != nil {
 			t.Fatalf("failed to load fixture file: %v", err)
 		}

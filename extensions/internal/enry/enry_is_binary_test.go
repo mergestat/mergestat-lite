@@ -1,7 +1,7 @@
 package enry
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/mergestat/mergestat-lite/extensions/internal/tools"
@@ -9,7 +9,7 @@ import (
 
 func TestEnryIsBinary(t *testing.T) {
 	path := "./testdata/binary"
-	fileContents, err := ioutil.ReadFile(path)
+	fileContents, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}

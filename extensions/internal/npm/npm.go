@@ -4,7 +4,7 @@ package npm
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/mergestat/mergestat-lite/extensions/options"
@@ -49,7 +49,7 @@ func (c *Client) GetPackage(ctx context.Context, packageName string) ([]byte, er
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *Client) GetPackageVersion(ctx context.Context, packageName, version str
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

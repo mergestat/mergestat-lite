@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/mergestat/mergestat-lite/pkg/display"
@@ -71,7 +71,7 @@ func (h *queryServiceHandler) httpHandler(w http.ResponseWriter, req *http.Reque
 
 	var body []byte
 	var err error
-	if body, err = ioutil.ReadAll(req.Body); err != nil {
+	if body, err = io.ReadAll(req.Body); err != nil {
 		h.handleErr(w, http.StatusBadRequest, err)
 		return
 	}
