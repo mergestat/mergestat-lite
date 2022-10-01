@@ -9,7 +9,6 @@ package locator
 
 import (
 	"context"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -66,7 +65,7 @@ func determineCloneDir(path, baseCloneDir string) (string, bool, error) {
 
 	// if no clone directory is specified, use a tmp dir
 	if baseCloneDir == "" {
-		if baseCloneDir, err = ioutil.TempDir(os.TempDir(), "mergestat"); err != nil {
+		if baseCloneDir, err = os.MkdirTemp("", "mergestat"); err != nil {
 			return "", false, errors.Wrap(err, "failed to create a temporary directory")
 		}
 

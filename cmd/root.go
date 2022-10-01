@@ -3,7 +3,7 @@ package cmd
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -97,7 +97,7 @@ Example queries can be found in the GitHub repo: https://github.com/mergestat/me
 			query = args[0]
 		} else if isPiped(info) {
 			var stdin []byte
-			if stdin, err = ioutil.ReadAll(os.Stdin); err != nil {
+			if stdin, err = io.ReadAll(os.Stdin); err != nil {
 				handleExitError(fmt.Errorf("failed to read from stdin: %v", err))
 			}
 			query = string(stdin)

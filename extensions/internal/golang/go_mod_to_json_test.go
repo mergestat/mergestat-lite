@@ -2,14 +2,14 @@ package golang
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/mergestat/mergestat-lite/extensions/internal/tools"
 )
 
 func TestGoModToJSONOK(t *testing.T) {
-	goMod, err := ioutil.ReadFile("testdata/GoModOK")
+	goMod, err := os.ReadFile("testdata/GoModOK")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestGoModToJSONEmpty(t *testing.T) {
 }
 
 func TestGoModToJSONMissingVals(t *testing.T) {
-	goMod, err := ioutil.ReadFile("testdata/GoModMissingVals")
+	goMod, err := os.ReadFile("testdata/GoModMissingVals")
 	if err != nil {
 		t.Fatal(err)
 	}
