@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/mergestat/mergestat/extensions/internal/tools"
+	"github.com/mergestat/mergestat-lite/extensions/internal/tools"
 )
 
 func TestApproxDuration(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat-lite/extensions/options"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"go.riyazali.net/sqlite"

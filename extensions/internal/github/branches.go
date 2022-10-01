@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/augmentable-dev/vtab"
-	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat-lite/extensions/options"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"

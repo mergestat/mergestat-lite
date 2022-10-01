@@ -4,14 +4,14 @@ import (
 	"os"
 
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/mergestat/mergestat/extensions"
-	"github.com/mergestat/mergestat/extensions/options"
-	"github.com/mergestat/mergestat/pkg/locator"
+	"github.com/mergestat/mergestat-lite/extensions"
+	"github.com/mergestat/mergestat-lite/extensions/options"
+	"github.com/mergestat/mergestat-lite/pkg/locator"
 	"go.riyazali.net/sqlite"
 
 	// bring in sqlite 🙌
 	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/mergestat/mergestat/pkg/sqlite"
+	_ "github.com/mergestat/mergestat-lite/pkg/sqlite"
 )
 
 func registerExt() {

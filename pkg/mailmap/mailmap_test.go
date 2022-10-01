@@ -3,7 +3,7 @@ package mailmap_test
 import (
 	"testing"
 
-	"github.com/mergestat/mergestat/pkg/mailmap"
+	"github.com/mergestat/mergestat-lite/pkg/mailmap"
 )
 
 func TestBasicOK(t *testing.T) {

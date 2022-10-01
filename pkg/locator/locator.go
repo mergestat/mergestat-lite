@@ -19,8 +19,8 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/mergestat/mergestat/extensions/options"
-	"github.com/mergestat/mergestat/extensions/services"
+	"github.com/mergestat/mergestat-lite/extensions/options"
+	"github.com/mergestat/mergestat-lite/extensions/services"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 )

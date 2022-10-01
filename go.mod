@@ -1,4 +1,4 @@
-module github.com/mergestat/mergestat
+module github.com/mergestat/mergestat-lite
 
 go 1.17
 

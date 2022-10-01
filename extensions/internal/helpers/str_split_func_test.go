@@ -3,7 +3,7 @@ package helpers
 import (
 	"testing"
 
-	"github.com/mergestat/mergestat/extensions/internal/tools"
+	"github.com/mergestat/mergestat-lite/extensions/internal/tools"
 )
 
 func TestStrSplitFunc(t *testing.T) {

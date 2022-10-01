@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mergestat/mergestat/pkg/pgsync"
+	"github.com/mergestat/mergestat-lite/pkg/pgsync"
 	"github.com/spf13/cobra"
 
 	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/mergestat/mergestat/pkg/sqlite"
+	_ "github.com/mergestat/mergestat-lite/pkg/sqlite"
 )
 
 var pgsyncCmd = &cobra.Command{

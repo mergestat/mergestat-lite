@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/mergestat/mergestat/pkg/display"
+	"github.com/mergestat/mergestat-lite/pkg/display"
 	"github.com/spf13/cobra"
 )
 

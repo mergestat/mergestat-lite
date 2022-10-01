@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog"
 
 	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/mergestat/mergestat/pkg/sqlite"
+	_ "github.com/mergestat/mergestat-lite/pkg/sqlite"
 )
 
 type SyncOptions struct {
