@@ -16,7 +16,7 @@ It can execute queries that look like:
 SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 ```
 
-It installs a binary names `mergestat`.
+It installs a binary named `mergestat`.
 
 More in-depth examples and documentation can be found on our dedicated [**documentation site**](https://docs.mergestat.com/).
 
