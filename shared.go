@@ -2,16 +2,16 @@
 // +build shared
 
 // This file provides a build target while building the dynamically loadable shared object library.
-// It imports github.com/mergestat/mergestat/extensions which provides the actual extension implementation.
+// It imports github.com/mergestat/mergestat-lite/extensions which provides the actual extension implementation.
 package main
 
 import (
 	"os"
 
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/mergestat/mergestat/extensions"
-	"github.com/mergestat/mergestat/extensions/options"
-	"github.com/mergestat/mergestat/pkg/locator"
+	"github.com/mergestat/mergestat-lite/extensions"
+	"github.com/mergestat/mergestat-lite/extensions/options"
+	"github.com/mergestat/mergestat-lite/pkg/locator"
 	"go.riyazali.net/sqlite"
 )
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/mergestat/mergestat/extensions/services"
+	"github.com/mergestat/mergestat-lite/extensions/services"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"github.com/shurcooL/graphql"

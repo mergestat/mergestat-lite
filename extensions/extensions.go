@@ -4,14 +4,14 @@
 package extensions
 
 import (
-	"github.com/mergestat/mergestat/extensions/internal/enry"
-	"github.com/mergestat/mergestat/extensions/internal/git"
-	"github.com/mergestat/mergestat/extensions/internal/github"
-	"github.com/mergestat/mergestat/extensions/internal/golang"
-	"github.com/mergestat/mergestat/extensions/internal/helpers"
-	"github.com/mergestat/mergestat/extensions/internal/npm"
-	"github.com/mergestat/mergestat/extensions/internal/sourcegraph"
-	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat-lite/extensions/internal/enry"
+	"github.com/mergestat/mergestat-lite/extensions/internal/git"
+	"github.com/mergestat/mergestat-lite/extensions/internal/github"
+	"github.com/mergestat/mergestat-lite/extensions/internal/golang"
+	"github.com/mergestat/mergestat-lite/extensions/internal/helpers"
+	"github.com/mergestat/mergestat-lite/extensions/internal/npm"
+	"github.com/mergestat/mergestat-lite/extensions/internal/sourcegraph"
+	"github.com/mergestat/mergestat-lite/extensions/options"
 	"go.riyazali.net/sqlite"
 )
 

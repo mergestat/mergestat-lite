@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mergestat/mergestat/extensions/options"
-	"github.com/mergestat/mergestat/extensions/services"
+	"github.com/mergestat/mergestat-lite/extensions/options"
+	"github.com/mergestat/mergestat-lite/extensions/services"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/time/rate"

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mergestat/mergestat/cmd"
+	"github.com/mergestat/mergestat-lite/cmd"
 )
 
 func main() {

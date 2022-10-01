@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mergestat/mergestat/pkg/display"
-	. "github.com/mergestat/mergestat/pkg/query"
+	"github.com/mergestat/mergestat-lite/pkg/display"
+	. "github.com/mergestat/mergestat-lite/pkg/query"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )

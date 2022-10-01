@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/mergestat/mergestat/extensions/options"
+	"github.com/mergestat/mergestat-lite/extensions/options"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
 )

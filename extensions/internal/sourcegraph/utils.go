@@ -1,7 +1,7 @@
 package sourcegraph
 
 import (
-	"github.com/mergestat/mergestat/extensions/services"
+	"github.com/mergestat/mergestat-lite/extensions/services"
 	"github.com/rs/zerolog"
 	"github.com/shurcooL/graphql"
 	"golang.org/x/time/rate"

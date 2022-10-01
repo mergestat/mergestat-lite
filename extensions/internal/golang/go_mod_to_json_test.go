@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/mergestat/mergestat/extensions/internal/tools"
+	"github.com/mergestat/mergestat-lite/extensions/internal/tools"
 )
 
 func TestGoModToJSONOK(t *testing.T) {

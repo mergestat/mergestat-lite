@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/storage/filesystem"
-	"github.com/mergestat/mergestat/extensions/internal/git/utils"
+	"github.com/mergestat/mergestat-lite/extensions/internal/git/utils"
 	"github.com/pkg/errors"
 	"go.riyazali.net/sqlite"
 )

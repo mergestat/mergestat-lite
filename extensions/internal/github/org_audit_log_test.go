@@ -3,7 +3,7 @@ package github_test
 import (
 	"testing"
 
-	"github.com/mergestat/mergestat/extensions/internal/tools"
+	"github.com/mergestat/mergestat-lite/extensions/internal/tools"
 )
 
 func TestOrgAuditLog(t *testing.T) {

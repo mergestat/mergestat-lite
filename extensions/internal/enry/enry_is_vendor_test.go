@@ -3,7 +3,7 @@ package enry
 import (
 	"testing"
 
-	"github.com/mergestat/mergestat/extensions/internal/tools"
+	"github.com/mergestat/mergestat-lite/extensions/internal/tools"
 )
 
 func TestEnryIsVendor(t *testing.T) {
