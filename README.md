@@ -6,7 +6,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/mergestat)](https://twitter.com/mergestat)
 
 
-# mergestat <a href="https://app.mergestat.com/"><img align="right" src="https://github.com/mergestat/mergestat-lite/raw/main/docs/logo.png" alt="MergeStat Logo" height="100"></a>
+# mergestat-lite <a href="https://app.mergestat.com/"><img align="right" src="https://github.com/mergestat/mergestat-lite/raw/main/docs/logo.png" alt="MergeStat Logo" height="100"></a>
 
 `mergestat-lite` is a command-line tool for running SQL queries on git repositories and related data sources.
 It's meant for ad-hoc querying of source-code on disk through a common interface (SQL), as an alternative to patching together various shell commands.
@@ -15,6 +15,8 @@ It can execute queries that look like:
 -- how many commits have been authored by user@email.com?
 SELECT count(*) FROM commits WHERE author_email = 'user@email.com'
 ```
+
+It installs a binary names `mergestat`.
 
 More in-depth examples and documentation can be found on our dedicated [**documentation site**](https://docs.mergestat.com/).
 
