@@ -126,7 +126,7 @@ func (cur *gitRefCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	return cur.Next()
 }
 
-func (cur *gitRefCursor) Column(c *sqlite.Context, col int) error {
+func (cur *gitRefCursor) Column(c *sqlite.VirtualTableContext, col int) error {
 	ref := cur.ref
 	switch col {
 	case 0:
