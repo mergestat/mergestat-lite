@@ -296,7 +296,7 @@ skip_mailmap:
 	return cur.Next()
 }
 
-func (cur *gitLogCursor) Column(c *sqlite.Context, col int) error {
+func (cur *gitLogCursor) Column(c *sqlite.VirtualTableContext, col int) error {
 	commit := cur.commit
 
 	properCommitterSig := cur.mm.Lookup(mailmap.NameAndEmail{Name: commit.Committer.Name, Email: commit.Committer.Email})
