@@ -29,7 +29,7 @@ require (
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
 	golang.org/x/oauth2 v0.0.0-20221006150949-b44042a4b9c1
 	golang.org/x/term v0.0.0-20220919170432-7a66f970e087
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.3.8
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af
 )
 
