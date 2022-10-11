@@ -24,7 +24,7 @@ require (
 	github.com/rs/zerolog v1.28.0
 	github.com/shurcooL/githubv4 v0.0.0-20220922232305-70b4d362a8cb
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.0
 	go.riyazali.net/sqlite v0.0.0-20221009071723-df6a26c107b6
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
 	golang.org/x/oauth2 v0.0.0-20221006150949-b44042a4b9c1
