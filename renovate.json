@@ -3,5 +3,5 @@
   "extends": [
     "config:base"
   ],
-  "postUpdateOptions": ["gomodMassage"]
+  "cloneSubmodules": true
 }
