@@ -6,7 +6,7 @@ import (
 
 func TestSelectLast5CommitStats(t *testing.T) {
 	db := Connect(t, Memory)
-	repo := "https://github.com/mergestat/mergestat"
+	repo := "https://github.com/mergestat/mergestat-lite"
 
 	rows, err := db.Query("SELECT commits.hash, file_path, additions, deletions FROM commits($1), stats($1, commits.hash) LIMIT 5", repo)
 	if err != nil {
@@ -31,7 +31,7 @@ func TestSelectLast5CommitStats(t *testing.T) {
 
 func TestInitialCommitStats(t *testing.T) {
 	db := Connect(t, Memory)
-	repo, initialCommit := "https://github.com/mergestat/mergestat", "a4562d2d5a35536771745b0aa19d705eb47234e7"
+	repo, initialCommit := "https://github.com/mergestat/mergestat-lite", "a4562d2d5a35536771745b0aa19d705eb47234e7"
 
 	var filesChanged, additions, deletions int
 	err := db.QueryRow("SELECT count(DISTINCT file_path), sum(additions), sum(deletions) FROM stats(?, ?)", repo, initialCommit).
@@ -59,7 +59,7 @@ func TestInitialCommitStats(t *testing.T) {
 
 func TestFromAndToStats(t *testing.T) {
 	db := Connect(t, Memory)
-	repo, fromHash, toHash := "https://github.com/mergestat/mergestat", "2359c9a9ba0ba8aa694601ff12538c4e74b82cd5", "d65736fd08fab5a64027f0c050ee148d88549406"
+	repo, fromHash, toHash := "https://github.com/mergestat/mergestat-lite", "2359c9a9ba0ba8aa694601ff12538c4e74b82cd5", "d65736fd08fab5a64027f0c050ee148d88549406"
 
 	var filesChanged, additions, deletions int
 	err := db.QueryRow("SELECT count(DISTINCT file_path), sum(additions), sum(deletions) FROM stats(?, ?, ?)", repo, fromHash, toHash).
