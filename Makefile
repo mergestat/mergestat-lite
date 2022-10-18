@@ -62,7 +62,7 @@ lint:
 	golangci-lint run --build-tags $(TAGS)
 
 lint-ci:
-	./bin/golangci-lint run --build-tags $(TAGS) --out-format github-actions
+	./bin/golangci-lint run --build-tags $(TAGS) --out-format github-actions --timeout 5m
 
 test:
 	go test -v -tags=$(TAGS) ./...
