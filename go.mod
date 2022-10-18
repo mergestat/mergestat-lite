@@ -28,7 +28,7 @@ require (
 	go.riyazali.net/sqlite v0.0.0-20221009071723-df6a26c107b6
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
 	golang.org/x/oauth2 v0.0.0-20221006150949-b44042a4b9c1
-	golang.org/x/term v0.0.0-20220919170432-7a66f970e087
+	golang.org/x/term v0.0.0-20221017184919-83659145692c
 	golang.org/x/text v0.3.8
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af
 )
@@ -73,7 +73,7 @@ require (
 	go.mongodb.org/mongo-driver v1.10.3 // indirect
 	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b // indirect
 	golang.org/x/net v0.0.0-20221004154528-8021a29435af // indirect
-	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
