@@ -27,7 +27,7 @@ require (
 	github.com/spf13/cobra v1.6.0
 	go.riyazali.net/sqlite v0.0.0-20221017074244-77a6464e0c2a
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
+	golang.org/x/oauth2 v0.1.0
 	golang.org/x/term v0.1.0
 	golang.org/x/text v0.4.0
 	golang.org/x/time v0.1.0
@@ -72,7 +72,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.2 // indirect
 	go.mongodb.org/mongo-driver v1.10.3 // indirect
 	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b // indirect
-	golang.org/x/net v0.0.0-20221004154528-8021a29435af // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
