@@ -22,7 +22,7 @@ require (
 	github.com/mergestat/timediff v0.0.3
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
-	github.com/shurcooL/githubv4 v0.0.0-20220922232305-70b4d362a8cb
+	github.com/shurcooL/githubv4 v0.0.0-20221021030919-a134b1472cc7
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/spf13/cobra v1.6.0
 	go.riyazali.net/sqlite v0.0.0-20221017074244-77a6464e0c2a
