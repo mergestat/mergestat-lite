@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/bubbles v0.14.0
 	github.com/charmbracelet/bubbletea v0.22.1
 	github.com/charmbracelet/lipgloss v0.6.0
-	github.com/clbanning/mxj/v2 v2.5.6
+	github.com/clbanning/mxj/v2 v2.5.7
 	github.com/dnaeon/go-vcr/v2 v2.0.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-enry/go-enry/v2 v2.8.3
