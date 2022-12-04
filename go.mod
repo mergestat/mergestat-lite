@@ -30,7 +30,7 @@ require (
 	golang.org/x/oauth2 v0.1.0
 	golang.org/x/term v0.1.0
 	golang.org/x/text v0.4.0
-	golang.org/x/time v0.2.0
+	golang.org/x/time v0.3.0
 )
 
 require (
