@@ -46,7 +46,7 @@ Use '%' to match all file paths or as a wildcard (e.g. '%.go' for all .go files)
 
 		// check if output is a terminal (https://rosettacode.org/wiki/Check_output_device_is_a_terminal#Go)
 		if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
-			if err := tea.NewProgram(ui).Start(); err != nil {
+			if _, err := tea.NewProgram(ui).Run(); err != nil {
 				handleExitError(err)
 			}
 		} else {

@@ -54,7 +54,7 @@ Read more here: https://sqlite.org/lang_expr.html#the_like_glob_regexp_and_match
 
 		// check if output is a terminal (https://rosettacode.org/wiki/Check_output_device_is_a_terminal#Go)
 		if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
-			if err := tea.NewProgram(ui).Start(); err != nil {
+			if _, err := tea.NewProgram(ui).Run(); err != nil {
 				handleExitError(err)
 			}
 		} else {
