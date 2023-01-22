@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"io"
@@ -24,6 +25,7 @@ var gitSSLNoVerify = os.Getenv("GIT_SSL_NO_VERIFY")   // if set to anything, wil
 var githubToken = os.Getenv("GITHUB_TOKEN")           // GitHub auth token for GitHub tables
 var sourcegraphToken = os.Getenv("SOURCEGRAPH_TOKEN") // Sourcegraph auth token for Sourcegraph queries
 var verbose bool                                      // whether or not to print logs to stderr
+var codex bool                                        // whether or not to use codex for query execution
 var logger = zerolog.Nop()                            // By default use a NOOP logger
 
 func init() {
@@ -35,6 +37,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cloneDir, "clone-dir", "c", "", "specify a path to a directory on disk to use when cloning repos, instead of a tmp dir. Should be empty to avoid path conflicts.")
 	rootCmd.PersistentFlags().BoolVar(&skipMailmap, "skip-mailmap", false, "skip usage of .mailmap file when querying commit history.")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "whether or not to print query execution logs to stderr")
+	rootCmd.PersistentFlags().BoolVarP(&codex, "codex", "x", false, "whether or not to use codex for query execution")
 
 	// register the sqlite extension ahead of any command
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
@@ -122,6 +125,15 @@ Example queries can be found in the GitHub repo: https://github.com/mergestat/me
 		}
 		if db, err = sql.Open("sqlite3", openPath); err != nil {
 			handleExitError(fmt.Errorf("failed to initialize database connection: %v", err))
+		}
+
+		if codex {
+			generatedSQL, err := codexToSQL(context.TODO(), query)
+			if err != nil {
+				handleExitError(fmt.Errorf("failed to translate prompt to SQL: %v", err))
+			}
+			logger.Info().Msgf("translated codex query to SQL: %s", generatedSQL)
+			query = generatedSQL
 		}
 
 		var rows *sql.Rows
