@@ -1,4 +1,4 @@
-FROM golang:1.19-buster as builder
+FROM golang:1.20-buster as builder
 WORKDIR /app
 RUN apt-get update && apt-get -y install cmake libssl-dev
 COPY . .
