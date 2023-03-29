@@ -9,6 +9,8 @@ github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4 h1:ra2OtmuW0A
 github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4/go.mod h1:UBYPn8k0D56RtnR8RFQMjmh4KrZzWJ5o7Z9SYjossQ8=
 github.com/PullRequestInc/go-gpt3 v1.1.11 h1:kZtCbAnUEKfUS50a+0TR2p9rJtz4t57THf5cxN3Ye/o=
 github.com/PullRequestInc/go-gpt3 v1.1.11/go.mod h1:F9yzAy070LhkqHS2154/IH0HVj5xq5g83gLTj7xzyfw=
+github.com/PullRequestInc/go-gpt3 v1.1.15 h1:pidXZbpqZVW0bp8NBNKDb+/++6PFdYfht9vw2CVpaUs=
+github.com/PullRequestInc/go-gpt3 v1.1.15/go.mod h1:F9yzAy070LhkqHS2154/IH0HVj5xq5g83gLTj7xzyfw=
 github.com/acomagu/bufpipe v1.0.3 h1:fxAGrHZTgQ9w5QqVItgzwj235/uYZYgbXitB+dLupOk=
 github.com/acomagu/bufpipe v1.0.3/go.mod h1:mxdxdup/WdsKVreO5GpW4+M/1CE2sMG4jeGJ2sYmHc4=
 github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be h1:9AeTilPcZAjCFIImctFaOjnTIavg87rW78vTPkQqLI8=
