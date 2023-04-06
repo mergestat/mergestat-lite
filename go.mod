@@ -26,7 +26,7 @@ require (
 	github.com/shurcooL/githubv4 v0.0.0-20230215024106-420ad0987b9b
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/spf13/cobra v1.6.1
-	go.riyazali.net/sqlite v0.0.0-20221229061135-0e640ca73f94
+	go.riyazali.net/sqlite v0.0.0-20230320080028-80a51d3944c0
 	golang.org/x/mod v0.9.0
 	golang.org/x/oauth2 v0.4.0
 	golang.org/x/term v0.5.0
