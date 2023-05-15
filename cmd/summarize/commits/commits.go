@@ -60,14 +60,14 @@ SELECT
 `
 
 type CommitAuthorSummary struct {
-	AuthorName    string        `db:"author_name"`
-	AuthorEmail   string        `db:"author_email"`
-	Commits       int           `db:"commit_count"`
-	Additions     sql.NullInt64 `db:"additions"`
-	Deletions     sql.NullInt64 `db:"deletions"`
-	DistinctFiles int           `db:"distinct_files"`
-	FirstCommit   string        `db:"first_commit"`
-	LastCommit    string        `db:"last_commit"`
+	AuthorName    string         `db:"author_name"`
+	AuthorEmail   sql.NullString `db:"author_email"`
+	Commits       int            `db:"commit_count"`
+	Additions     sql.NullInt64  `db:"additions"`
+	Deletions     sql.NullInt64  `db:"deletions"`
+	DistinctFiles int            `db:"distinct_files"`
+	FirstCommit   string         `db:"first_commit"`
+	LastCommit    string         `db:"last_commit"`
 }
 
 const commitAuthorSummarySQL = `
@@ -188,6 +188,7 @@ func (t *TermUI) loadCommitSummary() tea.Msg {
 	}
 
 	var commitSummary CommitSummary
+
 	if err := t.db.QueryRowx(commitSummarySQL, sql.Named("file_path", pathPattern)).StructScan(&commitSummary); err != nil {
 		return err
 	}
