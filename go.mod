@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/BurntSushi/toml v1.2.1
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/PullRequestInc/go-gpt3 v1.1.11
+	github.com/PullRequestInc/go-gpt3 v1.1.15
 	github.com/augmentable-dev/vtab v0.0.0-20221005151137-0ff49e3f5413
 	github.com/charmbracelet/bubbles v0.15.0
 	github.com/charmbracelet/bubbletea v0.23.2
