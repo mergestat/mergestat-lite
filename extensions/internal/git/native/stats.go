@@ -7,7 +7,7 @@ import (
 
 	"github.com/augmentable-dev/vtab"
 	"github.com/go-git/go-git/v5/storage/filesystem"
-	libgit2 "github.com/libgit2/git2go/v33"
+	libgit2 "github.com/libgit2/git2go/v34"
 	"github.com/mergestat/mergestat-lite/extensions/internal/git/utils"
 	"go.riyazali.net/sqlite"
 )
@@ -17,9 +17,39 @@ var statsCols = []vtab.Column{
 	{Name: "additions", Type: "INT", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 	{Name: "deletions", Type: "INT", NotNull: false, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
 
+	{Name: "old_file_mode", Type: "TEXT", NotNull: true, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+	{Name: "new_file_mode", Type: "TEXT", NotNull: true, Hidden: false, Filters: nil, OrderBy: vtab.NONE},
+
 	{Name: "repository", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
 	{Name: "to_rev", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}, OrderBy: vtab.NONE},
+}
+
+type GitFileModeObjectType string
+
+const (
+	GitFileModeObjectTypeUnknown     GitFileModeObjectType = "unknown"
+	GitFileModeObjectTypeNone        GitFileModeObjectType = "none"
+	GitFileModeObjectTypeRegularFile GitFileModeObjectType = "regular_file"
+	GitFileModeOjectTypeSymbolicLink GitFileModeObjectType = "symbolic_link"
+	GitFileModeOjectTypeGitLink      GitFileModeObjectType = "git_link"
+)
+
+// gitFileModeObjectTypeFromUint16 takes a git stats file mode and returns the GitFileModeObjectType.
+// See here for more info on the modes: https://unix.stackexchange.com/questions/450480/file-permission-with-six-bytes-in-git-what-does-it-mean
+func gitFileModeObjectTypeFromUint16(mode uint16) GitFileModeObjectType {
+	switch mode >> 12 {
+	case 0:
+		return GitFileModeObjectTypeNone
+	case 0b1110:
+		return GitFileModeOjectTypeGitLink
+	case 0b1010:
+		return GitFileModeOjectTypeSymbolicLink
+	case 0b1000:
+		return GitFileModeObjectTypeRegularFile
+	default:
+		return GitFileModeObjectTypeUnknown
+	}
 }
 
 // NewStatsModule returns the implementation of a table-valued-function for git stats
@@ -28,12 +58,12 @@ func NewStatsModule(options *utils.ModuleOptions) sqlite.Module {
 		var repoPath, rev, toRev string
 		for _, constraint := range constraints {
 			if constraint.Op == sqlite.INDEX_CONSTRAINT_EQ {
-				switch constraint.ColIndex {
-				case 3:
+				switch statsCols[constraint.ColIndex].Name {
+				case "repository":
 					repoPath = constraint.Value.Text()
-				case 4:
+				case "rev":
 					rev = constraint.Value.Text()
-				case 5:
+				case "to_rev":
 					toRev = constraint.Value.Text()
 				}
 			}
@@ -175,7 +205,7 @@ func newStatsIter(options *utils.ModuleOptions, repoPath, rev, toRev string) (*s
 
 	iter.stats = make([]*stat, 0)
 	err = diff.ForEach(func(delta libgit2.DiffDelta, progress float64) (libgit2.DiffForEachHunkCallback, error) {
-		stat := &stat{filePath: delta.NewFile.Path}
+		stat := &stat{filePath: delta.NewFile.Path, oldFileMode: gitFileModeObjectTypeFromUint16(delta.OldFile.Mode), newFileMode: gitFileModeObjectTypeFromUint16(delta.NewFile.Mode)}
 		iter.stats = append(iter.stats, stat)
 		return func(hunk libgit2.DiffHunk) (libgit2.DiffForEachLineCallback, error) {
 			return func(line libgit2.DiffLine) error {
@@ -197,9 +227,11 @@ func newStatsIter(options *utils.ModuleOptions, repoPath, rev, toRev string) (*s
 }
 
 type stat struct {
-	filePath  string
-	additions int
-	deletions int
+	filePath    string
+	additions   int
+	deletions   int
+	oldFileMode GitFileModeObjectType
+	newFileMode GitFileModeObjectType
 }
 
 type statsIter struct {
@@ -210,13 +242,17 @@ type statsIter struct {
 
 func (i *statsIter) Column(ctx vtab.Context, c int) error {
 	currentStat := i.stats[i.index]
-	switch c {
-	case 0:
+	switch statsCols[c].Name {
+	case "file_path":
 		ctx.ResultText(currentStat.filePath)
-	case 1:
+	case "additions":
 		ctx.ResultInt(currentStat.additions)
-	case 2:
+	case "deletions":
 		ctx.ResultInt(currentStat.deletions)
+	case "old_file_mode":
+		ctx.ResultText(string(currentStat.oldFileMode))
+	case "new_file_mode":
+		ctx.ResultText(string(currentStat.newFileMode))
 	}
 	return nil
 }
