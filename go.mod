@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/BurntSushi/toml v1.2.1
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/PullRequestInc/go-gpt3 v1.1.11
+	github.com/PullRequestInc/go-gpt3 v1.1.15
 	github.com/augmentable-dev/vtab v0.0.0-20221005151137-0ff49e3f5413
 	github.com/charmbracelet/bubbles v0.15.0
 	github.com/charmbracelet/bubbletea v0.23.2
@@ -29,7 +29,7 @@ require (
 	go.riyazali.net/sqlite v0.0.0-20230320080028-80a51d3944c0
 	golang.org/x/mod v0.9.0
 	golang.org/x/oauth2 v0.4.0
-	golang.org/x/term v0.5.0
+	golang.org/x/term v0.9.0
 	golang.org/x/text v0.8.0
 	golang.org/x/time v0.3.0
 )
@@ -40,7 +40,7 @@ require (
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aymanbagabas/go-osc52 v1.2.1 // indirect
-	github.com/cloudflare/circl v1.3.1 // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-enry/go-oniguruma v1.2.1 // indirect
@@ -76,7 +76,7 @@ require (
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
