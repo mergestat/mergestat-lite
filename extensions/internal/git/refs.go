@@ -148,8 +148,21 @@ func (cur *gitRefCursor) Column(c *sqlite.VirtualTableContext, col int) error {
 	case 3:
 		c.ResultText(ref.Name().String())
 	case 4:
-		if !ref.Hash().IsZero() {
-			c.ResultText(ref.Hash().String())
+		// tags come in two flavors, lightweight and annotated
+		// a lighteight tag points *directly* to a commit SHA
+		// vs an annotated tag which points to an object that contains metadata
+		// https://git-scm.com/book/en/v2/Git-Basics-Tagging
+		if ref.Name().IsTag() {
+			if tag, err := cur.repo.TagObject(ref.Hash()); err != nil && err != plumbing.ErrObjectNotFound {
+				return errors.Wrap(err, "failed to fetch tag object")
+			} else if tag != nil && tag.TargetType == plumbing.CommitObject {
+				// if the hash of the current ref is a tag object
+				// output the SHA of its target
+				c.ResultText(tag.Target.String())
+			} else {
+				// otherwise, output the hash of the ref
+				c.ResultText(ref.Hash().String())
+			}
 		}
 	case 5:
 		c.ResultText(ref.Target().String())
