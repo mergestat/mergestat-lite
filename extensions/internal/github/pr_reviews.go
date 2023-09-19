@@ -171,7 +171,7 @@ func (i *iterPRReviews) Column(ctx vtab.Context, c int) error {
 func (i *iterPRReviews) Next() (vtab.Row, error) {
 	i.currentReview += 1
 
-	if i.results == nil || i.currentReview >= len(i.results.PullRequest.Reviews.Nodes) {
+	if i.results == nil || (i.currentReview % i.PerPage) >= len(i.results.PullRequest.Reviews.Nodes) {
 		if i.results == nil || i.results.HasNextPage {
 			err := i.RateLimiter.Wait(context.Background())
 			if err != nil {
