@@ -31,7 +31,7 @@ else
 endif
 
 compress: .bin/upx
-	upx -5  mergestat*
+	upx -5 .build/mergestat*
 
 # target to build and install libgit2
 libgit2:
