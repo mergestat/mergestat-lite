@@ -15,7 +15,7 @@ FROM debian:bookworm-slim@sha256:abbf1e0df2d9631707a41780bd9d332523d10cbb1456012
 WORKDIR /app/
 RUN mkdir /repo
 COPY --from=builder /app/.build/mergestat .
-
+RUN  /app/.build/mergestat
 RUN apt-get update && apt-get install -y git
 
 ENTRYPOINT ["./mergestat", "--repo", "/repo"]

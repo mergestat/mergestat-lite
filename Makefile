@@ -1,7 +1,7 @@
 .PHONY: clean update vet test lint lint-ci test-cover bench
 
 # default task invoked while running make
-all: clean .build/libmergestat.so .build/mergestat compress
+all: clean .build/libmergestat.so .build/mergestat
 
 OS   = $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH = $(shell uname -m | sed 's/x86_64/amd64/')
