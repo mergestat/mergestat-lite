@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/augmentable-dev/vtab"
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.riyazali.net/sqlite"
-	"go.uber.org/zap"
 )
 
 // fetch checkRun from the checkSuiteConnection
@@ -66,7 +66,7 @@ type checkRun struct {
 	Url         githubv4.URI
 }
 
-type ref struct {
+type checkRunRef struct {
 	Name   string
 	Target struct {
 		Commit struct {
@@ -103,7 +103,7 @@ func (i *iterCheckSuites) fetchCheckSuiteResults(ctx context.Context, startCurso
 			}
 			Name string
 			Refs struct {
-				Nodes    []*ref
+				Nodes    []*checkRunRef
 				PageInfo struct {
 					EndCursor   githubv4.String
 					HasNextPage bool
@@ -126,9 +126,9 @@ func (i *iterCheckSuites) fetchCheckSuiteResults(ctx context.Context, startCurso
 	return &fetchCheckSuiteResults{rows, CheckSuiteQuery.Repository.Refs.PageInfo.HasNextPage, &CheckSuiteQuery.Repository.Refs.PageInfo.EndCursor}, nil
 }
 
-func (i *iterCheckSuites) logger() *zap.SugaredLogger {
-	logger := i.Logger.Sugar().With("per-page", i.PerPage, "owner", i.owner, "name", i.name)
-	return logger
+func (i *iterCheckSuites) logger() *zerolog.Logger {
+	logger := i.Logger.With().Int("per-page", i.PerPage).Str("owner", i.owner).Str("name", i.name).Logger()
+	return &logger
 }
 
 func (i *iterCheckSuites) Next() (vtab.Row, error) {
@@ -146,7 +146,7 @@ func (i *iterCheckSuites) Next() (vtab.Row, error) {
 				cursor = i.results.EndCursor
 			}
 
-			i.logger().With("cursor", cursor).Infof("fetching page of repo_check_runs for %s/%s", i.owner, i.name)
+			i.logger().Info().Msgf("fetching page of repo_check_runs for %s/%s", i.owner, i.name)
 			results, err := i.fetchCheckSuiteResults(context.Background(), cursor)
 			if err != nil {
 				return nil, err
@@ -164,7 +164,7 @@ func (i *iterCheckSuites) Next() (vtab.Row, error) {
 }
 
 var checkCols = []vtab.Column{
-	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, Required: true, OmitCheck: true}}},
+	{Name: "owner", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "reponame", Type: "TEXT", NotNull: true, Hidden: true, Filters: []*vtab.ColumnFilter{{Op: sqlite.INDEX_CONSTRAINT_EQ, OmitCheck: true}}},
 	{Name: "name", Type: "TEXT"},
 	{Name: "workflow_name", Type: "TEXT"},
@@ -183,7 +183,7 @@ var checkCols = []vtab.Column{
 	{Name: "app_logo_url", Type: "TEXT"},
 }
 
-func (i *iterCheckSuites) Column(ctx *sqlite.Context, c int) error {
+func (i *iterCheckSuites) Column(ctx vtab.Context, c int) error {
 	current := i.results.Edges[i.current]
 	col := checkCols[c]
 
@@ -252,12 +252,11 @@ func NewCheckModule(opts *Options) sqlite.Module {
 		}
 
 		iter := &iterCheckSuites{opts, owner, name, -1, nil}
-		iter.logger().Infof("starting GitHub check iterator for %s/%s", owner, name)
 		return iter, nil
 	})
 }
 
-func getCheckRowsFromRefs(refs []*ref) []*checkRunRow {
+func getCheckRowsFromRefs(refs []*checkRunRef) []*checkRunRow {
 	var rows []*checkRunRow
 	for _, r := range refs {
 		for _, suite := range r.Target.Commit.CheckSuites.Nodes {
