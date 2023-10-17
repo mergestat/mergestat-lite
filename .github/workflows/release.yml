@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   publish:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             asset_name: mergestat-linux-amd64
           # - os: windows-latest
           #   asset_name: mergestat-windows-amd64
@@ -20,30 +20,30 @@ jobs:
             asset_name: mergestat-macos-amd64
 
     steps:
-    - name: Set up Go 1.19
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.19.4
-      id: go
+      - name: Set up Go 1.19
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19.4
+        id: go
 
-    - name: Check out source
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      - name: Check out source
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - name: Install libgit2
-      run: make libgit2
+      - name: Install libgit2
+        run: make libgit2
 
-    - name: Build
-      run: make
+      - name: Build
+        run: make
 
-    - name: Compress
-      run: tar -czvf mergestat.tar.gz -C .build/ .
+      - name: Compress
+        run: tar -czvf mergestat.tar.gz -C .build/ .
 
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: mergestat.tar.gz
-        asset_name: ${{ matrix.asset_name }}.tar.gz
-        tag: ${{ github.ref }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: mergestat.tar.gz
+          asset_name: ${{ matrix.asset_name }}.tar.gz
+          tag: ${{ github.ref }}

@@ -3,6 +3,8 @@
 # default task invoked while running make
 all: clean .build/libmergestat.so .build/mergestat
 
+OS   = $(shell uname -s | tr '[:upper:]' '[:lower:]')
+ARCH = $(shell uname -m | sed 's/x86_64/amd64/')
 # pass these flags to linker to suppress missing symbol errors in intermediate artifacts
 export CGO_CFLAGS = -DUSE_LIBSQLITE3
 export CPATH = ${PWD}/pkg/sqlite
@@ -10,6 +12,26 @@ export CGO_LDFLAGS = -Wl,--unresolved-symbols=ignore-in-object-files
 ifeq ($(shell uname -s),Darwin)
 	export CGO_LDFLAGS = -Wl,-undefined,dynamic_lookup
 endif
+
+
+UPX_VERSION=4.1.0
+.bin/upx:
+ifeq (, $(shell which upx))
+ifeq ($(OS), darwin)
+	brew install upx
+	UPX=upx
+else
+	wget -nv -O upx.tar.xz https://github.com/upx/upx/releases/download/v$(UPX_VERSION)/upx-$(UPX_VERSION)-$(ARCH)_$(OS).tar.xz
+	tar xf upx.tar.xz  upx-$(UPX_VERSION)-$(ARCH)_$(OS)/upx
+	rm -rf upx.tar.xz
+	UPX=./upx
+endif
+else
+	UPX=$(shell which upx)
+endif
+
+compress: .bin/upx
+	upx -5 .build/mergestat*
 
 # target to build and install libgit2
 libgit2:
