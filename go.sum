@@ -212,6 +212,8 @@ go.mongodb.org/mongo-driver v1.14.0/go.mod h1:Vzb0Mk/pa7e6cWw85R4F/endUC3u0U9jGc
 go.riyazali.net/sqlite v0.0.0-20220820100132-b0f5d97504db/go.mod h1:UVocl0mLwS0QKUKa5mI6lppmBjvQnUEkFjFfoWqFWQU=
 go.riyazali.net/sqlite v0.0.0-20221017074244-77a6464e0c2a h1:pHdDTS5eaZgibyCyDuBmFUZ58PuOjQX0TcMKa/WaK9k=
 go.riyazali.net/sqlite v0.0.0-20221017074244-77a6464e0c2a/go.mod h1:UVocl0mLwS0QKUKa5mI6lppmBjvQnUEkFjFfoWqFWQU=
+go.riyazali.net/sqlite v0.0.0-20230816114005-832d6b745bcd h1:86G570Y/ErE3eEDtwh3UDLVDd02ToGck2nIzYooXMU0=
+go.riyazali.net/sqlite v0.0.0-20230816114005-832d6b745bcd/go.mod h1:UVocl0mLwS0QKUKa5mI6lppmBjvQnUEkFjFfoWqFWQU=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
