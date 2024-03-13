@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/clbanning/mxj/v2 v2.7.0
-	github.com/dnaeon/go-vcr/v2 v2.0.1
+	github.com/dnaeon/go-vcr/v3 v3.2.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-enry/go-enry/v2 v2.8.7
 	github.com/go-git/go-git/v5 v5.11.0
