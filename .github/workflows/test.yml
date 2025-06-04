@@ -2,15 +2,21 @@ name: Tests
 on: [push, pull_request]
 jobs:
   build:
-    name: Build for ${{ matrix.os }}
+    name: Build for ${{ matrix.os }} ${{ matrix.goarch }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
             asset_name: mergestat-linux-amd64
-          - os: macos-latest
+            goarch: amd64
+          - os: macos-13
             asset_name: mergestat-macos-amd64
+            goarch: amd64
+          - os: macos-latest
+            asset_name: mergestat-macos-arm64
+            goarch: arm64
 
     steps:
     - name: Set up Go 1.19
@@ -29,14 +35,23 @@ jobs:
 
     - name: Vet
       run: make vet
+      env:
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 1
 
     - name: Lint
       run: |
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.50.0
         make lint-ci
+      env:
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 1
     
     - name: Test
       run: make test-cover
+      env:
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 1
     
     - name: Upload coverage
       uses: codecov/codecov-action@v4

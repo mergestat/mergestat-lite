@@ -7,17 +7,23 @@ on:
 
 jobs:
   publish:
-    name: Publish for ${{ matrix.os }}
+    name: Publish for ${{ matrix.os }} ${{ matrix.goarch }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: true
       matrix:
         include:
           - os: ubuntu-latest
             asset_name: mergestat-linux-amd64
+            goarch: amd64
           # - os: windows-latest
           #   asset_name: mergestat-windows-amd64
-          - os: macos-latest
+          - os: macos-13
             asset_name: mergestat-macos-amd64
+            goarch: amd64
+          - os: macos-latest
+            asset_name: mergestat-macos-arm64
+            goarch: arm64
 
     steps:
     - name: Set up Go 1.19
@@ -36,6 +42,9 @@ jobs:
 
     - name: Build
       run: make
+      env:
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 1
 
     - name: Compress
       run: tar -czvf mergestat.tar.gz -C .build/ .
