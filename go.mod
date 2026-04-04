@@ -13,7 +13,7 @@ require (
 	github.com/clbanning/mxj/v2 v2.7.0
 	github.com/dnaeon/go-vcr/v2 v2.0.1
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-enry/go-enry/v2 v2.8.7
+	github.com/go-enry/go-enry/v2 v2.9.6
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/jmoiron/sqlx v1.3.5
