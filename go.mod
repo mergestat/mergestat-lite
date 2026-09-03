@@ -1,6 +1,6 @@
 module github.com/mergestat/mergestat-lite
 
-go 1.19
+go 1.23.0
 
 require (
 	github.com/BurntSushi/toml v1.3.2
@@ -28,7 +28,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	go.riyazali.net/sqlite v0.0.0-20221017074244-77a6464e0c2a
 	golang.org/x/mod v0.16.0
-	golang.org/x/oauth2 v0.18.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/term v0.18.0
 	golang.org/x/text v0.14.0
 	golang.org/x/time v0.5.0
