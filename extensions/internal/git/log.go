@@ -2,6 +2,9 @@ package git
 
 import (
 	"context"
+	"io"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -230,37 +233,52 @@ func (cur *gitLogCursor) Filter(_ int, s string, values ...sqlite.Value) (err er
 	logger = logger.With().Str("revision", opts.From.String()).Logger()
 
 	if skipMailmap, _ := cur.Context.GetBool("skipMailmap"); !skipMailmap {
-		var c *object.Commit
-		if c, err = repo.CommitObject(opts.From); err != nil {
-			return errors.Wrapf(err, "could not lookup commit")
-		}
-		var t *object.Tree
-		if t, err = c.Tree(); err != nil {
-			return errors.Wrapf(err, "could not lookup tree")
-		}
-
-		var f *object.File
-		if f, err = t.File(".mailmap"); err != nil {
-			if err != object.ErrFileNotFound {
-				return errors.Wrapf(err, "could not lookup mailmap file")
-			} else {
-				goto skip_mailmap
-			}
-		}
-
 		var m string
-		if m, err = f.Contents(); err != nil {
-			if err != nil {
-				return errors.Wrapf(err, "could not retrieve contents of mailmap file")
+		var mailmapFound bool
+
+		// Check worktree filesystem first (takes precedence in git)
+		if wt, err := repo.Worktree(); err == nil && wt != nil && wt.Filesystem != nil {
+			if f, err := wt.Filesystem.Open(".mailmap"); err == nil {
+				if b, err := io.ReadAll(f); err == nil {
+					_ = f.Close()
+					m = string(b)
+					mailmapFound = true
+				} else {
+					_ = f.Close()
+				}
 			}
 		}
 
-		var mm mailmap.MailMap
-		if mm, err = mailmap.Parse(m); err != nil {
-			return errors.Wrapf(err, "could not parse mailmap file")
+		// Check disk path if available
+		if !mailmapFound && path != "" {
+			if b, err := os.ReadFile(filepath.Join(path, ".mailmap")); err == nil {
+				m = string(b)
+				mailmapFound = true
+			}
 		}
-		logger.Info().Msg("found and parsed .mailmap file")
-		cur.mm = mm
+
+		// Fall back to commit tree (HEAD:.mailmap)
+		if !mailmapFound {
+			if c, err := repo.CommitObject(opts.From); err == nil {
+				if t, err := c.Tree(); err == nil {
+					if f, err := t.File(".mailmap"); err == nil {
+						if content, err := f.Contents(); err == nil {
+							m = content
+							mailmapFound = true
+						}
+					}
+				}
+			}
+		}
+
+		if mailmapFound {
+			var mm mailmap.MailMap
+			if mm, err = mailmap.Parse(m); err != nil {
+				return errors.Wrapf(err, "could not parse mailmap file")
+			}
+			logger.Info().Msg("found and parsed .mailmap file")
+			cur.mm = mm
+		}
 	}
 
 skip_mailmap:
